@@ -1,0 +1,53 @@
+<!--
+    APIShift Engine v1.0.0
+    (c) 2020-present Sapir Shemer, DevShift (devshift.biz)
+    Released under the MIT License with the additions present in the LICENSE.md
+    file in the root folder of the APIShift Engine original release source-code
+    @author Sapir Shemer
+-->
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title></title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <!-- Font & CSS -->
+        <link href="../externals/styles/google-roboto.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/@mdi/font@3.x/css/materialdesignicons.min.css" rel="stylesheet">
+        <link href="../externals/styles/vuetify.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/all.css" media="all">
+        <!-- System CSS -->
+        <link href="UI/style/main.css" rel="stylesheet">
+    </head>
+    <body>
+        <div id="app">
+            <v-app id="inspire">
+                <!-- Notifications -->
+                <component :is="app_notifications" :alerts="alerts"></component>
+
+                <!-- Loader -->
+                <component :is="app_loader" v-if="loader.visible" :message="loader.message"></component>
+
+                <!-- Navigator -->
+                <component :is="app_navigator"></component>
+
+                <!-- Page Body -->
+                <router-view></router-view>
+
+                <!-- Footer -->
+                <component :is="app_footer"></component>
+            </v-app>
+        </div>
+
+        <!-- Scripts -->
+        <script src="../externals/scripts/vue.js"></script>
+        <script src="../externals/scripts/vuetify.js"></script>
+        <script src="../externals/scripts/http-vue-loader.js"></script>
+        <script src="../externals/scripts/vue-router.js"></script>
+        <script src="../externals/scripts/jquery.js"></script>
+        <!-- System scripts -->
+        <script src="UI/scripts/APIShift.js"></script>
+        <script src="UI/scripts/main.js"></script>
+    </body>
+</html>

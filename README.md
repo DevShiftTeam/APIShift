@@ -1,5 +1,5 @@
 <div align="center">
-<img width="100px" src="https://gitlab.com/lesscomplexity/devshift-engine/-/raw/master/images/DevLogo.png">
+<img width="100px" src="https://gitlab.com/lesscomplexity/apishift/-/raw/master/images/DevLogo.png">
 
 # APIShift Engine
 </div>
@@ -33,7 +33,7 @@ Notice that the [configurations file](core/Configurations.php) should be writabl
 
 ## Architecture
 <div align="center">
-<img width="50%" src="https://gitlab.com/lesscomplexity/devshift-engine/-/raw/master/images/Architecture.png">
+<img width="50%" src="https://gitlab.com/lesscomplexity/apishift/-/raw/master/images/Architecture.png">
 </div>
 
 The system defines 3 main base concepts that are said to make a base for a whole API/Back-End, and provides modular and scalable objects as follows:

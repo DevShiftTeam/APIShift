@@ -1,5 +1,5 @@
 <div align="center">
-<img width="100px" src="https://gitlab.com/lesscomplexity/devshift-engine/-/raw/master/images/DevLogo.png">
+<img width="100px" src="https://gitlab.com/lesscomplexity/apishift/-/raw/master/images/DevLogo.png">
 
 # APIShift Code Design
 </div>
@@ -8,7 +8,7 @@ This document organizes the different components, sub-components and their prope
 
 ## Architecture Overview
 <div align="center">
-<img width="50%" src="https://gitlab.com/lesscomplexity/devshift-engine/-/raw/master/images/Architecture.png">
+<img width="50%" src="https://gitlab.com/lesscomplexity/apishift/-/raw/master/images/Architecture.png">
 </div>
 
 ### Base Concepts

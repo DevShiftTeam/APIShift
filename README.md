@@ -24,7 +24,7 @@ Released under the MIT license.
 ## Installation
 Clone the repository, upload it to your server, and then just visit the server through the web - the system will automatically redirect you to the installation page and will install the configurations and database by the data that you provide.
 
-Notice that the [configurations file](core/Configurations.php) should be writable, otherwise installation will return a permission denied error. And make sure to provide an existing schema on your DB host when installing.
+Notice that the [configurations file](machine/core/Configurations.php) should be writable, otherwise installation will return a permission denied error. And make sure to provide an existing schema on your DB host when installing.
 
 ### Requirements
  * Web server

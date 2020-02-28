@@ -11,6 +11,7 @@
 <template>
     <v-content>
         <v-container fluid fill-height>
+            <h1>Comming Soon! :)</h1>
         </v-container>
     </v-content>
 </template>

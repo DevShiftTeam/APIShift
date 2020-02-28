@@ -11,6 +11,11 @@
 <template>
     <v-content>
         <v-container fluid fill-height>
+            <h1>Version 1.0</h1>
+            <hr>
+            <p>
+                
+            </p>
         </v-container>
     </v-content>
 </template>

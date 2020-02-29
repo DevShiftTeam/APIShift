@@ -6,12 +6,12 @@
 
 This document organizes the different components, sub-components and their properties that make up the engine. The goal of this document is to provide both a high level overview of the architecture of the system and a guide for the specifics of functionality and algorithmics behind the engine. All new systems and components first need to be integrated in the code design before going into development stages to keep a clean, understandable flow of development, organization and efficiency. It is always better to first design the components and overall system before developing, it helps everyone to follow up with the same ideas and standards when developing and contributing to the system.
 
-## Architecture Overview
+# Architecture Overview
 <div align="center">
 <img width="50%" src="https://gitlab.com/lesscomplexity/apishift/-/raw/master/images/Architecture.png">
 </div>
 
-### Base Concepts
+## Base Concepts
 The system defines 3 main base concepts that are said to make a base for a whole API/Back-End, and provides modular and scalable objects as follows:
 1. __Core__: The basic data for connection to the main database, the username and password for the APIShift system, and other hardcoded metadata. The core file is defined fully during system installation.
     * [Core Configurations Class](machine/core/Configurations.php)
@@ -35,6 +35,39 @@ The system also defines 3 more concepts that use the base concept to build up th
 3. __Analysis__: Systems that are attached to different components of the system to accumulate usage data on the different components and the data that is transferred in them.
 
 Around all of these definitions, the engine defines __Controllers__ as the combining part of the API. The controllers are objects that contain all the possible requests that can be made to an API. Each controller makes use of logic, and is surrounded by access and analysis methods to complete the full features of the API.
+
+## Session management
+Each API/server usually needs different types of sessions. One session can represent a regular user on your application and another can represent a premium user, each type of session has different permissions in your system - some can access a certain function/data and others don't. APIShift allows you to define different session states easily and then assign access rules by these states. The classes that manage the session options are the [core SessionState](machine/core/SessionState.php) and the [controller SessionState](machine/controller/SessionState.php) which allows for changing and managing the session through API requests.
+
+The core SessionState contains the logic and functions that manage the session states, their updates, authorization and communication with the database. The controller SessionState provides a set of functions that a user can use to manipulate the session state - for example change the session on request and more. The controller uses the core object to make these requests come to life. Each session state has a state structure, value and children:
+
+ * __Structure__: Keys and nested keys that make up the session objects.
+ * __Values__: Indicator where to take the values from to fill in the structure - is it from database or the data provided in the request? your choice.
+ * __Children__: Children states are sub-states available on a certain state - they inherit and extend the structure and values of the parent state and use the same authorization process but with additional options or restrictions as you chose. For example a user session state can have a premium sub-session state that applies to premium users and provides access to more features in your application.
+
+To add, modify and remove session states visit the "Session" tab in the control panel.
+
+## Database management
+The management system is present in the control panel and comes to life in your code. The graphical system represents the database structure in Object + Graph Model, Where each entity\object is refered to as an Item and each connection, is refered to as a Relation - which in itself acts as an Item (Allowing for relations between relations). It is translated into the relational model - SQL, in future versions also to different NoSQL models for increased integration.
+
+The graphical framework, and even how it saves its representation doesn't refer to any primary keys that define the relations in the database. This allows for more flexibility when translating to different models and normalizing the database. The [DataModelManager](machine/core/DataModelManager.php), [Item](machine/core/Item.php) & [Relation](machine/core/Relation.php) give you objects to work with the graphically represented model by translating it to the database's query language for you.
+
+In later versions, you will be able to save your data on different DB servers, and APIShift will manage it for you - acting as a data warehouse. To add, modify and remove long-term data in your application visit the "Database" tab in the control panel.
+
+### UI Graph Terminology
+When working in APIShift database, you create `Canvases`, where each canvas is a visual representation of database objects and how they are related & constructed. The system uses these terms:
+ * __Item__: A collection of keys and values, where keys are strings abd values are values attached to them as the user defines. In other words, an object in the DB.
+ * __Relation__: A relation is an item that connects 2 or more items. Since a relation is also an item you can make relations between relations and also - this is what makes the terminology of the engine as a combination between [graph model semantics](https://en.wikipedia.org/wiki/Graph_database), [object model semantics](https://en.wikipedia.org/wiki/Object_model) and an [entity-relationship model](https://en.wikipedia.org/wiki/Entity%E2%80%93relationship_model).
+    * *One-To-One*: For each instance of the relation, there can be no more than one instance for each of the parent item/s and related item/s (as you can see a relation can be derived from more that one item, referenced as parent item/s, to any other more than one item, references as related item/s).
+    * *One-To-Many*: For each instance of the relation, there can be no more than one instance of parent items but as many related item instances as you like.
+    * *Many-To-Many*: For each instance of the relation, there can as many parent and related items instances as you like.
+ * __Group__: Items & Relations can be grouped together - grouping helps the user create relations between multiple items in a single connection, it is made for better user experience. When a relation is pointing to a group or from a group, the relation will have a `from_type` and `to_type` respectively, which are FK related to a table holding the types of items in the group.
+ * __Type__: Each Item & Relation can have types - for example the users item can be of type admin, premium or regular - this feature is also for better user experience, as developers can view and manage types, and even relate only specific types of items, which offers more flexibility.
+
+This kind of model & semantics allows us to keep a single query language to access, cunstruct and normalize instances of the data by translating to queries for the relational model like SQL, document object models like mongodb, elastic search, graph models and more.
+
+## Procedure Management
+More will be added later
 
 ## Project Structure
 Here we will review the filesystem structure of the APIShift framework before getting into specifics.

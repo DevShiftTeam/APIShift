@@ -18,8 +18,8 @@ APIShift is an open-source PHP system that was designed by Sapir Shemer and its 
 Released under the MIT license.
 
 ### Meet Our Team
- * [Sapir Shemer](@lesscomplexity) as the architect.
- * [Eran Bodokh](@Bodokh) as the Front-End lead.
+ * [Sapir Shemer](https://github.com/LessComplexity) as the architect.
+ * [Eran Bodokh](https://github.com/Bodokh) as the Front-End lead.
 
 ## Installation
 Clone the repository, upload it to your server, and then just visit the server through the web - the system will automatically redirect you to the installation page and will install the configurations and database by the data that you provide during installation.

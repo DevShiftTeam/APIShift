@@ -81,10 +81,10 @@ These kind of defintions and components allow us to keep a single query language
 ## Procedure Management
 More will be added later
 
-## Project Structure
+# Project Structure
 Here we will review the filesystem structure of the APIShift framework before getting into specifics.
 
-### Back-End
+## Back-End
 The back-end of the system is in the [machine folder](machine/) where you can find 4 different folders:
  * __[Core folder](machine/core)__: The folder containing all the core files of the system. The core files are classes that make up the main workflow of the system and contain methods to work with the system's main features. Any new core system will be integrated into the existing file or as a new file. Everything in the core folder should be under the namespace `APIShift\Core`.
  * __[Models folder](machine/models)__: Contains any classes that are used to make logical and database specific operations outside the scope of the system - made for users of the system. If you are contributing then you will probably touch every folder besides this one, unless you are adding features for managing extensions or helper functions, as the extensions management class and helper class exist in this folder. Everything in the models folder should be under the namespace `APIShift\Models`.
@@ -95,7 +95,7 @@ And there are 2 main files in the back-end:
  * **[APIShift](machine/APIShift.php)**: A simple file that loads the autoloader of the system - which knows how to interpret the framework's namespaces with ease, loads the session and starts the main connection with the database.
  * **[API](machine/API.php)**: This files integrated the API workflows for each request, it first calls the APIShift file to load the system, then it validates the request, calls the authorizer to authorize the request, and runs the desired controller & method - the only way to make API requests to any controller should be only from this file, as it integrates the authorization process. If you build your views from PHP files than you need to use only the APIShift file as explained in the [readme](README.md)'s usage section.
 
-### Control panel UI
+## Control panel UI
 The second most important structure to understand for contributers is the UI of the control panel which sits in the [control folder](control/). The control panel has a [UI folder](control/UI/) that contains all the UI components and an [index file](control/index.html) that integrates them together to make the single-page application of the control panel. The UI folder contains 4 sub-folder:
 
  * __[Components](control/UI/components)__: Components that help pages be complete, or other mixins to store repeating vue function and components.

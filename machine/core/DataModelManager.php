@@ -40,6 +40,9 @@ class DataModelManager {
         foreach($query['keys'] as $key_name => $value) $query_str .= $key_name . " " . $value . ",\n";
         // Create the table
         $result = DatabaseManager::getInstance("main")->query("CREATE TABLE " . $query['name']  . '{' . "id primary INT, " . $query_str . '}');
+
+        // Check if creation completed successfully
+        if(gettype($result) == 'string') Status::message(Status::ERROR, $result);
     }
 }
 ?>

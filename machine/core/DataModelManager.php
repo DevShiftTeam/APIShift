@@ -51,7 +51,10 @@ class DataModelManager {
                 "INSERT INTO items (name) VALUES (:iname);", [ 'iname' => $query['name'] ]      // Add item
             );
             // Check if creation completed successfully
-            if($result == false) Status::message(Status::ERROR, "Couldn't create item in DB");
+            if($result == false) {
+                Status::message(Status::ERROR, "Couldn't create item in DB");
+                // TOOD: Dispose of data if any was created
+            }
             Status::message(Status::SUCCESS, "Created Item successfully");
         }
         
@@ -87,10 +90,21 @@ class DataModelManager {
                         break;
                 }
                 $result = DatabaseManager::query("main",
-                    "ALTER TABLE " . $table_name . " ADD " . $query_str . ";" .                 // Create relation column
-                    "INSERT INTO items (name) VALUES (:iname);", [ 'iname' => $query['name'] ]  // Add item
+                    "ALTER TABLE " . $table_name . " ADD " . $query_str . ";" .     // Create relation column
+                    "INSERT INTO items (name) VALUES (:iname);" .                   // Add item
+                    // Create the relation
+                    "INSERT INTO relations (parent, `from`, `to`, `type`) VALUES ((SELECT id FROM items ORDER BY id DESC LIMIT 1), :fitem, :titem, :rtype)",
+                    [
+                        'iname' => $query['name'],
+                        'fitem' => $query['from'],
+                        'titem' => $query['to'],
+                        'rtype' => $query['relation_type'],
+                    ]
                 );
-                if($result == false) Status::message(Status::ERROR, "Couldn't create Relation in DB");
+                if($result == false) {
+                    Status::message(Status::ERROR, "Couldn't create Relation in DB");
+                    // TOOD: Dispose of data if any was created
+                }
 
                 // Add Item & Relation
                 break;

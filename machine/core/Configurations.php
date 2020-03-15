@@ -17,4 +17,5 @@ class Configurations {
     public const DB_PASS = "";
     public const DB_NAME = "apishift";
     public const USE_HTTPS = true;
+    public const DB_TYPE = "MySQL";
 }

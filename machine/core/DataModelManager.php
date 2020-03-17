@@ -24,7 +24,7 @@ class DataModelManager {
         if(!isset($query['name'])) Status::message(Status::ERROR, "No item/relation name specified");
         if(!isset($query['keys'])) Status::message(Status::ERROR, "Cannot create an empty item/relation structure");
 
-        // Check if table exists
+        // Check if table/item exists
         $check = DatabaseManager::getInstance("main")->query("SELECT id FROM " . $query['name']);
         if(gettype($check) == 'array') Status::message(Status::ERROR, "Item/relation exist");
         
@@ -66,18 +66,30 @@ class DataModelManager {
                 // Get `to` table id
                 if(gettype($query['to']) != 'int') {
                     if($query['relation_type'] == 1) $table_name = $query['to'];
-                    // TODO: Get 'to' table ID and store it int $query['to']
+                    // Get 'to' table ID and store it int $query['to']
+                    $result = DatabaseManager::query("main", "SELECT id FROM items WHERE name = :to_name", ['to_name' => $query['to']]);
+                    if(gettype($result) != 'array' || count($result) == 0) Status::message(Status::ERROR, "Relation `to` item doesn't exist");
+                    $query['to'] = $result[0]['id'];
                 }
                 else if($query['relation_type'] == 1){
-                    // TODO: get 'to' table name
+                    // Get 'to' table name
+                    $result = DatabaseManager::query("main", "SELECT name FROM items WHERE id = :to_id", ['to_id' => $query['to']]);
+                    if(gettype($result) != 'array' || count($result) == 0) Status::message(Status::ERROR, "Relation `to` item doesn't exist");
+                    $table_name = $result[0]['name'];
                 }
                 // Get `from` table id
                 if(gettype($query['from']) != 'int') {
                     if($query['relation_type'] == 0) $table_name = $query['from'];
-                    // TODO: Get 'from' table ID and store it in $query['from']
+                    // Get 'from' table ID and store it in $query['from']
+                    $result = DatabaseManager::query("main", "SELECT id FROM items WHERE name = :from_name", ['from_name' => $query['from']]);
+                    if(gettype($result) != 'array' || count($result) == 0) Status::message(Status::ERROR, "Relation `to` item doesn't exist");
+                    $query['from'] = $result[0]['id'];
                 }
                 else if($query['relation_type'] == 0){
-                    // TODO: get 'from' table name
+                    // Get 'from' table name
+                    $result = DatabaseManager::query("main", "SELECT name FROM items WHERE id = :from_id", ['from_id' => $query['from']]);
+                    if(gettype($result) != 'array' || count($result) == 0) Status::message(Status::ERROR, "Relation `to` item doesn't exist");
+                    $table_name = $result[0]['name'];
                 }
 
                 // Create column in the `from` table to serve as the relation
@@ -93,7 +105,7 @@ class DataModelManager {
                     "ALTER TABLE " . $table_name . " ADD " . $query_str . ";" .     // Create relation column
                     "INSERT INTO items (name) VALUES (:iname);" .                   // Add item
                     // Create the relation
-                    "INSERT INTO relations (parent, `from`, `to`, `type`) VALUES ((SELECT id FROM items ORDER BY id DESC LIMIT 1), :fitem, :titem, :rtype)",
+                    "INSERT INTO relations (parent, `from`, `to`, `type`) VALUES ((SELECT id FROM items ORDER BY id DESC LIMIT 1), :fitem, :titem, :rtype);",
                     [
                         'iname' => $query['name'],
                         'fitem' => $query['from'],
@@ -109,7 +121,7 @@ class DataModelManager {
                 // Add Item & Relation
                 break;
             case 3: // n to n
-                // Create relation as a new table
+                // TODO: Create relation as a new table
             break;
             default: Status::message(Status::ERROR, "Unrecognized relation type");
         }

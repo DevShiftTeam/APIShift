@@ -16,6 +16,10 @@ class Configurations {
     public const DB_USER = "";
     public const DB_PASS = "";
     public const DB_NAME = "apishift";
-    public const USE_HTTPS = true;
     public const DB_TYPE = "MySQL";
+    public const USE_HTTPS = true;
+    public const CACHE_TYPE = CacheManager::APCU;
+    public const CACHE_HOST = "";
+    public const CACHE_PORT = "";
+    public const CACHE_PASS = "";
 }

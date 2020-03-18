@@ -43,8 +43,8 @@
                         name: "Site data",
                         fields: [
                             {label: "Site Title", name: "site_name", icon: "fas fa-globe", type: "text", data: "" },
-                            {label: "Site Description", name: "site_desc", icon: "fas fa-paragraph", type: "textbox", data: "" },
-                            {label: "Site Keys", name: "site_keys", icon: "fas fa-key", type: "textbox", data: "" }
+                            {label: "Site Description", name: "site_desc", icon: "fas fa-paragraph", type: "text", data: "" },
+                            {label: "Site Keys", name: "site_keys", icon: "fas fa-key", type: "text", data: "" }
                         ]
                     }
                 ],

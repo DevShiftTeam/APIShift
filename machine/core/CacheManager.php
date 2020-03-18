@@ -140,7 +140,7 @@
      */
     public static function exists($key) {
         switch(Configurations::CACHE_TYPE) {
-            case self::APCU: return apcu_exists(Status::ERROR, "Please install/enable APCu") !== false;
+            case self::APCU: return apcu_exists($key) !== false;
             case self::MEMCACHED:
                 return self::$cache_connection->get($key) !== false;
                 break;

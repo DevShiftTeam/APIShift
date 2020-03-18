@@ -39,7 +39,7 @@
 <template>
     <v-content>
         <v-container class="main_container" fluid>
-            <v-card class="mx-auto" width="50%"><v-toolbar-title class="version_header">Version 1.0</v-toolbar-title></v-card>
+            <v-card class="mx-auto" width="50%" color="light-blue lighten-1"><v-toolbar-title class="version_header">Version 1.0</v-toolbar-title></v-card>
             <v-card class="mx-auto" width="70%" tile>
                 <v-list three-line>
                     <v-subheader>New Control Panel Features</v-subheader>

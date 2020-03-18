@@ -13,16 +13,19 @@
                 item: 3,
                 items: [
                     {
+                        icon: 'fas fa-user',
                         title: 'Manage Sessions',
                         subtitle: 'Create session structures and hierarchy as you desire easily'
                     },
                     {
+                        icon: 'fa fa-database',
                         title: 'Manage Database Structure & Objects',
-                        subtitle: 'Create Item and Relations between them that define your application\'s data'
+                        subtitle: 'Create Item & Relations between to define application\'s data'
                     },
                     {
+                        icon: 'fas fa-lock',
                         title: 'Manage Access To Controllers & Data',
-                        subtitle: 'Define which user can access what function and data in your system'
+                        subtitle: 'Define which functions and data a user can access'
                     }
                 ]
             };
@@ -40,14 +43,17 @@
     <v-content>
         <v-container class="main_container" fluid>
             <v-card class="mx-auto" width="50%" color="light-blue lighten-1"><v-toolbar-title class="version_header">Version 1.0</v-toolbar-title></v-card>
-            <v-card class="mx-auto" width="70%" tile>
+            <v-card class="mx-auto" width="80%" tile>
                 <v-list three-line>
                     <v-subheader>New Control Panel Features</v-subheader>
                     <v-list-item-group v-model="item" color="primary">
                         <v-list-item v-for="(item, i) in items" :key="i">
+                                <v-list-item-icon>
+                                    <v-icon >{{ item.icon }}</v-icon>
+                                </v-list-item-icon>
                             <v-list-item-content>
-                                <v-list-item-title v-html="item.title"></v-list-item-title>
-                                <v-list-item-subtitle v-html="item.subtitle"></v-list-item-subtitle>
+                                <v-list-item-title v-text="item.title"></v-list-item-title>
+                                <v-list-item-subtitle v-text="item.subtitle"></v-list-item-subtitle>
                             </v-list-item-content>
                         </v-list-item>
                     </v-list-item-group>

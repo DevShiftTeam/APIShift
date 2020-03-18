@@ -13,10 +13,11 @@ class Status {
     // Hardcoded statuses
     public const ERROR = 0;
     public const SUCCESS = 1;
-    // Error cods for installation
+    // Error codes for installation
     public const NOT_INSTALLED = 2;
     public const DB_CONNECTION_FAILED = 3;
     public const INVALID_CONFIG_FILE = 4;
+    // Last status container
     private static $output = [ 'status' => Status::SUCCESS, 'data' => "Status haven't changed" ];
 
     /**
@@ -35,7 +36,7 @@ class Status {
         else self::$output['data'] = "";
 
         // Send data to UI
-        if($message_and_exit) self::respond();
+        if($message_and_exit && $GLOBALS['REQUEST_MODE']) self::respond();
     }
 
     /**
@@ -48,8 +49,15 @@ class Status {
 
     /**
      * Get current status
+     * @return int Current status
      */
     public static function getStatus() { return self::$output['status']; }
+
+    /**
+     * Get current status message
+     * @return string Current status message
+     */
+    public static function getMessage() {return self::$output['data']; }
 }
 
 ?>

@@ -7,6 +7,12 @@
  * @author Sapir Shemer
  */
 
+ /**
+  * A global variable used to indicate whether the user requested data using a request
+  * or in a PHP file
+  */
+ $REQUEST_MODE = true;
+
  require "APIShift.php";
 
  use APIShift\Core\Authorizer;

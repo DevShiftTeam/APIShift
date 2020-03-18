@@ -7,11 +7,15 @@
  * @author Sapir Shemer
  */
 
+/**
+ * If the request mode wasn't set beforehand then assume we work using PHP mode
+ */
+if(!isset($REQUEST_MODE)) $GLOBALS['REQUEST_MODE'] = false;
+
 // Step 1: Define the autoloader to load the needed functions without hardcoding
 require_once "core/Autoloader.php";
 
 // Step 2: Define main dependencies for the API to function
-
 use APIShift\Core\CacheManager;
 use APIShift\Core\DatabaseManager;
 use APIShift\Core\SessionState;

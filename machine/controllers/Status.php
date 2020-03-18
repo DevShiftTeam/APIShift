@@ -12,7 +12,7 @@ use APIShift\Core;
 
 class Status {
     public static function getAllStatuses() {
-        Core\Status::message(Core\Status::SUCCESS, apcu_fetch('StatusCollection'));
+        Core\Status::message(Core\Status::SUCCESS, Core\CacheManager::get('StatusCollection'));
     }
 }
 ?>

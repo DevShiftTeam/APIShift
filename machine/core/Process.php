@@ -24,8 +24,8 @@ class Process {
         $result = null;
 
         // Load types from cache
-        $connection_types = apcu_fetch("ConnectionTypes");
-        $connection_node_types = apcu_fetch("ConnectionNodeTypes");
+        $connection_types = CacheManager::get("ConnectionTypes");
+        $connection_node_types = CacheManager::get("ConnectionNodeTypes");
 
         // Get the first connection which is not a result from the connections
         $connection_ids = array_keys($connections_set);
@@ -126,14 +126,14 @@ class Process {
                     break;
                 case "DataEntry":
                     // Get data entry
-                    $entry = apcu_fetch("DataEntries")[$connections_set[$current_connection]['from']];
-                    $entry_type = apcu_fetch("DataEntryTypes")[$entry['type']];
+                    $entry = CacheManager::get("DataEntries")[$connections_set[$current_connection]['from']];
+                    $entry_type = CacheManager::get("DataEntryTypes")[$entry['type']];
 
                     // Handle entry by type
                     switch($entry_type['name']) {
                         case 'array_key':
                             // Get source
-                            $source = apcu_fetch("DataSources")[$entry['source']]['name'];
+                            $source = CacheManager::get("DataSources")[$entry['source']]['name'];
                             if(isset($GLOBALS[$source])) $inputs[] = $GLOBALS[$source][$entry['name']];
                             else if(!isset(${$source})) Status::message(Status::ERROR, "Couldn't find array " . $source);
                             else $inputs[] = ${$source}[$entry['name']];
@@ -174,13 +174,13 @@ class Process {
                     switch($to_type) {
                         case 'DataEntry':
                             // Get data entry
-                            $entry = apcu_fetch("DataEntries")[$connections_set[$current_connection]['to']];
-                            $entry_type = apcu_fetch("DataEntryTypes")[$entry['type']];
+                            $entry = CacheManager::get("DataEntries")[$connections_set[$current_connection]['to']];
+                            $entry_type = CacheManager::get("DataEntryTypes")[$entry['type']];
                             
                             switch($entry_type['name']) {
                                 case 'array_key':
                                     // Get source
-                                    $source = apcu_fetch("DataSources")[$entry['source']]['name'];
+                                    $source = CacheManager::get("DataSources")[$entry['source']]['name'];
                                     // Store inputs
                                     if(isset($GLOBALS[$source])) $GLOBALS[$source][$entry['name']] = self::processValues($inputs, $input_names);
                                     else if(!isset(${$source})) Status::message(Status::ERROR, "Couldn't find array " . $source);
@@ -198,7 +198,7 @@ class Process {
                                     break;
                                 case 'table_cell':
                                     // Get table name
-                                    $table_name = apcu_fetch("DataSources")[$entry['source']]['name'];
+                                    $table_name = CacheManager::get("DataSources")[$entry['source']]['name'];
                                     // Initial query parameters
                                     $query_params = [ ];
 
@@ -243,13 +243,13 @@ class Process {
                     $to_measure = "";
                     if($to_type == 'DataEntry') {
                         // Get data entry
-                        $entry = apcu_fetch("DataEntries")[$connections_set[$current_connection]['to']];
-                        $entry_type = apcu_fetch("DataEntryTypes")[$entry['type']];
+                        $entry = CacheManager::get("DataEntries")[$connections_set[$current_connection]['to']];
+                        $entry_type = CacheManager::get("DataEntryTypes")[$entry['type']];
                         
                         switch($entry_type['name']) {
                             case 'array_key':
                                 // Get source
-                                $source = apcu_fetch("DataSources")[$entry['source']]['name'];
+                                $source = CacheManager::get("DataSources")[$entry['source']]['name'];
                                 // Store inputs
                                 if(isset($GLOBALS[$source])) $to_measure = $GLOBALS[$source][$entry['name']];
                                 else if(!isset(${$source})) Status::message(Status::ERROR, "Couldn't find array " . $source);

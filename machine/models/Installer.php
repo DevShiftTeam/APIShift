@@ -93,6 +93,7 @@ class Configurations {
     public const DB_USER = "{$db_user}";
     public const DB_PASS = "{$db_pass}";
     public const DB_NAME = "{$db_name}";
+    public const DB_TYPE = "MySQL";
     public const USE_HTTPS = true;
 }
 EOT;

@@ -33,26 +33,26 @@ class DataModelManager {
         // Create query string containing the key pairs and their types
         foreach($query['keys'] as $key_name => $value) $query_str .= $key_name . " " . $value . ",";
 
-        // TODO: Check if item is relation and create relation
+        // Check if item is relation and create relation
         if(!isset($query['relation_type'])) {
             // Create AI primary key based on system
             switch(Configurations::DB_TYPE) {
                 case "MySQL":
-                    $query_str .= "id int AUTO_INCREMENT";
+                    $query_str .= "id int NOT NULL AUTO_INCREMENT, PRIMARY KEY (id)";
                     break;
                 case "MSSQL":
-                    $query_str .= "id int IDENTITY(1,1)";
+                    $query_str .= "id int NOT NULL PRIMARY KEY IDENTITY(1,1)";
                     break;
             }
             // Create the table
-            $result = DatabaseManager::query("main",
-                "CREATE TABLE " . $query['name']  . '{' . $query_str . 'id int NOT NULL};' .    // Create item table
-                "ALTER TABLE " . $query['name'] . " ADD PRIMARY KEY(id);" .                     // Create a primary key on ID
-                "INSERT INTO items (name) VALUES (:iname);", [ 'iname' => $query['name'] ]      // Add item
-            );
+            $result = DatabaseManager::query("main", "CREATE TABLE " . $query['name']  . " (" . $query_str . ");");
             // Check if creation completed successfully
+            if($result == false) Status::message(Status::ERROR, "Couldn't create item in DB");
+            // Insert item data
+            $result = DatabaseManager::query("main", "INSERT INTO items (table_name) VALUES (:iname);", [ 'iname' => $query['name'] ]);
+            // Check if insertion completed successfully
             if($result == false) {
-                Status::message(Status::ERROR, "Couldn't create item in DB");
+                Status::message(Status::ERROR, "Couldn't insert item to items");
                 // TOOD: Dispose of data if any was created
             }
             Status::message(Status::SUCCESS, "Created Item successfully");
@@ -82,13 +82,13 @@ class DataModelManager {
                     if($query['relation_type'] == 0) $table_name = $query['from'];
                     // Get 'from' table ID and store it in $query['from']
                     $result = DatabaseManager::query("main", "SELECT id FROM items WHERE name = :from_name", ['from_name' => $query['from']]);
-                    if(gettype($result) != 'array' || count($result) == 0) Status::message(Status::ERROR, "Relation `to` item doesn't exist");
+                    if(gettype($result) != 'array' || count($result) == 0) Status::message(Status::ERROR, "Relation `from` item doesn't exist");
                     $query['from'] = $result[0]['id'];
                 }
                 else if($query['relation_type'] == 0){
                     // Get 'from' table name
                     $result = DatabaseManager::query("main", "SELECT name FROM items WHERE id = :from_id", ['from_id' => $query['from']]);
-                    if(gettype($result) != 'array' || count($result) == 0) Status::message(Status::ERROR, "Relation `to` item doesn't exist");
+                    if(gettype($result) != 'array' || count($result) == 0) Status::message(Status::ERROR, "Relation `from` item doesn't exist");
                     $table_name = $result[0]['name'];
                 }
 

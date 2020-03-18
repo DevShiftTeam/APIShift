@@ -13,6 +13,11 @@
   * Manages cache data on your command, sir!
   */
  class CacheManager {
+    // Cache types
+    public const APCU = 0;
+    public const MEMCACHED = 1;
+    public const REDIS = 2;
+
      /**
       * Load default cache data
       */

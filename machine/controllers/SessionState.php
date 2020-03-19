@@ -13,7 +13,7 @@ use APIShift\Core;
 use APIShift\Core\Status;
 
 /**
- * Manages components of the control panel - pages and other view data
+ * Provides a set of request handlers that allows users to manipulate the session state element
  */
 class SessionState {
     public static function getCurrentSessionState() {

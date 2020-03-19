@@ -29,9 +29,9 @@ class Installer {
         || (!isset($_POST['db_pass']) || $_POST['db_pass'] == "")
         || (!isset($_POST['db_name']) || $_POST['db_name'] == "")
         || (!isset($_POST['cc_system']) || $_POST['cc_system'] == "")
-        || (!isset($_POST['cc_host']))
-        || (!isset($_POST['cc_port']))
-        || (!isset($_POST['cc_pass']))
+        || (!isset($_POST['cc_host'])) // Can stay empty
+        || (!isset($_POST['cc_port'])) // Can stay empty
+        || (!isset($_POST['cc_pass'])) // Can stay empty
         || (!isset($_POST['site_name']) || $_POST['site_name'] == "")
         || (!isset($_POST['site_desc']) || $_POST['site_desc'] == "")
         || (!isset($_POST['site_keys']) || $_POST['site_keys'] == ""))

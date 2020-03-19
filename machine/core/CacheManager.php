@@ -30,13 +30,13 @@
                 break;
             case self::MEMCACHED:
                 if(!extension_loaded("memcached")) Status::message(Status::ERROR, "Please install/enable Memcached or configure to use another system (APCu/Redis)");
-                self::$cache_connection = new Memcached('_');
+                self::$cache_connection = new \Memcached('_');
                 $result = self::$cache_connection->addServer(Configurations::CACHE_HOST, Configurations::CACHE_PORT);
                 if(!$result) Status::message("Memcached: Couldn't start connection with cache host, please check host name/port");
             break;
             case self::REDIS:
                 if(!extension_loaded("redis")) Status::message(Status::ERROR, "Please install/enable Redis or configure to use another system (APCu/Memcached)");
-                self::$cache_connection = new Redis();
+                self::$cache_connection = new \Redis();
                 $result = self::$cache_connection->connect(Configurations::CACHE_HOST, Configurations::CACHE_PORT);
                 if(!$result) Status::message("Redis: Couldn't start connection with cache host, please check host name/port");
                 $result = self::$cache_connection->auth(Configurations::CACHE_PASS);

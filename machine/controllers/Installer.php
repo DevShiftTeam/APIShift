@@ -28,6 +28,10 @@ class Installer {
         || (!isset($_POST['db_user']) || $_POST['db_user'] == "")
         || (!isset($_POST['db_pass']) || $_POST['db_pass'] == "")
         || (!isset($_POST['db_name']) || $_POST['db_name'] == "")
+        || (!isset($_POST['cc_system']) || $_POST['cc_system'] == "")
+        || (!isset($_POST['cc_host']))
+        || (!isset($_POST['cc_port']))
+        || (!isset($_POST['cc_pass']))
         || (!isset($_POST['site_name']) || $_POST['site_name'] == "")
         || (!isset($_POST['site_desc']) || $_POST['site_desc'] == "")
         || (!isset($_POST['site_keys']) || $_POST['site_keys'] == ""))
@@ -39,7 +43,8 @@ class Installer {
         Models\Installer::createDB($_POST['db_host'], $_POST['db_name'], $_POST['db_user'], $_POST['db_pass'], $_POST['db_port'], $_POST['login'], $_POST['password']);
 
         // Create Config File
-        Models\Installer::createConfigFile($_POST['db_host'], $_POST['db_name'], $_POST['db_user'], $_POST['db_pass'], $_POST['db_port']);
+        Models\Installer::createConfigFile($_POST['db_host'], $_POST['db_name'], $_POST['db_user'], $_POST['db_pass'], $_POST['db_port'], "MySQL", $_POST['cc_system'],
+        $_POST['cc_host'], $_POST['cc_port'], $_POST['cc_pass']);
 
         // Done
         Status::message(Status::SUCCESS, "Installation Done!");

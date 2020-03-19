@@ -8,6 +8,8 @@
  */
 
 namespace APIShift\Models;
+
+use APIShift\Core\CacheManager;
 use APIShift\Core\DatabaseManager;
 use APIShift\Core\Status;
 use Exception;
@@ -48,6 +50,8 @@ class Installer {
             DatabaseManager::getInstance("main")->exec($data_to_import);
             
             // Add admin user to DB
+            $remove_existing = DatabaseManager::query("main", "TRUNCATE TABLE admin_users");
+            if(!$remove_existing) Status::message(Status::ERROR, "Couldn't clear the admin_users table");
             $add_admin = DatabaseManager::query("main",
                 "INSERT INTO admin_users (username, password, created) VALUES (:username, :password, NOW())",
                 [
@@ -73,7 +77,17 @@ class Installer {
      * @param $pass Control panel password
      * @return void
      */
-    public function createConfigFile(string $db_host, string $db_name, string $db_user, string $db_pass, int $db_port = 3306) {
+    public function createConfigFile(string $db_host, string $db_name, string $db_user, string $db_pass, int $db_port = 3306,
+                                        string $db_type = "MySQL", int $cache_system = CacheManager::APCU, string $cache_host = "",
+                                        int $cache_port = 0, string $cache_pass = "") {
+        // Determine the cache system string
+        switch($cache_system) {
+            case CacheManager::APCU: $cache_system = "CacheManager::APCU"; break;
+            case CacheManager::REDIS: $cache_system = "CacheManager::REDIS"; break;
+            case CacheManager::MEMCACHED: $cache_system = "CacheManager::MEMCACHED"; break;
+            default: Status::message(Status::ERROR, "Invalid cache system");
+        }
+
         $newConfigFileData = <<<EOT
 <?php
 /**
@@ -93,12 +107,12 @@ class Configurations {
     public const DB_USER = "{$db_user}";
     public const DB_PASS = "{$db_pass}";
     public const DB_NAME = "{$db_name}";
-    public const DB_TYPE = "MySQL";
+    public const DB_TYPE = "{$db_type}";
     public const USE_HTTPS = true;
-    public const CACHE_TYPE = CacheManager::APCU;
-    public const CACHE_HOST = "";
-    public const CACHE_PORT = "";
-    public const CACHE_PASS = "";
+    public const CACHE_TYPE = {$cache_system};
+    public const CACHE_HOST = "{$cache_host}";
+    public const CACHE_PORT = {$cache_port};
+    public const CACHE_PASS = "{$cache_pass}";
 }
 EOT;
 

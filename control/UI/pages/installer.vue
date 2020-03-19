@@ -40,6 +40,19 @@
                         ]
                     },
                     {
+                        name: "Cache Configurations",
+                        fields: [
+                            {label: "Cache Host", name: "cc_host", icon: "fas fa-database", type: "text", data: "127.0.0.1", values: [1, 2] },
+                            {label: "Cache Port", name: "cc_port", icon: "fas fa-cloud", type: "text", data: 6379, values: [1, 2] },
+                            {label: "Cache Pass", name: "cc_pass", icon: "lock", type: "password", data: "", values: [1] }
+                        ],
+                        selector: { label: "Cache System", name: "cc_system", items: [ 
+                                { text: "APCu", value: 0 },
+                                { text: "Redis", value: 1 },
+                                { text: "Memcached", value: 2 }
+                            ], data: 0, icon: ""}
+                    },
+                    {
                         name: "Site data",
                         fields: [
                             {label: "Site Title", name: "site_name", icon: "fas fa-globe", type: "text", data: "" },
@@ -86,6 +99,10 @@
                 for(field_id in this.steps[step_id].fields)
                 {
                     var field = this.steps[step_id].fields[field_id];
+
+                    // Skip fields not competent with the selector
+                    if(this.steps[step_id].selector !== undefined && !field.values.includes(this.steps[step_id].selector.data))
+                        continue;
                     
                     // Not empty
                     if(field.data == "")
@@ -94,7 +111,7 @@
                         return field_id; // return field who is incorrect or empty
                     }
 
-                    // Regex invalud
+                    // Regex invalid
                     if(field.regex !== undefined && !RegExp(field.regex).test(field.data)) {
                         if(update) APIShift.API.notify("Invalid format: " + field.format, "warning");
                         return field_id; // return field who is incorrect or empty
@@ -182,9 +199,12 @@
                 if(!this.isDataFilled()) return;
 
                 // Construct message
-                for(var step_id in this.steps)
+                for(var step_id in this.steps) {
                     for(var field_id in this.steps[step_id].fields)
                         to_send[this.steps[step_id].fields[field_id].name] = this.steps[step_id].fields[field_id].data;
+                    // Add field selector data
+                    if(this.steps[step_id].selector !== undefined) to_send[this.steps[step_id].selector.name] = this.steps[step_id].selector.data;
+                }
 
                 // Handle installation
                 APIShift.Loader.show();
@@ -261,9 +281,16 @@
 
                         <v-card-text>
                             <v-form>
+                                <v-select
+                                    v-if="steps[current_step].selector !== undefined"
+                                    :items="steps[current_step].selector.items"
+                                    :label="steps[current_step].selector.label"
+                                    :prepend-icon="steps[current_step].selector.icon"
+                                    v-model="steps[current_step].selector.data"
+                                    ></v-select>
                                 <v-text-field
                                     v-for="field in steps[current_step].fields"
-                                    :disabled="loader.visible"
+                                    :disabled="loader.visible || (steps[current_step].selector !== undefined && !field.values.includes(steps[current_step].selector.data))"
                                     :key="field.label /* Need this to satisfy the for loop, shitty error of vue in our situation, but let's keep this clean */"
                                     @keyup.enter="current_step == steps.length - 1 ? installSystem() : nextStep()"
                                     :label="field.label" :id="field.name" :name="field.name" :prepend-icon="field.icon" :type="field.type"

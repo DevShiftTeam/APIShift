@@ -187,7 +187,7 @@
     public static function set($key, $value) {
         switch(Configurations::CACHE_TYPE) {
             case self::APCU:
-                apcu_store(Status::ERROR, "Please install/enable APCu");
+                apcu_store($key, $value);
                 break;
             case self::MEMCACHED:
                 self::$cache_connection->set($key, $value);

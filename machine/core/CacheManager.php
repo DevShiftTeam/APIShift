@@ -184,17 +184,17 @@
      * @param mixed $value Value to store upon key
      * @return void
      */
-    public static function set($key, $value) {
+    public static function set($key, $value, $ttl = 0) {
         switch(Configurations::CACHE_TYPE) {
             case self::APCU:
-                apcu_store($key, $value);
+                apcu_store($key, $value, $ttl);
                 break;
             case self::MEMCACHED:
-                self::$cache_connection->set($key, $value);
+                self::$cache_connection->set($key, $value, $ttl);
                 break;
             case self::REDIS:
-                if(gettype($value) != 'array') self::$cache_connection->set($key, $value);
-                else self::$cache_connection->set($key, json_encode($value));
+                if(gettype($value) != 'array') self::$cache_connection->set($key, $value, ['EX' => $ttl]);
+                else self::$cache_connection->set($key, json_encode($value), ['EX' => $ttl]);
                 break;
             default:
                 Status::message(Status::ERROR, "Unrecognized cache system, please check your configurations");

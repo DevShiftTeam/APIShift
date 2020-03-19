@@ -18,7 +18,7 @@ The semantics of this architecture document will follow the definitions mentione
     - [Mid-Level Components](#mid-level-components)
   - [Session management](#session-management)
   - [Database management](#database-management)
-    - [UI Graph Components](#ui-graph-components)
+    - [Data Model Components](#data-model-components)
   - [Procedure Management](#procedure-management)
 - [Project Structure](#project-structure)
   - [Back-End](#back-end)
@@ -56,7 +56,7 @@ The system defines 3 main base concepts that are said to make a base for a whole
 ### Mid-Level Components
 The system also defines 3 more concepts that are connected to the base concept to build up the logic, restrictions and analysis of the API, and as follows, define modular and scalable components to handle it:
 1. __Logic/Models__: All the components that make use of the session, database and core of the API to make the requests complete. in a way that componets who handle process requests (the controllers, which will be reviewed later) connect to, to complete their operation. All the these components are stored in the [models folder](machine/models), and also made viable by creating procedures using the system's UI and attaching them using triggers controllers, models or the lifecycle of the API.
-    * [Procedure Management & Placement Class](machine/core/Task.php), Each task is made from different processes.
+    * [Data Model Class](machine/core/Task.php), Each task is made from different processes.
     * [Processes Management Class](machine/core/Process.php), Each process in a handler of procedural connections, that combines them to make a run-time process.
 2. __Access__: Components that are attached in run-time to each request for validating the procedure or the data that a client wants to access. The Access management tools are based on Tasks & Processes and complete autorizations using the session state which main purpose is to store data that should indicate who is the client.
     * [Authorization Class](machine/core/Authorizer.php)
@@ -82,7 +82,7 @@ The system provides a graphical framework for constructing data in the database 
 
 In later versions, you will be able to save your data on different DB servers, and APIShift will manage it for you - acting as a data warehouse. To add, modify and remove long-term data in your application visit the "Database" tab in the control panel.
 
-### UI Graph Components
+### Data Model Components
 When working with database components of the APIShift, you create `Canvases`, where each canvas is a visual representation of database elements and how they are related & constructed. The system uses these terms/components:
  * __Item__: An abstract components that is presented as a collection of keys and values, that represent data elements stired in the DB.
  * __Relation__: A relation is an item that makes and abstract connection between 2 or more items. Since a relation is also an item you can make relations between relations - this is what makes the terminology of the engine as a combination between [graph model semantics](https://en.wikipedia.org/wiki/Graph_database), [object model semantics](https://en.wikipedia.org/wiki/Object_model) and an [entity-relationship model](https://en.wikipedia.org/wiki/Entity%E2%80%93relationship_model). Notice that I wrote 'abstract connection' as a relation doesn't store or address primary or foreign keys, this frees the system from normalizing the database only in one way, and makes it easier to translate between different data models. Each relation is one of those types:

@@ -17,6 +17,7 @@
     public const APCU = 0;
     public const MEMCACHED = 1;
     public const REDIS = 2;
+    // Holds the connection object to call the cache system
     private static $cache_connection = null;
 
     /**
@@ -25,14 +26,16 @@
     public static function initialize() {
         switch(Configurations::CACHE_TYPE) {
             case self::APCU:
-                if(!extension_loaded("apcu")) Status::message(Status::ERROR, "Please install/enable APCu");
+                if(!extension_loaded("apcu")) Status::message(Status::ERROR, "Please install/enable APCu or configure to use another system (Redis/Memcached)");
                 break;
             case self::MEMCACHED:
+                if(!extension_loaded("memcached")) Status::message(Status::ERROR, "Please install/enable Memcached or configure to use another system (APCu/Redis)");
                 self::$cache_connection = new Memcached('_');
                 $result = self::$cache_connection->addServer(Configurations::CACHE_HOST, Configurations::CACHE_PORT);
                 if(!$result) Status::message("Memcached: Couldn't start connection with cache host, please check host name/port");
             break;
             case self::REDIS:
+                if(!extension_loaded("redis")) Status::message(Status::ERROR, "Please install/enable Redis or configure to use another system (APCu/Memcached)");
                 self::$cache_connection = new Redis();
                 $result = self::$cache_connection->connect(Configurations::CACHE_HOST, Configurations::CACHE_PORT);
                 if(!$result) Status::message("Redis: Couldn't start connection with cache host, please check host name/port");
@@ -46,13 +49,14 @@
 
      /**
       * Load default cache data
+      * @param bool $refresh Set true to refresh the cache data
       */
-    public static function loadDefaults() {
+    public static function loadDefaults(bool $refresh = false) {
         // Initialize cache system
         self::initialize();
 
         // Get session states into cache if not cached
-        if(!self::exists('StateCollection')) {
+        if($refresh || !self::exists('StateCollection')) {
             $collection_to_load = [];
             if(DatabaseManager::fetchInto("main", $collection_to_load, "SELECT * FROM session_states", [], 'id') === false)
                 Status::message(Status::ERROR, "Couldn't retrieve collection of States");
@@ -61,7 +65,7 @@
         }
 
         // Load available return statuses
-        if(!self::exists('StatusCollection')) {
+        if($refresh || !self::exists('StatusCollection')) {
             $temp_statuses = [];
             if(DatabaseManager::fetchInto("main", $temp_statuses, "SELECT * FROM statuses", [], 'id') === false)
                 Status::message(Status::ERROR, "Couldn't retrieve collection of Statuses");
@@ -69,7 +73,7 @@
         }
 
         // Load Data sources to cache
-        if(!self::exists('DataSources')) {
+        if($refresh || !self::exists('DataSources')) {
             $temp_sources = [];
             if(DatabaseManager::fetchInto("main", $temp_sources, "SELECT * FROM data_sources", [], 'id') === false)
                 Status::message(Status::ERROR, "Couldn't retrieve collection of data sources");
@@ -77,7 +81,7 @@
         }
 
         // Load Data entries to cache
-        if(!self::exists('DataEntries')) {
+        if($refresh || !self::exists('DataEntries')) {
             $temp_entries = [];
             if(DatabaseManager::fetchInto("main", $temp_entries, "SELECT * FROM data_entries", [], 'id') === false)
                 Status::message(Status::ERROR, "Couldn't retrieve collection of data entries");
@@ -85,7 +89,7 @@
         }
 
         // Load Data source types to cache
-        if(!self::exists('DataSourceTypes')) {
+        if($refresh || !self::exists('DataSourceTypes')) {
             $temp_source_types = [];
             if(DatabaseManager::fetchInto("main", $temp_source_types, "SELECT * FROM data_source_types", [], 'id') === false)
                 Status::message(Status::ERROR, "Couldn't retrieve collection of data source types");
@@ -93,7 +97,7 @@
         }
 
         // Load Data entry types to cache
-        if(!self::exists('DataEntryTypes')) {
+        if($refresh || !self::exists('DataEntryTypes')) {
             $temp_entry_types = [];
             if(DatabaseManager::fetchInto("main", $temp_entry_types, "SELECT * FROM data_entry_types", [], 'id') === false)
                 Status::message(Status::ERROR, "Couldn't retrieve collection of data entry types");
@@ -101,7 +105,7 @@
         }
 
         // Load Connection types to cache
-        if(!self::exists('ConnectionTypes')) {
+        if($refresh || !self::exists('ConnectionTypes')) {
             $temp_connection_types = [];
             if(DatabaseManager::fetchInto("main", $temp_connection_types, "SELECT * FROM connection_types", [], 'id') === false)
                 Status::message(Status::ERROR, "Couldn't retrieve collection of connection types");
@@ -109,7 +113,7 @@
         }
 
         // Load Connection node types to cache
-        if(!self::exists('ConnectionNodeTypes')) {
+        if($refresh || !self::exists('ConnectionNodeTypes')) {
             $temp_connection_node_types = [];
             if(DatabaseManager::fetchInto("main", $temp_connection_node_types, "SELECT * FROM connection_node_types", [], 'id') === false)
                 Status::message(Status::ERROR, "Couldn't retrieve collection of connection node types");
@@ -117,7 +121,7 @@
         }
 
         // Load Items to cache
-        if(!self::exists('Items')) {
+        if($refresh || !self::exists('Items')) {
             $temp_items = [];
             if(DatabaseManager::fetchInto("main", $temp_items, "SELECT * FROM items", [], 'id') === false)
                 Status::message(Status::ERROR, "Couldn't retrieve collection of Items");
@@ -125,7 +129,7 @@
         }
         
         // Load Relations to cache
-        if(!self::exists('Relations')) {
+        if($refresh || !self::exists('Relations')) {
             $temp_relations = [];
             if(DatabaseManager::fetchInto("main", $temp_relations, "SELECT * FROM relations", [], 'id') === false)
                 Status::message(Status::ERROR, "Couldn't retrieve collection of Relations");
@@ -177,7 +181,7 @@
     /**
      * Set variable in cache system
      * @param string $key Key name to assign to the data
-     * @param string|array $value Value to store upon key
+     * @param mixed $value Value to store upon key
      * @return void
      */
     public static function set($key, $value) {

@@ -66,7 +66,7 @@ class DataModelManager {
                 // Get `to` table id
                 if(gettype($query['to']) != 'int') {
                     if($query['relation_type'] == 1) $table_name = $query['to'];
-                    // Get 'to' table ID and store it int $query['to']
+                    // Get 'to' table ID and store it in $query['to']
                     $result = DatabaseManager::query("main", "SELECT id FROM items WHERE name = :to_name", ['to_name' => $query['to']]);
                     if(gettype($result) != 'array' || count($result) == 0) Status::message(Status::ERROR, "Relation `to` item doesn't exist");
                     $query['to'] = $result[0]['id'];

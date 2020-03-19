@@ -4,13 +4,12 @@
 # APIShift Engine
 </div>
 
-The APIShift Engine is an API creator library with a control panel which purpose is to help build and deploy a fully functional API or Back-End for any type of system using a GUI system for:
+The APIShift Engine is an API creator library with a control panel which purpose is to help build and deploy a fully functional API or Back-End for any type of system with features for:
  * Managing the sessions, its different states and how it changes overtime
- * Managing data structure in database using graphical representation of the data
- * Creating logical procedures using a graph-based UI to define procedures and attach them to different areas of the code/other procedures/lifecycle
- * Authorizing access for different states of session and requests (Will be available in next versions)
- * Analyzing the data passing through the database, session, access, procedures and code, then presenting it in the UI (Will be available in next versions)
- * Data warehousing by managing your data on different DB servers (Will be available in next versions)
+ * Managing data & structures in different databases using a graphical representation of the data and a unified query language
+ * Creating logical procedures using a graph-based UI to define procedures and attach them to different areas of the code/other procedures/lifecycle of your application
+ * Authorizing access for different states of session, requests and data
+ * Analyzing the data passing through your application and then presenting it
 
 ## Table of contents
 - [APIShift Engine](#apishift-engine)

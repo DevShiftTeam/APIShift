@@ -72,22 +72,6 @@
             self::set('StatusCollection', $temp_statuses);
         }
 
-        // Load Data sources to cache
-        if($refresh || !self::exists('DataSources')) {
-            $temp_sources = [];
-            if(DatabaseManager::fetchInto("main", $temp_sources, "SELECT * FROM data_sources", [], 'id') === false)
-                Status::message(Status::ERROR, "Couldn't retrieve collection of data sources");
-            self::set('DataSources', $temp_sources);
-        }
-
-        // Load Data entries to cache
-        if($refresh || !self::exists('DataEntries')) {
-            $temp_entries = [];
-            if(DatabaseManager::fetchInto("main", $temp_entries, "SELECT * FROM data_entries", [], 'id') === false)
-                Status::message(Status::ERROR, "Couldn't retrieve collection of data entries");
-            self::set('DataEntries', $temp_entries);
-        }
-
         // Load Data source types to cache
         if($refresh || !self::exists('DataSourceTypes')) {
             $temp_source_types = [];
@@ -118,22 +102,6 @@
             if(DatabaseManager::fetchInto("main", $temp_connection_node_types, "SELECT * FROM connection_node_types", [], 'id') === false)
                 Status::message(Status::ERROR, "Couldn't retrieve collection of connection node types");
             self::set('ConnectionNodeTypes', $temp_connection_node_types);
-        }
-
-        // Load Items to cache
-        if($refresh || !self::exists('Items')) {
-            $temp_items = [];
-            if(DatabaseManager::fetchInto("main", $temp_items, "SELECT * FROM items", [], 'id') === false)
-                Status::message(Status::ERROR, "Couldn't retrieve collection of Items");
-            self::set('Items', $temp_items);
-        }
-        
-        // Load Relations to cache
-        if($refresh || !self::exists('Relations')) {
-            $temp_relations = [];
-            if(DatabaseManager::fetchInto("main", $temp_relations, "SELECT * FROM relations", [], 'id') === false)
-                Status::message(Status::ERROR, "Couldn't retrieve collection of Relations");
-            self::set('Relations', $temp_relations);
         }
     }
 
@@ -182,6 +150,7 @@
      * Set variable in cache system
      * @param string $key Key name to assign to the data
      * @param mixed $value Value to store upon key
+     * @param int $ttl Time to live in cache
      * @return void
      */
     public static function set($key, $value, $ttl = 0) {
@@ -199,6 +168,30 @@
             default:
                 Status::message(Status::ERROR, "Unrecognized cache system, please check your configurations");
         }
+    }
+
+    /**
+     * Get a data from table into cache of the table if not present and then return it
+     * @param string|array $table_data Name of table or array with the name of the key name in cache to store it under
+     * @param int $id ID of the item to retrieve
+     */
+    public static function getFromTable($table_data, $id, $ttl = 120) {
+        $table = gettype($table_data) == 'array' ? $table_data[0] : $table_data;
+        $collection = gettype($table_data) == 'array' ? $table_data[1] : $table_data;
+
+        // Get from cache if exists
+        $existing = self::get($collection);
+        if($existing && isset($existing[$id])) return $existing[$id];
+
+        // If not than load from DB
+        $result = [];
+        if(DatabaseManager::fetchInto("main", $result, "SELECT * FROM " . $table . " WHERE id = :gid", [ 'gid' => $id ], 'id') === false)
+            Status::message(Status::ERROR, "Couldn't retrieve element from " . $table);
+        
+        // And add to cache
+        if($existing) foreach($existing as $key => $val) $result[$key] = $val;
+        self::set($collection, $result);
+        return $result[$id];
     }
  }
 ?>

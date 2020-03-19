@@ -4,13 +4,27 @@
 # APIShift Engine
 </div>
 
-
 The APIShift Engine is an API creator library with a control panel which purpose is to help build and deploy a fully functional API or Back-End for any type of system with features for:
  * Managing the sessions, its different states and how it changes overtime
  * Managing data & structures in different databases using a graphical representation of the data and a unified query language
  * Creating logical procedures using a graph-based UI to define procedures and attach them to different areas of the code/other procedures/lifecycle of your application
  * Authorizing access for different states of session, requests and data
  * Analyzing the data passing through your application and then presenting it
+
+## Table of content
+- [APIShift Engine](#apishift-engine)
+  - [Table of content](#table-of-content)
+  - [About](#about)
+    - [Meet Our Team](#meet-our-team)
+  - [Installation](#installation)
+    - [Requirements](#requirements)
+  - [Understanding the system](#understanding-the-system)
+  - [Usage](#usage)
+    - [Requests (API)](#requests-api)
+    - [Hardcoded (Back-End)](#hardcoded-back-end)
+- [About Versions](#about-versions)
+  - [Current Versions](#current-versions)
+  - [Expected in next versions](#expected-in-next-versions)
 
 ## About
 APIShift is an open-source PHP system that was designed by Sapir Shemer and its releases are maintained by [DevShift](https://devshift.biz). If you want to help and join the community, you are more than welcome to contribute. Just visit the [DevShift](https://devshift.biz) site or contact Sapir in any way you feel comfortable with: [LinkedIn](https://www.linkedin.com/in/sapir-shemer/), [Facebook](https://www.facebook.com/sapir.shemer).

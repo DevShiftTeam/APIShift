@@ -1,22 +1,38 @@
 <div align="center">
-<img width="100px" src="https://gitlab.com/lesscomplexity/apishift/-/raw/master/images/DevLogo.png">
+<img width="100px" src="https://raw.githubusercontent.com/DevShiftTeam/APIShift/master/images/DevLogo.png">
 
 # APIShift Code Design
 </div>
 
-This document organizes the different components, sub-components and their properties that make up the engine. The goal of this document is to provide both a high level overview of the architecture of the system and a guide for the specifics of functionality and algorithmics behind the engine. All new systems and components first need to be integrated in the code design before going into development stages to keep a clean, understandable flow of development, organization and efficiency. It is always better to first design the components and overall system before developing, it helps everyone to follow up with the same ideas and standards when developing and contributing to the system.
+This document organizes the different components, sub-components and their properties that make up the engine. The goal of this document is to provide both a high level overview of the architecture of the system and guidelines for the functionality and algorithmics behind the engine practically. All new systems and components first need to be integrated in the code design before going into development stages to keep a clean, understandable flow of development, organization and efficiency. It is always better to initially design the components and overall system before developing, it helps others follow up with the same ideas and standards when developing and contributing to the system.
 
 The semantics of this architecture document will follow the definitions mentioned in [Architectural Styles and the Design of Network-based Software Architectures. Doctoral dissertation by Roy Thomas Fielding, University of California, Irvine, 2000. Chapter 1](https://www.ics.uci.edu/~fielding/pubs/dissertation/software_arch.htm).
 
+# Table of contents
+- [APIShift Code Design](#apishift-code-design)
+- [Table of contents](#table-of-contents)
+- [Architecture Overview](#architecture-overview)
+  - [Definitions](#definitions)
+  - [Components](#components)
+    - [Base Components](#base-components)
+    - [Mid-Level Components](#mid-level-components)
+  - [Session management](#session-management)
+  - [Database management](#database-management)
+    - [UI Graph Components](#ui-graph-components)
+  - [Procedure Management](#procedure-management)
+- [Project Structure](#project-structure)
+  - [Back-End](#back-end)
+  - [Control panel UI](#control-panel-ui)
+
 # Architecture Overview
-In this section we will give an overview of the definitions, components, the connections between them and the data elements of the architecture.
+In this section we will give an overview of the definitions, components, connections between them and the data elements of the overall architecture.
 
 ## Definitions
-The system uses the following syntactic terms, which are wrapped as architectural components in our architecture. The purpose of those definitions is to create a modular connection handling when passing data elements between components, meaning that architectually (and practically) components won't need to worry if the data came in from code or database in the application.
+The system uses the following syntactic terms, which are presented as architectural components in our architecture. The purpose of those definitions is to create a template for passing different type of data elements between components, such that architectually (and practically) components won't need to worry if the data came in from a coded array or database tuple.
 
- * __Data Entry__: A data entry is any varaible, constant, key or cell in the projects.
- * __Data Sources__: Data sources are sources of data entries: arrays, tables, documents, items & relation (an Item and a Relation are components that process data elements of tables and documents under a unified definition to create a single query language that can access both types of data, allowing for integration and fast transitions from [relational](https://en.wikipedia.org/wiki/Relational_database) to [document](https://en.wikipedia.org/wiki/Document-oriented_database) models. We will review the Item and Relation components in this document).
- * __Procedural Connections__: A connection between data entries, sources and other procedural connection outputs with processing elements (e.g. functions) - each procedural connection provides an output in run-time. This defintion is used to create the procedural diagrams defining the authorizations and other processes that can be attached to system flow during run-time using the Task and Process components which will be discussed later in this document.
+ * __Data Entry__: A data entry is any varaible, constant, key or cell in the project.
+ * __Data Sources__: Data sources are sources of data entries: arrays, tables, documents, items & relation (an Item and a Relation are components that process data elements of tables and documents under a unified definition to create a single query language that can access both types of data, allowing for integration and fast transitions from [relational](https://en.wikipedia.org/wiki/Relational_database) to [document](https://en.wikipedia.org/wiki/Document-oriented_database) models. We will review the Item and Relation components later on).
+ * __Procedural Connections__: A path connecting between data entries, sources and other procedural connection outputs with processing elements (e.g. functions) - each procedural connection represents a function operation in run-time when called. This defintion is used to create the procedural diagrams defining the authorizations and other processes that can be attached to system flow during run-time using the Task and Process components which will be discussed later in this document.
 
 ## Components
 <div align="center">

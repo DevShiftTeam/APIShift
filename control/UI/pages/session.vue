@@ -11,10 +11,59 @@
 <template>
     <v-content>
         <v-container fluid fill-height>
-            <h1>Comming Soon! :)</h1>
+            <v-toolbar class="mx-auto" max-width="90%">
+                <v-toolbar-title>Manage Sessions</v-toolbar-title>
+                <v-spacer></v-spacer>
+                <v-btn icon>
+                    <v-icon>mdi-plus-circle</v-icon>
+                </v-btn>
+            </v-toolbar>
+            <v-card class="mx-auto session-editor" width="90%" min-height="75%" outlined>
+                <v-layout class="mx-auto" align-start justify-center row wrap>
+                    <v-hover v-slot:default="{ hover }">
+                        <v-card outlined class="px-0 session-card" :elevation="hover ? 16 : 2">
+                            <v-card-title>
+                                <v-icon left>
+                                    fas fa-user
+                                </v-icon>
+                                ADMIN_STATE
+                                <v-spacer></v-spacer>
+                                <v-btn icon>
+                                    <v-icon>mdi-pencil-box</v-icon>
+                                </v-btn>
+                                <v-btn icon>
+                                    <v-icon>mdi-minus-circle</v-icon>
+                                </v-btn>
+                            </v-card-title>
+
+                            <v-card-actions>
+
+                            </v-card-actions>
+                        </v-card>
+                    </v-hover>
+                </v-layout>
+            </v-card>
         </v-container>
     </v-content>
 </template>
 <style scoped>
 
+.session-editor {
+    padding: 10px;
+    margin-top: 5px;
+}
+
+.session-card {
+    flex-basis: 30%;
+    margin: 5px;
+    min-height: 200px;
+}
+
+@media (max-width: 600px) {
+    .session-card {
+        flex-basis: 50%;
+        margin: 5px;
+        min-height: 200px;
+    }
+}
 </style>

@@ -172,25 +172,22 @@
 
     /**
      * Get a data from table into cache of the table if not present and then return it
-     * @param string|array $table_data Name of table or array with the name of the key name in cache to store it under
+     * @param string $table_name Name of table
      * @param int $id ID of the item to retrieve
      */
-    public static function getFromTable($table_data, $id, $ttl = 120) {
-        $table = gettype($table_data) == 'array' ? $table_data[0] : $table_data;
-        $collection = gettype($table_data) == 'array' ? $table_data[1] : $table_data;
-
+    public static function getFromTable($table_name, $id, $ttl = 120) {
         // Get from cache if exists
-        $existing = self::get($collection);
+        $existing = self::get($table_name);
         if($existing && isset($existing[$id])) return $existing[$id];
 
         // If not than load from DB
         $result = [];
-        if(DatabaseManager::fetchInto("main", $result, "SELECT * FROM " . $table . " WHERE id = :gid", [ 'gid' => $id ], 'id') === false)
-            Status::message(Status::ERROR, "Couldn't retrieve element from " . $table);
+        if(DatabaseManager::fetchInto("main", $result, "SELECT * FROM " . $table_name . " WHERE id = :gid", [ 'gid' => $id ], 'id') === false)
+            Status::message(Status::ERROR, "Couldn't retrieve element from " . $table_name);
         
         // And add to cache
         if($existing) foreach($existing as $key => $val) $result[$key] = $val;
-        self::set($collection, $result);
+        self::set($table_name, $result);
         return $result[$id];
     }
  }

@@ -6,44 +6,91 @@
      * file in the root folder of the APIShift Engine original release source-code
      * @author Sapir Shemer
      */
+    module.exports = {
+        data() {
+            return {
+                states_collection: {
+                    1: { name: 'ADMIN_STATE', active_timeout: 0, inactive_timeout: 600, parent: 0 }
+                },
+                current_parent: 0
+            }
+        },
+        created() {
+            
+        }
+    };
 </script>
 
 <template>
     <v-content>
         <v-container fluid fill-height>
-            <v-toolbar class="mx-auto" max-width="90%">
-                <v-toolbar-title>Manage Sessions</v-toolbar-title>
-                <v-spacer></v-spacer>
-                <v-btn icon>
-                    <v-icon>mdi-plus-circle</v-icon>
-                </v-btn>
-            </v-toolbar>
-            <v-card class="mx-auto session-editor" width="90%" min-height="75%" outlined elevation="2">
+            <v-card class="mx-auto" width="90%" min-height="75%" elevation="2">
+                <v-app-bar>
+                    <v-toolbar-title>Manage Sessions</v-toolbar-title>
+                    <v-spacer></v-spacer>
+                    <v-tooltip top>
+                        <template v-slot:activator="{ on }">
+                            <v-btn icon v-on="on">
+                                <v-icon>mdi-plus-circle</v-icon>
+                            </v-btn>
+                        </template>
+                        <span>Add new session state</span>
+                    </v-tooltip>
+                </v-app-bar>
+                <div class="overflow-box" v-bar :class="$vuetify.theme.dark == true ? 'dark_bar' : 'light_bar'">
+                <div>
                 <v-layout class="mx-auto" align-start justify-center row wrap>
-                    <v-hover v-slot:default="{ hover }">
-                        <v-card outlined class="px-0 session-card" :elevation="hover ? 16 : 2">
-                            <v-card-title>
-                                <v-icon left>
-                                    fas fa-user
-                                </v-icon>
-                                ADMIN_STATE
+                    <v-hover v-for="(val, key) in states_collection" :key="key" v-slot:default="{ hover }" v-if="val.parent == current_parent">
+                        <v-card outlined class="px-0 session-card" :elevation="hover ? 16 : 6">
+                            <v-toolbar>
+                                <v-toolbar-title>{{ val.name }}</v-toolbar-title>
                                 <v-spacer></v-spacer>
-                                <v-btn icon>
-                                    <v-icon>mdi-pencil-box</v-icon>
-                                </v-btn>
-                                <v-btn icon>
-                                    <v-icon>mdi-minus-circle</v-icon>
-                                </v-btn>
-                                <v-btn icon>
-                                    <v-icon small>fas fa-lock</v-icon>
-                                </v-btn>
-                            </v-card-title>
+                                <v-tooltip top>
+                                    <template v-slot:activator="{ on }">
+                                    <v-btn icon v-on="on">
+                                        <v-icon>mdi-pencil-box</v-icon>
+                                    </v-btn>
+                                    </template>
+                                    <span>Edit</span>
+                                </v-tooltip>
+                                <v-tooltip top>
+                                    <template v-slot:activator="{ on }">
+                                    <v-btn icon v-on="on">
+                                        <v-icon>mdi-minus-circle</v-icon>
+                                    </v-btn>
+                                    </template>
+                                    <span>Remove</span>
+                                </v-tooltip>
+                                <v-tooltip top>
+                                    <template v-slot:activator="{ on }">
+                                    <v-btn icon v-on="on" to="/access">
+                                        <v-icon small>fas fa-lock</v-icon>
+                                    </v-btn>
+                                    </template>
+                                    <span>Define Authorization Process</span>
+                                </v-tooltip>
+                            </v-toolbar>
 
                             <v-card-text>
                                 <v-form>
-                                    <v-text-field class="session_field" type="text" lable="name" id="name" value="ADMIN_STATE" box disabled></v-text-field>
-                                    <v-text-field class="session_field" type="number" lable="active timeout" box disabled value="0"></v-text-field>
-                                    <v-text-field class="session_field" type="number" lable="inactive timeout" box disabled value="0"></v-text-field>
+                                    <v-tooltip top>
+                                        <template v-slot:activator="{ on }">
+                                            <v-text-field v-on="on" class="session_field" type="text" lable="name" id="name" v-model="val.name" readonly></v-text-field>
+                                        </template>
+                                        <span>Session Name</span>
+                                    </v-tooltip>
+                                    <v-tooltip top>
+                                        <template v-slot:activator="{ on }">
+                                            <v-text-field v-on="on" class="session_field" type="number" lable="active timeout" readonly v-model="val.active_timeout"></v-text-field>
+                                        </template>
+                                        <span>Timeout When User Active (s)</span>
+                                    </v-tooltip>
+                                    <v-tooltip top>
+                                        <template v-slot:activator="{ on }">
+                                            <v-text-field v-on="on" class="session_field" type="number" lable="inactive timeout" readonly v-model="val.inactive_timeout"></v-text-field>
+                                        </template>
+                                        <span>Timeout When User Inactive (s)</span>
+                                    </v-tooltip>
                                 </v-form>
                             </v-card-text>
 
@@ -55,16 +102,13 @@
                         </v-card>
                     </v-hover>
                 </v-layout>
+                </div>
+                </div>
             </v-card>
         </v-container>
     </v-content>
 </template>
 <style scoped>
-
-.session-editor {
-    padding: 10px;
-    margin-top: 5px;
-}
 
 .session-card {
     margin: 5px;
@@ -73,6 +117,10 @@
 
 .session_field {
     padding-top: 0;
+}
+
+.overflow-box {
+    height: 70vh;
 }
 
 </style>

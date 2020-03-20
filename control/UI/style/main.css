@@ -5,3 +5,92 @@
  * file in the root folder of the APIShift Engine original release source-code
  * @author Sapir Shemer
  */
+
+html { overflow-y: auto }
+
+.dark_bar > .vb-dragger, .light_bar > .vb-dragger {
+    z-index: 5;
+    width: 12px;
+    right: 0;
+}
+
+.light_bar > .vb-dragger > .vb-dragger-styler {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transform: rotate3d(0,0,0,0);
+    transform: rotate3d(0,0,0,0);
+    -webkit-transition:
+        background-color 100ms ease-out,
+        margin 100ms ease-out,
+        height 100ms ease-out;
+    transition:
+        background-color 100ms ease-out,
+        margin 100ms ease-out,
+        height 100ms ease-out;
+    background-color: rgba(0, 0, 0,.1);
+    margin: 5px 5px 5px 0;
+    border-radius: 20px;
+    height: calc(100% - 10px);
+    display: block;
+}
+
+.light_bar.vb-scrolling-phantom > .vb-dragger > .vb-dragger-styler {
+    background-color: rgba(0, 0, 0,.3);
+}
+
+.light_bar > .vb-dragger:hover > .vb-dragger-styler {
+    background-color: rgba(0, 0, 0,.5);
+    margin: 0px;
+    height: 100%;
+}
+
+.light_bar .vb-dragging > .vb-dragger > .vb-dragger-styler {
+    background-color: rgba(0, 0, 0,.5);
+    margin: 0px;
+    height: 100%;
+}
+
+.light_bar .vb-dragging-phantom > .vb-dragger > .vb-dragger-styler {
+    background-color: rgba(0, 0, 0,.5);
+}
+
+
+.dark_bar > .vb-dragger > .vb-dragger-styler {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transform: rotate3d(0,0,0,0);
+    transform: rotate3d(0,0,0,0);
+    -webkit-transition:
+        background-color 100ms ease-out,
+        margin 100ms ease-out,
+        height 100ms ease-out;
+    transition:
+        background-color 100ms ease-out,
+        margin 100ms ease-out,
+        height 100ms ease-out;
+    background-color: rgba(255, 255, 255,.1);
+    margin: 5px 5px 5px 0;
+    border-radius: 20px;
+    height: calc(100% - 10px);
+    display: block;
+}
+
+.dark_bar.vb-scrolling-phantom > .vb-dragger > .vb-dragger-styler {
+    background-color: rgba(255, 255, 255,.3);
+}
+
+.dark_bar > .vb-dragger:hover > .vb-dragger-styler {
+    background-color: rgba(255, 255, 255,.5);
+    margin: 0px;
+    height: 100%;
+}
+
+.dark_bar .vb-dragging > .vb-dragger > .vb-dragger-styler {
+    background-color: rgba(255, 255, 255,.5);
+    margin: 0px;
+    height: 100%;
+}
+
+.dark_bar .vb-dragging-phantom > .vb-dragger > .vb-dragger-styler {
+    background-color: rgba(255, 255, 255,.5);
+}

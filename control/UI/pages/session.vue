@@ -18,8 +18,29 @@
                     <v-icon>mdi-plus-circle</v-icon>
                 </v-btn>
             </v-toolbar>
-            <v-card class="mx-auto session-editor" width="90%" min-height="75%" outlined>
+            <v-card class="mx-auto session-editor" width="90%" min-height="75%" outlined elevation="2">
                 <v-layout class="mx-auto" align-start justify-center row wrap>
+                    <v-hover v-slot:default="{ hover }">
+                        <v-card outlined class="px-0 session-card" :elevation="hover ? 16 : 2">
+                            <v-card-title>
+                                <v-icon left>
+                                    fas fa-user
+                                </v-icon>
+                                ADMIN_STATE
+                                <v-spacer></v-spacer>
+                                <v-btn icon>
+                                    <v-icon>mdi-pencil-box</v-icon>
+                                </v-btn>
+                                <v-btn icon>
+                                    <v-icon>mdi-minus-circle</v-icon>
+                                </v-btn>
+                            </v-card-title>
+
+                            <v-card-actions>
+
+                            </v-card-actions>
+                        </v-card>
+                    </v-hover>
                     <v-hover v-slot:default="{ hover }">
                         <v-card outlined class="px-0 session-card" :elevation="hover ? 16 : 2">
                             <v-card-title>
@@ -54,16 +75,9 @@
 }
 
 .session-card {
-    flex-basis: 30%;
     margin: 5px;
     min-height: 200px;
+    min-width: 300px;
 }
 
-@media (max-width: 600px) {
-    .session-card {
-        flex-basis: 50%;
-        margin: 5px;
-        min-height: 200px;
-    }
-}
 </style>

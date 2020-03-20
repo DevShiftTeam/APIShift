@@ -36,8 +36,15 @@
                                 </v-btn>
                             </v-card-title>
 
-                            <v-card-actions>
+                            <v-card-text>
+                                <v-form>
+                                    <v-text-field type="text" lable="name" value="ADMIN_STATE" disabled></v-text-field>
+                                    <v-text-field type="number" lable="active timeout" disabled value="0"></v-text-field>
+                                    <v-text-field type="number" lable="inactive timeout" disabled value="0"></v-text-field>
+                                </v-form>
+                            </v-card-text>
 
+                            <v-card-actions bottom>
                             </v-card-actions>
                         </v-card>
                     </v-hover>
@@ -76,7 +83,6 @@
 
 .session-card {
     margin: 5px;
-    min-height: 200px;
     min-width: 300px;
 }
 

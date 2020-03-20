@@ -9,14 +9,20 @@
     module.exports = {
         data() {
             return {
-                states_collection: {
-                    1: { name: 'ADMIN_STATE', active_timeout: 0, inactive_timeout: 600, parent: 0 }
-                },
+                states_collection: {},
                 current_parent: 0
             }
         },
         created() {
-            
+            window.handler = this;
+            APIShift.API.request("SessionState", "getAllSessionStates", {}, function(response) {
+                if(response.status == true) {
+                    handler.states_collection = response.data;
+                    console.log(response.data);
+                } else {
+                    APIShift.API.notify("Couldn't retrieve statuses", 'error');
+                }
+            }, true);
         }
     };
 </script>

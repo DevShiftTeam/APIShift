@@ -51,7 +51,7 @@ window.app = new Vue({
             if(!APIShift.installed) app.$router.push("/installer");
             else if(!APIShift.logged_in) app.$router.push("/login");
 
-            // Navigation gaurd for comtrol panel
+            // Navigation gaurd for control panel
             app.$router.beforeEach((to, from, next) => {
                 // Move to installation if not installed
                 if(to.path != "/installer" && !APIShift.installed) next("/installer");

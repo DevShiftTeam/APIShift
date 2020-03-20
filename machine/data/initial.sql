@@ -55,7 +55,7 @@ CREATE TABLE `admin_users` (
   `password` char(60) DEFAULT NULL,
   `created` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -390,7 +390,7 @@ CREATE TABLE `request_authorization` (
   `method` text,
   `task` int DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -399,7 +399,7 @@ CREATE TABLE `request_authorization` (
 
 LOCK TABLES `request_authorization` WRITE;
 /*!40000 ALTER TABLE `request_authorization` DISABLE KEYS */;
-INSERT INTO `request_authorization` VALUES (1,'Control','*',2);
+INSERT INTO `request_authorization` VALUES (1,'Control','*',2),(2,'SessionState','getAllSessionStates',2);
 /*!40000 ALTER TABLE `request_authorization` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -442,8 +442,9 @@ CREATE TABLE `session_states` (
   `inactive_timeout` int DEFAULT '0',
   `active_timeout` int DEFAULT '0',
   `auth_task` int DEFAULT NULL,
+  `parent` int DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -452,7 +453,7 @@ CREATE TABLE `session_states` (
 
 LOCK TABLES `session_states` WRITE;
 /*!40000 ALTER TABLE `session_states` DISABLE KEYS */;
-INSERT INTO `session_states` VALUES (1,'ADMIN_STATE',600,0,1);
+INSERT INTO `session_states` VALUES (1,'ADMIN_STATE',600,0,1,0);
 /*!40000 ALTER TABLE `session_states` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -632,4 +633,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-02-21 20:46:50
+-- Dump completed on 2020-03-21  1:58:45

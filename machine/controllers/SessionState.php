@@ -10,12 +10,17 @@
 namespace APIShift\Controllers;
 
 use APIShift\Core;
+use APIShift\Core\CacheManager;
 use APIShift\Core\Status;
 
 /**
  * Provides a set of request handlers that allows users to manipulate the session state element
  */
 class SessionState {
+    public static function getAllSessionStates() {
+        Status::message(Status::SUCCESS, CacheManager::get("StateCollection"));
+    }
+
     public static function getCurrentSessionState() {
        Status::message(Status::SUCCESS, $_SESSION['state']);
     }

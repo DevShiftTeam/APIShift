@@ -51,7 +51,7 @@
       * Load default cache data
       * @param bool $refresh Set true to refresh the cache data
       */
-    public static function loadDefaults(bool $refresh = false) {
+    public static function loadDefaults(bool $refresh = true) {
         // Initialize cache system
         self::initialize();
 

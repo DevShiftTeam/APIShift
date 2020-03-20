@@ -85,7 +85,7 @@ class SessionState {
      * @param array $params Parameters to pass to the authorization process
      * @return void
      */
-    public static function changeState($state_name, $params)
+    public static function changeState($state_name)
     {
         SessionState::LoadDefaults();
         
@@ -100,7 +100,7 @@ class SessionState {
             if($state_id == -1) Status::message(Status::ERROR, "State couldn't be found");
 
             // Run and validate processes
-            if(!Task::validateResult(Task::run($state_collection[$state_id]['auth_task'], $params)))
+            if(!Task::validateResult(Task::run($state_collection[$state_id]['auth_task'])))
                 Status::message(Status::ERROR, "Authorization failed, please check credentials");
             // TODO: Add necessary parameters to session from params/database
 

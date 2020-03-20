@@ -59,16 +59,6 @@ CREATE TABLE `admin_users` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `admin_users`
---
-
-LOCK TABLES `admin_users` WRITE;
-/*!40000 ALTER TABLE `admin_users` DISABLE KEYS */;
-INSERT INTO `admin_users` VALUES (1,'admin','$2y$10$5/IfX63ViPwt2.BhYlds3udheXazXnoD.EUdN/ADsKNTweNt0qWRm','2020-02-19 14:54:40'),(3,'admin','$2y$10$pGQmMRnWGFt7wZreaSTTzu8MO1aPfEA8rvQTjCiM7d1yGkMfrKjzu','2020-02-20 22:26:06');
-/*!40000 ALTER TABLE `admin_users` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `connection_node_types`
 --
 
@@ -167,7 +157,7 @@ CREATE TABLE `data_entries` (
 
 LOCK TABLES `data_entries` WRITE;
 /*!40000 ALTER TABLE `data_entries` DISABLE KEYS */;
-INSERT INTO `data_entries` VALUES (1,'state',1,1),(2,'login',1,4),(3,'password',1,4),(4,'password',4,5),(5,'username',4,5),(6,'ADMIN_STATE',3,0),(7,'id',4,6);
+INSERT INTO `data_entries` VALUES (1,'state',1,1),(2,'login',1,2),(3,'password',1,2),(4,'password',4,5),(5,'username',4,5),(6,'ADMIN_STATE',3,0),(7,'id',4,6);
 /*!40000 ALTER TABLE `data_entries` ENABLE KEYS */;
 UNLOCK TABLES;
 

@@ -20,8 +20,8 @@ class SessionState {
        Status::message(Status::SUCCESS, $_SESSION['state']);
     }
 
-    public static function changeState($params) {
-        Core\SessionState::changeState($params['state'], $params);
+    public static function changeState() {
+        Core\SessionState::changeState($_POST['state']);
         Status::message(Status::SUCCESS, "State Changed!");
     }
 }

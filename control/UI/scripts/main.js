@@ -50,7 +50,6 @@ window.app = new Vue({
             // Handle first load of page
             if(!APIShift.installed) app.$router.push("/installer");
             else if(!APIShift.logged_in) app.$router.push("/login");
-            else app.$router.push("/main");
 
             // Navigation gaurd for comtrol panel
             app.$router.beforeEach((to, from, next) => {

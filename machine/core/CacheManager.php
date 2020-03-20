@@ -186,8 +186,12 @@
             Status::message(Status::ERROR, "Couldn't retrieve element from " . $table_name);
         
         // And add to cache
-        if($existing) foreach($existing as $key => $val) $result[$key] = $val;
-        self::set($table_name, $result);
+        if($existing) {
+            foreach($result as $key => $val) $existing[$key] = $val;
+            self::set($table_name, $existing);
+        }
+        else self::set($table_name, $result);
+        
         return $result[$id];
     }
  }

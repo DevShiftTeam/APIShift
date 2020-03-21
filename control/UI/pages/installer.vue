@@ -301,7 +301,7 @@
 
                         <v-card-actions v-if="isDataFilled()">
                             <v-spacer></v-spacer>
-                            <v-btn color="grey accent-1" v-on:click="installSystem()">Submit</v-btn>
+                            <v-btn text color="purple accent-4" v-on:click="installSystem()">Submit</v-btn>
                         </v-card-actions>
                     </v-card>
                 </v-flex>

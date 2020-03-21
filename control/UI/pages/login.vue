@@ -172,7 +172,7 @@
 
                         <v-card-actions v-if="isDataFilled()">
                             <v-spacer></v-spacer>
-                            <v-btn color="grey accent-1" v-on:click="login()">Login</v-btn>
+                            <v-btn text color="purple accent-4" v-on:click="login()">Login</v-btn>
                         </v-card-actions>
                     </v-card>
                 </v-flex>

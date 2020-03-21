@@ -106,10 +106,10 @@
                     }
                     else if (response.status == APIShift.API.status_codes.SUCCESS) {
                         APIShift.API.notify("Success! :) " + response.data, "success");
-                        // Re-initialize devshift system
+                        // Re-initialize devshift system to logged id state
                         window.app.apishift.initialize().then(() => {
                             APIShift.logged_in = true;
-                            app.$router.push('main');
+                            app.$router.push(app.prev_route);
                             app.app_loader = APIShift.components["loader"];
                             app.app_navigator = APIShift.components["navigator"];
                             app.app_footer = APIShift.components["footer"];
@@ -134,7 +134,7 @@
             <v-layout align-center justify-center>
                 <v-flex xs12 sm8 md4>
                     <v-card class="elevation-12">
-                        <v-toolbar color="deep-purple darken-3" dark flat>
+                        <v-toolbar>
                             <v-toolbar-title>{{ credentials.name }}</v-toolbar-title>
                             <v-spacer></v-spacer>
 
@@ -172,7 +172,7 @@
 
                         <v-card-actions v-if="isDataFilled()">
                             <v-spacer></v-spacer>
-                            <v-btn color="deep-purple" v-on:click="login()">Login</v-btn>
+                            <v-btn color="grey accent-1" v-on:click="login()">Login</v-btn>
                         </v-card-actions>
                     </v-card>
                 </v-flex>

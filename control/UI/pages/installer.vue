@@ -75,6 +75,7 @@
         },
         created () {
             APIShift.Loader.changeLoader("installer", this.loader);
+            APIShift.Loader.close("installer");
         },
         updated () {
             // If step action accurred, then focus on the selected field
@@ -236,13 +237,13 @@
             <v-layout align-center justify-center>
                 <v-flex xs12 sm8 md4>
                     <v-card class="elevation-12">
-                        <v-toolbar color="deep-purple darken-3" dark flat>
+                        <v-toolbar>
                             <v-toolbar-title>Install System > {{ steps[current_step].name }}</v-toolbar-title>
                             <v-spacer></v-spacer>
 
-                            <v-tooltip right>
-                            <template v-slot:activator="{  }">
-                                <v-btn class="lightbulb" icon large target="_blank" v-on:click="toggleDarkTheme()">
+                            <v-tooltip bottom>
+                            <template v-slot:activator="{ on }">
+                                <v-btn class="lightbulb" v-on="on" icon large target="_blank" v-on:click="toggleDarkTheme()">
                                     <v-icon v-if="isOnDarkMode()">fas fa-lightbulb</v-icon>
                                     <v-icon v-else>fas fa-moon</v-icon>
                                 </v-btn>
@@ -250,18 +251,18 @@
                             <span>Toggle Dark Theme</span>
                             </v-tooltip>
 
-                            <v-tooltip v-if="current_step != 0" right>
-                            <template v-slot:activator="{  }">
-                                <v-btn class="prev_step" icon large target="_blank" v-on:click="prevStep()">
+                            <v-tooltip v-if="current_step != 0" bottom>
+                            <template v-slot:activator="{ on }">
+                                <v-btn class="prev_step" v-on="on" icon large target="_blank" v-on:click="prevStep()">
                                 <v-icon>fas fa-backward</v-icon>
                                 </v-btn>
                             </template>
                             <span>Previous Step</span>
                             </v-tooltip>
 
-                            <v-tooltip v-if="current_step != steps.length - 1" right>
-                            <template v-slot:activator="{  }">
-                                <v-btn class="next_step" icon large target="_blank" v-on:click="nextStep()">
+                            <v-tooltip v-if="current_step != steps.length - 1" bottom>
+                            <template v-slot:activator="{ on }">
+                                <v-btn class="next_step" v-on="on" icon large target="_blank" v-on:click="nextStep()">
                                 <v-icon>fas fa-forward</v-icon>
                                 </v-btn>
                             </template>
@@ -300,7 +301,7 @@
 
                         <v-card-actions v-if="isDataFilled()">
                             <v-spacer></v-spacer>
-                            <v-btn color="deep-purple" v-on:click="installSystem()">Submit</v-btn>
+                            <v-btn color="grey accent-1" v-on:click="installSystem()">Submit</v-btn>
                         </v-card-actions>
                     </v-card>
                 </v-flex>

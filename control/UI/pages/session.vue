@@ -10,7 +10,8 @@
         data() {
             return {
                 states_collection: {},
-                current_parent: 0
+                current_parent: 0,
+                in_edit: 0
             }
         },
         created() {
@@ -18,12 +19,22 @@
             APIShift.API.request("SessionState", "getAllSessionStates", {}, function(response) {
                 if(response.status == true) {
                     handler.states_collection = response.data;
-                    console.log(response.data);
                 } else {
                     APIShift.API.notify("Couldn't retrieve statuses", 'error');
                 }
             }, true);
-        }
+        },
+        methods: {
+            startEdit: function(id) {
+                if(this.in_edit == 0) this.in_edit = id;
+                else {
+                    APIShift.API.notify("Edit in progress");
+                }
+            },
+            saveEdit: function() {
+                this.in_edit = 0;
+            }
+        },
     };
 </script>
 
@@ -44,71 +55,88 @@
                     </v-tooltip>
                 </v-app-bar>
                 <div class="overflow-box" v-bar :class="$vuetify.theme.dark == true ? 'dark_bar' : 'light_bar'">
-                <div>
-                <v-layout class="mx-auto" align-start justify-center row wrap>
-                    <v-hover v-for="(val, key) in states_collection" :key="key" v-slot:default="{ hover }" v-if="val.parent == current_parent">
-                        <v-card outlined class="px-0 session-card" :elevation="hover ? 16 : 6">
-                            <v-toolbar>
-                                <v-toolbar-title>{{ val.name }}</v-toolbar-title>
-                                <v-spacer></v-spacer>
-                                <v-tooltip top>
-                                    <template v-slot:activator="{ on }">
-                                    <v-btn icon v-on="on">
-                                        <v-icon>mdi-pencil-box</v-icon>
-                                    </v-btn>
-                                    </template>
-                                    <span>Edit</span>
-                                </v-tooltip>
-                                <v-tooltip top>
-                                    <template v-slot:activator="{ on }">
-                                    <v-btn icon v-on="on">
-                                        <v-icon>mdi-minus-circle</v-icon>
-                                    </v-btn>
-                                    </template>
-                                    <span>Remove</span>
-                                </v-tooltip>
-                                <v-tooltip top>
-                                    <template v-slot:activator="{ on }">
-                                    <v-btn icon v-on="on" to="/access">
-                                        <v-icon small>fas fa-lock</v-icon>
-                                    </v-btn>
-                                    </template>
-                                    <span>Define Authorization Process</span>
-                                </v-tooltip>
-                            </v-toolbar>
+                    <div>
+                        <v-layout class="mx-auto" align-start justify-center row wrap>
+                            <v-hover v-for="(val, key) in states_collection" :key="key" v-slot:default="{ hover }" v-if="val.parent == current_parent">
+                                <v-card outlined class="px-0 session-card" :elevation="hover ? 16 : 2">
+                                    <v-toolbar>
+                                        <v-toolbar-title>{{ val.name }}</v-toolbar-title>
+                                        <v-spacer></v-spacer>
+                                        <v-tooltip top>
+                                            <template v-slot:activator="{ on }">
+                                                <v-btn v-if="key == in_edit" icon v-on="on" @click="saveEdit()">
+                                                    <v-icon>mdi-checkbox-marked-circle</v-icon>
+                                                </v-btn>
+                                                <v-btn v-else icon v-on="on" @click="startEdit(key)">
+                                                    <v-icon>mdi-pencil-circle</v-icon>
+                                                </v-btn>
+                                            </template>
+                                            <span>Edit</span>
+                                        </v-tooltip>
+                                        <v-tooltip top>
+                                            <template v-slot:activator="{ on }">
+                                            <v-btn icon v-on="on">
+                                                <v-icon>mdi-minus-circle</v-icon>
+                                            </v-btn>
+                                            </template>
+                                            <span>Remove</span>
+                                        </v-tooltip>
+                                        <v-tooltip top>
+                                            <template v-slot:activator="{ on }">
+                                            <v-btn icon v-on="on" to="/access">
+                                                <v-icon small>fas fa-lock</v-icon>
+                                            </v-btn>
+                                            </template>
+                                            <span>Define Authorization Process</span>
+                                        </v-tooltip>
+                                    </v-toolbar>
 
-                            <v-card-text>
-                                <v-form>
-                                    <v-tooltip top>
-                                        <template v-slot:activator="{ on }">
-                                            <v-text-field v-on="on" class="session_field" type="text" lable="name" id="name" v-model="val.name" readonly></v-text-field>
-                                        </template>
-                                        <span>Session Name</span>
-                                    </v-tooltip>
-                                    <v-tooltip top>
-                                        <template v-slot:activator="{ on }">
-                                            <v-text-field v-on="on" class="session_field" type="number" lable="active timeout" readonly v-model="val.active_timeout"></v-text-field>
-                                        </template>
-                                        <span>Timeout When User Active (s)</span>
-                                    </v-tooltip>
-                                    <v-tooltip top>
-                                        <template v-slot:activator="{ on }">
-                                            <v-text-field v-on="on" class="session_field" type="number" lable="inactive timeout" readonly v-model="val.inactive_timeout"></v-text-field>
-                                        </template>
-                                        <span>Timeout When User Inactive (s)</span>
-                                    </v-tooltip>
-                                </v-form>
-                            </v-card-text>
+                                    <v-card-text>
+                                        <v-form>
+                                            <v-tooltip top>
+                                                <template v-slot:activator="{ on }">
+                                                    <v-text-field v-on="on"
+                                                        class="session_field"
+                                                        type="text" label="name"
+                                                        v-model="val.name"
+                                                        :disabled="in_edit != key"></v-text-field>
+                                                </template>
+                                                <span>Session Name</span>
+                                            </v-tooltip>
+                                            <v-tooltip top>
+                                                <template v-slot:activator="{ on }">
+                                                    <v-text-field v-on="on"
+                                                        class="session_field"
+                                                        type="number"
+                                                        label="active timeout"
+                                                        v-model="val.active_timeout"
+                                                        :disabled="in_edit != key"></v-text-field>
+                                                </template>
+                                                <span>Timeout When User Active (s)</span>
+                                            </v-tooltip>
+                                            <v-tooltip top>
+                                                <template v-slot:activator="{ on }">
+                                                    <v-text-field v-on="on"
+                                                        class="session_field"
+                                                        type="number"
+                                                        label="inactive timeout"
+                                                        v-model="val.inactive_timeout"
+                                                        :disabled="in_edit != key"></v-text-field>
+                                                </template>
+                                                <span>Timeout When User Inactive (s)</span>
+                                            </v-tooltip>
+                                        </v-form>
+                                    </v-card-text>
 
-                            <v-card-actions>
-                                <v-btn text color="purple accent-4" width="100%">
-                                    View Children
-                                </v-btn>
-                            </v-card-actions>
-                        </v-card>
-                    </v-hover>
-                </v-layout>
-                </div>
+                                    <v-card-actions>
+                                        <v-btn text color="purple accent-4" width="100%">
+                                            View Children
+                                        </v-btn>
+                                    </v-card-actions>
+                                </v-card>
+                            </v-hover>
+                        </v-layout>
+                    </div>
                 </div>
             </v-card>
         </v-container>
@@ -123,10 +151,11 @@
 
 .session_field {
     padding-top: 0;
+    padding-bottom: 0;
 }
 
 .overflow-box {
-    height: 70vh;
+    height: 65vh;
 }
 
 </style>

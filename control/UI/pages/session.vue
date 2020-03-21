@@ -10,7 +10,7 @@
         data() {
             return {
                 states_collection: {},
-                editor_model: {},
+                editor_previous: {},
                 current_parent: 0,
                 in_edit: 0,
                 delete_dialog: false,
@@ -37,17 +37,35 @@
             },
             startStateEdit: function(id) {
                 if(this.in_edit != 0) {
-                    APIShift.API.notify("Edit in progress");
+                    APIShift.API.notify("Edit in progress", 'error');
+                    return;
                 }
+                if(this.states_collection[id] === undefined) {
+                    APIShift.API.notify("State doesn't exist", 'error');
+                    return;
+                }
+
                 this.in_edit = id;
+                // Store copy of the item undergoing edit
+                this.editor_previous = Object.assign({}, this.states_collection[this.in_edit]);
             },
             saveStateEdit: function() {
                 this.in_edit = 0;
             },
             discardStateEdit: function() {
+                // Show dialog if there are unsaved changes
+                if(!this.discard_dialog
+                && (this.editor_previous.name != this.states_collection[this.in_edit].name
+                || this.editor_previous.active_time != this.states_collection[this.in_edit].active_time
+                || this.editor_previous.inactive_time != this.states_collection[this.in_edit].inactive_time)) {
+                    this.discard_dialog = true;
+                    return;
+                }
 
-                // Close dialog
+                // Close dialog & revert changes
                 this.discard_dialog = false;
+                this.states_collection[this.in_edit] = this.editor_previous;
+                this.in_edit = 0;
             },
             deleteState: function(id) {
                 // Close dialog
@@ -59,7 +77,7 @@
 
 <template>
     <v-content>
-        <v-container fluid fill-height>
+        <v-container class="session-display" fluid fill-height>
             <v-card class="mx-auto" width="90%" min-height="75%" elevation="2">
                 <!-- Header -->
                 <v-app-bar>
@@ -89,7 +107,7 @@
                                         <!-- Discard changes -->
                                         <v-tooltip v-if="key == in_edit" top>
                                             <template #activator="{ on }">
-                                                <v-btn icon v-on="on" @click="discard_dialog = true">
+                                                <v-btn icon v-on="on" @click="discardStateEdit()">
                                                     <v-icon>mdi-close-circle</v-icon>
                                                 </v-btn>
                                             </template>
@@ -149,7 +167,7 @@
                                         <v-tooltip top>
                                             <template #activator="{ on }">
                                                 <v-btn icon v-on="on" to="/access">
-                                                    <v-icon small>fas fa-lock</v-icon>
+                                                    <v-icon>mdi-lock</v-icon>
                                                 </v-btn>
                                             </template>
                                             <span>Define Authorization Process</span>
@@ -208,6 +226,10 @@
     </v-content>
 </template>
 <style scoped>
+
+.session-display {
+    align-items: baseline;
+}
 
 .session-card {
     margin: 5px;

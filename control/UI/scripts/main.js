@@ -30,8 +30,7 @@ window.app = new Vue({
         app_navigator: Vue.extend({ template: "<div></div>" }),
         app_footer: Vue.extend({ template: "<div></div>" }),
         app_notifications: Vue.extend({ template: "<div></div>" }),
-        apishift: null,
-        prev_route: '/'
+        apishift: null
     },
     created() {
         // Initialize APIShift Engine
@@ -59,11 +58,7 @@ window.app = new Vue({
                 // Move to installation if not installed
                 if(to.path != "/installer" && !APIShift.installed) next("/installer");
                 // Move to login if not authenticated
-                else if(to.path != "/login" && !APIShift.logged_in & APIShift.installed) {
-                    // Get the preious page to redirect back to
-                    app.prev_route = from.path != "/installer" && from.path != "/login" ? from.path : '/main';
-                    next("/login");
-                }
+                else if(to.path != "/login" && !APIShift.logged_in & APIShift.installed) next("/login");
                 // Move to main if authenticated
                 else if((to.path == "/login" || to.path == "/") && APIShift.logged_in) next("/main");
                 else next();

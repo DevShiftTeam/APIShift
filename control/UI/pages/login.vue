@@ -109,7 +109,7 @@
                         // Re-initialize devshift system to logged id state
                         window.app.apishift.initialize().then(() => {
                             APIShift.logged_in = true;
-                            app.$router.push(app.prev_route);
+                            app.$router.push("/main");
                             app.app_loader = APIShift.components["loader"];
                             app.app_navigator = APIShift.components["navigator"];
                             app.app_footer = APIShift.components["footer"];

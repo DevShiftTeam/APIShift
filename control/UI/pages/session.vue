@@ -11,7 +11,9 @@
             return {
                 states_collection: {},
                 current_parent: 0,
-                in_edit: 0
+                in_edit: 0,
+                delete_dialog: false,
+                discard_dialog: false
             }
         },
         created() {
@@ -33,6 +35,12 @@
             },
             saveEdit: function() {
                 this.in_edit = 0;
+            },
+            deleteState: function() {
+
+            },
+            discardChanges: function() {
+                
             }
         },
     };

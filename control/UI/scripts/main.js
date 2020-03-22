@@ -52,6 +52,7 @@ window.app = new Vue({
             else if(!APIShift.logged_in) {
                 app.$router.push("/login");
             }
+            else if(app.$route.path == "/") app.$router.push("/main");
 
             // Navigation gaurd for control panel
             app.$router.beforeEach((to, from, next) => {
@@ -64,5 +65,13 @@ window.app = new Vue({
                 else next();
             })
         });
-    }
+    },
+    methods: {
+        getThemeElevation(level) {
+            return (this.$vuetify.theme.dark ? 'dark-' : '') + 'elevation-' + level;
+        },
+        getToolbarShadow() {
+            return this.$vuetify.theme.dark ? 'dark-v-toolbar-shadow' : '';
+        }
+    },
 });

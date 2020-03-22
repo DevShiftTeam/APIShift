@@ -53,24 +53,21 @@ html { overflow-y: auto }
 }
 
 /* Light Theme Bar */
-.light_bar > .vb-dragger > .vb-dragger-styler { background-color: rgba(0, 0, 0,.1) }
-.light_bar.vb-scrolling-phantom > .vb-dragger > .vb-dragger-styler { background-color: rgba(0, 0, 0,.3) }
-.light_bar > .vb-dragger:hover > .vb-dragger-styler { background-color: rgba(0, 0, 0,.5) }
-.light_bar .vb-dragging > .vb-dragger > .vb-dragger-styler { background-color: rgba(0, 0, 0,.5) }
-.light_bar .vb-dragging-phantom > .vb-dragger > .vb-dragger-styler { background-color: rgba(0, 0, 0,.5) }
+.theme--light .vb > .vb-dragger > .vb-dragger-styler { background-color: rgba(0, 0, 0,.1) }
+.theme--light .vb.vb-scrolling-phantom > .vb-dragger > .vb-dragger-styler { background-color: rgba(0, 0, 0,.3) }
+.theme--light .vb > .vb-dragger:hover > .vb-dragger-styler { background-color: rgba(0, 0, 0,.5) }
+.theme--light .vb .vb-dragging > .vb-dragger > .vb-dragger-styler { background-color: rgba(0, 0, 0,.5) }
+.theme--light .vb .vb-dragging-phantom > .vb-dragger > .vb-dragger-styler { background-color: rgba(0, 0, 0,.5) }
 /* Dark Theme Bar */
-.dark_bar > .vb-dragger > .vb-dragger-styler { background-color: rgba(255, 255, 255,.1) }
-.dark_bar.vb-scrolling-phantom > .vb-dragger > .vb-dragger-styler { background-color: rgba(255, 255, 255,.3) }
-.dark_bar > .vb-dragger:hover > .vb-dragger-styler { background-color: rgba(255, 255, 255,.5) }
-.dark_bar .vb-dragging > .vb-dragger > .vb-dragger-styler { background-color: rgba(255, 255, 255,.5) }
-.dark_bar .vb-dragging-phantom > .vb-dragger > .vb-dragger-styler { background-color: rgba(255, 255, 255,.5) }
+.theme--dark .vb > .vb-dragger > .vb-dragger-styler { background-color: rgba(255, 255, 255,.1) }
+.theme--dark .vb.vb-scrolling-phantom > .vb-dragger > .vb-dragger-styler { background-color: rgba(255, 255, 255,.3) }
+.theme--dark .vb > .vb-dragger:hover > .vb-dragger-styler { background-color: rgba(255, 255, 255,.5) }
+.theme--dark .vb .vb-dragging > .vb-dragger > .vb-dragger-styler { background-color: rgba(255, 255, 255,.5) }
+.theme--dark .vb .vb-dragging-phantom > .vb-dragger > .vb-dragger-styler { background-color: rgba(255, 255, 255,.5) }
 
 /* Dark Theme Shadow Box */
-.v-application .dark-elevation-16 {
-    box-shadow: 0 8px 10px -5px rgba(66,165,245,.2),0 16px 24px 2px rgba(66,165,245,.14),0 6px 30px 5px rgba(66,165,245,.12)!important;
-}
-.v-application .dark-elevation-2 {
-    box-shadow: 0 3px 1px -2px rgba(66,165,245,.2),0 2px 2px 0 rgba(66,165,245,.14),0 1px 5px 0 rgba(66,165,245,.12)!important;
-}
-
-.dark-v-toolbar-shadow { box-shadow: 0 2px 4px 1px rgba(66,165,245,.2), 0 4px 5px 0 rgba(66,165,245,.14), 0 1px 10px 0 rgba(66,165,245,.12) }
+.v-application .dark-elevation-16 { box-shadow: 0 8px 10px -5px rgba(126,87,194,.2),0 16px 24px 2px rgba(126,87,194,.14),0 6px 30px 5px rgba(126,87,194,.12) }
+.v-application .dark-elevation-2 { box-shadow: 0 3px 1px -2px rgba(126,87,194,.2),0 2px 2px 0 rgba(126,87,194,.14),0 1px 5px 0 rgba(126,87,194,.12) }
+/* TODO: Add all elevations of vuetify with dark theme, or theme of choice (Can be done through JS) */
+.v-toolbar.theme--dark { box-shadow: 0 2px 4px 1px rgba(126,87,194,.2), 0 4px 5px 0 rgba(126,87,194,.14), 0 1px 10px 0 rgba(126,87,194,.12) }
+.v-card.theme--dark { box-shadow: 0 3px 1px -2px rgba(126,87,194,.2), 0 2px 2px 0 rgba(126,87,194,.14), 0 1px 5px 0 rgba(126,87,194,.12) }

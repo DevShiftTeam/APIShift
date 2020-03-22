@@ -12,7 +12,7 @@ window.app = new Vue({
         routes: []
     }),
     vuetify: new Vuetify({
-        theme: { dark: false }
+        theme: { dark: true }
     }),
     props: {
         source: String

@@ -69,9 +69,6 @@ window.app = new Vue({
     methods: {
         getThemeElevation(level) {
             return (this.$vuetify.theme.dark ? 'dark-' : '') + 'elevation-' + level;
-        },
-        getToolbarShadow() {
-            return this.$vuetify.theme.dark ? 'dark-v-toolbar-shadow' : '';
         }
     },
 });

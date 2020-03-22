@@ -116,7 +116,7 @@
 <template>
     <v-content>
         <v-container class="session-display" fluid fill-height>
-            <v-card class="mx-auto" width="90%" min-height="75%" :class="app.getThemeElevation(2)">
+            <v-card class="mx-auto" width="90%" min-height="75%" elevation-2>
                 <!-- Header -->
                 <v-app-bar>
                     <v-toolbar-title>Manage Sessions</v-toolbar-title>
@@ -139,7 +139,7 @@
                         <v-layout class="mx-auto" align-start justify-center row wrap>
                             <!-- Iterate through session states and show them -->
                             <v-hover v-for="(val, key) in states_collection" :key="key" v-slot:default="{ hover }" v-if="val !== undefined && val.parent != key">
-                                <v-card outlined class="px-0 session-card" :class="hover ? app.getThemeElevation(16) : app.getThemeElevation(2)">
+                                <v-card outlined class="px-0 session-card" :elevation="hover ? 16 : 2">
                                     <!-- Session state header with name & actions -->
                                     <v-toolbar>
                                         <v-toolbar-title>{{ val.name }}</v-toolbar-title>

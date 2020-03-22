@@ -67,8 +67,5 @@ window.app = new Vue({
         });
     },
     methods: {
-        getThemeElevation(level) {
-            return (this.$vuetify.theme.dark ? 'dark-' : '') + 'elevation-' + level;
-        }
     },
 });

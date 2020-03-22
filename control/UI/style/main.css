@@ -66,8 +66,8 @@ html { overflow-y: auto }
 .theme--dark .vb .vb-dragging-phantom > .vb-dragger > .vb-dragger-styler { background-color: rgba(255, 255, 255,.5) }
 
 /* Dark Theme Shadow Box */
-.v-application .dark-elevation-16 { box-shadow: 0 8px 10px -5px rgba(126,87,194,.2),0 16px 24px 2px rgba(126,87,194,.14),0 6px 30px 5px rgba(126,87,194,.12) }
-.v-application .dark-elevation-2 { box-shadow: 0 3px 1px -2px rgba(126,87,194,.2),0 2px 2px 0 rgba(126,87,194,.14),0 1px 5px 0 rgba(126,87,194,.12) }
+.theme--dark.elevation-16 { box-shadow: 0 8px 10px -5px rgba(126,87,194,.2),0 16px 24px 2px rgba(126,87,194,.14),0 6px 30px 5px rgba(126,87,194,.12)!important }
+.theme--dark.elevation-2 { box-shadow: 0 3px 1px -2px rgba(126,87,194,.2),0 2px 2px 0 rgba(126,87,194,.14),0 1px 5px 0 rgba(126,87,194,.12)!important }
 /* TODO: Add all elevations of vuetify with dark theme, or theme of choice (Can be done through JS) */
 .v-toolbar.theme--dark { box-shadow: 0 2px 4px 1px rgba(126,87,194,.2), 0 4px 5px 0 rgba(126,87,194,.14), 0 1px 10px 0 rgba(126,87,194,.12) }
 .v-card.theme--dark { box-shadow: 0 3px 1px -2px rgba(126,87,194,.2), 0 2px 2px 0 rgba(126,87,194,.14), 0 1px 5px 0 rgba(126,87,194,.12) }

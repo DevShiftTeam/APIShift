@@ -9,19 +9,20 @@
     module.exports = {
         data() {
             return {
-                states_collection: {},
+                states_collection: [],
                 editor_previous: {},
                 current_parent: 0,
                 in_edit: 0,
                 delete_dialog: false,
-                discard_dialog: false
+                discard_dialog: false,
+                adding_state: false
             }
         },
         created() {
             window.handler = this;
             APIShift.API.request("SessionState", "getAllSessionStates", {}, function(response) {
                 if(response.status == true) {
-                    handler.states_collection = response.data;
+                    handler.states_collection = Object.assign([], response.data);
                 }
                 else {
                     APIShift.API.notify(response.data, 'error');
@@ -30,14 +31,32 @@
         },
         methods: {
             createState: function() {
+                // Show discard state dialog
+                if(this.in_edit != 0) {
+                    this.discard_dialog = true;
+                    return;
+                }
 
+                let biggest = 0;
+                for(key in this.states_collection) if(key > biggest) biggest = key;
+                this.adding_state = true;
+                
+                // Add next ID
+                this.in_edit = Number.parseInt(biggest) + 1;
+                this.states_collection[this.in_edit] = {
+                    name: 'new' + this.in_edit,
+                    active_timeout: 0,
+                    inactive_timeout: 0,
+                    parent: 0
+                };
+                this.editor_previous = Object.assign({}, this.states_collection[this.in_edit]);
             },
             saveState: function () {
-
+                
             },
             startStateEdit: function(id) {
                 if(this.in_edit != 0) {
-                    APIShift.API.notify("Edit in progress", 'error');
+                    this.discardStateEdit();
                     return;
                 }
                 if(this.states_collection[id] === undefined) {
@@ -47,28 +66,47 @@
 
                 this.in_edit = id;
                 // Store copy of the item undergoing edit
-                this.editor_previous = Object.assign({}, this.states_collection[this.in_edit]);
+                this.editor_previous = JSON.parse(JSON.stringify(this.states_collection[this.in_edit]));
             },
             saveStateEdit: function() {
+                if(this.editor_previous.name == this.states_collection[this.in_edit].name
+                && this.editor_previous.active_timeout == this.states_collection[this.in_edit].active_timeout
+                && this.editor_previous.inactive_timeout == this.states_collection[this.in_edit].inactive_timeout
+                && !this.adding_state) {
+                    this.in_edit = 0;
+                    APIShift.API.notify("Nothing to save", 'warning');
+                    return;
+                }
+
+                if(this.states_collection[this.in_edit].just_added !== undefined) this.states_collection[this.in_edit].just_added = undefined;
                 this.in_edit = 0;
+                if(this.adding_state) this.adding_state = false
             },
             discardStateEdit: function() {
                 // Show dialog if there are unsaved changes
                 if(!this.discard_dialog
-                && (this.editor_previous.name != this.states_collection[this.in_edit].name
-                || this.editor_previous.active_time != this.states_collection[this.in_edit].active_time
-                || this.editor_previous.inactive_time != this.states_collection[this.in_edit].inactive_time)) {
+                && ((this.editor_previous.name != this.states_collection[this.in_edit].name
+                || this.editor_previous.active_timeout != this.states_collection[this.in_edit].active_timeout
+                || this.editor_previous.inactive_timeout != this.states_collection[this.in_edit].inactive_timeout) || this.adding_state)) {
                     this.discard_dialog = true;
                     return;
                 }
 
                 // Close dialog & revert changes
                 this.discard_dialog = false;
-                this.states_collection[this.in_edit] = this.editor_previous;
+                console.log(this.states_collection[this.in_edit]);
+                console.log(this.editor_previous);
+                if(this.adding_state) {
+                    this.states_collection.pop();
+                    this.adding_state = false;
+                }
+                else this.states_collection[this.in_edit] = {...this.editor_previous};
+                delete this.editor_previous;
                 this.in_edit = 0;
             },
             deleteState: function(id) {
                 // Close dialog
+                Vue.delete(this.states_collection, id);
                 this.delete_dialog = false;
             }
         },
@@ -78,28 +116,30 @@
 <template>
     <v-content>
         <v-container class="session-display" fluid fill-height>
-            <v-card class="mx-auto" width="90%" min-height="75%" elevation="2">
+            <v-card class="mx-auto" width="90%" min-height="75%" :class="app.getThemeElevation(2)">
                 <!-- Header -->
                 <v-app-bar>
                     <v-toolbar-title>Manage Sessions</v-toolbar-title>
                     <v-spacer></v-spacer>
                     <v-tooltip top>
                         <template #activator="{ on }">
-                            <v-btn icon v-on="on">
-                                <v-icon>mdi-plus-circle</v-icon>
+                            <v-btn icon v-on="on" @click="createState()">
+                                <v-icon v-if="adding_state">mdi-close-circle</v-icon>
+                                <v-icon v-else>mdi-plus-circle</v-icon>
                             </v-btn>
                         </template>
-                        <span>Add new session state</span>
+                        <span v-if="adding_state">Discard new session state</span>
+                        <span v-else>Add new session state</span>
                     </v-tooltip>
                 </v-app-bar>
 
                 <!-- Body -->
-                <div class="overflow-box" v-bar :class="$vuetify.theme.dark == true ? 'dark_bar' : 'light_bar'">
+                <div class="overflow-box" v-bar>
                     <div>
                         <v-layout class="mx-auto" align-start justify-center row wrap>
                             <!-- Iterate through session states and show them -->
-                            <v-hover v-for="(val, key) in states_collection" :key="key" v-slot:default="{ hover }" v-if="val.parent == current_parent">
-                                <v-card outlined class="px-0 session-card" :elevation="hover ? 16 : 2">
+                            <v-hover v-for="(val, key) in states_collection" :key="key" v-slot:default="{ hover }" v-if="val !== undefined && val.parent != key">
+                                <v-card outlined class="px-0 session-card" :class="hover ? app.getThemeElevation(16) : app.getThemeElevation(2)">
                                     <!-- Session state header with name & actions -->
                                     <v-toolbar>
                                         <v-toolbar-title>{{ val.name }}</v-toolbar-title>
@@ -143,7 +183,7 @@
                                         <!-- Remove state dialog & trigger -->
                                         <v-tooltip top>
                                             <template #activator="{ on }">
-                                                <v-btn icon v-on="on" @click="delete_dialog = true">
+                                                <v-btn icon v-on="on" @click="delete_dialog = true" :disabled="key == in_edit && adding_state">
                                                     <v-icon>mdi-minus-circle</v-icon>
                                                 </v-btn>
                                             </template>

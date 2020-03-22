@@ -25,6 +25,7 @@ The APIShift Engine is an API creator library with a control panel which purpose
 - [About Versions](#about-versions)
   - [Current Versions](#current-versions)
   - [Expected in next versions](#expected-in-next-versions)
+- [Projects that made this possible](#projects-that-made-this-possible)
 
 ## About
 APIShift is an open-source PHP system that was designed by Sapir Shemer and its releases are maintained by [DevShift](https://devshift.biz). If you want to help and join the community, you are more than welcome to contribute. Just visit the [DevShift](https://devshift.biz) site or contact Sapir in any way you feel comfortable with: [LinkedIn](https://www.linkedin.com/in/sapir-shemer/), [Facebook](https://www.facebook.com/sapir.shemer).
@@ -99,3 +100,9 @@ Data on the current versions will be given here
 
 ## Expected in next versions
 Data on the next versions will be present here
+
+# Projects that made this possible
+ * [VueJS](https://github.com/vuejs)
+ * [Vuetify](https://github.com/vuetifyjs)
+ * [http-vue-loader](https://github.com/FranckFreiburger/http-vue-loader)
+ * [Vuebar](https://github.com/DominikSerafin/vuebar)

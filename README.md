@@ -64,7 +64,20 @@ https://example-site.com/machine/API.php?c=<ControllerName>&m=<MethodName>
 
 Example in JS using the [APIShift.js](control/UI/scripts/APIShift.js) library:
 ```javascript
-
+// 
+APShift.API.request("<Controller Name>", "<Method Name>", { <Request Body> },
+    function(response) {
+        /**
+         * response in an object containing a status and the response data as either a string or an object
+         */
+        // Success message
+        if(response.status == APIShift.API.status_codes.SUCCESS) APShift.notify(status.data, "success");
+        // Error message
+        else if(response.status == APIShift.API.status_codes.ERROR) APIShift.notify(status.data, "error");
+        // Any other status
+        else APIShift.notify("Unknown error!", "error");
+    }
+);
 ```
 
 ### Hardcoded (Back-End)

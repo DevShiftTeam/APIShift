@@ -215,17 +215,14 @@
                     }
                     else if (response.status == APIShift.API.status_codes.SUCCESS) {
                         APIShift.API.notify("Success! :) " + response.data, "success");
-                        location.reload(); // Reload the control panel page to move to login
+                        location.reload(); // Reload the page to move to login
                     }
                     else APIShift.API.notify(APIShift.API.getStatusName(response.status) + ": " + response.data, "error");
-                    APIShift.Loader.close();
+                    APIShift.Loader.close("installer");
                 });
             },
             toggleDarkTheme: function() {
                 window.app.$vuetify.theme.dark = !(window.app.$vuetify.theme.dark);
-            },
-            isOnDarkMode: function () {
-                return window.app.$vuetify.theme.dark;
             }
         }
     }
@@ -244,7 +241,7 @@
                             <v-tooltip bottom>
                             <template v-slot:activator="{ on }">
                                 <v-btn class="lightbulb" v-on="on" icon large target="_blank" v-on:click="toggleDarkTheme()">
-                                    <v-icon v-if="isOnDarkMode()">fas fa-lightbulb</v-icon>
+                                    <v-icon v-if="app.$vuetify.theme.dark">fas fa-lightbulb</v-icon>
                                     <v-icon v-else>fas fa-moon</v-icon>
                                 </v-btn>
                             </template>

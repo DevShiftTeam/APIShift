@@ -78,7 +78,6 @@
                     return;
                 }
 
-                if(this.states_collection[this.in_edit].just_added !== undefined) this.states_collection[this.in_edit].just_added = undefined;
                 this.in_edit = 0;
                 if(this.adding_state) this.adding_state = false
             },
@@ -93,16 +92,13 @@
                 }
 
                 // Close dialog & revert changes
-                this.discard_dialog = false;
-                console.log(this.states_collection[this.in_edit]);
-                console.log(this.editor_previous);
                 if(this.adding_state) {
                     this.states_collection.pop();
                     this.adding_state = false;
                 }
-                else this.states_collection[this.in_edit] = {...this.editor_previous};
-                delete this.editor_previous;
+                else this.states_collection[this.in_edit] = JSON.parse(JSON.stringify(this.editor_previous));
                 this.in_edit = 0;
+                this.discard_dialog = false;
             },
             deleteState: function(id) {
                 // Close dialog

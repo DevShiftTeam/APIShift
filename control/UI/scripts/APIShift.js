@@ -87,23 +87,11 @@ class APIShift {
             });
 
             // Check that session state allows to proceed
-            APIShift.API.request("SessionState", "getCurrentSessionState", {}, function (response) {
-                if(response.status == 1) {
-                    if(response.data == 1) { // In case of admin mode
-                        APIShift.load_components = true;
-                        APIShift.logged_in = true;
-                    }
-                    else {
-                        APIShift.load_components = false; // Don't load other system components before login
-                    }
-                }
-                else {
-                    APIShift.API.notify(APIShift.API.getStatusName(response.status) + ": " + response.data, "error");
-                }
-            }, true);
-                    
-            // Login validation check check
-            if(!APIShift.load_components) {
+            if(this.isSessionState(1)) {
+                APIShift.load_components = true;
+                APIShift.logged_in = true;
+            } else {
+                APIShift.load_components = false; // Don't load other system components before login
                 APIShift.Loader.close("main"); // Close main loader
                 return;
             }
@@ -115,6 +103,18 @@ class APIShift {
             APIShift.Loader.close("main"); // Close main loader
         });
     };
+
+    /**
+     * Compare to check the session state id
+     */
+    isSessionState(state_id) {
+        let result = false;
+        APIShift.API.request("SessionState", "getCurrentSessionState", {}, function (response) {
+            if(response.status == 1) result = response.data == state_id;
+            else APIShift.API.notify(APIShift.API.getStatusName(response.status) + ": " + response.data, "error");
+        }, true);
+        return result;
+    }
 };
 
 /**

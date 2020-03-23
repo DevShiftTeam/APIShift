@@ -96,7 +96,11 @@
                     this.states_collection.pop();
                     this.adding_state = false;
                 }
-                else this.states_collection[this.in_edit] = JSON.parse(JSON.stringify(this.editor_previous));
+                else {
+                    this.states_collection[this.in_edit].name = this.editor_previous.name;
+                    this.states_collection[this.in_edit].active_timeout = this.editor_previous.active_timeout;
+                    this.states_collection[this.in_edit].inactive_timeout = this.editor_previous.inactive_timeout;
+                }
                 this.in_edit = 0;
                 this.discard_dialog = false;
             },
@@ -179,7 +183,7 @@
                                         <!-- Remove state dialog & trigger -->
                                         <v-tooltip top>
                                             <template #activator="{ on }">
-                                                <v-btn icon v-on="on" @click="delete_dialog = true" :disabled="key == in_edit && adding_state">
+                                                <v-btn icon v-on="on" @click="delete_dialog = true" :disabled="(key == in_edit && adding_state) || (in_edit != key && in_edit != 0)">
                                                     <v-icon>mdi-minus-circle</v-icon>
                                                 </v-btn>
                                             </template>

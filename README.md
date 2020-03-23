@@ -1,5 +1,5 @@
 <div align="center">
-<img width="100px" src="https://raw.githubusercontent.com/DevShiftTeam/APIShift/master/images/DevLogo.png">
+<img width="100px" src="https://raw.githubusercontent.com/DevShiftTeam/APIShift/master/images/apishift-logo.png">
 
 # APIShift Engine
 </div>

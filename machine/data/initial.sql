@@ -59,6 +59,16 @@ CREATE TABLE `admin_users` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping data for table `admin_users`
+--
+
+LOCK TABLES `admin_users` WRITE;
+/*!40000 ALTER TABLE `admin_users` DISABLE KEYS */;
+INSERT INTO `admin_users` VALUES (1,'admin','$2y$10$nPs0jtbpyVhiQpw2LS6ws.Mr2zmRHD.yazFcJ9bJpIrxUj5sBJkV.','2020-03-20 15:02:05');
+/*!40000 ALTER TABLE `admin_users` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `connection_node_types`
 --
 
@@ -390,7 +400,7 @@ CREATE TABLE `request_authorization` (
   `method` text,
   `task` int DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -399,7 +409,7 @@ CREATE TABLE `request_authorization` (
 
 LOCK TABLES `request_authorization` WRITE;
 /*!40000 ALTER TABLE `request_authorization` DISABLE KEYS */;
-INSERT INTO `request_authorization` VALUES (1,'Control','*',2),(2,'SessionState','getAllSessionStates',2);
+INSERT INTO `request_authorization` VALUES (1,'Control','*',2),(2,'SessionState','getAllSessionStates',2),(3,'SessionState','addSessionState',2),(4,'SessionState','removeSessionState',2),(5,'SessionState','updateSessionState',2);
 /*!40000 ALTER TABLE `request_authorization` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -444,7 +454,7 @@ CREATE TABLE `session_states` (
   `auth_task` int DEFAULT NULL,
   `parent` int DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -633,4 +643,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-03-21  1:58:45
+-- Dump completed on 2020-03-25 20:02:59

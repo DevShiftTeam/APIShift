@@ -59,16 +59,6 @@ CREATE TABLE `admin_users` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `admin_users`
---
-
-LOCK TABLES `admin_users` WRITE;
-/*!40000 ALTER TABLE `admin_users` DISABLE KEYS */;
-INSERT INTO `admin_users` VALUES (1,'admin','$2y$10$nPs0jtbpyVhiQpw2LS6ws.Mr2zmRHD.yazFcJ9bJpIrxUj5sBJkV.','2020-03-20 15:02:05');
-/*!40000 ALTER TABLE `admin_users` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `connection_node_types`
 --
 

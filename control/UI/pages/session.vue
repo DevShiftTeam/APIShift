@@ -20,16 +20,19 @@
         },
         created() {
             window.handler = this;
-            APIShift.API.request("SessionState", "getAllSessionStates", {}, function(response) {
-                if(response.status == true) {
-                    handler.states_collection = Object.assign([], response.data);
-                }
-                else {
-                    APIShift.API.notify(response.data, 'error');
-                }
-            }, true);
+            this.updateSessionStates();
         },
         methods: {
+            updateSessionStates: function() {
+                APIShift.API.request("SessionState", "getAllSessionStates", {}, function(response) {
+                    if(response.status == true) {
+                        handler.states_collection = Object.assign([], response.data);
+                    }
+                    else {
+                        APIShift.API.notify(response.data, 'error');
+                    }
+                });
+            },
             createState: function() {
                 // Show discard state dialog
                 if(this.in_edit != 0) {
@@ -50,9 +53,6 @@
                     parent: 0
                 };
                 this.editor_previous = Object.assign({}, this.states_collection[this.in_edit]);
-            },
-            saveState: function () {
-                
             },
             startStateEdit: function(id) {
                 if(this.in_edit != 0) {
@@ -78,8 +78,42 @@
                     return;
                 }
 
-                this.in_edit = 0;
-                if(this.adding_state) this.adding_state = false
+                // Create a new state
+                if(this.adding_state) {
+                    this.adding_state = false
+                    APIShift.API.request("SessionState", "addSessionState", this.states_collection[this.in_edit], function(response) {
+                        if(response.status == true) {
+                            APIShift.API.notify(response.data, 'success');
+                        }
+                        else {
+                            APIShift.API.notify(response.data, 'error');
+                        }
+                        handler.in_edit = 0;
+                        handler.updateSessionStates();
+                    }, true);
+                    return;
+                }
+                // Edit existing state
+                let to_send = {};
+                // Construct data to update
+                to_send.id = this.in_edit;
+                if(this.editor_previous.name != this.states_collection[this.in_edit].name)
+                    to_send.name = this.states_collection[this.in_edit].name;
+                if(this.editor_previous.active_timeout != this.states_collection[this.in_edit].active_timeout)
+                    to_send.active_timeout = this.states_collection[this.in_edit].active_timeout;
+                if(this.editor_previous.inactive_timeout != this.states_collection[this.in_edit].inactive_timeout)
+                    to_send.inactive_timeout = this.states_collection[this.in_edit].inactive_timeout;
+                // Update
+                APIShift.API.request("SessionState", "updateSessionState", to_send, function(response) {
+                    if(response.status == true) {
+                        APIShift.API.notify(response.data, 'success');
+                    }
+                    else {
+                        APIShift.API.notify(response.data, 'error');
+                    }
+                    handler.in_edit = 0;
+                    handler.updateSessionStates();
+                }, true);
             },
             discardStateEdit: function() {
                 // Show dialog if there are unsaved changes
@@ -106,6 +140,16 @@
                 this.discard_dialog = false;
             },
             deleteState: function(id) {
+                APIShift.API.request("SessionState", "removeSessionState", { 'id' : id }, function(response) {
+                    if(response.status == true) {
+                        APIShift.API.notify(response.data, 'success');
+                    }
+                    else {
+                        APIShift.API.notify(response.data, 'error');
+                    }
+                    handler.in_edit = 0;
+                    handler.updateSessionStates();
+                }, true);
                 // Close dialog
                 Vue.delete(this.states_collection, id);
                 this.delete_dialog = false;
@@ -140,7 +184,7 @@
                         <v-layout class="mx-auto" align-start justify-center row wrap>
                             <!-- Iterate through session states and show them -->
                             <v-hover v-for="(val, key) in states_collection" :key="key" v-slot:default="{ hover }" v-if="val !== undefined && val.parent != key">
-                                <v-card outlined class="px-0 session-card" :elevation="hover ? 16 : 2">
+                                <v-card outlined class="px-0 session-card" :elevation="hover ? 24 : 4">
                                     <!-- Session state header with name & actions -->
                                     <v-toolbar>
                                         <v-toolbar-title>{{ val.name }}</v-toolbar-title>
@@ -253,6 +297,9 @@
                                     </v-card-text>
 
                                     <v-card-actions>
+                                        <v-btn text color="blue accent-4" width="100%">
+                                            Edit Structure
+                                        </v-btn>
                                         <v-btn text color="purple accent-4" width="100%">
                                             View Children
                                         </v-btn>
@@ -284,6 +331,14 @@
 
 .overflow-box {
     height: 65vh;
+}
+
+.v-card__actions {
+    display: block;
+}
+
+.v-card__actions > * {
+    margin-left: 0!important;
 }
 
 </style>

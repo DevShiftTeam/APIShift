@@ -11,6 +11,7 @@ namespace APIShift\Controllers;
 
 use APIShift\Core;
 use APIShift\Core\CacheManager;
+use APIShift\Core\DatabaseManager;
 use APIShift\Core\Status;
 
 /**
@@ -31,15 +32,50 @@ class SessionState {
     }
     
     public static function addSessionState() {
-        Status::message(Status::SUCCESS, $_SESSION['state']);
+        // Name is required
+        if(!isset($_POST['name'])) Status::message(Status::ERROR, "At least specify a name");
+        // Set defaults if not provided
+        if(!isset($_POST['active_timeout'])) $_POST['active_timeout'] = 0;
+        if(!isset($_POST['inactive_timeout'])) $_POST['inactive_timeout'] = 0;
+        if(!isset($_POST['parent'])) $_POST['parent'] = 0;
+        // Add the session state
+        $res = DatabaseManager::query("main",
+            "INSERT INTO session_states (name, active_timeout, inactive_timeout, parent) VALUES (:name, :active_timeout, :inactive_timeout, :parent)", $_POST);
+        if(!$res) Status::message(Status::ERROR, "Couldn't insert into the DB");
+
+        // Refresh Cache to apply changes
+        CacheManager::loadDefaults(true);
+        Status::message(Status::SUCCESS, "Added Successfully! :)");
     }
     
     public static function removeSessionState() {
-        Status::message(Status::SUCCESS, $_SESSION['state']);
+        if(!isset($_POST['id'])) Status::message(Status::ERROR, "Didn't set element to remove");
+        // Remove the element
+        $res = DatabaseManager::query("main", "DELETE FROM session_states WHERE id = :id", $_POST);
+        if(!$res) Status::message(Status::ERROR, "Couldn't update the DB");
+
+        // Refresh Cache to apply changes
+        CacheManager::loadDefaults(true);
+        Status::message(Status::SUCCESS, "Updated Successfully! :)");
     }
     
     public static function updateSessionState() {
-        Status::message(Status::SUCCESS, $_SESSION['state']);
+        if(!isset($_POST['id'])) Status::message(Status::ERROR, "Didn't set element to modify");
+        // Construct Query string
+        $qstr = [];
+        foreach($_POST as $key => $value) {
+            if($key == 'id') continue;
+            $qstr[] = $key . " = " . ":" . $key;
+        }
+        $qstr = implode(", ", $qstr);
+
+        // Update the data
+        $res = DatabaseManager::query("main", "UPDATE session_states SET " . $qstr . " WHERE id = :id", $_POST);
+        if(!$res) Status::message(Status::ERROR, "Couldn't update the DB");
+
+        // Refresh Cache to apply changes
+        CacheManager::loadDefaults(true);
+        Status::message(Status::SUCCESS, "Updated Successfully! :)");
     }
 }
 ?>

@@ -100,6 +100,7 @@
                     this.states_collection[this.in_edit].name = this.editor_previous.name;
                     this.states_collection[this.in_edit].active_timeout = this.editor_previous.active_timeout;
                     this.states_collection[this.in_edit].inactive_timeout = this.editor_previous.inactive_timeout;
+                    delete this.editor_previous;
                 }
                 this.in_edit = 0;
                 this.discard_dialog = false;

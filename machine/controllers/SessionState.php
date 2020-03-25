@@ -29,5 +29,17 @@ class SessionState {
         Core\SessionState::changeState($_POST['state']);
         Status::message(Status::SUCCESS, "State Changed!");
     }
+    
+    public static function addSessionState() {
+        Status::message(Status::SUCCESS, $_SESSION['state']);
+    }
+    
+    public static function removeSessionState() {
+        Status::message(Status::SUCCESS, $_SESSION['state']);
+    }
+    
+    public static function updateSessionState() {
+        Status::message(Status::SUCCESS, $_SESSION['state']);
+    }
 }
 ?>

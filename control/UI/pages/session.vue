@@ -78,7 +78,7 @@
                     name: 'new' + this.in_edit,
                     active_timeout: 0,
                     inactive_timeout: 0,
-                    parent: 0
+                    parent: this.current_parent
                 };
                 this.editor_previous = Object.assign({}, this.states_collection[this.in_edit]);
             },

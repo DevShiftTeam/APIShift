@@ -48,6 +48,16 @@
                             </v-row>
                         </v-container>
                     </v-card>
+                    <v-card to="/access/database" class="page-card" elevation-4>
+                        <v-container>
+                            <v-row justify="space-between">
+                                <v-col>
+                                    <v-list-item-title>Database Access</v-list-item-title>
+                                    <v-list-item-subtitle>Manage CRUD access of data in the DB</v-list-item-subtitle>
+                                </v-col>
+                            </v-row>
+                        </v-container>
+                    </v-card>
             </v-layout>
         </v-container>
         <router-view v-else></router-view>
@@ -56,7 +66,7 @@
 <style scoped>
 .page-card {
     margin: 5px;
-    min-width: 300px;
+    min-width: 500px;
 }
 
 .page-card:hover {

@@ -20,11 +20,12 @@
             // Load control panel pages
             APIShift.API.request("Control", "getPages", {}, function (response) {
                 if(response.status == APIShift.API.status_codes.SUCCESS) {
-                    nav_holder.pages = response.data;
+                    nav_holder.pages = [];
                     // Add routes
                     for(let item in response.data) {
                         // Construct path to page
                         if(response.data[item].parent === 0) {
+                            nav_holder.pages.push(response.data[item]);
                             APIShift.admin_routes.push({
                                 path: "/" + response.data[item].path,
                                 component: httpVueLoader(APIShift.API.getPage(response.data[item].path))
@@ -109,7 +110,7 @@
                 </v-list-item>
                 <v-divider class="my-2"></v-divider>
 
-                <v-list-item v-for="page in pages" :key="page.id" link :to="'/' + page.path" v-if="page.parent == 0">
+                <v-list-item v-for="page in pages" :key="page.id" link :to="'/' + page.path" >
                     <v-list-item-action>
                         <v-icon>{{ page.icon }}</v-icon>
                     </v-list-item-action>

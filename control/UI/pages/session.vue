@@ -192,7 +192,7 @@
             <v-card class="mx-auto" width="90%" min-height="75%" elevation-2>
                 <!-- Header -->
                 <v-app-bar>
-                    <v-toolbar-title><v-btn @click="setParentView(0)">Manage Sessions</v-btn> <v-btn text v-if="parent != 0" v-for="item in parents_array" @click="setParentView(item.id)">> {{ item.name }}</v-btn></v-toolbar-title>
+                    <v-toolbar-title><v-btn @click="setParentView(0)">Manage Sessions</v-btn> <v-btn text v-for="(item, key) in parents_array" :key="key" @click="setParentView(item.id)">> {{ item.name }}</v-btn></v-toolbar-title>
                     <v-spacer></v-spacer>
                     <v-tooltip top>
                         <template #activator="{ on }">

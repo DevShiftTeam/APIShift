@@ -9,11 +9,9 @@
 </script>
 
 <template>
-    <v-content>
-        <v-container fluid fill-height>
-            <h1>Comming Soon! :)</h1>
-        </v-container>
-    </v-content>
+    <v-container fluid fill-height>
+        <h1>Yeahhhh</h1>
+    </v-container>
 </template>
 <style scoped>
 

@@ -18,7 +18,9 @@ use \PDO;
  */
 class Control {
     public static function getPages() {
-        Status::message(Status::SUCCESS, DatabaseManager::getInstance("main")->query("SELECT * FROM admin_pages")->fetchAll(PDO::FETCH_ASSOC));
+        $res = [];
+        if(DatabaseManager::fetchInto("main", $res, "SELECT * FROM admin_pages", [], 'id') === false) Status::message(Status::ERROR, "Couldn't retrieve pages");;
+        Status::message(Status::SUCCESS, $res);
     }
 }
 ?>

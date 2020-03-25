@@ -23,10 +23,20 @@
                     nav_holder.pages = response.data;
                     // Add routes
                     for(let item in response.data) {
-                        APIShift.admin_routes.push({
-                            path: "/" + response.data[item].path,
-                            component: httpVueLoader(APIShift.API.getPage(response.data[item].path))
-                        });
+                        // Construct path to page
+                        if(response.data[item].parent === 0) {
+                            APIShift.admin_routes.push({
+                                path: "/" + response.data[item].path,
+                                component: httpVueLoader(APIShift.API.getPage(response.data[item].path))
+                            });
+                        } else {
+                            let routeData = APIShift.admin_routes.find(r => r.path === "/" + response.data[response.data[item].parent].path);
+                            if(routeData.children === undefined) routeData.children = [];
+                            routeData.children.push({
+                                path: response.data[item].path,
+                                component: httpVueLoader(APIShift.API.getPage(response.data[response.data[item].parent].path + "/" + response.data[item].path))
+                            });
+                        }
                     }
                     // Update routes
                     app.$router.addRoutes(APIShift.admin_routes);
@@ -87,7 +97,7 @@
         <v-navigation-drawer v-model="showNavBar" app clipped :mini-variant="drawer != 1">
             <v-list dense>
                 <!-- Home option -->
-                <v-list-item link to="main">
+                <v-list-item link to="/main">
                     <v-list-item-action>
                         <v-icon>fa fa-home</v-icon>
                     </v-list-item-action>
@@ -99,7 +109,7 @@
                 </v-list-item>
                 <v-divider class="my-2"></v-divider>
 
-                <v-list-item v-for="page in pages" :key="page.id" link :to="page.path">
+                <v-list-item v-for="page in pages" :key="page.id" link :to="'/' + page.path" v-if="page.parent == 0">
                     <v-list-item-action>
                         <v-icon>{{ page.icon }}</v-icon>
                     </v-list-item-action>

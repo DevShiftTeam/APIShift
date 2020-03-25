@@ -12,6 +12,7 @@
                 states_collection: [],
                 editor_previous: {},
                 current_parent: 0,
+                parents_array: [],
                 in_edit: 0,
                 delete_dialog: false,
                 discard_dialog: false,
@@ -23,6 +24,33 @@
             this.updateSessionStates();
         },
         methods: {
+            /**
+             * Set which children states are being viewed
+             */
+            setParentView: function(parent) {
+                if(this.in_edit != 0) {
+                    this.discardStateEdit();
+                    return;
+                }
+                if(parent == 0) {
+                    this.parents_array = []; // Empty parents
+                    this.current_parent = 0;
+                    return;
+                }
+                if(this.states_collection[parent] == undefined) {
+                    APIShift.API.notify("Parent doesn't exist", 'error');
+                    return;
+                }
+
+                this.parents_array = []; // Empty parents
+                let parent_holder = this.states_collection[parent];
+                this.parents_array.push({ id: parent , name: parent_holder.name});
+                while(parent_holder.parent != 0) {
+                    this.parents_array.push({ id: parent_holder.parent , name: this.states_collection[parent_holder.parent].name});
+                    parent_holder = this.states_collection[parent_holder.parent];
+                }
+                this.current_parent = parent;
+            },
             updateSessionStates: function() {
                 APIShift.API.request("SessionState", "getAllSessionStates", {}, function(response) {
                     if(response.status == true) {
@@ -164,7 +192,7 @@
             <v-card class="mx-auto" width="90%" min-height="75%" elevation-2>
                 <!-- Header -->
                 <v-app-bar>
-                    <v-toolbar-title>Manage Sessions</v-toolbar-title>
+                    <v-toolbar-title><v-btn @click="setParentView(0)">Manage Sessions</v-btn> <v-btn text v-if="parent != 0" v-for="item in parents_array" @click="setParentView(item.id)">> {{ item.name }}</v-btn></v-toolbar-title>
                     <v-spacer></v-spacer>
                     <v-tooltip top>
                         <template #activator="{ on }">
@@ -183,7 +211,7 @@
                     <div>
                         <v-layout class="mx-auto" align-start justify-center row wrap>
                             <!-- Iterate through session states and show them -->
-                            <v-hover v-for="(val, key) in states_collection" :key="key" v-slot:default="{ hover }" v-if="val !== undefined && val.parent != key">
+                            <v-hover v-for="(val, key) in states_collection" :key="key" v-slot:default="{ hover }" v-if="val !== undefined && val.parent == current_parent">
                                 <v-card outlined class="px-0 session-card" :elevation="hover ? 24 : 4">
                                     <!-- Session state header with name & actions -->
                                     <v-toolbar>
@@ -300,7 +328,7 @@
                                         <v-btn text color="blue accent-4" width="100%">
                                             Edit Structure
                                         </v-btn>
-                                        <v-btn text color="purple accent-4" width="100%">
+                                        <v-btn text color="purple accent-4" width="100%" @click="setParentView(key)">
                                             View Children
                                         </v-btn>
                                     </v-card-actions>

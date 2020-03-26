@@ -50,7 +50,7 @@ Notice that the [configurations file](machine/core/Configurations.php) should be
 One of our goals is to provide users access to a full ecosystem of information about the system. Everything from tutorials, documentation and the code design and flow of the system. The purpose of releasing these documents is to help people understand the system fully.
 
  1. __[Code design](CODE_DESIGN.md)__: Holds the guiding material for developers and information about later releases - which are first written as a design. Reading the code design is, for now, the best way to get insight into the system (besides running it and reviewing the code on your own, it's better to start here).
- 2. __Documentation__: Comming later
+ 2. __Documentation__: Install the system and navigate to `http://your-server/doc/server` for server-side documentation. Client-side documentation comming soon.
  3. __Tutorial__: Comming later
 
 ## Usage

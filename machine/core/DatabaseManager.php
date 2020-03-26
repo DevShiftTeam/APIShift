@@ -4,6 +4,7 @@
  * (c) 2020-present Sapir Shemer, DevShift (devshift.biz)
  * Released under the MIT License with the additions present in the LICENSE.md
  * file in the root folder of the APIShift Engine original release source-code
+ * 
  * @author Sapir Shemer
  */
 
@@ -22,8 +23,18 @@ class DatabaseManager {
 
     /**
      * Start the connection and add ID name
+     * 
+     * @param string $connectionName Key of the connection object
+     * @param string $db_host Hostname of DB
+     * @param string $db_user Username of DB
+     * @param string $db_pass Password of DB
+     * @param int $db_port Port of DB
+     * @param string $db_name DB name in server
+     * @param bool $exit_on_error Set to false to not exit
+     * 
+     * @return void
      */
-    public static function startConnection(string $connectionName, string $db_host = null, string $db_user = null, string $db_pass = null, int $db_port = null, string $db_name = null, bool $exit_on_error = true) {
+    public static function startConnection($connectionName, $db_host = null, $db_user = null, $db_pass = null, $db_port = null, $db_name = null, $exit_on_error = true) {
         // Check if connection already exists is queue
         if(isset(self::$connections[$connectionName]) && (self::$connections[$connectionName] instanceof PDO)) return;
         try {
@@ -52,7 +63,9 @@ class DatabaseManager {
 
     /**
      * Return PDO instance of connection
-     * @param $ConnectionName Name of the connection
+     * 
+     * @param $connectionName Name of the connection
+     * 
      * @return PDO Instance of connection
      */
     public static function getInstance(string $connectionName)
@@ -63,6 +76,9 @@ class DatabaseManager {
 
     /**
      * Close a connection
+     * @param $connectionName Name of the connection
+     * 
+     * @return void
      */
     public static function closeConnection(string $connectionName)
     {
@@ -80,6 +96,7 @@ class DatabaseManager {
      * @param array $data Parameters to pass when parsing query
      * @param string|null $column Comlumn to order as key
      * @param bool $single_row Store as a single row or as a collection of rows
+     * 
      * @return void|false Returns false on failure
      */
     public static function fetchInto($connectionName, &$collector, $query, $data = array(), $column = null, $single_row = true) {
@@ -121,7 +138,8 @@ class DatabaseManager {
      * @param string $connectionName Name of the connection
      * @param string $query Query to run
      * @param array $data Parameters to pass when parsing query
-     * @return bool|PDOStatement - Returns FALSE on failure and PDOStatement on success
+     * 
+     * @return bool|PDOStatement Returns FALSE on failure and PDOStatement on success
      */
     public static function query($connectionName, $query, $data = array()) {
         try {

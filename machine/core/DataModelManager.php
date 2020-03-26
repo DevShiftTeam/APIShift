@@ -9,6 +9,9 @@
 
 namespace APIShift\Core;
 
+/**
+ * Interface that helps manage the structures and types of items and relations available in the system
+ */
 class DataModelManager {
     /**
      * Creates an item/relation using query rules

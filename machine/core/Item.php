@@ -4,11 +4,15 @@
  * (c) 2020-present Sapir Shemer, DevShift (devshift.biz)
  * Released under the MIT License with the additions present in the LICENSE.md
  * file in the root folder of the APIShift Engine original release source-code
+ * 
  * @author Sapir Shemer
  */
 
 namespace APIShift\Core;
 
+/**
+ * Interface to interact with database items/relations on the system
+ */
 class Item {
     // Relation Types
     public const SINGLE_TO_SINGLE_RELATION = 0;

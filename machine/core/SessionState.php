@@ -10,7 +10,7 @@
 namespace APIShift\Core;
 
 /**
- * Manages everything aroung your different session states & data
+ * Manages everything about session states & their data structure
  */
 class SessionState {
     // Hardcoded states

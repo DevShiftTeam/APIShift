@@ -4,6 +4,7 @@
  * (c) 2020-present Sapir Shemer, DevShift (devshift.biz)
  * Released under the MIT License with the additions present in the LICENSE.md
  * file in the root folder of the APIShift Engine original release source-code
+ * 
  * @author Sapir Shemer
  */
 
@@ -14,7 +15,13 @@ use APIShift\Core\Configurations;
 use \APIShift\Core\Status;
 use \APIShift\Models;
 
+/**
+ * Controller interface that holds all the request triggers that help install the system
+ */
 class Installer {
+    /**
+     * Request that runs the full installation process
+     */
     public static function runInstallation() {
         // Allow installation only for admins or when system installed
         if(Configurations::INSTALLED) Core\Authorizer::authorizeByState();

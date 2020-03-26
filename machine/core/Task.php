@@ -9,10 +9,15 @@
 
 namespace APIShift\Core;
 
+/**
+ * Interface to manage collections of processes and call them when needed, whether for authorization, as a request, etc.
+ */
 class Task {
     /**
      * Places a trigger and calls all the tasks that are part of the trigger
+     * 
      * @param string $ref_name Name of the trigger
+     * 
      * @return void
      */
     public static function placeTrigger($ref_name) {
@@ -25,6 +30,7 @@ class Task {
      * 
      * @param string $controller Controller name
      * @param string $method Method name
+     * 
      * @return bool TRUE if request exists as a task, FALSE otherwise
      */
     public static function requestAsTaskExists($controller, $method) {
@@ -34,10 +40,13 @@ class Task {
 
     /**
      * Run the request task
+     * 
      * @param string $controller Controller name
      * @param string $method Method name
+     * 
+     * @return void
      */
-    public static function runRequestTask($controller, $method, $data = []) {
+    public static function runRequestTask($controller, $method) {
         if(!self::requestAsTaskExists($controller, $method)) Status::message(Status::ERROR, "Controller or method are not defined");
         // TODO: Run the task associated with the request
     }
@@ -47,6 +56,7 @@ class Task {
      * 
      * @param string $controller Name of the controller to authorize
      * @param string $method Name of the method to authorize
+     * 
      * @return array Collection of results from running the tasks
      */
     public static function runAuthorizationTasks($controller, $method) {
@@ -77,6 +87,7 @@ class Task {
      * 
      * @param array|int $task_list The tasks IDs to run
      * @param array& $params Refernce to the parameters to use for authentication
+     * 
      * @return array Collection of the results of the tasks
      */
     public static function run($task_list = [], &$params = []) {
@@ -119,6 +130,8 @@ class Task {
 
     /**
      * Check if out of all processes at least one succeeded
+     * 
+     * @param array $task_results The task results to validates
      */
     public static function validateResult($task_results = [])
     {

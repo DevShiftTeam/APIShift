@@ -4,11 +4,15 @@
  * (c) 2020-present Sapir Shemer, DevShift (devshift.biz)
  * Released under the MIT License with the additions present in the LICENSE.md
  * file in the root folder of the APIShift Engine original release source-code
+ * 
  * @author Sapir Shemer
  */
 
 namespace APIShift\Models;
 
+/**
+ * A component holding helper functions that are repeated throughout the program and connot be categorized to a specific component
+ */
 class Helper {
     /**
      * This is a smart array key mapper that maps the whole keys as a tree

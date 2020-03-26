@@ -4,11 +4,15 @@
  * (c) 2020-present Sapir Shemer, DevShift (devshift.biz)
  * Released under the MIT License with the additions present in the LICENSE.md
  * file in the root folder of the APIShift Engine original release source-code
+ * 
  * @author Sapir Shemer
  */
 
 namespace APIShift\Core;
 
+/**
+ * Interface containing functions that provide a standard for notifying about internal & procedure states with data attached for the client to understand
+ */
 class Status {
     // Hardcoded statuses
     public const ERROR = 0;

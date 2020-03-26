@@ -11,10 +11,16 @@ namespace APIShift\Models;
 use APIShift\Core;
 
 /**
- * Your gateway to personal extensions
+ * Gateway to personal extensions
  */
 class Extensions {
+    /**
+     * Template function to run commands from extensions
+     * 
+     * @param array $data Array of commands to send to the extension
+     */
     public static function run($data) {
+        // TODO: redesign
         $request = "../extensions/{$data['name']}/{$data['controller']}.php";
 
         if(file_exists($request))

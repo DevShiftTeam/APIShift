@@ -18,19 +18,32 @@ use APIShift\Core\Status;
  * Provides a set of request handlers that allows users to manipulate the session state element
  */
 class SessionState {
+    /**
+     * Get all the session states available
+     */
     public static function getAllSessionStates() {
         Status::message(Status::SUCCESS, CacheManager::get("StateCollection"));
     }
 
+    /**
+     * Get the current session state used
+     */
     public static function getCurrentSessionState() {
        Status::message(Status::SUCCESS, $_SESSION['state']);
     }
 
+    /**
+     * Change the current state to a new one.
+     * Automatically run authorization process defined for the state
+     */
     public static function changeState() {
         Core\SessionState::changeState($_POST['state']);
         Status::message(Status::SUCCESS, "State Changed!");
     }
     
+    /**
+     * Add a new session state to DB
+     */
     public static function addSessionState() {
         // Name is required
         if(!isset($_POST['name'])) Status::message(Status::ERROR, "At least specify a name");
@@ -48,6 +61,9 @@ class SessionState {
         Status::message(Status::SUCCESS, "Added Successfully! :)");
     }
     
+    /**
+     * Remove session state from DB
+     */
     public static function removeSessionState() {
         if(!isset($_POST['id'])) Status::message(Status::ERROR, "Didn't set element to remove");
         // Remove the element
@@ -59,6 +75,9 @@ class SessionState {
         Status::message(Status::SUCCESS, "Updated Successfully! :)");
     }
     
+    /**
+     * Update session state in DB
+     */
     public static function updateSessionState() {
         if(!isset($_POST['id'])) Status::message(Status::ERROR, "Didn't set element to modify");
         // Construct Query string

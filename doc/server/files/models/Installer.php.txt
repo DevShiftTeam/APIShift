@@ -15,26 +15,30 @@ use APIShift\Core\Status;
 use Exception;
 
 /**
- * Creates the configuration file for the engine
+ * Model containing an interface of functions that help manage the installation process of the system
  */
 class Installer {
     /**
-     * Load the initial database structure and data for the system to function
+     * Upload the initial database structure and data for the system to function
      * 
-     * @param $db_host Database host
-     * @param $db_user Database username
-     * @param $db_pass Database password
-     * @param $db_port Database port
+     * @param string $db_host Database host
+     * @param string $db_name Database schema name
+     * @param string $db_user Database username
+     * @param int $db_pass Database password
+     * @param string $db_port Database port
+     * @param string $user Admin user to install
+     * @param string $pass Admin password to install with
+     * 
      * @return void
      */
-    public function createDB(string $db_host, string $db_name, string $db_user, string $db_pass, int $port = 3306, string $user, string $pass) {
+    public function createDB($db_host, $db_name, $db_user, $db_pass, $db_port = 3306, $user, $pass) {
         // Step 1: Connect to DB
-        DatabaseManager::startConnection("main", $db_host, $db_user, $db_pass, $port, $db_name, false);
+        DatabaseManager::startConnection("main", $db_host, $db_user, $db_pass, $db_port, $db_name, false);
 
         try {
             // Create schema if not exists
             if(Status::getStatus() == Status::DB_CONNECTION_FAILED) {
-                DatabaseManager::startConnection("main", $db_host, $db_user, $db_pass, $port);
+                DatabaseManager::startConnection("main", $db_host, $db_user, $db_pass, $db_port);
             $add_schema = DatabaseManager::query("main", "CREATE SCHEMA {$db_name}; USE {$db_name};");
                 if(!$add_schema) Status::message(Status::ERROR, "Couldn't create DB schema");
             }
@@ -67,19 +71,24 @@ class Installer {
     }
 
     /**
-     * Modify config file using the installation data
+     * Modify configurations file using the installation data
      * 
-     * @param $db_host Database host
-     * @param $db_user Database username
-     * @param $db_pass Database password
-     * @param $db_port Database port
-     * @param $user Control panel username
-     * @param $pass Control panel password
+     * @param string $db_host Database host
+     * @param string $db_name Database schema name
+     * @param string $db_user Database username
+     * @param int $db_pass Database password
+     * @param int $db_port Database port
+     * @param string $db_type Database type ("MySQL" | "MSSQL" | "PGSQL" | "MongoDB", etc..)
+     * @param int $cache_system Type of cache system to use (CacheManager::APCU | CacheManager::REDIS | CacheManager::MEMCACHED)
+     * @param string $cache_host Host nae of cache server
+     * @param int $cache_port Post to connect with cache system
+     * @param string $cache_pass Password needed to authenticate cache system
+     * 
      * @return void
      */
-    public function createConfigFile(string $db_host, string $db_name, string $db_user, string $db_pass, int $db_port = 3306,
-                                        string $db_type = "MySQL", int $cache_system = CacheManager::APCU, string $cache_host = "",
-                                        int $cache_port = 0, string $cache_pass = "") {
+    public function createConfigFile($db_host, $db_name, $db_user, $db_pass, $db_port = 3306,
+                                        $db_type = "MySQL", $cache_system = CacheManager::APCU, $cache_host = "",
+                                        $cache_port = 0, $cache_pass = "") {
         // Determine the cache system string
         switch($cache_system) {
             case CacheManager::APCU: $cache_system = "CacheManager::APCU"; break;
@@ -99,7 +108,10 @@ class Installer {
  */
         
 namespace APIShift\Core;
-        
+
+/**
+ * Class with all the configurations to make the system up and running
+ */
 class Configurations {
     public const INSTALLED = true;
     public const DB_HOST = "{$db_host}";

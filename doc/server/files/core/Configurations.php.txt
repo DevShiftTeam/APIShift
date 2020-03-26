@@ -8,7 +8,10 @@
  */
         
 namespace APIShift\Core;
-        
+
+/**
+ * Class with all the configurations to make the system up and running
+ */
 class Configurations {
     public const INSTALLED = true;
     public const DB_HOST = "127.0.0.1";

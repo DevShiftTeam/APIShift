@@ -35,4 +35,3 @@ if(Configurations::INSTALLED) {
     CacheManager::loadDefaults();
     SessionState::loadDefaults();
 }
-error_reporting(0);

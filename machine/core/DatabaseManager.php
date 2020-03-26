@@ -13,7 +13,7 @@ use \PDO;
 use \PDOException;
 
 /**
- * Holds and manages PDO instances on the API
+ * Interface which holds and manages PDO instances
  */
 class DatabaseManager {
     /**

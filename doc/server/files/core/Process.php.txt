@@ -9,14 +9,20 @@
 
 namespace APIShift\Core;
 
+/**
+ * Provides an interface to compile and manage procedural connections in the system
+ * Procedural connection are explained in the CODE_DESIGN.md file
+ */
 class Process {
     /**
      * Compiles a set of connections.
      * Set of connections need to be connected either from front or back, since
      * free nodes will not produce a correct compilation process
+     * 
      * @param array $connections_set The set of connection to compile
-     * @param array& $param Refernce to the params to pass to the compilation process
-     * @return any The result of the compilation
+     * @param array &$params Refernce to the params to pass to the compilation process
+     * 
+     * @return mixed The result of the compilation
      */
     public static function compileConnections(&$connections_set, &$params = []) {
         // Key-value store of results of each connection
@@ -315,7 +321,7 @@ class Process {
     /**
      * Checks if a given conenction is a result
      * 
-     * @param reference &$connection Reference to the connection to check
+     * @param array &$connection Reference to the connection to check
      * @return boolean If connection is indeed a result
      */
     private static function isResult(&$connection) {
@@ -327,9 +333,9 @@ class Process {
     /** 
      * Assigns inputs as value if only one or array if more than one
      * 
-     * @param reference &$inputs Input collection to assign
-     * @param reference &$input_names Names of the inputs by index
-     * @return any|array The result of the processed inputs
+     * @param array &$inputs Input collection to assign
+     * @param array &$input_names Names of the inputs by index
+     * @return mixed|array The result of the processed inputs
      */
     private static function processValues(&$inputs, &$input_names) {
         $result = "";

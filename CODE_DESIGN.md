@@ -16,6 +16,8 @@ The semantics of this architecture document will follow the definitions mentione
   - [Components](#components)
     - [Base Components](#base-components)
     - [Mid-Level Components](#mid-level-components)
+  - [Architectural Style](#architectural-style)
+- [System Components](#system-components)
   - [Session management](#session-management)
   - [Database management](#database-management)
     - [Data Model Components](#data-model-components)
@@ -63,6 +65,17 @@ The system also defines 3 more concepts that are connected to the base concept t
 3. __Analysis__: Components that are connected to other components of the system to accumulate usage data on the different components and the data that is transferred in the system to illustrate a analytic image of the system in terms of performance, access and usage.
 
 Around all of these definitions, the engine defines __Controllers__ as the combining part of the API. The controllers are components that contain all the possible requests that can be made to an API. Each controller makes use of logic, and is surrounded by access and analysis methods to complete the full features of the API.
+
+## Architectural Style
+An architectural style, is in other words, restrictions that guide how we define architectural elements and relate between them in ways that satisfy the given style.
+
+Our style, first and foremost, follows the definitions presented in the [Architecture Overview](#architecture-overview) section. Meaning that any component in our architecture will belong to a specific classification defined in that section.
+
+Each component will be divided in a Core-Model-Controller manner, where each component's functionallity that can be triggered by an end-user will be referred to as a `Controller` sub-component. And each functionallity that is triggered only after an end-user request at run-time by an inner-state or inner-trigger of the system will be referred to as a `Model` sub-component. User-made components should contain only components that are divided into `Controller` & `Model` sub-components. `Core` is basically a `Model` sub-component of a system component that gives user-made `Controllers` & `Models` the basic functionallity needed to integrate with the system's workflow and features.
+
+This style is not very restrictive in its definitions, as it only divides whatever component given into which part of it define the end-user interface of the API (`Controller`) and the other part as a different components (`Model`/`Core`). The style is intended to be scalable to provide the ability to scale the base system into any kind of API/server (By developing your own `Controllers`/`Models`), and base components and functionallity (`Core`) that helps you maintain an integrated, unified, managed flow of requests and analysis on the overall system.
+
+# System Components
 
 ## Session management
 Each API/server usually needs different types of sessions. One session can represent a regular user on your application and another can represent a premium user, each type of session has different permissions in your system - some can access a certain function/data and others don't. APIShift allows you to define different session states easily and then assign access rules by these states. The classes that manage the session options are the [core SessionState](machine/core/SessionState.php) and the [controller SessionState](machine/controller/SessionState.php) which allows for changing and managing the session through API requests.

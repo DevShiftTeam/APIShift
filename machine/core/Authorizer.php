@@ -29,17 +29,17 @@ class Authorizer {
     /**
      * Indicates that request comes from code
      */
-    private const REQUEST_AS_CODE = 0;
+    const REQUEST_AS_CODE = 0;
 
     /**
      * Indicates that request come from a task in the DB
      */
-    private const REQUEST_AS_TASK = 2;
+    const REQUEST_AS_TASK = 2;
 
     /**
      * Indicates that the request couldn't be found
      */
-    private const REQUEST_INVALID = 3;
+    const REQUEST_INVALID = 3;
 
     /**
      * Validate the request - check if controller exists as core file, controller or as a task
@@ -72,7 +72,7 @@ class Authorizer {
      * 
      * @return void
      */
-    public static function authorizeAndRun($controller, $method, $data = [])
+    public static function authorizeAndRun($controller, $method)
     {
         // Step 1: Find controller & method
         $request_type = Authorizer::validateRequest($controller, $method);
@@ -85,8 +85,8 @@ class Authorizer {
         Task::placeTrigger("BeforeRun");
         
         // Step 4: Run request
-        if($request_type == self::REQUEST_AS_CODE) ("APIShift\\Controllers\\" . $controller)::$method($data);
-        else if($request_type == self::REQUEST_AS_TASK) Task::runRequestTask($controller, $method, $data);
+        if($request_type == self::REQUEST_AS_CODE) ("APIShift\\Controllers\\" . $controller)::$method();
+        else if($request_type == self::REQUEST_AS_TASK) Task::runRequestTask($controller, $method);
 
         // Step 5: Tasks triggered after request
         Task::placeTrigger("AfterRun");

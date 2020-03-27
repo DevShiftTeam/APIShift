@@ -25,18 +25,42 @@ namespace APIShift\Core;
  * Interface containing functions that provide a standard for notifying about internal & procedure states with data attached for the client to understand
  */
 class Status {
-    // Hardcoded statuses
-    public const ERROR = 0;
-    public const SUCCESS = 1;
-    // Error codes for installation
-    public const NOT_INSTALLED = 2;
-    public const DB_CONNECTION_FAILED = 3;
-    public const INVALID_CONFIG_FILE = 4;
-    // Last status container
+    /**
+     * Error message ID
+     */
+    const ERROR = 0;
+
+    /**
+     * Success message ID
+     */
+    const SUCCESS = 1;
+    
+    /**
+     * Not instlled message ID
+     */
+    const NOT_INSTALLED = 2;
+
+    /**
+     * COuldn't connect to DB message ID
+     */
+    const DB_CONNECTION_FAILED = 3;
+
+    /**
+     * Configuration file damaged message ID
+     */
+    const INVALID_CONFIG_FILE = 4;
+
+    /**
+     * Container of the last status output
+     */
     private static $output = [ 'status' => Status::SUCCESS, 'data' => "Status haven't changed" ];
 
     /**
      * Return a status & data to the client & exit
+     * 
+     * @param int $status_code Status code to assign to the output message
+     * @param mixed $data Data to provide along with the status message
+     * @param bool $message_and_exit Set FALSE to not stop running when this function is called
      */
     public static function message($status_code = Status::SUCCESS, $data = null, $message_and_exit = true)
     {
@@ -64,12 +88,14 @@ class Status {
 
     /**
      * Get current status
+     * 
      * @return int Current status
      */
     public static function getStatus() { return self::$output['status']; }
 
     /**
      * Get current status message
+     * 
      * @return string Current status message
      */
     public static function getMessage() {return self::$output['data']; }

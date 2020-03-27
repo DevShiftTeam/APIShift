@@ -20,18 +20,21 @@
  */
         
 namespace APIShift\Core;
-        
+
+/**
+ * Contains the core configuration to make the system run
+ */
 class Configurations {
-    public const INSTALLED = false;
-    public const DB_HOST = "127.0.0.1";
-    public const DB_PORT = 3306;
-    public const DB_USER = "";
-    public const DB_PASS = "";
-    public const DB_NAME = "";
-    public const DB_TYPE = "MySQL";
-    public const USE_HTTPS = true;
-    public const CACHE_TYPE = CacheManager::APCU;
-    public const CACHE_HOST = "";
-    public const CACHE_PORT = "";
-    public const CACHE_PASS = "";
+    const INSTALLED = false;
+    const DB_HOST = "127.0.0.1";
+    const DB_PORT = 3306;
+    const DB_USER = "";
+    const DB_PASS = "";
+    const DB_NAME = "";
+    const DB_TYPE = "MySQL";
+    const USE_HTTPS = true;
+    const CACHE_TYPE = CacheManager::APCU;
+    const CACHE_HOST = "";
+    const CACHE_PORT = "";
+    const CACHE_PASS = "";
 }

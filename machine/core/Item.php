@@ -26,10 +26,10 @@ namespace APIShift\Core;
  */
 class Item {
     // Relation Types
-    public const SINGLE_TO_SINGLE_RELATION = 0;
-    public const SINGLE_TO_MULTI_RELATION = 1;
-    public const MULTI_TO_MULTI_RELATION = 2;
-    public const EXTENDS_RELATION = 3;
+    const SINGLE_TO_SINGLE_RELATION = 0;
+    const SINGLE_TO_MULTI_RELATION = 1;
+    const MULTI_TO_MULTI_RELATION = 2;
+    const EXTENDS_RELATION = 3;
     
     // TODO: add CRUD operations to itemsS
     // TODO: create general query language based on json

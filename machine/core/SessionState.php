@@ -13,9 +13,14 @@ namespace APIShift\Core;
  * Manages everything about session states & their data structure
  */
 class SessionState {
-    // Hardcoded states
-    public const DEFAULT_VIEWER = 0;
-    public const NO_STATE = -1;
+    /**
+     * A default state ID given to every user
+     */
+    const DEFAULT_VIEWER = 0;
+    /**
+     * Indicates that not state is found/set
+     */
+    const NO_STATE = -1;
 
     /**
      * Load all the default session variables into state
@@ -82,7 +87,7 @@ class SessionState {
      * Set and validate a specific state
      * 
      * @param string $state_name Name of the state to move to
-     * @param array $params Parameters to pass to the authorization process
+     * 
      * @return void
      */
     public static function changeState($state_name)

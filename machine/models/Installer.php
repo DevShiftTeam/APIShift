@@ -122,21 +122,21 @@ class Installer {
 namespace APIShift\Core;
 
 /**
- * Class with all the configurations to make the system up and running
+ * Contains the core configuration to make the system run
  */
 class Configurations {
-    public const INSTALLED = true;
-    public const DB_HOST = "{$db_host}";
-    public const DB_PORT = {$db_port};
-    public const DB_USER = "{$db_user}";
-    public const DB_PASS = "{$db_pass}";
-    public const DB_NAME = "{$db_name}";
-    public const DB_TYPE = "{$db_type}";
-    public const USE_HTTPS = true;
-    public const CACHE_TYPE = {$cache_system};
-    public const CACHE_HOST = "{$cache_host}";
-    public const CACHE_PORT = {$cache_port};
-    public const CACHE_PASS = "{$cache_pass}";
+    const INSTALLED = true;
+    const DB_HOST = "{$db_host}";
+    const DB_PORT = {$db_port};
+    const DB_USER = "{$db_user}";
+    const DB_PASS = "{$db_pass}";
+    const DB_NAME = "{$db_name}";
+    const DB_TYPE = "{$db_type}";
+    const USE_HTTPS = true;
+    const CACHE_TYPE = {$cache_system};
+    const CACHE_HOST = "{$cache_host}";
+    const CACHE_PORT = {$cache_port};
+    const CACHE_PASS = "{$cache_pass}";
 }
 EOT;
 

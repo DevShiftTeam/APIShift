@@ -25,11 +25,24 @@
   * Manages cache data on your command, sir!
   */
  class CacheManager {
-    // Cache types
-    public const APCU = 0;
-    public const MEMCACHED = 1;
-    public const REDIS = 2;
-    // Holds the connection object to call the cache system
+    /**
+     * Indicates use of the APCU cache type
+     */
+    const APCU = 0;
+
+    /**
+     * Indicates use of the Memcached cache type
+     */
+    const MEMCACHED = 1;
+
+    /**
+     * Indicates use of the Redis cache type
+     */
+    const REDIS = 2;
+
+    /**
+     * Holds the connection object to call the cache system
+     */
     private static $cache_connection = null;
 
     /**
@@ -61,6 +74,7 @@
 
      /**
       * Load default cache data
+
       * @param bool $refresh Set true to refresh the cache data
       */
     public static function loadDefaults(bool $refresh = false) {
@@ -139,7 +153,9 @@
     
     /**
      * Get value of a given key
+     * 
      * @param string $key Key name to check
+     * 
      * @return string|array|bool Value in case exists, FALSE otherwise
      */
     public static function get($key) {
@@ -160,9 +176,11 @@
 
     /**
      * Set variable in cache system
+     * 
      * @param string $key Key name to assign to the data
      * @param mixed $value Value to store upon key
      * @param int $ttl Time to live in cache
+     * 
      * @return void
      */
     public static function set($key, $value, $ttl = 0) {
@@ -184,8 +202,10 @@
 
     /**
      * Get a data from table into cache of the table if not present and then return it
+     * 
      * @param string $table_name Name of table
      * @param int $id ID of the item to retrieve
+     * @param int $ttl Time to live in cache
      */
     public static function getFromTable($table_name, $id, $ttl = 120) {
         // Get from cache if exists

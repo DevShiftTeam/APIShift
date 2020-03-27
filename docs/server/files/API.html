@@ -11,6 +11,7 @@
     <link href="../css/font-awesome.min.css" rel="stylesheet">
     <link href="../css/prism.css" rel="stylesheet" media="all"/>
     <link href="../css/template.css" rel="stylesheet" media="all"/>
+    
     <!--[if lt IE 9]>
     <script src="../js/html5.js"></script>
     <![endif]-->
@@ -19,10 +20,11 @@
     <script src="../js/bootstrap.min.js"></script>
     <script src="../js/jquery.smooth-scroll.js"></script>
     <script src="../js/prism.min.js"></script>
-    <!-- TODO: Add http://jscrollpane.kelvinluck.com/ to style the scrollbars for browsers not using webkit-->    <script type="text/javascript">
+    <!-- TODO: Add http://jscrollpane.kelvinluck.com/ to style the scrollbars for browsers not using webkit-->
+        <script type="text/javascript">
         function loadExternalCodeSnippets() {
             Array.prototype.slice.call(document.querySelectorAll('pre[data-src]')).forEach(function (pre) {
-                var src = pre.getAttribute('data-src');
+                var src = pre.getAttribute('data-src').replace( /\\/g, '/');
                 var extension = (src.match(/\.(\w+)$/) || [, ''])[1];
                 var language = 'php';
 
@@ -67,6 +69,7 @@
             loadExternalCodeSnippets();
         })
     </script>
+
     <link rel="shortcut icon" href="../images/favicon.ico"/>
     <link rel="apple-touch-icon" href="../images/apple-touch-icon.png"/>
     <link rel="apple-touch-icon" sizes="72x72" href="../images/apple-touch-icon-72x72.png"/>
@@ -83,12 +86,16 @@
             <a class="brand" href="../index.html">API Documentation</a>
 
             <div class="nav-collapse">
-                <ul class="nav pull-right">                    <li class="dropdown">
+                <ul class="nav pull-right">
+                                        <li class="dropdown">
                         <a href="../index.html" class="dropdown-toggle" data-toggle="dropdown">
                             API Documentation <b class="caret"></b>
                         </a>
-                        <ul class="dropdown-menu">                            <li><a href="../namespaces/APIShift.html">\APIShift</a></li>                        </ul>
-                    </li>                    <li class="dropdown" id="charts-menu">
+                        <ul class="dropdown-menu">
+                                                        <li><a href="../namespaces/APIShift.html">\APIShift</a></li>
+                                                    </ul>
+                    </li>
+                                        <li class="dropdown" id="charts-menu">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             Charts <b class="caret"></b>
                         </a>
@@ -106,15 +113,18 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li>
-                                <a href="../reports/errors.html">                                    <i class="icon-list-alt"></i>&#160;Errors <span class="label label-info pull-right">12</span>
+                                <a href="../reports/errors.html">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <i class="icon-list-alt"></i>&#160;Errors <span class="label label-info pull-right">6</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="../reports/markers.html">                                    <i class="icon-list-alt"></i>&#160;Markers <span class="label label-info pull-right">16</span>
+                                <a href="../reports/markers.html">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <i class="icon-list-alt"></i>&#160;Markers <span class="label label-info pull-right">16</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="../reports/deprecated.html">                                    <i class="icon-list-alt"></i>&#160;Deprecated <span class="label label-info pull-right">0</span>
+                                <a href="../reports/deprecated.html">
+                                                                                                            <i class="icon-list-alt"></i>&#160;Deprecated <span class="label label-info pull-right">0</span>
                                 </a>
                             </li>
                         </ul>
@@ -128,69 +138,125 @@
     <!--</div>-->
 </div>
 
-<div id="___" class="container-fluid">    <section class="row-fluid">
-        <div class="span2 sidebar">    <div class="accordion" style="margin-bottom: 0">
+<div id="___" class="container-fluid">
+        <section class="row-fluid">
+        <div class="span2 sidebar">
+                                <div class="accordion" style="margin-bottom: 0">
         <div class="accordion-group">
-            <div class="accordion-heading">                    <a class="accordion-toggle" data-toggle="collapse" data-target="#namespace-1523414488"></a>                <a href="../namespaces/default.html" style="margin-left: 30px; padding-left: 0">\</a>
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle " data-toggle="collapse" data-target="#namespace-811712817"></a>
+                                <a href="../namespaces/default.html" style="margin-left: 30px; padding-left: 0">\</a>
             </div>
-            <div id="namespace-1523414488" class="accordion-body collapsein">
-                <div class="accordion-inner">    <div class="accordion" style="margin-bottom: 0">
-        <div class="accordion-group">
-            <div class="accordion-heading">                    <a class="accordion-togglecollapsed" data-toggle="collapse" data-target="#namespace-86046690"></a>                <a href="../namespaces/APIShift.html" style="margin-left: 30px; padding-left: 0">APIShift</a>
-            </div>
-            <div id="namespace-86046690" class="accordion-body collapse">
-                <div class="accordion-inner">    <div class="accordion" style="margin-bottom: 0">
-        <div class="accordion-group">
-            <div class="accordion-heading">                    <a class="accordion-togglecollapsed" data-toggle="collapse" data-target="#namespace-1390673904"></a>                <a href="../namespaces/APIShift.Controllers.html" style="margin-left: 30px; padding-left: 0">Controllers</a>
-            </div>
-            <div id="namespace-1390673904" class="accordion-body collapse">
+            <div id="namespace-811712817" class="accordion-body collapse in">
                 <div class="accordion-inner">
-                    <ul>                            <li class="class"><a href="../classes/APIShift.Controllers.Control.html">Control</a></li>                            <li class="class"><a href="../classes/APIShift.Controllers.Installer.html">Installer</a></li>                            <li class="class"><a href="../classes/APIShift.Controllers.SessionState.html">SessionState</a></li>                            <li class="class"><a href="../classes/APIShift.Controllers.Status.html">Status</a></li>                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>    <div class="accordion" style="margin-bottom: 0">
+
+                                                    <div class="accordion" style="margin-bottom: 0">
         <div class="accordion-group">
-            <div class="accordion-heading">                    <a class="accordion-togglecollapsed" data-toggle="collapse" data-target="#namespace-657310477"></a>                <a href="../namespaces/APIShift.Core.html" style="margin-left: 30px; padding-left: 0">Core</a>
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1881514506"></a>
+                                <a href="../namespaces/APIShift.html" style="margin-left: 30px; padding-left: 0">APIShift</a>
             </div>
-            <div id="namespace-657310477" class="accordion-body collapse">
+            <div id="namespace-1881514506" class="accordion-body collapse ">
                 <div class="accordion-inner">
-                    <ul>                            <li class="class"><a href="../classes/APIShift.Core.Autoloader.html">Autoloader</a></li>                            <li class="class"><a href="../classes/APIShift.Core.DatabaseManager.html">DatabaseManager</a></li>                            <li class="class"><a href="../classes/APIShift.Core.DataModelManager.html">DataModelManager</a></li>                            <li class="class"><a href="../classes/APIShift.Core.Process.html">Process</a></li>                            <li class="class"><a href="../classes/APIShift.Core.Task.html">Task</a></li>                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>    <div class="accordion" style="margin-bottom: 0">
+
+                                                    <div class="accordion" style="margin-bottom: 0">
         <div class="accordion-group">
-            <div class="accordion-heading">                    <a class="accordion-togglecollapsed" data-toggle="collapse" data-target="#namespace-3407994"></a>                <a href="../namespaces/APIShift.Models.html" style="margin-left: 30px; padding-left: 0">Models</a>
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-487668330"></a>
+                                <a href="../namespaces/APIShift.Controllers.html" style="margin-left: 30px; padding-left: 0">Controllers</a>
             </div>
-            <div id="namespace-3407994" class="accordion-body collapse">
+            <div id="namespace-487668330" class="accordion-body collapse ">
                 <div class="accordion-inner">
-                    <ul>                            <li class="class"><a href="../classes/APIShift.Models.Extensions.html">Extensions</a></li>                            <li class="class"><a href="../classes/APIShift.Models.Helper.html">Helper</a></li>                            <li class="class"><a href="../classes/APIShift.Models.Installer.html">Installer</a></li>                    </ul>
+
+                    
+                    <ul>
+                                                                                                    <li class="class"><a href="../classes/APIShift.Controllers.Control.html">Control</a></li>
+                                                    <li class="class"><a href="../classes/APIShift.Controllers.Installer.html">Installer</a></li>
+                                                    <li class="class"><a href="../classes/APIShift.Controllers.SessionState.html">SessionState</a></li>
+                                                    <li class="class"><a href="../classes/APIShift.Controllers.Status.html">Status</a></li>
+                                            </ul>
                 </div>
             </div>
         </div>
     </div>
-                    <ul>                    </ul>
+
+                                                    <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1501638569"></a>
+                                <a href="../namespaces/APIShift.Core.html" style="margin-left: 30px; padding-left: 0">Core</a>
+            </div>
+            <div id="namespace-1501638569" class="accordion-body collapse ">
+                <div class="accordion-inner">
+
+                    
+                    <ul>
+                                                                                                    <li class="class"><a href="../classes/APIShift.Core.Authorizer.html">Authorizer</a></li>
+                                                    <li class="class"><a href="../classes/APIShift.Core.Autoloader.html">Autoloader</a></li>
+                                                    <li class="class"><a href="../classes/APIShift.Core.CacheManager.html">CacheManager</a></li>
+                                                    <li class="class"><a href="../classes/APIShift.Core.Configurations.html">Configurations</a></li>
+                                                    <li class="class"><a href="../classes/APIShift.Core.DatabaseManager.html">DatabaseManager</a></li>
+                                                    <li class="class"><a href="../classes/APIShift.Core.DataModelManager.html">DataModelManager</a></li>
+                                                    <li class="class"><a href="../classes/APIShift.Core.Item.html">Item</a></li>
+                                                    <li class="class"><a href="../classes/APIShift.Core.Process.html">Process</a></li>
+                                                    <li class="class"><a href="../classes/APIShift.Core.SessionState.html">SessionState</a></li>
+                                                    <li class="class"><a href="../classes/APIShift.Core.Status.html">Status</a></li>
+                                                    <li class="class"><a href="../classes/APIShift.Core.Task.html">Task</a></li>
+                                            </ul>
                 </div>
             </div>
         </div>
     </div>
-                    <ul>                    </ul>
+
+                                                    <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-273357057"></a>
+                                <a href="../namespaces/APIShift.Models.html" style="margin-left: 30px; padding-left: 0">Models</a>
+            </div>
+            <div id="namespace-273357057" class="accordion-body collapse ">
+                <div class="accordion-inner">
+
+                    
+                    <ul>
+                                                                                                    <li class="class"><a href="../classes/APIShift.Models.Extensions.html">Extensions</a></li>
+                                                    <li class="class"><a href="../classes/APIShift.Models.Helper.html">Helper</a></li>
+                                                    <li class="class"><a href="../classes/APIShift.Models.Installer.html">Installer</a></li>
+                                            </ul>
                 </div>
             </div>
         </div>
     </div>
+
+                    
+                    <ul>
+                                                                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                    
+                    <ul>
+                                                                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
         </div>
     </section>
     <section class="row-fluid">
         <div class="span10 offset2">
             <div class="row-fluid">
                 <div class="span8 content file">
-                    <nav>                    </nav>
+                    <nav>
+                                                                    </nav>
 
                     <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal"><i class="icon-code"></i></a>
                     <h1><small></small>API.php</h1>
-                    <p><em>APIShift Engine v1.0.0</em></p><p>Copyright 2020-present Sapir Shemer, DevShift (devshift.biz)</p>
+                    <p><em>APIShift Engine v1.0.0</em></p>
+                    <p>Copyright 2020-present Sapir Shemer, DevShift (devshift.biz)</p>
 <p>Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at</p>
@@ -199,21 +265,36 @@ You may obtain a copy of the License at</p>
 distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
-limitations under the License.</p>                </div>
+limitations under the License.</p>
+
+                    
+                    
+                                    </div>
 
                 <aside class="span4 detailsbar">
-                    <dl>                            <dt>Package</dt>
+                    <dl>
+                                                    <dt>Package</dt>
                             <dd><div class="namespace-wrapper">\Default</div></dd>
+                        
+                        
                     </dl>
                     <h2>Tags</h2>
-                    <table class="table table-condensed">                            <tr>
-                                <th>author
+                    <table class="table table-condensed">
+                                                    <tr>
+                                <th>
+                                    author
                                 </th>
-                                <td><p>Sapir Shemer</p>                                </td>
-                            </tr>                    </table>
+                                <td>
+                                                                                                                    <p>Sapir Shemer</p>
+                                                                    </td>
+                            </tr>
+                                            </table>
 
                 </aside>
             </div>
+
+            
+            
         </div>
     </section>
 
@@ -226,24 +307,30 @@ limitations under the License.</p>                </div>
             <pre data-src="../files/API.php.txt" class="language-php line-numbers"></pre>
         </div>
     </div>
+
     <footer class="row-fluid">
         <section class="span10 offset2">
             <section class="row-fluid">
                 <section class="span10 offset1">
                     <section class="row-fluid footer-sections">
-                        <section class="span4">                            <h1><i class="icon-code"></i></h1>
+                        <section class="span4">
+                                                        <h1><i class="icon-code"></i></h1>
                             <div>
-                                <ul>                                        <li><a href="../namespaces/APIShift.html">\APIShift</a></li>                                </ul>
+                                <ul>
+                                                                            <li><a href="../namespaces/APIShift.html">\APIShift</a></li>
+                                                                    </ul>
                             </div>
                         </section>
-                        <section class="span4">                            <h1><i class="icon-bar-chart"></i></h1>
+                        <section class="span4">
+                                                        <h1><i class="icon-bar-chart"></i></h1>
                             <div>
                                 <ul>
                                     <li><a href="../graphs/class.html">Class Hierarchy Diagram</a></li>
                                 </ul>
                             </div>
                         </section>
-                        <section class="span4">                            <h1><i class="icon-pushpin"></i></h1>
+                        <section class="span4">
+                                                        <h1><i class="icon-pushpin"></i></h1>
                             <div>
                                 <ul>
                                     <li><a href="../reports/errors.html">Errors</a></li>
@@ -258,7 +345,7 @@ limitations under the License.</p>                </div>
                 <section class="span10 offset1">
                     <hr />
                     Documentation is powered by <a href="http://www.phpdoc.org/">phpDocumentor </a> and authored
-                    onMarch 27th, 2020 at 14:38.
+                    on March 27th, 2020 at 14:45.
                 </section>
             </section>
         </section>

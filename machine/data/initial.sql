@@ -29,7 +29,7 @@ CREATE TABLE `admin_pages` (
   `icon` varchar(45) DEFAULT NULL,
   `parent` int DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -38,7 +38,7 @@ CREATE TABLE `admin_pages` (
 
 LOCK TABLES `admin_pages` WRITE;
 /*!40000 ALTER TABLE `admin_pages` DISABLE KEYS */;
-INSERT INTO `admin_pages` VALUES (1,'Database','database','fa fa-database',0),(2,'Session','session','fas fa-user',0),(3,'Logic','logic','fas fa-tasks',0),(4,'Access','access','fas fa-lock',0),(5,'Analysis','analysis','fas fa-chart-bar',0),(6,'Extensions','extensions','fas fa-microchip',0),(7,'Issues','issues','fa fa-ticket-alt',0),(8,'Settings','settings','fas fa-cog',0);
+INSERT INTO `admin_pages` VALUES (1,'Database','database','fa fa-database',0),(2,'Session','session','fas fa-user',0),(3,'Logic','logic','fas fa-tasks',0),(4,'Access','access','fas fa-lock',0),(5,'Analysis','analysis','fas fa-chart-bar',0),(6,'Extensions','extensions','fas fa-microchip',0),(7,'Issues','issues','fa fa-ticket-alt',0),(8,'Settings','settings','fas fa-cog',0),(9,'Session Access','session',NULL,4),(10,'Controller Access','controllers',NULL,4),(11,'Database Access','database',NULL,4);
 /*!40000 ALTER TABLE `admin_pages` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -57,6 +57,15 @@ CREATE TABLE `admin_users` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `admin_users`
+--
+
+LOCK TABLES `admin_users` WRITE;
+/*!40000 ALTER TABLE `admin_users` DISABLE KEYS */;
+/*!40000 ALTER TABLE `admin_users` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `connection_node_types`
@@ -444,7 +453,7 @@ CREATE TABLE `session_states` (
   `auth_task` int DEFAULT NULL,
   `parent` int DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -633,4 +642,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-03-25 20:02:59
+-- Dump completed on 2020-03-27  4:38:20

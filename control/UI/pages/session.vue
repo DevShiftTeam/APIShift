@@ -369,10 +369,6 @@
     padding-bottom: 0;
 }
 
-.overflow-box {
-    height: 65vh;
-}
-
 .v-card__actions {
     display: block;
 }

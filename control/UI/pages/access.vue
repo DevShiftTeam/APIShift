@@ -22,7 +22,12 @@
     module.exports = {
         data() {
             return {
-                is_main_page: true
+                is_main_page: true,
+                sub_pages: [
+                    { title: "Session Access", sub_title: "Manage session access and authorization processes", url: "/access/session" },
+                    { title: "Controllers Access", sub_title: "Manage controllers access and authorization processes", url: "/access/controllers" },
+                    { title: "Database Access", sub_title: "Manage database access and authorization processes", url: "/access/database" }
+                ]
             }
         },
         created() {
@@ -38,41 +43,41 @@
 
 <template>
     <v-content>
-        <v-container fluid fill-height v-if="is_main_page">
-            <v-layout class="mx-auto" align-start justify-center row wrap>
-                    <v-card to="/access/session" class="page-card" elevation-4>
-                        <v-container>
-                            <v-row justify="space-between">
-                                <v-col>
-                                    <v-list-item-title>Session Access</v-list-item-title>
-                                    <v-list-item-subtitle>Manage session access and authorization processes</v-list-item-subtitle>
-                                </v-col>
-                            </v-row>
-                        </v-container>
-                    </v-card>
-                    <v-card to="/access/controllers" class="page-card" elevation-4>
-                        <v-container>
-                            <v-row justify="space-between">
-                                <v-col>
-                                    <v-list-item-title>Controllers Access</v-list-item-title>
-                                    <v-list-item-subtitle>Manage controllers access and authorization processes</v-list-item-subtitle>
-                                </v-col>
-                            </v-row>
-                        </v-container>
-                    </v-card>
-                    <v-card to="/access/database" class="page-card" elevation-4>
-                        <v-container>
-                            <v-row justify="space-between">
-                                <v-col>
-                                    <v-list-item-title>Database Access</v-list-item-title>
-                                    <v-list-item-subtitle>Manage CRUD access of data in the DB</v-list-item-subtitle>
-                                </v-col>
-                            </v-row>
-                        </v-container>
-                    </v-card>
-            </v-layout>
+        <v-container class="session-display" fluid fill-height>
+            <v-card class="mx-auto" width="90%" min-height="75%" elevation-2>
+                <!-- Header -->
+                <v-app-bar>
+                    <v-menu offset-y>
+                        <template v-slot:activator="{ on }">
+                            <v-toolbar-title v-on="on"><v-btn>Manage Access</v-btn></v-toolbar-title>
+                        </template>
+                        <v-list>
+                            <v-list-item to="/access">Main Page</v-list-item>
+                            <v-list-item v-for="(item, key) in  sub_pages" :key="key" :to="item.url">{{ item.title }}</v-list-item>
+                        </v-list>
+                    <v-spacer></v-spacer>
+                </v-app-bar>
+
+                <!-- Body -->
+                <div class="overflow-box" v-bar>
+                    <div v-if="is_main_page">
+                        <v-layout class="mx-auto" align-start justify-center row wrap>
+                            <v-card v-for="(item, key) in  sub_pages" :key="key" :to="item.url" class="page-card" elevation-4 outlined>
+                                <v-container>
+                                    <v-row justify="space-between">
+                                        <v-col>
+                                            <v-list-item-title>{{ item.title }}</v-list-item-title>
+                                            <v-list-item-subtitle>{{ item.sub_title }}</v-list-item-subtitle>
+                                        </v-col>
+                                    </v-row>
+                                </v-container>
+                            </v-card>
+                        </v-layout>
+                    </div>
+                    <router-view v-else></router-view>
+                </div>
+            </v-card>
         </v-container>
-        <router-view v-else></router-view>
     </v-content>
 </template>
 <style scoped>

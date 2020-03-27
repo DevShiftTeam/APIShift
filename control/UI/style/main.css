@@ -20,6 +20,10 @@
 
 html { overflow-y: auto }
 
+.overflow-box {
+    height: 65vh;
+}
+
 /* Scrollbar styles */
 .vb > .vb-dragger {
     z-index: 5;

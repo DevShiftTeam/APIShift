@@ -21,9 +21,9 @@
 </script>
 
 <template>
-    <v-container fluid fill-height>
+    <div>
         <h1>Comming Soon! :)</h1>
-    </v-container>
+    </div>
 </template>
 <style scoped>
 

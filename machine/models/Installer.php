@@ -39,8 +39,10 @@ class Installer {
             // Create schema if not exists
             if(Status::getStatus() == Status::DB_CONNECTION_FAILED) {
                 DatabaseManager::startConnection("main", $db_host, $db_user, $db_pass, $db_port);
-            $add_schema = DatabaseManager::query("main", "CREATE SCHEMA {$db_name}; USE {$db_name};");
+                $add_schema = DatabaseManager::query("main", "CREATE SCHEMA {$db_name}");
                 if(!$add_schema) Status::message(Status::ERROR, "Couldn't create DB schema");
+                $add_schema = DatabaseManager::query("main", "USE {$db_name}");
+                if(!$add_schema) Status::message(Status::ERROR, "Couldn't use DB schema");
             }
 
             // Step 2: Load sql file of installation, and import the initial data

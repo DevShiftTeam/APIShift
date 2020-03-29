@@ -18,11 +18,73 @@
      * 
      * @author Sapir Shemer
      */
+
+    module.exports = {
+        data() {
+            return {
+                controller_access_list: [],
+                search: '',
+                loader: {
+                    visible: false,
+                    message: "",
+                    processes: 0
+                },
+                headers: [
+                    {
+                        text: 'Controller',
+                        align: 'start',
+                        sortable: false,
+                        value: 'controller',
+                    },
+                    {
+                        text: 'Method',
+                        align: 'start',
+                        sortable: false,
+                        value: 'method',
+                    },
+                    { text: 'Task name', value: 'name' }
+                ],
+
+            }
+        },
+        created() {
+            APIShift.Loader.changeLoader("access_controllers", this.loader);
+            window.cahandler = this;
+
+            APIShift.API.request("Control", "getControllersTasks", {}, function (response) {
+                if(response.status == APIShift.API.status_codes.SUCCESS) {
+                    cahandler.controller_access_list = Object.assign([], response.data);
+                } else {
+                    APIShift.API.notify(response.data, "error");
+                }
+            }, true);
+        }
+    };
 </script>
 
 <template>
     <div>
-        <h1>Comming Soon! :)</h1>
+        <v-card>
+            <v-card-title>
+                Controllers
+                <v-spacer></v-spacer>
+                <v-text-field
+                    v-model="search"
+                    append-icon="mdi-magnify"
+                    label="Search"
+                    single-line
+                    :loading="loader.visible"
+                    :loading-text="loader.message"
+                    hide-details
+                ></v-text-field>
+            </v-card-title>
+
+            <v-data-table
+                :headers="headers"
+                :items="controller_access_list"
+                :search="search"
+            ></v-data-table>
+        </v-card>
     </div>
 </template>
 <style scoped>

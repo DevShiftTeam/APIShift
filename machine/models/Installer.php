@@ -139,14 +139,29 @@ namespace APIShift\Core;
  * Contains the core configuration to make the system run
  */
 class Configurations {
+    /**
+     * When true system acts as though itshould be installed, false otehrwise
+     */
     const INSTALLED = true;
+
+    /**
+     * Database login info
+     */
     const DB_HOST = "{$db_host}";
     const DB_PORT = {$db_port};
     const DB_USER = "{$db_user}";
     const DB_PASS = "{$db_pass}";
     const DB_NAME = "{$db_name}";
     const DB_TYPE = "{$db_type}";
+
+    /**
+     * When true server requires the use oh HTTPS at each request
+     */
     const USE_HTTPS = true;
+
+    /**
+     * Cache system configurations
+     */
     const CACHE_TYPE = {$cache_system};
     const CACHE_HOST = "{$cache_host}";
     const CACHE_PORT = {$cache_port};

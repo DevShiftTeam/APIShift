@@ -62,6 +62,7 @@ class Autoloader {
      * @param string $prefix The namespace prefix.
      * @param string $base_dir A base directory for class files in the namespace.
      * @param bool|null $ignore If true, then the loader will ignore the directory of the parent namespace
+     * 
      * @return void
      */
     public static function addNamespace($prefix, $base_dir, bool $ignore = null)
@@ -109,6 +110,7 @@ class Autoloader {
      * Returns the path of the package selected
      * 
      * @param $package The package to get path from
+     * 
      * @return void
      */
     protected static function getPathFromPackage($package) {

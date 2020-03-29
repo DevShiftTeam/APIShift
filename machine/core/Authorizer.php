@@ -34,12 +34,12 @@ class Authorizer {
     /**
      * Indicates that request come from a task in the DB
      */
-    const REQUEST_AS_TASK = 2;
+    const REQUEST_AS_TASK = 1;
 
     /**
      * Indicates that the request couldn't be found
      */
-    const REQUEST_INVALID = 3;
+    const REQUEST_INVALID = 2;
 
     /**
      * Validate the request - check if controller exists as core file, controller or as a task

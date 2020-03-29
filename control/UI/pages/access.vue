@@ -37,7 +37,14 @@
             if(to.path == '/access' || to.path == '/access/') this.is_main_page = true;
             else this.is_main_page = false;
             next();
-        }
+        },
+        methods: {
+            getPageTitle: function () {
+                if(app.$router.currentRoute.path === '/access') return "Manage Access";
+                for(let key in this.sub_pages) if(this.sub_pages[key].url == app.$router.currentRoute.path) return this.sub_pages[key].title;
+                return "Not Found";
+            }
+        },
     };
 </script>
 
@@ -49,7 +56,7 @@
                 <v-app-bar>
                     <v-menu offset-y>
                         <template v-slot:activator="{ on }">
-                            <v-toolbar-title v-on="on"><v-btn>Manage Access</v-btn></v-toolbar-title>
+                            <v-toolbar-title v-on="on"><v-btn>{{ getPageTitle() }}</v-btn></v-toolbar-title>
                         </template>
                         <v-list>
                             <v-list-item to="/access">Main Page</v-list-item>

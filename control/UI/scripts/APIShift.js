@@ -279,9 +279,10 @@ class APIHandler {
         this.status_codes = {
             ERROR: 0,
             SUCCESS: 1,
-            NOT_INSTALLED: 2,
-            DB_CONNECTION_FAILED: 3,
-            INVALID_CONFIG_FILE: 4
+            NO_AUTH: 2,
+            NOT_INSTALLED: 3,
+            DB_CONNECTION_FAILED: 4,
+            INVALID_CONFIG_FILE: 5
         };
     }
 
@@ -313,6 +314,7 @@ class APIHandler {
             async: !use_loader,
             dataType: "json",
             success: function (response) {
+                if(response.status == APIShift.API.status_codes.NO_AUTH && APIShift.admin_mode) nav_holder.logout();
                 handlerMethod(response);
             },
             error: function () {

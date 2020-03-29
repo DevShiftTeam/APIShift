@@ -145,7 +145,7 @@
                     to_send.inactive_timeout = this.states_collection[this.in_edit].inactive_timeout;
                 // Update
                 APIShift.API.request("SessionState", "updateSessionState", to_send, function(response) {
-                    if(response.status == true) {
+                    if(response.status == APIShift.API.status_codes.SUCCESS) {
                         APIShift.API.notify(response.data, 'success');
                     }
                     else {

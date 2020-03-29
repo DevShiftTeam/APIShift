@@ -21,7 +21,7 @@
     module.exports = {
         data() {
             return {
-                states_collection: [],
+                states_collection: {},
                 editor_previous: {},
                 current_parent: 0,
                 parents_array: [],
@@ -66,7 +66,7 @@
             updateSessionStates: function() {
                 APIShift.API.request("SessionState", "getAllSessionStates", {}, function(response) {
                     if(response.status == true) {
-                        handler.states_collection = Object.assign([], response.data);
+                        handler.states_collection = Object.assign({}, response.data);
                     }
                     else {
                         APIShift.API.notify(response.data, 'error');
@@ -167,7 +167,7 @@
 
                 // Close dialog & revert changes
                 if(this.adding_state) {
-                    this.states_collection.pop();
+                    delete this.states_collection[this.in_edit];
                     this.adding_state = false;
                 }
                 else {

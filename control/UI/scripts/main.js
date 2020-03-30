@@ -88,14 +88,15 @@ window.app = new Vue({
                     next("/main");
                 }
                 else {
-                    let page_holder = Object.values(nav_holder.pages).find(function(r) {
-                        if(r.parent == 0) return to.path === "/" + r.path;
-                        let parent_paths = to.path.split("/");
-                        return parent_paths[1] == nav_holder.pages[r.parent].path && parent_paths[2] == r.path
-                    });
-                    console.log(page_holder);
-                    if(page_holder !== undefined) app.apishift.setSubtitle(page_holder.name);
-                    else app.apishift.removeSubtitle();
+                    if(nav_holder !== undefined) {
+                        let page_holder = Object.values(nav_holder.pages).find(function(r) {
+                            if(r.parent == 0) return to.path === "/" + r.path;
+                            let parent_paths = to.path.split("/");
+                            return parent_paths[1] == nav_holder.pages[r.parent].path && parent_paths[2] == r.path
+                        });
+                        if(page_holder !== undefined) app.apishift.setSubtitle(page_holder.name);
+                        else app.apishift.removeSubtitle();
+                    }
                     next();
                 }
             });

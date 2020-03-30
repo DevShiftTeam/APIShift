@@ -55,6 +55,24 @@
             }, true);
         },
         methods: {
+            getRuleType(rule) {
+                if(rule.name.indexOf("_") == -1) return "task";
+                let prefix = rule.name.substring(0, rule.name.indexOf("_"));
+                switch(prefix) {
+                    case "function": return "func";
+                    case "state": return "state";
+                    default: return "task";
+                }
+            },
+            getRuleName(rule) {
+                if(rule.name.indexOf("_") == -1) return rule.name;
+                let prefix = rule.name.substring(0, rule.name.indexOf("_"));
+                switch(prefix) {
+                    case "function": return rule.name.substring(rule.name.indexOf("_") + 1);
+                    case "state": return rule.name.substring(rule.name.indexOf("_") + 1);
+                    default: return rule.name;
+                }
+            },
             createAccessRule: function () {
                 if(this.is_creating) {
                     this.is_creating = false;
@@ -126,6 +144,10 @@
                         <span v-else>Add new session state</span>
                     </v-tooltip>
                 </v-app-bar>
+            </template>
+            <template v-slot:item.name="{ item }">
+                <v-chip>{{ getRuleType(item) }}</v-chip>
+                <span>{{ getRuleName(item) }}</span>
             </template>
             <template v-slot:item.actions="{ item }">
                 <v-icon @click="editAccessRule(item)">

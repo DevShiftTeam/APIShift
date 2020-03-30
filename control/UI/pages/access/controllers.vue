@@ -144,6 +144,43 @@
                         <span v-else>Add new session state</span>
                     </v-tooltip>
                 </v-app-bar>
+
+                <!-- Edit/Add dialog -->
+                <v-dialog v-model="edit_dialog" max-width="500px">
+                    <v-card>
+                        <v-card-title><span class="headline">{{ is_creating ? "Add New" : "Edit" }}</span></v-card-title>
+
+                        <v-card-text>
+                            <v-container>
+                                <v-row>
+
+                                </v-row>
+                            </v-container>
+                        </v-card-text>
+
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn color="primary" text @click="save()">Save</v-btn>
+                            <v-btn text @click="discard()">Cancel</v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
+
+                <!-- Discard dialog -->
+                <v-dialog v-model="discard_dialog" max-width="500px">
+                    <v-card>
+                        <v-card-title>Sure?</v-card-title>
+                        <v-card-text>
+                            You cannot revert changes you've discarded
+                        </v-card-text>
+                        <v-divider></v-divider>
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn color="primary" text @click="discard()">Remove</v-btn>
+                            <v-btn text @click="discard_dialog = false">Cancel</v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
             </template>
             <template v-slot:item.name="{ item }">
                 <v-chip>{{ getRuleType(item) }}</v-chip>
@@ -174,43 +211,6 @@
                     </v-card>
                 </v-dialog>
             </template>
-
-            <!-- Edit dialog -->
-            <v-dialog v-model="edit_dialog" max-width="500px">
-                <v-card>
-                    <v-card-title><span class="headline">{{ is_creating ? "Add New" : "Edit" }}</span></v-card-title>
-
-                    <v-card-text>
-                        <v-container>
-                            <v-row>
-
-                            </v-row>
-                        </v-container>
-                    </v-card-text>
-
-                    <v-card-actions>
-                        <v-spacer></v-spacer>
-                        <v-btn color="primary" text @click="save()">Save</v-btn>
-                        <v-btn text @click="discard()">Cancel</v-btn>
-                    </v-card-actions>
-                </v-card>
-            </v-dialog>
-
-            <!-- Discard dialog -->
-            <v-dialog v-model="discard_dialog" max-width="500px">
-                <v-card>
-                    <v-card-title>Sure?</v-card-title>
-                    <v-card-text>
-                        You cannot revert changes you've discarded
-                    </v-card-text>
-                    <v-divider></v-divider>
-                    <v-card-actions>
-                        <v-spacer></v-spacer>
-                        <v-btn color="primary" text @click="discard()">Remove</v-btn>
-                        <v-btn text @click="discard_dialog = false">Cancel</v-btn>
-                    </v-card-actions>
-                </v-card>
-            </v-dialog>
         </v-data-table>
 </template>
 <style scoped>

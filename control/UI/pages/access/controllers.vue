@@ -238,8 +238,7 @@
                                         <v-select @change="getAvailableRulesForType()" v-model="in_edit.type" :items="access_types" label="Authentication type"></v-select>
                                     </v-col>
                                     <v-col cols="12" sm="6" md="6">
-                                        <v-select v-if="in_edit.type !== 'Function'" v-model="in_edit.name" :items="access_names" label="Task"></v-select>
-                                        <v-text-field v-else v-model="in_edit.name"  label="Fuction Name"></v-text-field>
+                                        <v-autocomplete v-model="in_edit.name" :items="access_names" label="Task"></v-autocomplete>
                                     </v-col>
                                 </v-row>
                             </v-container>

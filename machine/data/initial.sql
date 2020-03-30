@@ -399,7 +399,7 @@ CREATE TABLE `request_authorization` (
 
 LOCK TABLES `request_authorization` WRITE;
 /*!40000 ALTER TABLE `request_authorization` DISABLE KEYS */;
-INSERT INTO `request_authorization` VALUES (1,'Control','*',2),(2,'SessionState','getAllSessionStates',2),(3,'SessionState','addSessionState',2),(4,'SessionState','removeSessionState',2),(5,'SessionState','updateSessionState',2);
+INSERT INTO `request_authorization` VALUES (1,'Admin\\*','*',2);
 /*!40000 ALTER TABLE `request_authorization` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -633,4 +633,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-03-30 20:03:15
+-- Dump completed on 2020-03-31  2:11:44

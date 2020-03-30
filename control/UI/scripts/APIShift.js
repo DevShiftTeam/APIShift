@@ -65,15 +65,15 @@ class APIShift {
              */
             APIShift.API.request("Status", "getAllStatuses", {}, function (response) {
                 switch (response.status) {
-                    case 0:
+                    case APIShift.API.status_codes.ERROR:
                         APIShift.API.notify("Error: " + response.data, "error");
                         break;
-                    case 1:
+                    case APIShift.API.status_codes.SUCCESS:
                         for(let status in response.data)
                             APIShift.API.status_codes[response.data[status].name] = 4 + response.data[status].id;
                             APIShift.load_components = true;
                         break;
-                    case 2:
+                    case APIShift.API.status_codes.NOT_INSTALLED:
                         // Redirect user to admin page if system is not installed
                         if (!APIShift.admin_mode) location.href = MyServer + "/control/index.html";
                         // Route to installation page
@@ -84,6 +84,10 @@ class APIShift {
                             });
                             APIShift.installed = false; // Don't continue loading system if not installed
                         }
+                        break;
+                    default:
+                        APIShift.API.notify(response.data, 'error');
+                        return;
                 }
             }, true);
 

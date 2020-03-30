@@ -60,22 +60,39 @@ window.app = new Vue({
             app.$router.addRoutes(APIShift.admin_routes);
 
             // Handle first load of page
-            if(!APIShift.installed) app.$router.push("/installer");
+            if(!APIShift.installed) {
+                app.apishift.setSubtitle("Installer");
+                app.$router.push("/installer");
+            }
             else if(!APIShift.logged_in) {
+                app.apishift.setSubtitle("Login");
                 app.$router.push("/login");
             }
             else if(app.$route.path == "/") app.$router.push("/main");
 
             // Navigation gaurd for control panel
             app.$router.beforeEach((to, from, next) => {
-                app.apishift.removeSubtitle();
                 // Move to installation if not installed
-                if(to.path != "/installer" && !APIShift.installed) next("/installer");
+                if(to.path != "/installer" && !APIShift.installed) {
+                    app.apishift.setSubtitle("Installer");
+                    next("/installer");
+                }
                 // Move to login if not authenticated
-                else if(to.path != "/login" && !APIShift.logged_in & APIShift.installed) next("/login");
+                else if(to.path != "/login" && !APIShift.logged_in & APIShift.installed) {
+                    app.apishift.setSubtitle("Login");
+                    next("/login");
+                }
                 // Move to main if authenticated
-                else if((to.path == "/login" || to.path == "/") && APIShift.logged_in) next("/main");
-                else next();
+                else if((to.path == "/login" || to.path == "/") && APIShift.logged_in) {
+                    app.apishift.removeSubtitle();
+                    next("/main");
+                }
+                else {
+                    let page_holder = nav_holder.pages.find(r => to.path === "/" + r.path);
+                    if(page_holder !== undefined) app.apishift.setSubtitle(page_holder.name);
+                    else app.apishift.removeSubtitle();
+                    next();
+                }
             });
         });
     },

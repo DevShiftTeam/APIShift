@@ -32,6 +32,7 @@
         },
         created() {
             this.is_main_page = app.$router.currentRoute.path === '/access';
+            window.holder = this;
         },
         beforeRouteUpdate (to, from, next) {
             if(to.path == '/access' || to.path == '/access/') this.is_main_page = true;
@@ -50,8 +51,8 @@
 
 <template>
     <v-content>
-        <v-container class="session-display" fluid fill-height>
-            <v-card class="mx-auto" width="90%" min-height="75%" elevation-2>
+        <v-container fluid fill-height>
+            <v-card v-if="is_main_page" class="mx-auto" width="90%" min-height="75%" elevation-2>
                 <!-- Header -->
                 <v-app-bar>
                     <v-menu offset-y>
@@ -60,14 +61,15 @@
                         </template>
                         <v-list>
                             <v-list-item to="/access">Main Page</v-list-item>
-                            <v-list-item v-for="(item, key) in  sub_pages" :key="key" :to="item.url">{{ item.title }}</v-list-item>
+                            <v-list-item v-for="(item, key) in sub_pages" :key="key" :to="item.url">{{ item.title }}</v-list-item>
                         </v-list>
+                    </v-menu>
                     <v-spacer></v-spacer>
                 </v-app-bar>
 
                 <!-- Body -->
                 <div class="overflow-box" v-bar>
-                    <div v-if="is_main_page">
+                    <div>
                         <v-layout class="mx-auto" align-start justify-center row wrap>
                             <v-card v-for="(item, key) in  sub_pages" :key="key" :to="item.url" class="page-card" elevation-4 outlined>
                                 <v-container>
@@ -81,9 +83,9 @@
                             </v-card>
                         </v-layout>
                     </div>
-                    <router-view v-else></router-view>
                 </div>
             </v-card>
+            <router-view v-else></router-view>
         </v-container>
     </v-content>
 </template>

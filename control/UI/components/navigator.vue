@@ -30,7 +30,7 @@
         created () {
             window.nav_holder = this;
             // Load control panel pages
-            APIShift.API.request("Control", "getPages", {}, function (response) {
+            APIShift.API.request("Admin\\Control", "getPages", {}, function (response) {
                 if(response.status == APIShift.API.status_codes.SUCCESS) {
                     nav_holder.pages = Object.assign({}, response.data);
                     // Add routes
@@ -76,7 +76,7 @@
                 return window.app.$vuetify.theme.dark;
             },
             logout: function() {
-                APIShift.API.request("SessionState", "changeState", {state: "DEFAULT_VIEWER"}, function (response) {
+                APIShift.API.request("Main\\SessionState", "changeState", {state: "DEFAULT_VIEWER"}, function (response) {
                     if(response.status == 1) {
                         APIShift.API.notify("Logged out", "success");
                         // Load login screen

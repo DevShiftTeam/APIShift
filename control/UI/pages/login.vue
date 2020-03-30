@@ -112,7 +112,7 @@
                 to_send['state'] = "ADMIN_STATE"; //  Request to login in admin state
 
                 // Handle login
-                APIShift.API.request("SessionState", "changeState", to_send, function (response) {
+                APIShift.API.request("Main\\SessionState", "changeState", to_send, function (response) {
                     if(response.status == APIShift.API.status_codes.ERROR) {
                         APIShift.API.notify("Error: " + response.data, "error");
                     }

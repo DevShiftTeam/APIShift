@@ -64,6 +64,41 @@ class Task {
     }
 
     /**
+     * 
+     */
+    private static function isDirectiveMatching($directive, $str) {
+        // Check if matches directly
+        if($directive == $str || $directive == '*') return true;
+        
+        $dir_rules = explode('*', $directive);
+        if(count($dir_rules) == 0) return false;
+        $need_break = false;
+        $last_pos = -1;
+        $search_str = $str;
+        
+        // Validate matching directive
+        if($dir_rules[0] == "") $last_pos = 0;
+        foreach($dir_rules as $req) {
+            if($req != "") {
+                $match = strpos($search_str, $req);
+
+                if(($last_pos === -1 && $match === 0) || ($match > -1 && $last_pos !== -1)) {
+                    $search_str = substr($search_str, $match + strlen($req) - 1);
+                    continue;
+                }
+                else {
+                    $need_break = true;
+                    break;
+                }
+            }
+        }
+
+        // Add task if match found
+        if(!$need_break) return true;
+        return false;
+    }
+
+    /**
      * Find all authorization tasks related to the current request
      * 
      * @param string $controller Name of the controller to authorize
@@ -75,21 +110,16 @@ class Task {
         // Cannot continue using the DB if system not connected
         if (!Configurations::INSTALLED) return [];
 
-        // Find all tasks associated to request
-        $task_collection = [];
-        DatabaseManager::fetchInto("main", $task_collection,
-            "SELECT task FROM request_authorization WHERE controller = :controller AND (method = :method OR method = '*')",
-            array(
-                'controller' => $controller,
-                'method' => $method
-            )
-        );
-        if(!is_array($task_collection) || count($task_collection) == 0) return [];
-
-        // Filter tasks
         $task_list = [];
-        // Construct valid tasks list
-        foreach($task_collection as $task) $task_list[] = $task['task'];
+        $req_auth = CacheManager::get("RequestAuthorizations");
+        // Search string to help itereate request validation
+        $controller_search_str = $controller;
+
+        // Find all tasks associated to request
+        foreach($req_auth as $key => $val)
+            if(self::isDirectiveMatching($val['controller'], $controller) && self::isDirectiveMatching($val['method'], $method))
+                $task_list[] = $val['task'];
+        
         // Run valid tasks
         return Task::run($task_list);
     }

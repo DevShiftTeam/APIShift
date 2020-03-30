@@ -129,6 +129,14 @@
                 Status::message(Status::ERROR, "Couldn't retrieve collection of connection node types");
             self::set('ConnectionNodeTypes', $temp_connection_node_types);
         }
+
+        // Load request authorizations to cache
+        if($refresh || !self::exists('RequestAuthorizations')) {
+            $temp_request_auth = [];
+            if(DatabaseManager::fetchInto("main", $temp_request_auth, "SELECT * FROM request_authorization", [], 'id') === false)
+                Status::message(Status::ERROR, "Couldn't retrieve collection of request authorizations");
+            self::set('RequestAuthorizations', $temp_request_auth);
+        }
     }
 
     /**

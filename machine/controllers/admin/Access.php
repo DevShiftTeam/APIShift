@@ -19,7 +19,7 @@
  * @author Sapir Shemer
  */
 
-namespace APIShift\Controllers;
+namespace APIShift\Controllers\Admin;
 
 use APIShift\Core\DatabaseManager;
 use APIShift\Core\Status;

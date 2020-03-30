@@ -19,22 +19,29 @@
  * @author Sapir Shemer
  */
 
-namespace APIShift\Controllers;
+namespace APIShift\Controllers\Main;
 
-use APIShift\Core\DatabaseManager;
+use APIShift\Core;
 use APIShift\Core\Status;
 
 /**
- * Interface containing the available main request of the system's control panel
+ * Provides a set of request handlers that allows users to recieve general information about the session state
  */
-class Control {
+class SessionState {
     /**
-     * Returns all the pages of the control panel
+     * Get the current session state used
      */
-    public static function getPages() {
-        $res = [];
-        if(DatabaseManager::fetchInto("main", $res, "SELECT * FROM admin_pages", [], 'id') === false) Status::message(Status::ERROR, "Couldn't retrieve pages");;
-        Status::message(Status::SUCCESS, $res);
+    public static function getCurrentSessionState() {
+       Status::message(Status::SUCCESS, $_SESSION['state']);
+    }
+
+    /**
+     * Change the current state to a new one.
+     * Automatically run authorization process defined for the state
+     */
+    public static function changeState() {
+        Core\SessionState::changeState($_POST['state']);
+        Status::message(Status::SUCCESS, "State Changed!");
     }
 }
 ?>

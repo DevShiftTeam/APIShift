@@ -19,7 +19,7 @@
  * @author Sapir Shemer
  */
 
-namespace APIShift\Controllers;
+namespace APIShift\Controllers\Main;
 use APIShift\Core;
 
 /**

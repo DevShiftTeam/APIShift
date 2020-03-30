@@ -64,7 +64,7 @@
                 this.current_parent = parent;
             },
             updateSessionStates: function() {
-                APIShift.API.request("SessionState", "getAllSessionStates", {}, function(response) {
+                APIShift.API.request("Admin\\SessionState", "getAllSessionStates", {}, function(response) {
                     if(response.status == true) {
                         handler.states_collection = Object.assign({}, response.data);
                     }
@@ -121,7 +121,7 @@
                 // Create a new state
                 if(this.adding_state) {
                     this.adding_state = false
-                    APIShift.API.request("SessionState", "addSessionState", this.states_collection[this.in_edit], function(response) {
+                    APIShift.API.request("Admin\\SessionState", "addSessionState", this.states_collection[this.in_edit], function(response) {
                         if(response.status == true) {
                             APIShift.API.notify(response.data, 'success');
                         }
@@ -144,7 +144,7 @@
                 if(this.editor_previous.inactive_timeout != this.states_collection[this.in_edit].inactive_timeout)
                     to_send.inactive_timeout = this.states_collection[this.in_edit].inactive_timeout;
                 // Update
-                APIShift.API.request("SessionState", "updateSessionState", to_send, function(response) {
+                APIShift.API.request("Admin\\SessionState", "updateSessionState", to_send, function(response) {
                     if(response.status == APIShift.API.status_codes.SUCCESS) {
                         APIShift.API.notify(response.data, 'success');
                     }
@@ -180,7 +180,7 @@
                 this.discard_dialog = false;
             },
             deleteState: function(id) {
-                APIShift.API.request("SessionState", "removeSessionState", { 'id' : id }, function(response) {
+                APIShift.API.request("Admin\\SessionState", "removeSessionState", { 'id' : id }, function(response) {
                     if(response.status == true) {
                         APIShift.API.notify(response.data, 'success');
                     }

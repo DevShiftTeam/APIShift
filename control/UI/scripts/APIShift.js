@@ -63,7 +63,7 @@ class APIShift {
             /**
              * Fill in API data from server
              */
-            APIShift.API.request("Status", "getAllStatuses", {}, function (response) {
+            APIShift.API.request("Main\\Status", "getAllStatuses", {}, function (response) {
                 switch (response.status) {
                     case APIShift.API.status_codes.ERROR:
                         APIShift.API.notify("Error: " + response.data, "error");
@@ -136,7 +136,7 @@ class APIShift {
      */
     isSessionState(state_id) {
         let result = false;
-        APIShift.API.request("SessionState", "getCurrentSessionState", {}, function (response) {
+        APIShift.API.request("Main\\SessionState", "getCurrentSessionState", {}, function (response) {
             if(response.status == 1) result = response.data == state_id;
             else APIShift.API.notify(APIShift.API.getStatusName(response.status) + ": " + response.data, "error");
         }, true);

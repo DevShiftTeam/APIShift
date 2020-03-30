@@ -19,12 +19,12 @@
  * @author Sapir Shemer
  */
 
-namespace APIShift\Controllers;
+namespace APIShift\Controllers\Main;
 
 use APIShift\Core;
 use APIShift\Core\Configurations;
-use \APIShift\Core\Status;
-use \APIShift\Models;
+use APIShift\Core\Status;
+use APIShift\Models;
 
 /**
  * Controller interface that holds all the request triggers that help install the system

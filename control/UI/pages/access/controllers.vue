@@ -24,7 +24,7 @@
             return {
                 controller_access_list: [],
                 access_types: [
-                    "", "Function", "State", "Task"
+                    "Function", "State", "Task"
                 ],
                 access_names: [],
                 search: '',
@@ -53,7 +53,7 @@
         },
         methods: {
             updateControllerTasks: function() {
-                APIShift.API.request("Access", "getControllersTasks", {}, function (response) {
+                APIShift.API.request("Admin\\Access", "getControllersTasks", {}, function (response) {
                 if(response.status == APIShift.API.status_codes.SUCCESS) {
                     cahandler.controller_access_list = Object.assign([], response.data);
                 } else {
@@ -122,7 +122,7 @@
                     return;
                 }
 
-                APIShift.API.request("Access", "removeAccessRule", { elem: 'controller', id: this.in_edit.id }, function(response) {
+                APIShift.API.request("Admin\\Access", "removeAccessRule", { elem: 'controller', id: this.in_edit.id }, function(response) {
                     if(response.status === APIShift.API.status_codes.SUCCESS) {
                         APIShift.API.notify(response.data, 'success');
                     }
@@ -141,7 +141,7 @@
                         break;
                     case "State":
                         // Get all available states
-                        APIShift.API.request("SessionState", "getAllSessionStates", {}, function(response) {
+                        APIShift.API.request("Admin\\SessionState", "getAllSessionStates", {}, function(response) {
                             cahandler.access_names = [];
                             if(response.status == APIShift.API.status_codes.SUCCESS) {
                                 for(key in response.data) {
@@ -162,7 +162,7 @@
                         break;
                     default:
                         // Get all available tasks
-                        APIShift.API.request("Access", "getAllTasks", {}, function(response) {
+                        APIShift.API.request("Admin\\Access", "getAllTasks", {}, function(response) {
                             cahandler.access_names = [];
                             if(response.status == APIShift.API.status_codes.SUCCESS) {
                                 for(key in response.data) {

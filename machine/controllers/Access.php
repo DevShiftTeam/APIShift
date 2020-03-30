@@ -42,7 +42,7 @@ class Access {
      */
     public static function getControllersTasks() {
         $res = [];
-        if(DatabaseManager::fetchInto("main", $res, "SELECT * FROM tasks JOIN request_authorization ON tasks.id = request_authorization.task", [], 'id') === false)
+        if(DatabaseManager::fetchInto("main", $res, "SELECT * FROM tasks JOIN request_authorization ON tasks.id = request_authorization.task") === false)
             Status::message(Status::ERROR, "Couldn't retrieve controller tasks");;
         Status::message(Status::SUCCESS, $res);
     }
@@ -72,11 +72,11 @@ class Access {
         
         switch($_POST['elem']) {
             case 'session':
-                $res = DatabaseManager::query("main", "UPDATE session_states SET auth_task = NULL WHERE id = :id", $_POST['rule']);
+                $res = DatabaseManager::query("main", "UPDATE session_states SET auth_task = NULL WHERE id = :id", json_decode($_POST['rule']));
                 if(!$res) Status::message(Status::ERROR, "Couldn't remove rule from DB");
                 break;
             case 'controller':
-                $res = DatabaseManager::query("main", "DELETE FROM request_authorization WHERE id = :id", $_POST['rule']);
+                $res = DatabaseManager::query("main", "DELETE FROM request_authorization WHERE id = :id", [ 'id' => $_POST['id']]);
                 if(!$res) Status::message(Status::ERROR, "Couldn't remove rule from DB");
                 break;
             case 'database':

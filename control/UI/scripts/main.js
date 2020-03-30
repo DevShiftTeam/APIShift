@@ -88,7 +88,7 @@ window.app = new Vue({
                     next("/main");
                 }
                 else {
-                    if(nav_holder !== undefined) {
+                    if(window.nav_holder !== undefined) {
                         let page_holder = Object.values(nav_holder.pages).find(function(r) {
                             if(r.parent == 0) return to.path === "/" + r.path;
                             let parent_paths = to.path.split("/");

@@ -49,16 +49,18 @@
         created() {
             APIShift.Loader.changeLoader("access_controllers", this.loader);
             window.cahandler = this;
-
-            APIShift.API.request("Access", "getControllersTasks", {}, function (response) {
+            this.updateControllerTasks();            
+        },
+        methods: {
+            updateControllerTasks: function() {
+                APIShift.API.request("Access", "getControllersTasks", {}, function (response) {
                 if(response.status == APIShift.API.status_codes.SUCCESS) {
                     cahandler.controller_access_list = Object.assign([], response.data);
                 } else {
                     APIShift.API.notify(response.data, "error");
                 }
             }, true);
-        },
-        methods: {
+            },
             getRuleType(rule) {
                 if(rule.name.indexOf("_") == -1) return "Task";
                 let prefix = rule.name.substring(0, rule.name.indexOf("_"));
@@ -112,12 +114,22 @@
                 this.in_edit.type = this.getRuleType(access_rule);
                 this.getAvailableRulesForType();
             },
-            removeAccessRule: function(access_rule) {
+            removeAccessRule: function(rule_id) {
                 if(!this.delete_dialog) {
+                    this.in_edit = Object.assign({}, this.controller_access_list.find(r => r.id === rule_id));
                     this.delete_dialog = true;
                     return;
                 }
 
+                APIShift.API.request("Access", "removeAccessRule", { elem: 'controller', id: this.in_edit.id }, function(response) {
+                    if(response.status === APIShift.API.status_codes.SUCCESS) {
+                        APIShift.API.notify(response.data, 'success');
+                    }
+                    else {
+                        APIShift.API.notify(response.data, 'error');
+                    }
+                    cahandler.updateControllerTasks();
+                });
                 this.delete_dialog = false;
             },
             getAvailableRulesForType() {
@@ -256,10 +268,12 @@
                     </v-card>
                 </v-dialog>
             </template>
+
             <template v-slot:item.name="{ item }">
                 <v-chip>{{ getRuleType(item) }}</v-chip>
                 <span>{{ getRuleName(item) }}</span>
             </template>
+
             <template v-slot:item.actions="{ item }">
                 <v-icon @click="editAccessRule(item)">
                     mdi-pencil-circle
@@ -267,7 +281,7 @@
                 <!-- Delete dialog -->
                 <v-dialog v-model="delete_dialog" max-width="500px">
                     <template v-slot:activator="{ on }">
-                        <v-icon v-on="on" @click="removeAccessRule(item)">
+                        <v-icon v-on="on" @click="removeAccessRule(item.id)">
                             mdi-delete-circle
                         </v-icon>
                     </template>
@@ -279,7 +293,7 @@
                         <v-divider></v-divider>
                         <v-card-actions>
                             <v-spacer></v-spacer>
-                            <v-btn color="primary" text @click="removeAccessRule(item)">Remove</v-btn>
+                            <v-btn color="primary" text @click="removeAccessRule(item.id)">Remove</v-btn>
                             <v-btn text @click="delete_dialog = false">Cancel</v-btn>
                         </v-card-actions>
                     </v-card>

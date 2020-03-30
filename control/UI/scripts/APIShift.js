@@ -30,12 +30,23 @@ let MyServer = "https://" + location.host;
  * APIShift library constructor
  */
 class APIShift {
-    constructor(loader = app.loader) {
+    constructor(loader = app.loader, title = "APIShift") {
+        // Store site title reference
+        document.title = title;
+        this.main_title = title;
         // Set default loader
         APIShift.Loader.changeLoader("main", loader);
         // Initialize
         APIShift.Loader.message("Loading System");
         this.initialize();
+    }
+
+    setSubtitle(sub_title) {
+        document.title = this.main_title + " | " + sub_title;
+    }
+
+    removeSubtitle() {
+        document.title = this.main_title;
     }
 
     initialize() {

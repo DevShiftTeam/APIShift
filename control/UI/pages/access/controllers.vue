@@ -103,6 +103,7 @@
                 if(this.is_creating) this.is_creating = false;
                 this.edit_dialog = false;
                 this.discard_dialog = false;
+                this.access_names = []; // Empty access names
             },
             save: function() {
 

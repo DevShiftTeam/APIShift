@@ -53,6 +53,40 @@ class Access {
     public static function createAccessRule() {
         // TODO: Create/get access rule as task
         // TODO: assign task to designated element
+        if(!isset($_POST['elem']) || $_POST['elem'] == "")
+            Status::message(Status::ERROR, "No element to assign access rule was specified");
+        
+        // Determine to which system elemect the rule applies
+        switch($_POST['elem']) {
+            case 'session':
+                // TODO: finish here
+                break;
+            case 'controller':
+                // Determine to method of authentication
+                switch($_POST['rule']['type']) {
+                    case "State":
+                        // TODO: check if state exists
+                        // TODO: add state as task
+                        // TODO: assign task to controller
+                        break;
+                    case "Function":
+                        // TODO: check if function exists
+                        // TODO: add function as task
+                        // TODO: assign task to controller
+                        break;
+                    default:
+                        // TODO: check if task exists
+                        // TODO: assign task to controller
+                        break;
+                }
+                break;
+            case 'database':
+                // TODO: Finish database access rule interface
+                break;
+            default: Status::message(Status::ERROR, "Unknown system element");
+        }
+
+        Status::message(Status::SUCCESS, "Created Successfully!");
     }
     
     /**
@@ -70,9 +104,10 @@ class Access {
         if(!isset($_POST['elem']) || $_POST['elem'] == "")
             Status::message(Status::ERROR, "No element to assign access rule was specified");
         
+        // Determine to which system elemect the rule applies
         switch($_POST['elem']) {
             case 'session':
-                $res = DatabaseManager::query("main", "UPDATE session_states SET auth_task = NULL WHERE id = :id", json_decode($_POST['rule']));
+                $res = DatabaseManager::query("main", "UPDATE session_states SET auth_task = NULL WHERE id = :id", $_POST['rule']);
                 if(!$res) Status::message(Status::ERROR, "Couldn't remove rule from DB");
                 break;
             case 'controller':

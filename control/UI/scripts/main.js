@@ -68,6 +68,7 @@ window.app = new Vue({
 
             // Navigation gaurd for control panel
             app.$router.beforeEach((to, from, next) => {
+                app.apishift.removeSubtitle();
                 // Move to installation if not installed
                 if(to.path != "/installer" && !APIShift.installed) next("/installer");
                 // Move to login if not authenticated
@@ -75,7 +76,7 @@ window.app = new Vue({
                 // Move to main if authenticated
                 else if((to.path == "/login" || to.path == "/") && APIShift.logged_in) next("/main");
                 else next();
-            })
+            });
         });
     },
     methods: {

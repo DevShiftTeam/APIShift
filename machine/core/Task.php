@@ -64,7 +64,12 @@ class Task {
     }
 
     /**
+     * Matches search directive to a string, using the '*' directive
      * 
+     * @param string $directive Directive to check
+     * @param string $str String to match
+     * 
+     * @return boolean Whether matching (TRUE) or not (FALSE)
      */
     private static function isDirectiveMatching($directive, $str) {
         // Check if matches directly

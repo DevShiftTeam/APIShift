@@ -44,7 +44,9 @@
                     },
                     { text: 'Task name', value: 'name' }
                 ],
-
+                in_edit: 0,
+                is_creating: false,
+                dialog: false
             }
         },
         created() {
@@ -58,33 +60,90 @@
                     APIShift.API.notify(response.data, "error");
                 }
             }, true);
-        }
+        },
+        methods: {
+            createAccessRule: function () {
+                if(this.is_creating) {
+                    this.is_creating = false;
+                    this.dialog = false;
+                    return;
+                }
+
+                this.is_creating = true;
+                this.dialog = true;
+            },
+            discard: function() {
+                if(this.is_creating) this.is_creating = false;
+                this.dialog = false;
+            },
+            save: function() {
+
+            },
+            editAccessRule: function() {
+
+            },
+            removeAccessRule: function() {
+                
+            }
+        },
     };
 </script>
 
 <template>
     <div>
-        <v-card>
-            <v-card-title>
-                Controllers
-                <v-spacer></v-spacer>
-                <v-text-field
-                    v-model="search"
-                    append-icon="mdi-magnify"
-                    label="Search"
-                    single-line
-                    :loading="loader.visible"
-                    :loading-text="loader.message"
-                    hide-details
-                ></v-text-field>
-            </v-card-title>
+        <v-data-table
+            :headers="headers"
+            :items="controller_access_list"
+            :search="search">
+            <template v-slot:top>
+                <v-toolbar>
+                    <v-card-title>Controllers</v-card-title>
+                    <v-divider class="mx-4" inset vertical></v-divider>
+                    <v-spacer></v-spacer>
+                    <v-text-field
+                        v-model="search"
+                        append-icon="mdi-magnify"
+                        label="Search"
+                        single-line
+                        :loading="loader.visible"
+                        :loading-text="loader.message"
+                        hide-details
+                    ></v-text-field>
+                    <v-spacer></v-spacer>
+                    <v-tooltip top>
+                        <template #activator="{ on }">
+                            <v-btn icon v-on="on" @click="createAccessRule()">
+                                <v-icon v-if="is_creating">mdi-close-circle</v-icon>
+                                <v-icon v-else>mdi-plus-circle</v-icon>
+                            </v-btn>
+                        </template>
+                        <span v-if="is_creating">Discard new session state</span>
+                        <span v-else>Add new session state</span>
+                    </v-tooltip>
+                </v-toolbar>
+            </template>
+        </v-data-table>
 
-            <v-data-table
-                :headers="headers"
-                :items="controller_access_list"
-                :search="search"
-            ></v-data-table>
-        </v-card>
+        <!-- Edit dialog -->
+        <v-dialog v-model="dialog" max-width="500px">
+            <v-card>
+                <v-card-title><span class="headline">{{ is_creating ? "Add New" : "Edit" }}</span></v-card-title>
+
+                <v-card-text>
+                    <v-container>
+                        <v-row>
+
+                        </v-row>
+                    </v-container>
+                </v-card-text>
+
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn text @click="discard()">Cancel</v-btn>
+                    <v-btn text @click="save()">Save</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
     </div>
 </template>
 <style scoped>

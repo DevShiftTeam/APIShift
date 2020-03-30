@@ -33,7 +33,7 @@ class Access {
      */
     public static function getAllTasks() {
         $res = [];
-        if(DatabaseManager::fetchInto("main", $res, "SELECT * FROM tasks", [], 'id') === false) Status::message(Status::ERROR, "Couldn't retrieve tasks");;
+        if(DatabaseManager::fetchInto("main", $res, "SELECT * FROM tasks") === false) Status::message(Status::ERROR, "Couldn't retrieve tasks");;
         Status::message(Status::SUCCESS, $res);
     }
 
@@ -45,6 +45,47 @@ class Access {
         if(DatabaseManager::fetchInto("main", $res, "SELECT * FROM tasks JOIN request_authorization ON tasks.id = request_authorization.task", [], 'id') === false)
             Status::message(Status::ERROR, "Couldn't retrieve controller tasks");;
         Status::message(Status::SUCCESS, $res);
+    }
+
+    /**
+     * Create a new access rule
+     */
+    public static function createAccessRule() {
+        // TODO: Create/get access rule as task
+        // TODO: assign task to designated element
+    }
+    
+    /**
+     * Edit an acess rule
+     */
+    public static function editAccessRule() {
+        // TODO: Create/Get access rule as task if changed
+        // TODO: assign task to designated element
+    }
+
+    /**
+     * Remove an access rule
+     */
+    public static function removeAccessRule() {
+        if(!isset($_POST['elem']) || $_POST['elem'] == "")
+            Status::message(Status::ERROR, "No element to assign access rule was specified");
+        
+        switch($_POST['elem']) {
+            case 'session':
+                $res = DatabaseManager::query("main", "UPDATE session_states SET auth_task = NULL WHERE id = :id", $_POST['rule']);
+                if(!$res) Status::message(Status::ERROR, "Couldn't remove rule from DB");
+                break;
+            case 'controller':
+                $res = DatabaseManager::query("main", "DELETE FROM request_authorization WHERE id = :id", $_POST['rule']);
+                if(!$res) Status::message(Status::ERROR, "Couldn't remove rule from DB");
+                break;
+            case 'database':
+                // TODO: Finish database access rule interface
+                break;
+            default: Status::message(Status::ERROR, "Unknown system element");
+        }
+
+        Status::message(Status::SUCCESS, "Updated Successfully!");
     }
 }
 ?>

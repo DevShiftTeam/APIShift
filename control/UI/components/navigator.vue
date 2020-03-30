@@ -79,7 +79,7 @@
             logout: function() {
                 APIShift.API.request("SessionState", "changeState", {state: "DEFAULT_VIEWER"}, function (response) {
                     if(response.status == 1) {
-                        APIShift.API.notify("Logged out successfully", "success");
+                        APIShift.API.notify("Logged out", "success");
                         // Load login screen
                         APIShift.logged_in = false;
                         app.$router.push('login');

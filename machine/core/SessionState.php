@@ -118,7 +118,7 @@ class SessionState {
 
             // Run and validate processes
             if(!Task::validateResult(Task::run($state_collection[$state_id]['auth_task'])))
-                Status::message(Status::ERROR, "Authorization failed, please check credentials");
+                Status::message(Status::NO_AUTH, "Authorization failed, please check credentials");
             // TODO: Add necessary parameters to session from params/database
 
             // Save session active timeout

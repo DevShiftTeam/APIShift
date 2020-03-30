@@ -34,21 +34,26 @@ class Status {
      * Success message ID
      */
     const SUCCESS = 1;
+
+    /**
+     * No Authorization code
+     */
+    const NO_AUTH = 2;
     
     /**
      * Not instlled message ID
      */
-    const NOT_INSTALLED = 2;
+    const NOT_INSTALLED = 3;
 
     /**
      * COuldn't connect to DB message ID
      */
-    const DB_CONNECTION_FAILED = 3;
+    const DB_CONNECTION_FAILED = 4;
 
     /**
      * Configuration file damaged message ID
      */
-    const INVALID_CONFIG_FILE = 4;
+    const INVALID_CONFIG_FILE = 5;
 
     /**
      * Container of the last status output

@@ -30,12 +30,23 @@ let MyServer = "https://" + location.host;
  * APIShift library constructor
  */
 class APIShift {
-    constructor(loader = app.loader) {
+    constructor(loader = app.loader, title = "APIShift") {
+        // Store site title reference
+        document.title = title;
+        this.main_title = title;
         // Set default loader
         APIShift.Loader.changeLoader("main", loader);
         // Initialize
         APIShift.Loader.message("Loading System");
         this.initialize();
+    }
+
+    setSubtitle(sub_title) {
+        document.title = this.main_title + " | " + sub_title;
+    }
+
+    removeSubtitle() {
+        document.title = this.main_title;
     }
 
     initialize() {
@@ -54,15 +65,15 @@ class APIShift {
              */
             APIShift.API.request("Status", "getAllStatuses", {}, function (response) {
                 switch (response.status) {
-                    case 0:
+                    case APIShift.API.status_codes.ERROR:
                         APIShift.API.notify("Error: " + response.data, "error");
                         break;
-                    case 1:
+                    case APIShift.API.status_codes.SUCCESS:
                         for(let status in response.data)
                             APIShift.API.status_codes[response.data[status].name] = 4 + response.data[status].id;
                             APIShift.load_components = true;
                         break;
-                    case 2:
+                    case APIShift.API.status_codes.NOT_INSTALLED:
                         // Redirect user to admin page if system is not installed
                         if (!APIShift.admin_mode) location.href = MyServer + "/control/index.html";
                         // Route to installation page
@@ -73,6 +84,10 @@ class APIShift {
                             });
                             APIShift.installed = false; // Don't continue loading system if not installed
                         }
+                        break;
+                    default:
+                        APIShift.API.notify(response.data, 'error');
+                        return;
                 }
             }, true);
 
@@ -279,9 +294,10 @@ class APIHandler {
         this.status_codes = {
             ERROR: 0,
             SUCCESS: 1,
-            NOT_INSTALLED: 2,
-            DB_CONNECTION_FAILED: 3,
-            INVALID_CONFIG_FILE: 4
+            NO_AUTH: 2,
+            NOT_INSTALLED: 3,
+            DB_CONNECTION_FAILED: 4,
+            INVALID_CONFIG_FILE: 5
         };
     }
 
@@ -313,6 +329,7 @@ class APIHandler {
             async: !use_loader,
             dataType: "json",
             success: function (response) {
+                if(response.status == APIShift.API.status_codes.NO_AUTH && APIShift.admin_mode) nav_holder.logout();
                 handlerMethod(response);
             },
             error: function () {

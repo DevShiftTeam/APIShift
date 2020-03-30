@@ -30,23 +30,16 @@
                     processes: 0
                 },
                 headers: [
-                    {
-                        text: 'Controller',
-                        align: 'start',
-                        sortable: false,
-                        value: 'controller',
-                    },
-                    {
-                        text: 'Method',
-                        align: 'start',
-                        sortable: false,
-                        value: 'method',
-                    },
-                    { text: 'Task name', value: 'name' }
+                    { text: 'Controller', value: 'controller', },
+                    { text: 'Method', value: 'method', },
+                    { text: 'Task name', value: 'name' },
+                    { text: 'Actions', value: 'actions', sortable: false }
                 ],
                 in_edit: 0,
                 is_creating: false,
-                dialog: false
+                delete_dialog: false,
+                edit_dialog: false,
+                discard_dialog: false
             }
         },
         created() {
@@ -65,25 +58,30 @@
             createAccessRule: function () {
                 if(this.is_creating) {
                     this.is_creating = false;
-                    this.dialog = false;
+                    this.edit_dialog = false;
                     return;
                 }
 
                 this.is_creating = true;
-                this.dialog = true;
+                this.edit_dialog = true;
             },
             discard: function() {
                 if(this.is_creating) this.is_creating = false;
-                this.dialog = false;
+                this.edit_dialog = false;
             },
             save: function() {
 
             },
-            editAccessRule: function() {
-
+            editAccessRule: function(access_rule) {
+                this.edit_dialog = true;
             },
-            removeAccessRule: function() {
-                
+            removeAccessRule: function(access_rule) {
+                if(!this.delete_dialog) {
+                    this.delete_dialog = true;
+                    return;
+                }
+
+                this.delete_dialog = false;
             }
         },
     };
@@ -107,8 +105,7 @@
                         single-line
                         :loading="loader.visible"
                         :loading-text="loader.message"
-                        hide-details
-                    ></v-text-field>
+                        hide-details></v-text-field>
                     <v-spacer></v-spacer>
                     <v-tooltip top>
                         <template #activator="{ on }">
@@ -122,10 +119,35 @@
                     </v-tooltip>
                 </v-toolbar>
             </template>
+            <template v-slot:item.actions="{ item }">
+                <v-icon @click="editAccessRule(item)">
+                    mdi-pencil-circle
+                </v-icon>
+                <!-- Delete dialog -->
+                <v-dialog v-model="delete_dialog" max-width="500px">
+                    <template v-slot:activator="{ on }">
+                        <v-icon v-on="on" @click="removeAccessRule(item)">
+                            mdi-delete-circle
+                        </v-icon>
+                    </template>
+                    <v-card>
+                        <v-card-title>Sure?</v-card-title>
+                        <v-card-text>
+                            Deleting an important access rule might lead to an information leak
+                        </v-card-text>
+                        <v-divider></v-divider>
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn color="primary" text @click="removeAccessRule(item)">Remove</v-btn>
+                            <v-btn text @click="delete_dialog = false">Cancel</v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
+            </template>
         </v-data-table>
 
         <!-- Edit dialog -->
-        <v-dialog v-model="dialog" max-width="500px">
+        <v-dialog v-model="edit_dialog" max-width="500px">
             <v-card>
                 <v-card-title><span class="headline">{{ is_creating ? "Add New" : "Edit" }}</span></v-card-title>
 
@@ -139,8 +161,24 @@
 
                 <v-card-actions>
                     <v-spacer></v-spacer>
+                    <v-btn color="primary" text @click="save()">Save</v-btn>
                     <v-btn text @click="discard()">Cancel</v-btn>
-                    <v-btn text @click="save()">Save</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
+        <!-- Discard dialog -->
+        <v-dialog v-model="discard_dialog" max-width="500px">
+            <v-card>
+                <v-card-title>Sure?</v-card-title>
+                <v-card-text>
+                    You cannot revert changes you've discarded
+                </v-card-text>
+                <v-divider></v-divider>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="primary" text @click="discard()">Remove</v-btn>
+                    <v-btn text @click="discard_dialog = false">Cancel</v-btn>
                 </v-card-actions>
             </v-card>
         </v-dialog>

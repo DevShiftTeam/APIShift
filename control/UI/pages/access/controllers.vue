@@ -23,6 +23,10 @@
         data() {
             return {
                 controller_access_list: [],
+                access_types: [
+                    "", "Function", "State", "Task"
+                ],
+                access_names: [],
                 search: '',
                 loader: {
                     visible: false,
@@ -35,7 +39,7 @@
                     { text: 'Task name', value: 'name' },
                     { text: 'Actions', value: 'actions', sortable: false }
                 ],
-                in_edit: 0,
+                in_edit: null,
                 is_creating: false,
                 delete_dialog: false,
                 edit_dialog: false,
@@ -46,7 +50,7 @@
             APIShift.Loader.changeLoader("access_controllers", this.loader);
             window.cahandler = this;
 
-            APIShift.API.request("Control", "getControllersTasks", {}, function (response) {
+            APIShift.API.request("Access", "getControllersTasks", {}, function (response) {
                 if(response.status == APIShift.API.status_codes.SUCCESS) {
                     cahandler.controller_access_list = Object.assign([], response.data);
                 } else {
@@ -56,12 +60,12 @@
         },
         methods: {
             getRuleType(rule) {
-                if(rule.name.indexOf("_") == -1) return "task";
+                if(rule.name.indexOf("_") == -1) return "Task";
                 let prefix = rule.name.substring(0, rule.name.indexOf("_"));
                 switch(prefix) {
-                    case "function": return "func";
-                    case "state": return "state";
-                    default: return "task";
+                    case "function": return "Function";
+                    case "state": return "State";
+                    default: return "Task";
                 }
             },
             getRuleName(rule) {
@@ -82,16 +86,31 @@
 
                 this.is_creating = true;
                 this.edit_dialog = true;
+                this.in_edit = {
+                    controller: '',
+                    method: '',
+                    name: '',
+                    type: ''
+                }
             },
             discard: function() {
+                if(this.is_creating && !this.discard_dialog) {
+                    this.discard_dialog = true;
+                    return;
+                }
                 if(this.is_creating) this.is_creating = false;
                 this.edit_dialog = false;
+                this.discard_dialog = false;
             },
             save: function() {
 
             },
             editAccessRule: function(access_rule) {
                 this.edit_dialog = true;
+                this.in_edit = Object.assign({}, access_rule);
+                this.in_edit.name = this.getRuleName(access_rule);
+                this.in_edit.type = this.getRuleType(access_rule);
+                this.getAvailableRulesForType();
             },
             removeAccessRule: function(access_rule) {
                 if(!this.delete_dialog) {
@@ -100,8 +119,50 @@
                 }
 
                 this.delete_dialog = false;
+            },
+            getAvailableRulesForType() {
+                switch(this.in_edit.type) {
+                    case "Function":
+                        // Get all available functions
+                        break;
+                    case "State":
+                        // Get all available states
+                        APIShift.API.request("SessionState", "getAllSessionStates", {}, function(response) {
+                            cahandler.access_names = [];
+                            if(response.status == APIShift.API.status_codes.SUCCESS) {
+                                for(key in response.data) {
+                                    let current = response.data[key];
+                                    let name = response.data[key].name;
+
+                                    while(current.parent != 0) {
+                                        name = response.data[current.parent].name + "/" + name;
+                                        current = response.data[current.parent];
+                                    }
+                                    cahandler.access_names.push(name);
+                                }
+                            }
+                            else {
+                                APIShift.API.notify(response.data, 'error');
+                            }
+                        });
+                        break;
+                    default:
+                        // Get all available tasks
+                        APIShift.API.request("Access", "getAllTasks", {}, function(response) {
+                            cahandler.access_names = [];
+                            if(response.status == APIShift.API.status_codes.SUCCESS) {
+                                for(key in response.data) {
+                                    cahandler.access_names.push(response.data[key].name);
+                                }
+                            }
+                            else {
+                                APIShift.API.notify(response.data, 'error');
+                            }
+                        });
+                        break;
+                }
             }
-        },
+        }
     };
 </script>
 
@@ -146,14 +207,26 @@
                 </v-app-bar>
 
                 <!-- Edit/Add dialog -->
-                <v-dialog v-model="edit_dialog" max-width="500px">
+                <v-dialog v-if="edit_dialog" v-model="edit_dialog" max-width="500px">
                     <v-card>
                         <v-card-title><span class="headline">{{ is_creating ? "Add New" : "Edit" }}</span></v-card-title>
 
                         <v-card-text>
                             <v-container>
                                 <v-row>
-
+                                    <v-col cols="12" sm="6" md="6">
+                                        <v-text-field v-model="in_edit.controller" label="Controller"></v-text-field>
+                                    </v-col>
+                                    <v-col cols="12" sm="6" md="6">
+                                        <v-text-field v-model="in_edit.method"  label="Method"></v-text-field>
+                                    </v-col>
+                                    <v-col cols="12" sm="6" md="6">
+                                        <v-select @change="getAvailableRulesForType()" v-model="in_edit.type" :items="access_types" label="Authentication type"></v-select>
+                                    </v-col>
+                                    <v-col cols="12" sm="6" md="6">
+                                        <v-select v-if='in_edit.type != "Function"' v-model="in_edit.name" :items="access_names" label="Task"></v-select>
+                                        <v-text-field v-else v-model="in_edit.name"  label="Fuction Name"></v-text-field>
+                                    </v-col>
                                 </v-row>
                             </v-container>
                         </v-card-text>
@@ -176,7 +249,7 @@
                         <v-divider></v-divider>
                         <v-card-actions>
                             <v-spacer></v-spacer>
-                            <v-btn color="primary" text @click="discard()">Remove</v-btn>
+                            <v-btn color="primary" text @click="discard()">Discard</v-btn>
                             <v-btn text @click="discard_dialog = false">Cancel</v-btn>
                         </v-card-actions>
                     </v-card>

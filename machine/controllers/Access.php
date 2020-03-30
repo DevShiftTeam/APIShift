@@ -27,13 +27,23 @@ use APIShift\Core\Status;
 /**
  * Interface containing the available main request of the system's control panel
  */
-class Control {
+class Access {
     /**
-     * Returns all the pages of the control panel
+     * Returns all the tasks available
      */
-    public static function getPages() {
+    public static function getAllTasks() {
         $res = [];
-        if(DatabaseManager::fetchInto("main", $res, "SELECT * FROM admin_pages", [], 'id') === false) Status::message(Status::ERROR, "Couldn't retrieve pages");;
+        if(DatabaseManager::fetchInto("main", $res, "SELECT * FROM tasks", [], 'id') === false) Status::message(Status::ERROR, "Couldn't retrieve tasks");;
+        Status::message(Status::SUCCESS, $res);
+    }
+
+    /**
+     * Returns all the controllers and their access tasks
+     */
+    public static function getControllersTasks() {
+        $res = [];
+        if(DatabaseManager::fetchInto("main", $res, "SELECT * FROM tasks JOIN request_authorization ON tasks.id = request_authorization.task", [], 'id') === false)
+            Status::message(Status::ERROR, "Couldn't retrieve controller tasks");;
         Status::message(Status::SUCCESS, $res);
     }
 }

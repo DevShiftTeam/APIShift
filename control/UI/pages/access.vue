@@ -31,6 +31,7 @@
             }
         },
         created() {
+            window.handler = this;
             this.is_main_page = app.$router.currentRoute.path === '/access';
             window.holder = this;
         },

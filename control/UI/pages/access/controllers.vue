@@ -182,11 +182,7 @@
 
 <template>
         <v-data-table
-<<<<<<< Updated upstream
-            class="mx-auto ca_table" elevation-2
-=======
             class="mx-auto ca_table" elevation-2 max-height="75%"
->>>>>>> Stashed changes
             :headers="headers"
             :items="controller_access_list"
             :search="search">
@@ -194,7 +190,6 @@
                 <v-app-bar>
                     <v-menu offset-y>
                         <template v-slot:activator="{ on }">
-<<<<<<< Updated upstream
                             <v-toolbar-title v-on="on"><v-btn>{{ holder.getPageTitle() }}</v-btn></v-toolbar-title>
                         </template>
                         <v-list>
@@ -203,15 +198,6 @@
                         </v-list>
                     </v-menu>
                     <v-divider class="mx-4" inset vertical></v-divider>
-=======
-                            <v-toolbar-title v-on="on"><v-btn>{{ handler.getPageTitle() }}</v-btn></v-toolbar-title>
-                        </template>
-                        <v-list>
-                            <v-list-item to="/access">Main Page</v-list-item>
-                            <v-list-item v-for="(item, key) in  handler.sub_pages" :key="key" :to="item.url">{{ item.title }}</v-list-item>
-                        </v-list>
-                    </v-menu>
->>>>>>> Stashed changes
                     <v-spacer></v-spacer>
                     <v-text-field
                         v-model="search"
@@ -233,7 +219,6 @@
                         <span v-else>Add new session state</span>
                     </v-tooltip>
                 </v-app-bar>
-<<<<<<< Updated upstream
 
                 <!-- Edit/Add dialog -->
                 <v-dialog v-if="edit_dialog" v-model="edit_dialog" max-width="500px">
@@ -287,8 +272,6 @@
             <template v-slot:item.name="{ item }">
                 <v-chip>{{ getRuleType(item) }}</v-chip>
                 <span>{{ getRuleName(item) }}</span>
-=======
->>>>>>> Stashed changes
             </template>
 
             <template v-slot:item.actions="{ item }">
@@ -316,56 +299,10 @@
                     </v-card>
                 </v-dialog>
             </template>
-<<<<<<< Updated upstream
-=======
-
-            
-
-        <!-- Edit dialog -->
-        <v-dialog v-model="edit_dialog" max-width="500px">
-            <v-card>
-                <v-card-title><span class="headline">{{ is_creating ? "Add New" : "Edit" }}</span></v-card-title>
-
-                <v-card-text>
-                    <v-container>
-                        <v-row>
-
-                        </v-row>
-                    </v-container>
-                </v-card-text>
-
-                <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="primary" text @click="save()">Save</v-btn>
-                    <v-btn text @click="discard()">Cancel</v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
-
-        <!-- Discard dialog -->
-        <v-dialog v-model="discard_dialog" max-width="500px">
-            <v-card>
-                <v-card-title>Sure?</v-card-title>
-                <v-card-text>
-                    You cannot revert changes you've discarded
-                </v-card-text>
-                <v-divider></v-divider>
-                <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="primary" text @click="discard()">Remove</v-btn>
-                    <v-btn text @click="discard_dialog = false">Cancel</v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
->>>>>>> Stashed changes
         </v-data-table>
 </template>
 <style scoped>
 .ca_table {
-<<<<<<< Updated upstream
     width: 90%;
-=======
-    width: 90% !important;
->>>>>>> Stashed changes
 }
 </style>

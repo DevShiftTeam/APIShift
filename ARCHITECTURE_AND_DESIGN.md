@@ -1,7 +1,7 @@
 <div align="center">
 <img width="100px" src="https://raw.githubusercontent.com/DevShiftTeam/APIShift/master/images/apishift-logo.png">
 
-# APIShift Code Design
+# APIShift Architecture And Design
 </div>
 
 This document organizes the different components, sub-components and their properties that make up the engine. The goal of this document is to provide both a high level overview of the architecture of the system and guidelines for the functionality and algorithmics behind the engine practically. All new systems and components first need to be integrated in the code design before going into development stages to keep a clean, understandable flow of development, organization and efficiency. It is always better to initially design the components and overall system before developing, it helps others follow up with the same ideas and standards when developing and contributing to the system.
@@ -9,7 +9,7 @@ This document organizes the different components, sub-components and their prope
 The semantics of this architecture document will follow the definitions mentioned in [Architectural Styles and the Design of Network-based Software Architectures. Doctoral dissertation by Roy Thomas Fielding, University of California, Irvine, 2000. Chapter 1](https://www.ics.uci.edu/~fielding/pubs/dissertation/software_arch.htm).
 
 # Table of contents
-- [APIShift Code Design](#apishift-code-design)
+- [APIShift Architecture And Design](#apishift-architecture-and-design)
 - [Table of contents](#table-of-contents)
 - [Architecture Overview](#architecture-overview)
   - [Definitions](#definitions)

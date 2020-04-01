@@ -24,7 +24,9 @@
             return {
                 controller_access_list: [],
                 access_types: [
-                    "Function", "State", "Task"
+                    "Function",
+                    "State",
+                    "Task",
                 ],
                 access_names: [],
                 search: '',
@@ -54,12 +56,12 @@
         methods: {
             updateControllerTasks: function() {
                 APIShift.API.request("Admin\\Access", "getControllersTasks", {}, function (response) {
-                if(response.status == APIShift.API.status_codes.SUCCESS) {
-                    cahandler.controller_access_list = Object.assign([], response.data);
-                } else {
-                    APIShift.API.notify(response.data, "error");
-                }
-            }, true);
+                    if(response.status == APIShift.API.status_codes.SUCCESS) {
+                        cahandler.controller_access_list = Object.assign([], response.data);
+                    } else {
+                        APIShift.API.notify(response.data, "error");
+                    }
+                }, true);
             },
             getRuleType(rule) {
                 if(rule.name.indexOf("_") == -1) return "Task";
@@ -111,7 +113,7 @@
             editAccessRule: function(access_rule) {
                 this.edit_dialog = true;
                 this.in_edit = Object.assign({}, access_rule);
-                this.in_edit.name = this.getRuleName(access_rule);
+                this.in_edit.rule = { text: this.getRuleName(access_rule), val: 0 };
                 this.in_edit.type = this.getRuleType(access_rule);
                 this.getAvailableRulesForType();
             },
@@ -152,7 +154,8 @@
                                         name = response.data[current.parent].name + "/" + name;
                                         current = response.data[current.parent];
                                     }
-                                    cahandler.access_names.push(name);
+
+                                    cahandler.access_names.push({ text: name, val: key});
                                 }
                             }
                             else {
@@ -166,7 +169,7 @@
                             cahandler.access_names = [];
                             if(response.status == APIShift.API.status_codes.SUCCESS) {
                                 for(key in response.data) {
-                                    cahandler.access_names.push(response.data[key].name);
+                                    cahandler.access_names.push({ text: response.data[key].name, val: key });
                                 }
                             }
                             else {
@@ -238,7 +241,7 @@
                                         <v-select @change="getAvailableRulesForType()" v-model="in_edit.type" :items="access_types" label="Authentication type"></v-select>
                                     </v-col>
                                     <v-col cols="12" sm="6" md="6">
-                                        <v-autocomplete v-model="in_edit.name" :items="access_names" label="Task"></v-autocomplete>
+                                        <v-autocomplete :value="in_edit.rule" :items="access_names" item-text="text" item-value="val" label="Task"></v-autocomplete>
                                     </v-col>
                                 </v-row>
                             </v-container>

@@ -78,7 +78,7 @@ window.app = new Vue({
                     next("/installer");
                 }
                 // Move to login if not authenticated
-                else if(to.path != "/login" && !APIShift.logged_in & APIShift.installed) {
+                else if(to.path != "/login" && !APIShift.logged_in && APIShift.installed) {
                     app.apishift.setSubtitle("Login");
                     next("/login");
                 }
@@ -88,6 +88,7 @@ window.app = new Vue({
                     next("/main");
                 }
                 else {
+                    // Construct current page title
                     if(window.nav_holder !== undefined) {
                         let page_holder = Object.values(nav_holder.pages).find(function(r) {
                             if(r.parent == 0) return to.path === "/" + r.path;
@@ -97,6 +98,7 @@ window.app = new Vue({
                         if(page_holder !== undefined) app.apishift.setSubtitle(page_holder.name);
                         else app.apishift.removeSubtitle();
                     }
+                    // Move to next page if everything's in place
                     next();
                 }
             });

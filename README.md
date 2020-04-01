@@ -54,6 +54,9 @@ The main folders of the system indicate the basic idea of where development is d
 * [**control/**](control/): Stores the UI code & style of the control panel of the devshift system.
 * [**machine/**](machine/): Stores the Back-End code for the APIShift system.
 * [**UI/**](UI/): Stores the UI code the the main page - can actually have as many diffrent folders with different names to build your app, the UI is provided by default and not confined to this name or style, so do whatever you want.
+* [**externals/**](externals/): External dependencies and libraries the the APIShift system uses.
+* [**images/**](images/): Stores images that the APIShift system uses.
+* [**docs/**](docs/): Stores HTML pages the provide information and documentation about the system.
 
 And these are the documents that serve as the information infrastructure we set up for users:
  1. __[Architecture and design](ARCHITECTURE_AND_DESIGN.md)__: Provide a map showing the system from the view point of the code, and the developer - Reading this document is the best way to get insight into the system (besides running it and reviewing the code on your own, it's better to start here).

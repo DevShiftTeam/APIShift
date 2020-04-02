@@ -86,6 +86,7 @@
             }
         },
         created () {
+            app.apishift.setSubtitle("Installer");
             APIShift.Loader.changeLoader("installer", this.loader);
             APIShift.Loader.close("installer");
         },

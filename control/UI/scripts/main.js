@@ -73,15 +73,9 @@ window.app = new Vue({
             // Navigation gaurd for control panel
             app.$router.beforeEach((to, from, next) => {
                 // Move to installation if not installed
-                if(to.path != "/installer" && !APIShift.installed) {
-                    app.apishift.setSubtitle("Installer");
-                    next("/installer");
-                }
+                if(to.path != "/installer" && !APIShift.installed) next("/installer");
                 // Move to login if not authenticated
-                else if(to.path != "/login" && !APIShift.logged_in && APIShift.installed) {
-                    app.apishift.setSubtitle("Login");
-                    next("/login");
-                }
+                else if(to.path != "/login" && !APIShift.logged_in && APIShift.installed) next("/login");
                 else {
                     // Construct current page title
                     if(window.nav_holder !== undefined) {
@@ -91,7 +85,6 @@ window.app = new Vue({
                             return parent_paths[1] == nav_holder.pages[r.parent].path && parent_paths[2] == r.path
                         });
                         if(page_holder !== undefined) app.apishift.setSubtitle(page_holder.name);
-                        else app.apishift.removeSubtitle();
                     }
                     // Move to next page if everything's in place
                     next();

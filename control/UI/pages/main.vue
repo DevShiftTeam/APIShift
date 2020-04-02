@@ -43,6 +43,7 @@
             };
         },
         created() {
+            app.apishift.setSubtitle("Dashboard");
             APIShift.Loader.changeLoader("main");
         },
         methods: {

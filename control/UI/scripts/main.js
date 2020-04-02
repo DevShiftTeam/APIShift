@@ -82,11 +82,6 @@ window.app = new Vue({
                     app.apishift.setSubtitle("Login");
                     next("/login");
                 }
-                // Move to main if authenticated
-                else if((to.path == "/login" || to.path == "/") && APIShift.logged_in) {
-                    app.apishift.removeSubtitle();
-                    next("/main");
-                }
                 else {
                     // Construct current page title
                     if(window.nav_holder !== undefined) {

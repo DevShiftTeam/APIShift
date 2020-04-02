@@ -46,11 +46,7 @@
                 step_action: false
             }
         },
-        beforeRouteEnter (to, from, next) {
-            if(APIShift.logged_in) next("/main");
-            next();
-        },
-        created () { },
+        created () { if(APIShift.logged_in) app.$router.push('/main'); },
         updated () {
             // If step action accurred, then focus on the selected field
             // Should happen after DOM re-render

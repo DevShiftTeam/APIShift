@@ -21,6 +21,7 @@
 
 namespace APIShift\Controllers\Admin;
 
+use APIShift\Core\CacheManager;
 use APIShift\Core\DatabaseManager;
 use APIShift\Core\Status;
 
@@ -65,9 +66,27 @@ class Access {
                 // Determine to method of authentication
                 switch($_POST['rule']['type']) {
                     case "State":
-                        // TODO: check if state exists
-                        // TODO: add state as task
-                        // TODO: assign task to controller
+                        // Check if state exists
+                        $states = CacheManager::get("StateCollection");
+                        if(!isset($states[$_POST['rule']['rule']['val']])) Status::message(Status::ERROR, "State doesn't exist");
+
+                        // Check if state task exists
+                        $task_res = [];
+                        $task_id = 0;
+                        $check = DatabaseManager::fetchInto("main", $task_res, "SELECT id FROM tasks WHERE id = :val", [ 'name' => 'state_' . $_POST['rule']['rule']['text'] ]);
+                        if(!$check || gettype($task_res) !== 'array' && count($task_res) == 0) {
+                            // Add task if doesn't exists
+                        }
+                        else $task_id = $task_res[0]['id'];
+
+                        // Assign task to controller
+                        $result = DatabaseManager::query("main", 
+                        "INSERT INTO request_authorization (controller, method, auth_task) VALUES (:controller, :method, :auth)",
+                        [
+                            'controller' => $_POST['rule']['controller'],
+                            'method' => $_POST['rule']['method'],
+                            'auth' => $task_id
+                        ]);
                         break;
                     case "Function":
                         // TODO: check if function exists

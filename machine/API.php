@@ -33,7 +33,7 @@
 
 // Step 1: Validate request format
 if (!isset($_GET["c"]) || !isset($_GET["m"])) Status::message(Status::ERROR, "Invalid Request, Method or Controller not set");
-if (!Configurations::INSTALLED && $_GET["c"] != "Main/Installer") Status::message(Status::NOT_INSTALLED, "Not Installed, can only call the Installer controller");
+if (!Configurations::INSTALLED && $_GET["c"] != "Main\Installer") Status::message(Status::NOT_INSTALLED, "Not Installed, can only call the Installer controller");
 
 // Step 3: Authorize & run the request
 Authorizer::authorizeAndRun($_GET["c"], $_GET["m"], $_POST);

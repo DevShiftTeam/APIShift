@@ -23,7 +23,7 @@ namespace APIShift\Core;
 
 /**
  * Provides an interface to compile and manage procedural connections in the system
- * Procedural connection are explained in the CODE_DESIGN.md file
+ * Procedural connection are explained in the ARCHITECTURE_AND_DESIGN.md file
  */
 class Process {
     /**

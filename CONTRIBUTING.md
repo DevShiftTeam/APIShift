@@ -6,7 +6,7 @@ We built this system for everyone to allow for faster deployment and development
 Before contributing to APIShift, please take a moment to read the following guidelines:
  1. [Code of Conduct](CODE_OF_CONDUCT.md)
  2. [Readme file](README.md)
- 3. [Framework Code Design](CODE_DESIGN.md)
+ 3. [Framework Code Design](ARCHITECTURE_AND_DESIGN.md)
  4. [Coding Standards](#coding-standards)
  5. [Git Workflow](#git-workflow)
  6. [Project Structure](#project-structure)

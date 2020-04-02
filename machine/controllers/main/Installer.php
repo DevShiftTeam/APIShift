@@ -40,7 +40,7 @@ class Installer {
 
         // Validate data
         if((!isset($_POST['login']) || strlen($_POST['login']) < 5)
-        || (!isset($_POST['password']) || strlen($_POST['password']) <= 8)
+        || (!isset($_POST['password']) || strlen($_POST['password']) < 8)
         || (!isset($_POST['db_host']) || $_POST['db_host'] == "")
         || (!isset($_POST['db_port']) || $_POST['db_port'] == "")
         || (!isset($_POST['db_user']) || $_POST['db_user'] == "")

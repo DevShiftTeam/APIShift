@@ -236,8 +236,8 @@ class Loader {
      */
     close(loader_name = this.current_loader) {
         this.loader_manager[loader_name].processes--;
-        if(this.loader_manager[loader_name].processes == 0
-            && this.loader_manager[loader_name].visible) this.loader_manager[loader_name].visible = false;
+        if(this.loader_manager[loader_name].processes < 0) this.loader_manager[loader_name].processes = 0;
+        if(this.loader_manager[loader_name].processes == 0 && this.loader_manager[loader_name].visible) this.loader_manager[loader_name].visible = false;
     }
 
     /**

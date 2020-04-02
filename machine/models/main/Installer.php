@@ -19,7 +19,7 @@
  * @author Sapir Shemer
  */
 
-namespace APIShift\Models;
+namespace APIShift\Models\Main;
 
 use APIShift\Core\CacheManager;
 use APIShift\Core\DatabaseManager;

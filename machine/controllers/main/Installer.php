@@ -58,10 +58,10 @@ class Installer {
         }
 
         // Create DB
-        Models\Installer::createDB($_POST['db_host'], $_POST['db_name'], $_POST['db_user'], $_POST['db_pass'], $_POST['db_port'], $_POST['login'], $_POST['password']);
+        Models\Main\Installer::createDB($_POST['db_host'], $_POST['db_name'], $_POST['db_user'], $_POST['db_pass'], $_POST['db_port'], $_POST['login'], $_POST['password']);
 
         // Create Config File
-        Models\Installer::createConfigFile($_POST['db_host'], $_POST['db_name'], $_POST['db_user'], $_POST['db_pass'], $_POST['db_port'], "MySQL", $_POST['cc_system'],
+        Models\Main\Installer::createConfigFile($_POST['db_host'], $_POST['db_name'], $_POST['db_user'], $_POST['db_pass'], $_POST['db_port'], "MySQL", $_POST['cc_system'],
         $_POST['cc_host'], $_POST['cc_port'], $_POST['cc_pass']);
 
         // Done

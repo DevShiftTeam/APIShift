@@ -19,7 +19,7 @@
  * @author Sapir Shemer
  */
 
-namespace APIShift\Models;
+namespace APIShift\Models\Main;
 
 /**
  * A component holding helper functions that are repeated throughout the program and connot be categorized to a specific component

@@ -122,12 +122,14 @@
                     else if (response.status == APIShift.API.status_codes.SUCCESS) {
                         APIShift.API.notify("Success! :) " + response.data, "success");
                         // Re-initialize devshift system to logged id state
-                        window.app.apishift.initialize().then(() => {
+                        window.app.apishift.initialize();
+                        APIShift.Loader.load((resolve, reject) => {
                             APIShift.logged_in = true;
                             app.$router.push("/main");
                             app.app_loader = APIShift.components["loader"];
                             app.app_navigator = APIShift.components["navigator"];
                             app.app_footer = APIShift.components["footer"];
+                            resolve(0);
                         });
                     }
                     else APIShift.API.notify(APIShift.API.getStatusName(response.status) + ": " + response.data, "error");

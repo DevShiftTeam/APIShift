@@ -30,33 +30,7 @@
         created () {
             window.nav_holder = this;
             // Load control panel pages
-            APIShift.API.request("Admin\\Control", "getPages", {}, function (response) {
-                if(response.status == APIShift.API.status_codes.SUCCESS) {
-                    nav_holder.pages = Object.assign({}, response.data);
-                    // Add routes
-                    for(let item in response.data) {
-                        // Construct path to page
-                        if(response.data[item].parent === 0) {
-                            APIShift.admin_routes.push({
-                                path: "/" + response.data[item].path,
-                                component: httpVueLoader(APIShift.API.getPage(response.data[item].path))
-                            });
-                        } else {
-                            let routeData = APIShift.admin_routes.find(r => r.path === "/" + response.data[response.data[item].parent].path);
-                            if(routeData.children === undefined) routeData.children = [];
-                            routeData.children.push({
-                                path: response.data[item].path,
-                                component: httpVueLoader(APIShift.API.getPage(response.data[response.data[item].parent].path + "/" + response.data[item].path))
-                            });
-                        }
-                    }
-                    // Update routes
-                    app.$router.addRoutes(APIShift.admin_routes);
-                }
-                else {
-                    APIShift.API.notify(APIShift.API.getStatusName(response.status) + ": " + response.data, "error");
-                }
-            });
+            this.updatePages();
         },
         computed: {
             showNavBar: {
@@ -69,6 +43,35 @@
             }
         },
         methods: {
+            updatePages: function () {
+                APIShift.API.request("Admin\\Control", "getPages", {}, function (response) {
+                    if(response.status == APIShift.API.status_codes.SUCCESS) {
+                        nav_holder.pages = Object.assign({}, response.data);
+                        // Add routes
+                        for(let item in response.data) {
+                            // Construct path to page
+                            if(response.data[item].parent === 0) {
+                                APIShift.admin_routes.push({
+                                    path: "/" + response.data[item].path,
+                                    component: httpVueLoader(APIShift.API.getPage(response.data[item].path))
+                                });
+                            } else {
+                                let routeData = APIShift.admin_routes.find(r => r.path === "/" + response.data[response.data[item].parent].path);
+                                if(routeData.children === undefined) routeData.children = [];
+                                routeData.children.push({
+                                    path: response.data[item].path,
+                                    component: httpVueLoader(APIShift.API.getPage(response.data[response.data[item].parent].path + "/" + response.data[item].path))
+                                });
+                            }
+                        }
+                        // Update routes
+                        app.$router.addRoutes(APIShift.admin_routes);
+                    }
+                    else {
+                        APIShift.API.notify(APIShift.API.getStatusName(response.status) + ": " + response.data, "error");
+                    }
+                });
+            },
             toggleDarkTheme: function() {
                 window.app.$vuetify.theme.dark = !(window.app.$vuetify.theme.dark);
             },

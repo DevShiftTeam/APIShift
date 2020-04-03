@@ -49,13 +49,12 @@ window.app = new Vue({
         this.apishift = new APIShift(this.loader);
         
         // Link components to apishift
-        APIShift.Loader.load(function () {
+        APIShift.Loader.load((resolve, reject) => {
             app.app_notifications = APIShift.components["notifications"];
-            if(!APIShift.load_components) return; //  Don't load other components if system isn't installed
-            app.app_loader = APIShift.components["loader"];
-            app.app_navigator = APIShift.components["navigator"];
-            app.app_footer = APIShift.components["footer"];
-        }).then(() => {
+            resolve(0);
+        });
+
+        APIShift.Loader.load((resolve, reject) => {
             // Add loaded routes & pages
             app.$router.addRoutes(APIShift.admin_routes);
 
@@ -69,6 +68,13 @@ window.app = new Vue({
                 app.$router.push("/login");
             }
             else if(app.$route.path == "/") app.$router.push("/main");
+
+            //  Don't load other components if system isn't installed
+            if(APIShift.load_components) {
+                app.app_loader = APIShift.components["loader"];
+                app.app_navigator = APIShift.components["navigator"];
+                app.app_footer = APIShift.components["footer"];
+            }
 
             // Navigation gaurd for control panel
             app.$router.beforeEach((to, from, next) => {
@@ -90,6 +96,8 @@ window.app = new Vue({
                     next();
                 }
             });
+
+            resolve(0);
         });
     },
     methods: {

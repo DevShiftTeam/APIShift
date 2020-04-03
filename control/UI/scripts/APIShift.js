@@ -51,56 +51,55 @@ class APIShift {
 
     initialize() {
         APIShift.Loader.show("main"); // Show main loader
-        // Load statuses and check admin mode
-        return APIShift.Loader.load(() => {
-            // Set admin mode in case the user is in admin page
+        // Set admin mode in case the user is in admin page
+        APIShift.Loader.load((resolve, reject) => {
             if (location.pathname.indexOf("/control") == 0) {
                 APIShift.admin_mode = true;
                 // Load default components
                 APIShift.components['notifications'] = httpVueLoader(APIShift.API.getComponent("notifications"));
             }
+            resolve(0);
+        });
 
-            /**
-             * Fill in API data from server
-             */
-            APIShift.API.request("Main\\Status", "getAllStatuses", {}, function (response) {
-                switch (response.status) {
-                    case APIShift.API.status_codes.ERROR:
-                        APIShift.API.notify("Error: " + response.data, "error");
-                        break;
-                    case APIShift.API.status_codes.SUCCESS:
-                        for(let status in response.data)
-                            APIShift.API.status_codes[response.data[status].name] = 4 + response.data[status].id;
-                            APIShift.load_components = true;
-                        break;
-                    case APIShift.API.status_codes.NOT_INSTALLED:
-                        // Redirect user to admin page if system is not installed
-                        if (!APIShift.admin_mode) location.href = MyServer + "/control/index.html";
-                        // Route to installation page
-                        else {
-                            APIShift.admin_routes.push({
-                                path: '/installer',
-                                component: httpVueLoader(APIShift.API.getPage("installer"))
-                            });
-                            APIShift.installed = false; // Don't continue loading system if not installed
-                        }
-                        break;
-                    default:
-                        APIShift.API.notify(response.data, 'error');
-                        return;
-                }
-            }, true);
+        // Load statuses
+        APIShift.API.request("Main\\Status", "getAllStatuses", {}, function (response) {
+            switch (response.status) {
+                case APIShift.API.status_codes.ERROR:
+                    APIShift.API.notify("Error: " + response.data, "error");
+                    break;
+                case APIShift.API.status_codes.SUCCESS:
+                    for(let status in response.data)
+                        APIShift.API.status_codes[response.data[status].name] = 4 + response.data[status].id;
+                        APIShift.load_components = true;
+                    break;
+                case APIShift.API.status_codes.NOT_INSTALLED:
+                    // Redirect user to admin page if system is not installed
+                    if (!APIShift.admin_mode) location.href = MyServer + "/control/index.html";
+                    // Route to installation page
+                    else {
+                        APIShift.admin_routes.push({
+                            path: '/installer',
+                            component: httpVueLoader(APIShift.API.getPage("installer"))
+                        });
+                        APIShift.installed = false; // Don't continue loading system if not installed
+                    }
+                    break;
+                default:
+                    APIShift.API.notify(response.data, 'error');
+                    return;
+            }
+        });
 
+        // Check admin mode & installation
+        APIShift.Loader.load((resolve, reject) => {
             // Preceding code is only for the CP
             if(!APIShift.admin_mode) {
-                APIShift.Loader.close("main"); // Close main loader
-                return;
+                resolve(2); // Jump 2 stage forward
             }
 
             // Installation check
             if(!APIShift.installed) {
-                APIShift.Loader.close("main"); // Close main loader
-                return;
+                resolve(2); // Jump 2 stage forward
             }
 
             // Load default pages
@@ -113,21 +112,30 @@ class APIShift {
                 component: httpVueLoader(APIShift.API.getPage("login"))
             });
 
-            // Check that session state allows to proceed
-            if(this.isSessionState(1)) {
+            resolve(0);
+        });
+        
+        // Check that session state allows to proceed
+        let is_session_admin = false;
+        APIShift.API.request("Main\\SessionState", "getCurrentSessionState", {}, function (response) {
+            if(response.status == APIShift.API.status_codes.SUCCESS) is_session_admin = response.data == 1;
+            else APIShift.API.notify(APIShift.API.getStatusName(response.status) + ": " + response.data, "error");
+        });
+
+        APIShift.Loader.load((resolve, reject) => {
+            if(is_session_admin) {
                 APIShift.load_components = true;
                 APIShift.logged_in = true;
             } else {
                 APIShift.load_components = false; // Don't load other system components before login
-                APIShift.Loader.close("main"); // Close main loader
-                return;
+                resolve(0);
             }
 
             // Load admin components
             APIShift.components['footer'] = httpVueLoader(APIShift.API.getComponent("footer"));
             APIShift.components['navigator'] = httpVueLoader(APIShift.API.getComponent("navigator"));
             APIShift.components['loader'] = httpVueLoader(APIShift.API.getComponent("loader"));
-            APIShift.Loader.close("main"); // Close main loader
+            resolve(0);
         });
     };
 
@@ -136,10 +144,10 @@ class APIShift {
      */
     isSessionState(state_id) {
         let result = false;
-        APIShift.API.request("Main\\SessionState", "getCurrentSessionState", {}, function (response) {
-            if(response.status == 1) result = response.data == state_id;
-            else APIShift.API.notify(APIShift.API.getStatusName(response.status) + ": " + response.data, "error");
-        }, true);
+            APIShift.API.request("Main\\SessionState", "getCurrentSessionState", {}, function (response) {
+                if(response.status == 1) result = response.data == state_id;
+                else APIShift.API.notify(APIShift.API.getStatusName(response.status) + ": " + response.data, "error");
+            });
         return result;
     }
 };
@@ -189,6 +197,7 @@ class Loader {
                 // Attach loader and create process counter
                 this.loader_manager[name] = new_loader;
                 this.loader_manager[name].processes = 0;
+                this.loader_manager[name].promise = null;
                 if(this.loader_manager[name].visible === undefined) this.loader_manager[name].visible = false;
                 if(this.loader_manager[name].message === undefined) this.loader_manager[name].message = "";
             }
@@ -227,7 +236,6 @@ class Loader {
      * Show the loader in view
      */
     show(loader_name = this.current_loader) {
-        this.loader_manager[loader_name].processes++;
         if(!this.loader_manager[loader_name].visible) this.loader_manager[loader_name].visible = true;
     }
 
@@ -235,8 +243,7 @@ class Loader {
      * Remove loader from view
      */
     close(loader_name = this.current_loader) {
-        this.loader_manager[loader_name].processes--;
-        if(this.loader_manager[loader_name].processes < 0) this.loader_manager[loader_name].processes = 0;
+        if(this.loader_manager[loader_name].processes > 0) this.loader_manager[loader_name].processes--;
         if(this.loader_manager[loader_name].processes == 0 && this.loader_manager[loader_name].visible) this.loader_manager[loader_name].visible = false;
     }
 
@@ -246,18 +253,50 @@ class Loader {
      * @param {String} loader_name The loader name to use at this loading
      * @param {Boolean} background Run in background and don't show the loader on screen
      */
-    load(handlerMethod = function() {}, loader_name = this.current_loader, background = false) {
+    load(handlerMethod = function(resolve, reject) { return resolve(0); }, loader_name = this.current_loader, background = false) {
         // Promise is indepenent of any other promise so no need to keep
-        let tempProm = new Promise(function (resolve) {
-            if (!background) APIShift.Loader.show(loader_name);
-            resolve();
-        });
-        tempProm.then(handlerMethod);
-        tempProm.then(function () {
+        let promiseHolder;
+
+        // Integrate with promise chain if not in background
+        if(!background)
+        {
+            promiseHolder = this.loader_manager[loader_name].promise;
+            // Create a new promise if all processes finished
+            if(promiseHolder == null || this.loader_manager[loader_name].processes == 0)
+            {
+                promiseHolder = new Promise(function (resolutionFunc) {
+                    APIShift.Loader.show(loader_name);
+                    resolutionFunc(0);
+                });
+            }
+            else {
+                promiseHolder.then((value) => {
+                    APIShift.Loader.show(loader_name);
+                    return value;
+                });
+            }
+            this.loader_manager[loader_name].processes++;
+        }
+        else {
+            promiseHolder = new Promise(function (resolutionFunc) { resolutionFunc(0); });
+        }
+
+        // Run user requested function
+        let endResult = promiseHolder.then((value) => {
+            // Skip processses
+            if(value != 0 && value !== undefined && value != null) {
+                APIShift.Loader.loader_manager[loader_name].processes--;
+                return --value;
+            }
+            return new Promise(handlerMethod);
+        }).then(function (value) {
             // When done close loader
             if (!background) APIShift.Loader.close(loader_name);
+            return value;
         });
-        return tempProm;
+
+        if(!background) this.loader_manager[loader_name].promise = endResult;
+        return endResult;
     }
 
     /**
@@ -313,35 +352,36 @@ class APIHandler {
 
     /**
      * Retreive data from the API
+     * 
      * @param {string} controller The controller to use
      * @param {string} method The method to call
      * @param {object} attached_data Data to send to the method
      * @param {function} HandlerMethod Function to handle the response or error
      * @param {boolean} use_loader Open loader until request finishes
      */
-    request(controller, method, attached_data = {}, handlerMethod = function (response) {}, use_loader = false) {
-        if (use_loader) APIShift.Loader.show();
+    request(controller, method, attached_data = {}, handlerMethod = function (response) {}, use_loader = true) {
         // Define request function without running it
-        return $.ajax({
-            type: "POST",
-            url: MyServer + "/machine/API.php?c=" + controller + "&m=" + method,
-            data: attached_data,
-            async: !use_loader,
-            dataType: "json",
-            success: function (response) {
-                if(response.status == APIShift.API.status_codes.NO_AUTH && APIShift.admin_mode) nav_holder.logout();
-                handlerMethod(response);
-            },
-            error: function () {
-                handlerMethod({
-                    status: 0,
-                    data: "Request couldn't be complete"
-                });
-            },
-            complete: function () {
-                if (use_loader) APIShift.Loader.close();
-            }
-        });
+        return APIShift.Loader.load((resolve, reject) => {
+            $.ajax({
+                type: "POST",
+                url: MyServer + "/machine/API.php?c=" + controller + "&m=" + method,
+                data: attached_data,
+                dataType: "json",
+                success: function (response) {
+                    if(response.status == APIShift.API.status_codes.NO_AUTH && APIShift.admin_mode) nav_holder.logout();
+                    handlerMethod(response);
+                },
+                error: function () {
+                    handlerMethod({
+                        status: 0,
+                        data: "Request couldn't be complete"
+                    });
+                },
+                complete: function () {
+                    resolve(0);
+                }
+            });
+        }, APIShift.Loader.current_loader, !use_loader);
     }
 
     /**

@@ -92,6 +92,8 @@ class APIShift {
 
         // Check admin mode & installation
         APIShift.Loader.load((resolve, reject) => {
+            // Start update loop with server
+            APIShift.API.startUpdate();
             // Preceding code is only for the CP
             if(!APIShift.admin_mode) {
                 resolve(2); // Jump 2 stage forward
@@ -330,6 +332,7 @@ class Loader {
  */
 class APIHandler {
     constructor() {
+        // Collection of the status codes available
         this.status_codes = {
             ERROR: 0,
             SUCCESS: 1,
@@ -338,6 +341,56 @@ class APIHandler {
             DB_CONNECTION_FAILED: 4,
             INVALID_CONFIG_FILE: 5
         };
+
+        // Map of functions to run on server update loop
+        this.update_function = {
+            KeepAlive: function() {
+                APIShift.API.request("Main\\KeepAlive", "stillHere", {});
+            }
+        };
+        this.update_function_running = false;
+    }
+
+    /**
+     * Start a loop that updates every given interval with the update function defined by the user
+     * 
+     * @param {number} interval 
+     */
+    startUpdate(interval = 5000) {
+        // Continue only if update loop is not running
+        if(this.update_function_running !== false) return;
+        this.update_function_running = setInterval(() => {
+            for(let key in APIShift.API.update_function) {
+                APIShift.API.update_function[key]();
+            }
+        }, interval);
+    }
+
+    /**
+     * Stop the update loop
+     */
+    stopUpdate() {
+        clearInterval(this.update_function_running);
+        this.update_function_running = false;
+    }
+
+    /**
+     * Add a new function to the update loop
+     * 
+     * @param {string} name 
+     * @param {function} func 
+     */
+    addUpdateFunc(name, func) {
+        this.update_function[name] = func;
+    }
+
+    /**
+     * Remove a function from the update loop given its name
+     * 
+     * @param {string} name 
+     */
+    removeUpdateFunc(name) {
+        delete this.update_function[name];
     }
 
     /**

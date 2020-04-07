@@ -5,12 +5,12 @@
 </div>
 
 APIShift is a platform with a set of helpful tools for building your own API/server with a configurable architecture that lets you implement whatever type of style you want, whether it'll be REST, SOAP or your own monster you wish to implement. The environment which APIShift sets you, give you flexibility and control over the following concept:
- * **Requests**: Develop you own requests & their responses with a helpful set of tools and configurable, ready to use workflow set up for you. (**<span style="color:#0000ff">Status</span>: <span style="color:#00ff00">Ready</span>**)
- * **Session**: Manage the sessions, their different states, roles, life-cycle and data during run-time with a simple interface. (**<span style="color:#0000ff">Status</span>: <span style="color:#ff00ff">In development</span>**)
- * **Database**: Manage data & structures in different databases using an interface that lets you automate and manage multiple databases and types of databases. (**<span style="color:#0000ff">Status</span>: <span style="color:#ff00ff">In development</span>, <span style="color:#ff0000">Planning</span>**)
- * **Algotihms**: Creating logical procedures using a graph-based UI or your own code to define procedures and attach them to different areas of the code/other procedures/lifecycle of your application using our interface. (**<span style="color:#0000ff">Status</span>: <span style="color:#ff00ff">In development</span>, <span style="color:#ff0000">Planning</span>**)
- * **Authorize**: Buid your unique authorization processes and attach them to any part of your system easily. (**<span style="color:#0000ff">Status</span>: <span style="color:#ff00ff">In development</span>, <span style="color:#ff0000">Planning</span>**)
- * **Analyze**: Track anything you want in your system and collect data about it, then create your own analyzation tools or use our pre-made tools to present different analyzations and conclusions about the system and how it functions. (**<span style="color:#0000ff">Status</span>: <span style="color:#ff0000">Planning</span>**)
+ * **Requests**: Develop you own requests & their responses with a helpful set of tools and configurable, ready to use workflow set up for you. (*Status*: **``Ready``**)
+ * **Session**: Manage the sessions, their different states, roles, life-cycle and data during run-time with a simple interface. (*Status*: **``Development``**)
+ * **Database**: Manage data & structures in different databases using an interface that lets you automate and manage multiple databases and types of databases. (*Status*: **``Development`` ``Planning``**)
+ * **Algotihms**: Creating logical procedures using a graph-based UI or your own code to define procedures and attach them to different areas of the code/other procedures/lifecycle of your application using our interface. (*Status*: **``Development`` ``Planning``**)
+ * **Authorize**: Buid your unique authorization processes and attach them to any part of your system easily. (*Status*: **``Development`` ``Planning``**)
+ * **Analyze**: Track anything you want in your system and collect data about it, then create your own analyzation tools or use our pre-made tools to present different analyzations and conclusions about the system and how it functions. (*Status*: **``Planning``**)
 
 If you want, you can use your own tools, dependencies and modifications, the architecture lets you add on top of it whatever you want to integrate and use.
 

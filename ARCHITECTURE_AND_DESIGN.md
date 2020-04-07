@@ -13,30 +13,32 @@ The semantics of this architecture document will follow the definitions mentione
 - [Table of contents](#table-of-contents)
 - [Architecture Overview](#architecture-overview)
   - [Definitions](#definitions)
-  - [Components](#components)
+  - [Component Classifications](#component-classifications)
     - [Base Components](#base-components)
     - [Mid-Level Components](#mid-level-components)
   - [Architectural Style](#architectural-style)
-- [System Components](#system-components)
-  - [Session management](#session-management)
-  - [Database management](#database-management)
-    - [Data Model Components](#data-model-components)
-  - [Procedure Management](#procedure-management)
+  - [System Components](#system-components)
+    - [Session management](#session-management)
+    - [Database management](#database-management)
+      - [Data Model Components](#data-model-components)
+    - [Procedure Management](#procedure-management)
 - [Project Structure](#project-structure)
   - [Back-End](#back-end)
   - [Control panel UI](#control-panel-ui)
 
 # Architecture Overview
-In this section we will give an overview of the definitions, components, connections between them and the data elements of the overall architecture.
+In this section we will give an overview of the definitions, components, connections between them and the data elements of the overall architecture. APIShift, through its architecture strives to not be bound to a specific API architecture (e.g. REST), thus making it an abstract API that can be configured to follow any netwrok-based software architecture you want it.
+
+We also want to keep our system as clean as possible from other complex technologies so that anyone can add whatever packages and technologies he wants with only knowing PHP. You can use composer to add Symfony packages, Doctrine and more on your own.
 
 ## Definitions
-The system uses the following syntactic terms, which are presented as architectural components in our architecture. The purpose of those definitions is to create a template for passing different type of data elements between components, such that architectually (and practically) components won't need to worry if the data came in from a coded array or database tuple.
+The system uses the following syntactic terms, which are presented as architectural components. The purpose of those definitions is to create a template for passing different type of data elements between components, such that architectually (and practically) components won't need to worry if the data came in from a coded array or database tuple.
 
  * __Data Entry__: A data entry is any varaible, constant, key or cell in the project.
  * __Data Sources__: Data sources are sources of data entries: arrays, tables, documents, items & relation (an Item and a Relation are components that process data elements of tables and documents under a unified definition to create a single query language that can access both types of data, allowing for integration and fast transitions from [relational](https://en.wikipedia.org/wiki/Relational_database) to [document](https://en.wikipedia.org/wiki/Document-oriented_database) models. We will review the Item and Relation components later on).
  * __Procedural Connections__: A path connecting between data entries, sources and other procedural connection outputs with processing elements (e.g. functions) - each procedural connection represents a function operation in run-time when called. This defintion is used to create the procedural diagrams defining the authorizations and other processes that can be attached to system flow during run-time using the Task and Process components which will be discussed later in this document.
 
-## Components
+## Component Classifications
 <div align="center">
 <img width="50%" src="https://gitlab.com/lesscomplexity/apishift/-/raw/master/images/Architecture.png">
 </div>
@@ -69,15 +71,15 @@ Around all of these definitions, the engine defines __Controllers__ as the combi
 ## Architectural Style
 An architectural style, is in other words, restrictions that guide how we define architectural elements and relate between them in ways that satisfy the given style.
 
-Our style, first and foremost, follows the definitions presented in the [Architecture Overview](#architecture-overview) section. Meaning that any component in our architecture will belong to a specific classification defined in that section.
+Our style, first and foremost, follows the definitions presented in the [Component Classifications](#component-classifications) section. Meaning that any component in our architecture will belong to a specific classification defined in that section.
 
-Each component will be divided in a Core-Model-Controller manner, where each component's functionallity that can be triggered by an end-user will be referred to as a `Controller` sub-component. And each functionallity that is triggered only after an end-user request at run-time by an inner-state or inner-trigger of the system will be referred to as a `Model` sub-component. User-made components should contain only components that are divided into `Controller` & `Model` sub-components. `Core` is basically a `Model` sub-component of a system component that gives user-made `Controllers` & `Models` the basic functionallity needed to integrate with the system's workflow and features.
+Each component will be divided in a Core-Model-Controller manner, where each component's functionallity that can be triggered by an end-user will be referred to as a `Controller` sub-component. And each functionallity that is triggered only after an end-user request at run-time by an inner-state or inner-trigger of the system will be referred to as a `Model` sub-component. User-made components should contain only components that are divided into `Controller` & `Model` sub-components. `Core` is basically `Model` components  that define the overall system's workflow and gives user-made `Controllers` & `Models` the basic functionallity needed to integrate with the system's workflow and features.
 
-This style is not very restrictive in its definitions, as it only divides whatever component given into which part of it define the end-user interface of the API (`Controller`) and the other part as a different components (`Model`/`Core`). The style is intended to be scalable to provide the ability to scale the base system into any kind of API/server (By developing your own `Controllers`/`Models`), and base components and functionallity (`Core`) that helps you maintain an integrated, unified, managed flow of requests and analysis on the overall system.
+This style is not very restrictive in its definitions, as it only divides whatever component given into which part of it define the end-user interface of the API (`Controller`) and the other part as a different components (`Model`/`Core`). The style is intended to be scalable to provide the ability to scale the base system into any kind of API (By developing your own `Controllers`/`Models`), and base components (`Core`) with a functionallity that helps you maintain a unified, managed flow of procedures, requests and analysis on the overall system.
 
-# System Components
+## System Components
 
-## Session management
+### Session management
 Each API/server usually needs different types of sessions. One session can represent a regular user on your application and another can represent a premium user, each type of session has different permissions in your system - some can access a certain function/data and others don't. APIShift allows you to define different session states easily and then assign access rules by these states. The classes that manage the session options are the [core SessionState](machine/core/SessionState.php) and the [controller SessionState](machine/controller/SessionState.php) which allows for changing and managing the session through API requests.
 
 The core SessionState contains the logic and functions that manage the session states, their updates, authorization and communication with the database. The controller SessionState provides a set of functions that a user can use to manipulate the session state - for example change the session on request and more. The controller uses the core object to make these requests come to life. Each session state has a state structure, value and children:
@@ -88,14 +90,14 @@ The core SessionState contains the logic and functions that manage the session s
 
 To add, modify and remove session states visit the "Session" tab in the control panel.
 
-## Database management
+### Database management
 This system is configurable from the control panel and comes to life in your code. The system defines the database structure using an Object + Graph model and translates this model to the relational and other NoSQL models (Which makes it both an [ORM](https://en.wikipedia.org/wiki/Object-relational_mapping) & [ODM](https://www.quora.com/What-is-Object-Document-Mapping)). Each entity\object is refered to as an Item (which not only represents a single table, but can reference multiple tables) and each connection, is refered to as a Relation - which in itself acts as an Item (Allowing for relations between relations). It is translated into the relational model - SQL, in future versions also to different NoSQL models for increased integration.
 
 The system provides a graphical framework for constructing data in the database and managing access to the data. The [DataModelManager](machine/core/DataModelManager.php), [Item](machine/core/Item.php) & [Relation](machine/core/Relation.php) serve as the components that work with the graphical framework and translate it to the database's query language for you.
 
 In later versions, you will be able to save your data on different DB servers, and APIShift will manage it for you - acting as a data warehouse. To add, modify and remove long-term data in your application visit the "Database" tab in the control panel.
 
-### Data Model Components
+#### Data Model Components
 When working with database components of the APIShift, you create `Canvases`, where each canvas is a visual representation of database elements and how they are related & constructed. The system uses these terms/components:
  * __Item__: An abstract components that is presented as a collection of keys and values, that represent data elements stired in the DB.
  * __Relation__: A relation is an item that makes and abstract connection between 2 or more items. Since a relation is also an item you can make relations between relations - this is what makes the terminology of the engine as a combination between [graph model semantics](https://en.wikipedia.org/wiki/Graph_database), [object model semantics](https://en.wikipedia.org/wiki/Object_model) and an [entity-relationship model](https://en.wikipedia.org/wiki/Entity%E2%80%93relationship_model). Notice that I wrote 'abstract connection' as a relation doesn't store or address primary or foreign keys, this frees the system from normalizing the database only in one way, and makes it easier to translate between different data models. Each relation is one of those types:
@@ -107,7 +109,7 @@ When working with database components of the APIShift, you create `Canvases`, wh
 
 These kind of defintions and components allow us to keep a single query language to access, cunstruct and normalize data elements in a database of any type (SQL and NoSQL structures like mongodb, graphQL and more).
 
-## Procedure Management
+### Procedure Management
 More will be added later
 
 # Project Structure

@@ -4,12 +4,15 @@
 # APIShift Engine
 </div>
 
-The APIShift Engine is an API creator library with a control panel which purpose is to help build and deploy a fully functional API or Back-End for any type of system with features for:
- * Managing the sessions, its different states and how it changes overtime
- * Managing data & structures in different databases using a graphical representation of the data and a unified query language
- * Creating logical procedures using a graph-based UI to define procedures and attach them to different areas of the code/other procedures/lifecycle of your application
- * Authorizing access for different states of session, requests and data
- * Analyzing the data passing through your application and then presenting it
+APIShift is a platform with a set of helpful tools for building your own API/server with a configurable architecture that lets you implement whatever type of style you want, whether it'll be REST, SOAP or your own monster you wish to implement. The environment which APIShift sets you, give you flexibility and control over the following concept:
+ * **Requests**: Develop you own requests & their responses with a helpful set of tools and configurable, ready to use workflow set up for you. (**<span style="color:#0000ff">Status</span>: <span style="color:#00ff00">Ready</span>**)
+ * **Session**: Manage the sessions, their different states, roles, life-cycle and data during run-time with a simple interface. (**<span style="color:#0000ff">Status</span>: <span style="color:#ff00ff">In development</span>**)
+ * **Database**: Manage data & structures in different databases using an interface that lets you automate and manage multiple databases and types of databases. (**<span style="color:#0000ff">Status</span>: <span style="color:#ff00ff">In development</span>, <span style="color:#ff0000">Planning</span>**)
+ * **Algotihms**: Creating logical procedures using a graph-based UI or your own code to define procedures and attach them to different areas of the code/other procedures/lifecycle of your application using our interface. (**<span style="color:#0000ff">Status</span>: <span style="color:#ff00ff">In development</span>, <span style="color:#ff0000">Planning</span>**)
+ * **Authorize**: Buid your unique authorization processes and attach them to any part of your system easily. (**<span style="color:#0000ff">Status</span>: <span style="color:#ff00ff">In development</span>, <span style="color:#ff0000">Planning</span>**)
+ * **Analyze**: Track anything you want in your system and collect data about it, then create your own analyzation tools or use our pre-made tools to present different analyzations and conclusions about the system and how it functions. (**<span style="color:#0000ff">Status</span>: <span style="color:#ff0000">Planning</span>**)
+
+If you want, you can use your own tools, dependencies and modifications, the architecture lets you add on top of it whatever you want to integrate and use.
 
 ## Table of contents
 - [APIShift Engine](#apishift-engine)

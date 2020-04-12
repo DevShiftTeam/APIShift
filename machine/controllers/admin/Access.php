@@ -71,11 +71,23 @@ class Access {
                         if(!isset($states[$_POST['rule']['rule']['val']])) Status::message(Status::ERROR, "State doesn't exist");
 
                         // Check if state task exists
+                        $name = 'state_' . $_POST['rule']['rule']['text'];
                         $task_res = [];
                         $task_id = 0;
-                        $check = DatabaseManager::fetchInto("main", $task_res, "SELECT id FROM tasks WHERE id = :val", [ 'name' => 'state_' . $_POST['rule']['rule']['text'] ]);
-                        if(!$check || gettype($task_res) !== 'array' && count($task_res) == 0) {
-                            // Add task if doesn't exists
+                        $check = DatabaseManager::fetchInto("main", $task_res, "SELECT id FROM tasks WHERE name = :name", [ 'name' => $name ]);
+                        if(!$check || gettype($task_res) !== 'array' || count($task_res) == 0) {
+                            // Add process
+                            DatabaseManager::query("main", "INSERT INTO processes (name) VALUES (:name)", [ 'name' => $name ]);
+
+                            // Add task
+                            DatabaseManager::query("main", "INSERT INTO tasks (name) VALUES (:name)", [ 'name' => $name ]);
+
+                            // Connect task and process
+                            DatabaseManager::query("main", "INSERT INTO task_processes (task, process) VALUES
+                                ((SELECT id FROM tasks WHERE name = :task),
+                                (SELECT id FROM processes WHERE name = :process))", [ 'task' => $name, 'proccess' => $name ]);
+                            
+                            // TODO: Add validation connections
                         }
                         else $task_id = $task_res[0]['id'];
 
@@ -117,7 +129,12 @@ class Access {
     }
 
     /**
-     * Remove an access rule
+     * Remove an access rule.
+     * The structure of the request should like like this:
+     * [
+     *  'elem' => To which element to apply the auth rule (session, controller, database)
+     *  'id' => Element ID to remove from
+     * ]
      */
     public static function removeAccessRule() {
         if(!isset($_POST['elem']) || $_POST['elem'] == "")
@@ -126,7 +143,7 @@ class Access {
         // Determine to which system elemect the rule applies
         switch($_POST['elem']) {
             case 'session':
-                $res = DatabaseManager::query("main", "UPDATE session_states SET auth_task = NULL WHERE id = :id", $_POST['rule']);
+                $res = DatabaseManager::query("main", "UPDATE session_states SET auth_task = NULL WHERE id = :id", $_POST['id']);
                 if(!$res) Status::message(Status::ERROR, "Couldn't remove rule from DB");
                 break;
             case 'controller':

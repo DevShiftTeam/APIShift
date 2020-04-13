@@ -144,7 +144,7 @@ class DatabaseManager {
     }
 
     /**
-     * Make fast query
+     * Run a query
      * 
      * @param string $connectionName Name of the connection
      * @param string $query Query to run

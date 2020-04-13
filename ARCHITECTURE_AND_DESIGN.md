@@ -12,11 +12,11 @@ The semantics of this architecture document will follow the definitions mentione
 - [APIShift Architecture And Design](#apishift-architecture-and-design)
 - [Table of contents](#table-of-contents)
 - [Architecture Overview](#architecture-overview)
-  - [Definitions](#definitions)
-  - [Component Classifications](#component-classifications)
-    - [Base Components](#base-components)
-    - [Mid-Level Components](#mid-level-components)
   - [Architectural Style](#architectural-style)
+    - [Definitions](#definitions)
+  - [Component Classifications](#component-classifications)
+    - [Base Components: 1st Lvl Abstraction](#base-components-1st-lvl-abstraction)
+    - [Base Components: 2st Lvl Abstraction](#base-components-2st-lvl-abstraction)
   - [System Components](#system-components)
     - [Session management](#session-management)
     - [Database management](#database-management)
@@ -27,16 +27,25 @@ The semantics of this architecture document will follow the definitions mentione
   - [Control panel UI](#control-panel-ui)
 
 # Architecture Overview
-In this section we will give an overview of the definitions, components, connections between them and the data elements of the overall architecture. APIShift, through its architecture strives to not be bound to a specific API architecture (e.g. REST), thus making it an abstract API that can be configured to follow any netwrok-based software architecture you want it.
+In this section we will give an overview of the definitions, components, connections between them and the data elements of the overall architecture. APIShift, through its architecture strives to not be bound to a specific API architecture (e.g. REST, SOAP), thus making it an abstract API that can be configured to follow any netwrok-based software architecture you want.
 
-We also want to keep our system as clean as possible from other complex technologies so that anyone can add whatever packages and technologies he wants with only knowing PHP. You can use composer to add Symfony packages, Doctrine and more on your own.
+We also want to keep our system as clean as possible from other complex technologies so that anyone can start working with it, and add whatever packages and technologies they want. You can use composer to add Symfony packages, Doctrine and more on your own.
 
-## Definitions
+## Architectural Style
+An architectural style, are restrictions that guide how we define architectural elements and relate between them in ways that satisfy the given style.
+
+Our style, first and foremost, follows the definitions presented in the [Component Classifications](#component-classifications) section. Meaning that any component in our architecture will belong to a specific classification defined in that section.
+
+Each component will be divided in a Core-Model-Controller manner, such that: Each component's functionallity that is visible, and can be triggered by an end-user will be referred by a `Controller` sub-component. And any functionallity that is not visible to the end-user will be referred by a `Model` sub-component. User-made components may contain only components that are divided into `Controller` & `Model` sub-components. `Core` is basically `Model` components  that define the overall system's workflow and gives user-made `Controllers` & `Models` the basic functionallity needed to integrate with the system's workflow and features.
+
+This style is not very restrictive in its definitions, as it only divides whatever component given into which part of it define the end-user interface of the API (`Controller`) and the other part as a different components (`Model`/`Core`). The style is intended to be scalable to provide the ability to scale the base system into any kind of API by developing your own `Controllers`/`Models`. The base components (`Core`) are developed with functionallity to help you maintain a managed flow of procedures, requests and analysis on the overall system.
+
+### Definitions
 The system uses the following syntactic terms, which are presented as architectural components. The purpose of those definitions is to create a template for passing different type of data elements between components, such that architectually (and practically) components won't need to worry if the data came in from a coded array or database tuple.
 
  * __Data Entry__: A data entry is any varaible, constant, key or cell in the project.
  * __Data Sources__: Data sources are sources of data entries: arrays, tables, documents, items & relation (an Item and a Relation are components that process data elements of tables and documents under a unified definition to create a single query language that can access both types of data, allowing for integration and fast transitions from [relational](https://en.wikipedia.org/wiki/Relational_database) to [document](https://en.wikipedia.org/wiki/Document-oriented_database) models. We will review the Item and Relation components later on).
- * __Procedural Connections__: A path connecting between data entries, sources and other procedural connection outputs with processing elements (e.g. functions) - each procedural connection represents a function operation in run-time when called. This defintion is used to create the procedural diagrams defining the authorizations and other processes that can be attached to system flow during run-time using the Task and Process components which will be discussed later in this document.
+ * __Procedural Connections__: A connection between data entries, sources or other procedural connection and processing elements (e.g. functions) - each procedural connection represents a function operation in run-time on the connected data. This defintion represents a concept that the APIShift framework uses to run, interpret and create functionallity. Later on this concept will be used to turn diagram made using the framework into run-time elements of your system.
 
 ## Component Classifications
 <div align="center">
@@ -45,37 +54,28 @@ The system uses the following syntactic terms, which are presented as architectu
 
 The diagram above shows the different classifications each component can  belong to. The purpose of these classification is to create an abstraction above the architectural components that can, in theory, classify any type of API or server components into these definitions for providing a scalable and modular system to build any type of API/Server. These classification are built around the idea that anyone can define & add it's own components, and classify them according to this model. Then the base components are created with definitions and connections that abide this classification, and the ability to expand their functionallity and architecture by combining other components in the same classification, to fit the desired architecture of any API/server the developer wishes to make.
 
-### Base Components
-The system defines 3 main base concepts that are said to make a base for a whole API/Back-End, and provides components as follows:
-1. __Core__: The basic components that hold and process data elements that define the configurations of the system. For example credentials for connecting to the main database, and other hardcoded metadata. Practically the core file is defined during system installation. These components are connected to other components of the system and are used for passing configurations between components.
+### Base Components: 1st Lvl Abstraction
+The system defines 3 main base concepts that give the basic functionallity to configure metadata, and have access to long and short term memory.
+1. __Core Configurations__: Holds the framework's configurations. For example, credentials for connecting to the main database, and other hardcoded metadata. Practically the core file is defined during system installation. 
     * [Core Configurations Class](machine/core/Configurations.php)
-2. __Database__: The components that manage and communicate with the database to access the long-term memory from code and translate between different database models.
-    * [Data Structure Manager & Translator Class](machine/core/DataModelManager.php)
+2. __Database__: The components that manage and communicate with the database to access the 'long-term memory' of the framework from code and translate between different database models.
+    * [PDO Objects Collection Class](machine/core/DataModelManager.php)
+    * [Data Structure Manager Class](machine/core/DataModelManager.php)
     * [Item Class](machine/core/Item.php)
     * [Relation Class](machine/core/Relation.php)
-    * [PDO Objects Collection Class](machine/core/DataModelManager.php)
-3. __Session__: The components that manage the data elements and data strcuture and how they change in each session. Practically, in PHP terms, each session at any point in run-time has PHP array (key-value) defining the structure and data of the session stored in the `$_SESSION` variable, which our system refers to as the current session state.
+3. __Session__: The components that manage the data elements and data strcuture and how they change per each session. Practically, in PHP terms, each session at any point in run-time has PHP array (key-value) defining the structure and data of the session stored in the `$_SESSION` variable, which our system refers to as the current session state. Can be considered as a 'short-term memory' of an API or BE.
     * [Session State Management Class](machine/core/SessionState.php)
 
-### Mid-Level Components
-The system also defines 3 more concepts that are connected to the base concept to build up the logic, restrictions and analysis of the API, and as follows, define modular and scalable components to handle it:
-1. __Logic/Models__: All the components that make use of the session, database and core of the API to make the requests complete. in a way that componets who handle process requests (the controllers, which will be reviewed later) connect to, to complete their operation. All the these components are stored in the [models folder](machine/models), and also made viable by creating procedures using the system's UI and attaching them using triggers controllers, models or the lifecycle of the API.
-    * [Data Model Class](machine/core/Task.php), Each task is made from different processes.
-    * [Processes Management Class](machine/core/Process.php), Each process in a handler of procedural connections, that combines them to make a run-time process.
-2. __Access__: Components that are attached in run-time to each request for validating the procedure or the data that a client wants to access. The Access management tools are based on Tasks & Processes and complete autorizations using the session state which main purpose is to store data that should indicate who is the client.
+### Base Components: 2st Lvl Abstraction
+The system also defines 3 higher level concepts that are using the base components to build up the logic, restrictions and analysis behind the requests of an API, and as a result, define modular and scalable components to handle it:
+1. __Logic/Models__: Components that make use of the session, database and core of the API to provide `Model` functionallity. All these components are stored in the [models folder](machine/models), and later can also be made by creating procedures using the system's UI and attaching them using triggers  to other `Controllers`, `Models` and the overall lifecycle of the API.
+    * [Task Management Class](machine/core/Task.php), Each task manages a collection of processes.
+    * [Processes Management Class](machine/core/Process.php), Each process in a handler of procedural connections, and holds the functionallity to compile them in run-time.
+2. __Access__: Components that provide functionallity to attaches validation procedures at run-time on the data/functionallity that an end-user wants to access/trigger. The access management tools are based on Tasks & Processes and complete autorizations using the session state.
     * [Authorization Class](machine/core/Authorizer.php)
 3. __Analysis__: Components that are connected to other components of the system to accumulate usage data on the different components and the data that is transferred in the system to illustrate a analytic image of the system in terms of performance, access and usage.
 
-Around all of these definitions, the engine defines __Controllers__ as the combining part of the API. The controllers are components that contain all the possible requests that can be made to an API. Each controller makes use of logic, and is surrounded by access and analysis methods to complete the full features of the API.
-
-## Architectural Style
-An architectural style, is in other words, restrictions that guide how we define architectural elements and relate between them in ways that satisfy the given style.
-
-Our style, first and foremost, follows the definitions presented in the [Component Classifications](#component-classifications) section. Meaning that any component in our architecture will belong to a specific classification defined in that section.
-
-Each component will be divided in a Core-Model-Controller manner, where each component's functionallity that can be triggered by an end-user will be referred to as a `Controller` sub-component. And each functionallity that is triggered only after an end-user request at run-time by an inner-state or inner-trigger of the system will be referred to as a `Model` sub-component. User-made components should contain only components that are divided into `Controller` & `Model` sub-components. `Core` is basically `Model` components  that define the overall system's workflow and gives user-made `Controllers` & `Models` the basic functionallity needed to integrate with the system's workflow and features.
-
-This style is not very restrictive in its definitions, as it only divides whatever component given into which part of it define the end-user interface of the API (`Controller`) and the other part as a different components (`Model`/`Core`). The style is intended to be scalable to provide the ability to scale the base system into any kind of API (By developing your own `Controllers`/`Models`), and base components (`Core`) with a functionallity that helps you maintain a unified, managed flow of procedures, requests and analysis on the overall system.
+Around all of these definitions, the engine defines __Controllers__ as the highest level of abstraction of an API it is concerned with. The controllers are components that contain all the possible requests that make up an API. Each controller makes use of logic, and is surrounded by access and analysis components to complete the full features of the API.
 
 ## System Components
 

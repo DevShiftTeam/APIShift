@@ -88,12 +88,10 @@ class APIShift {
                     APIShift.API.notify(response.data, 'error');
                     return;
             }
-        });
+        }, true);
 
         // Check admin mode & installation
         APIShift.Loader.load((resolve, reject) => {
-            // Start update loop with server
-            APIShift.API.startUpdate();
             // Preceding code is only for the CP
             if(!APIShift.admin_mode) {
                 resolve(2); // Jump 2 stage forward
@@ -103,6 +101,9 @@ class APIShift {
             if(!APIShift.installed) {
                 resolve(2); // Jump 2 stage forward
             }
+
+            // Start update loop with server
+            APIShift.API.startUpdate();
 
             // Load default pages
             APIShift.admin_routes.push({
@@ -122,7 +123,7 @@ class APIShift {
         APIShift.API.request("Main\\SessionState", "getCurrentSessionState", {}, function (response) {
             if(response.status == APIShift.API.status_codes.SUCCESS) is_session_admin = response.data == 1;
             else APIShift.API.notify(APIShift.API.getStatusName(response.status) + ": " + response.data, "error");
-        });
+        }, true);
 
         APIShift.Loader.load((resolve, reject) => {
             if(is_session_admin) {
@@ -146,10 +147,10 @@ class APIShift {
      */
     isSessionState(state_id) {
         let result = false;
-            APIShift.API.request("Main\\SessionState", "getCurrentSessionState", {}, function (response) {
-                if(response.status == 1) result = response.data == state_id;
-                else APIShift.API.notify(APIShift.API.getStatusName(response.status) + ": " + response.data, "error");
-            });
+        APIShift.API.request("Main\\SessionState", "getCurrentSessionState", {}, function (response) {
+            if(response.status == 1) result = response.data == state_id;
+            else APIShift.API.notify(APIShift.API.getStatusName(response.status) + ": " + response.data, "error");
+        }, true);
         return result;
     }
 };
@@ -253,14 +254,14 @@ class Loader {
      * Load a function and show the loader if defined
      * @param {Function} handlerMethod The method to run when loading
      * @param {String} loader_name The loader name to use at this loading
-     * @param {Boolean} background Run in background and don't show the loader on screen
+     * @param {Boolean} chain True to run sequencially by order of calls or false to run independently
      */
-    load(handlerMethod = function(resolve, reject) { return resolve(0); }, loader_name = this.current_loader, background = false) {
+    load(handlerMethod = function(resolve, reject) { return resolve(0); }, loader_name = this.current_loader, chain = true) {
         // Promise is indepenent of any other promise so no need to keep
         let promiseHolder;
 
-        // Integrate with promise chain if not in background
-        if(!background)
+        // Integrate with promise chain in loader if not as chain
+        if(chain)
         {
             promiseHolder = this.loader_manager[loader_name].promise;
             // Create a new promise if all processes finished
@@ -293,11 +294,11 @@ class Loader {
             return new Promise(handlerMethod);
         }).then(function (value) {
             // When done close loader
-            if (!background) APIShift.Loader.close(loader_name);
+            if (chain) APIShift.Loader.close(loader_name);
             return value;
         });
 
-        if(!background) this.loader_manager[loader_name].promise = endResult;
+        if(chain) this.loader_manager[loader_name].promise = endResult;
         return endResult;
     }
 
@@ -410,9 +411,9 @@ class APIHandler {
      * @param {string} method The method to call
      * @param {object} attached_data Data to send to the method
      * @param {function} HandlerMethod Function to handle the response or error
-     * @param {boolean} use_loader Open loader until request finishes
+     * @param {boolean} chain Open loader until request finishes
      */
-    request(controller, method, attached_data = {}, handlerMethod = function (response) {}, use_loader = true) {
+    request(controller, method, attached_data = {}, handlerMethod = function (response) {}, chain = false) {
         // Define request function without running it
         return APIShift.Loader.load((resolve, reject) => {
             $.ajax({
@@ -434,7 +435,7 @@ class APIHandler {
                     resolve(0);
                 }
             });
-        }, APIShift.Loader.current_loader, !use_loader);
+        }, APIShift.Loader.current_loader, chain);
     }
 
     /**

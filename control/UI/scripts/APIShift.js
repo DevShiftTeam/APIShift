@@ -413,7 +413,7 @@ class APIHandler {
      * @param {function} HandlerMethod Function to handle the response or error
      * @param {boolean} chain Open loader until request finishes
      */
-    request(controller, method, attached_data = {}, handlerMethod = function (response) {}, chain = false) {
+    request(controller, method, attached_data = {}, handlerMethod = function (response) {}, chain = true) {
         // Define request function without running it
         return APIShift.Loader.load((resolve, reject) => {
             $.ajax({
@@ -422,7 +422,8 @@ class APIHandler {
                 data: attached_data,
                 dataType: "json",
                 success: function (response) {
-                    if(response.status == APIShift.API.status_codes.NO_AUTH && APIShift.admin_mode) nav_holder.logout();
+                    if(response.status == APIShift.API.status_codes.NO_AUTH && APIShift.admin_mode
+                        && APIShift.logged_in && window.nav_holder !== undefined) nav_holder.logout();
                     handlerMethod(response);
                 },
                 error: function () {

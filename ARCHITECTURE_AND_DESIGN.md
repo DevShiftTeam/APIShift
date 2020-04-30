@@ -19,23 +19,39 @@ The semantics of this architecture document will follow the definitions mentione
     - [Base Components: 2nd Lvl Abstraction](#base-components-2nd-lvl-abstraction)
   - [Request Workflow](#request-workflow)
 - [Architectural Elements](#architectural-elements)
-  - [Session Components](#session-components)
-    - [SessionState](#sessionstate)
-      - [Core Interface](#core-interface)
-      - [Controller Interface](#controller-interface)
-  - [Database Components](#database-components)
-    - [Item](#item)
+  - [Session States](#session-states)
+    - [Data](#data)
+    - [Core Interface](#core-interface)
+    - [Controller Interface](#controller-interface)
+  - [Database](#database)
+    - [Database Manager](#database-manager)
+      - [Data](#data-1)
       - [Core Interface](#core-interface-1)
       - [Controller Interface](#controller-interface-1)
-    - [DataModel](#datamodel)
+    - [Item](#item)
+      - [Data](#data-2)
       - [Core Interface](#core-interface-2)
       - [Controller Interface](#controller-interface-2)
-    - [Data Model Components](#data-model-components)
-  - [Tasks & Processes Components](#tasks--processes-components)
-    - [Task Interface](#task-interface)
-    - [Process Interface](#process-interface)
-  - [Authorization Components](#authorization-components)
-  - [Analysis Components](#analysis-components)
+    - [DataModel](#datamodel)
+      - [Data](#data-3)
+      - [Core Interface](#core-interface-3)
+      - [Controller Interface](#controller-interface-3)
+  - [Task](#task)
+    - [Data](#data-4)
+    - [Core Interface](#core-interface-4)
+    - [Controller Interface](#controller-interface-4)
+  - [Process](#process)
+    - [Data](#data-5)
+    - [Core Interface](#core-interface-5)
+    - [Controller Interface](#controller-interface-5)
+  - [Access](#access)
+    - [Data](#data-6)
+    - [Core Interface](#core-interface-6)
+    - [Controller Interface](#controller-interface-6)
+  - [Analysis](#analysis)
+    - [Data](#data-7)
+    - [Core Interface](#core-interface-7)
+    - [Controller Interface](#controller-interface-7)
 - [Project Structure](#project-structure)
   - [Back-End](#back-end)
   - [Control panel UI](#control-panel-ui)
@@ -104,9 +120,9 @@ The APIShift framework provides a general workflow for each request, with an eco
 Part 1 to 3 of this workflow is implemented by the [APIShift.php](machine/APIShift.php) file, and the other part 4 to 6 is implemented by the [API.php](machine/API.php) file. This separation is made so that if a developer wishes to implement server-side rendering or his own components using the framework's features, he can simply include the APIShift.php file, while the API.php file serves at the head file from which requests to the API controllers are made.
 
 # Architectural Elements
-This title will discuss the different components, connectors and data elements of the famework, their features and interfaces.
+This title will discuss the different components, connectors and data elements of the famework, their features, interfaces and responsibility.
 
-## Session Components
+## Session States
 A session, for a program, is a data structure that its values are stored per each client, usually from the start untill the end of the interaction with an additional timeout. Sessions are great tools to store a certain "state" about a client thoughout a connection, indicating our program who the client is - is it an admin? a player in our app? a premium user maybe? all these different clients have different restrictions on the functionallity and data the can access. APIShift allows you to define different session states easily and then assign access rules by these states to data, controllers and methods. The classes that manage the session options are the [core of the SessionState](machine/core/SessionState.php). The [controller interface SessionState](machine/controller/SessionState.php) allows for managing the session through API requests - As described in the [README.md](README.md) file.
 
 The core of the SessionState contains the logic and functions that manage the session states, their updates, authorization and communication with the database. The controller of the SessionState provides a interface that a user can use to manipulate the session state - for example change the session on a given request to indicate a login or logout, and more. Each session state has a state structure, indicating how the data about the state is saved, it also needs to know which data entries to take value from to fill them, and who are their children:
@@ -117,7 +133,26 @@ The core of the SessionState contains the logic and functions that manage the se
 
 To manage session states in your API visit the "Session" tab in the control panel.
 
-### SessionState
+### Data
+More will be added later
+
+### Core Interface
+More will be added later
+
+### Controller Interface
+More will be added later
+
+## Database
+This system is configurable from the control panel and comes to life in your code. The system defines the database structure using an Object + Graph model and translates this model to the relational and other NoSQL models (Which makes it both an [ORM](https://en.wikipedia.org/wiki/Object-relational_mapping) & [ODM](https://www.quora.com/What-is-Object-Document-Mapping)). Each entity\object is refered to as an Item (which not only represents a single table, but can reference multiple tables) and each connection, is refered to as a Relation - which in itself acts as an Item (Allowing for relations between relations). It is translated into the relational model - SQL, in future versions also to different NoSQL models for increased integration.
+
+The system strives to provide a graphical framework for constructing data in the database and manage access to the data. The [DataModelManager](machine/core/DataModelManager.php), [Item](machine/core/Item.php) & [Relation](machine/core/Relation.php) serve as the components that work with the graphical framework and translate it to the database's query language for you.
+
+In later versions, you will be able to save your data on different DB servers, and APIShift will manage it for you - acting as a data warehouse. To add, modify and remove long-term data in your application visit the "Database" tab in the control panel.
+
+### Database Manager
+More will be added later
+
+#### Data
 More will be added later
 
 #### Core Interface
@@ -126,14 +161,10 @@ More will be added later
 #### Controller Interface
 More will be added later
 
-## Database Components
-This system is configurable from the control panel and comes to life in your code. The system defines the database structure using an Object + Graph model and translates this model to the relational and other NoSQL models (Which makes it both an [ORM](https://en.wikipedia.org/wiki/Object-relational_mapping) & [ODM](https://www.quora.com/What-is-Object-Document-Mapping)). Each entity\object is refered to as an Item (which not only represents a single table, but can reference multiple tables) and each connection, is refered to as a Relation - which in itself acts as an Item (Allowing for relations between relations). It is translated into the relational model - SQL, in future versions also to different NoSQL models for increased integration.
-
-The system strives to provide a graphical framework for constructing data in the database and manage access to the data. The [DataModelManager](machine/core/DataModelManager.php), [Item](machine/core/Item.php) & [Relation](machine/core/Relation.php) serve as the components that work with the graphical framework and translate it to the database's query language for you.
-
-In later versions, you will be able to save your data on different DB servers, and APIShift will manage it for you - acting as a data warehouse. To add, modify and remove long-term data in your application visit the "Database" tab in the control panel.
-
 ### Item
+More will be added later
+
+#### Data
 More will be added later
 
 #### Core Interface
@@ -143,15 +174,6 @@ More will be added later
 More will be added later
 
 ### DataModel
-More will be added later
-
-#### Core Interface
-More will be added later
-
-#### Controller Interface
-More will be added later
-
-### Data Model Components
 When working with database components of the APIShift, you create `Canvases`, where each canvas is a visual representation of database elements and how they are related & constructed. The system uses these terms/components:
  * __Item__: An abstract components that is presented as a collection of keys and values, that represent data elements stired in the DB.
  * __Relation__: A relation is an item that makes and abstract connection between 2 or more items. Since a relation is also an item you can make relations between relations - this is what makes the terminology of the engine as a combination between [graph model semantics](https://en.wikipedia.org/wiki/Graph_database), [object model semantics](https://en.wikipedia.org/wiki/Object_model) and an [entity-relationship model](https://en.wikipedia.org/wiki/Entity%E2%80%93relationship_model). Notice that I wrote 'abstract connection' as a relation doesn't store or address primary or foreign keys, this frees the system from normalizing the database only in one way, and makes it easier to translate between different data models. Each relation is one of those types:
@@ -163,19 +185,61 @@ When working with database components of the APIShift, you create `Canvases`, wh
 
 These kind of defintions and components allow us to keep a single query language to access, cunstruct and normalize data elements in a database of any type (SQL and NoSQL structures like mongodb, graphQL and more).
 
-## Tasks & Processes Components
+#### Data
 More will be added later
 
-### Task Interface
+#### Core Interface
 More will be added later
 
-### Process Interface
+#### Controller Interface
 More will be added later
 
-## Authorization Components
+## Task
 More will be added later
 
-## Analysis Components
+### Data
+More will be added later
+
+### Core Interface
+More will be added later
+
+### Controller Interface
+More will be added later
+
+## Process
+More will be added later
+
+### Data
+More will be added later
+
+### Core Interface
+More will be added later
+
+### Controller Interface
+More will be added later
+
+## Access
+More will be added later
+
+### Data
+More will be added later
+
+### Core Interface
+More will be added later
+
+### Controller Interface
+More will be added later
+
+## Analysis
+More will be added later
+
+### Data
+More will be added later
+
+### Core Interface
+More will be added later
+
+### Controller Interface
 More will be added later
 
 # Project Structure

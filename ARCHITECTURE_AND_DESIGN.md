@@ -19,39 +19,47 @@ The semantics of this architecture document will follow the definitions mentione
     - [Base Components: 2nd Lvl Abstraction](#base-components-2nd-lvl-abstraction)
   - [Request Workflow](#request-workflow)
 - [Architectural Elements](#architectural-elements)
-  - [Session States](#session-states)
+  - [Cache](#cache)
     - [Data](#data)
     - [Core Interface](#core-interface)
     - [Controller Interface](#controller-interface)
+  - [Session States](#session-states)
+    - [Data](#data-1)
+    - [Core Interface](#core-interface-1)
+    - [Controller Interface](#controller-interface-1)
   - [Database](#database)
     - [Database Manager](#database-manager)
-      - [Data](#data-1)
-      - [Core Interface](#core-interface-1)
-      - [Controller Interface](#controller-interface-1)
-    - [Item](#item)
       - [Data](#data-2)
       - [Core Interface](#core-interface-2)
       - [Controller Interface](#controller-interface-2)
-    - [DataModel](#datamodel)
+    - [Item](#item)
       - [Data](#data-3)
       - [Core Interface](#core-interface-3)
       - [Controller Interface](#controller-interface-3)
+    - [DataModel](#datamodel)
+      - [Data](#data-4)
+      - [Core Interface](#core-interface-4)
+      - [Controller Interface](#controller-interface-4)
   - [Task](#task)
-    - [Data](#data-4)
-    - [Core Interface](#core-interface-4)
-    - [Controller Interface](#controller-interface-4)
-  - [Process](#process)
     - [Data](#data-5)
     - [Core Interface](#core-interface-5)
     - [Controller Interface](#controller-interface-5)
-  - [Access](#access)
+  - [Process](#process)
     - [Data](#data-6)
     - [Core Interface](#core-interface-6)
     - [Controller Interface](#controller-interface-6)
-  - [Analysis](#analysis)
+  - [Access](#access)
     - [Data](#data-7)
     - [Core Interface](#core-interface-7)
     - [Controller Interface](#controller-interface-7)
+  - [Analysis](#analysis)
+    - [Data](#data-8)
+    - [Core Interface](#core-interface-8)
+    - [Controller Interface](#controller-interface-8)
+  - [Extensions](#extensions)
+    - [Data](#data-9)
+    - [Core Interface](#core-interface-9)
+    - [Controller Interface](#controller-interface-9)
 - [Project Structure](#project-structure)
   - [Back-End](#back-end)
   - [Control panel UI](#control-panel-ui)
@@ -122,8 +130,20 @@ Part 1 to 3 of this workflow is implemented by the [APIShift.php](machine/APIShi
 # Architectural Elements
 This title will discuss the different components, connectors and data elements of the famework, their features, interfaces and responsibility.
 
+## Cache
+More will be added later
+
+### Data
+More will be added later
+
+### Core Interface
+More will be added later
+
+### Controller Interface
+More will be added later
+
 ## Session States
-A session, for a program, is a data structure that its values are stored per each client, usually from the start untill the end of the interaction with an additional timeout. Sessions are great tools to store a certain "state" about a client thoughout a connection, indicating our program who the client is - is it an admin? a player in our app? a premium user maybe? all these different clients have different restrictions on the functionallity and data the can access. APIShift allows you to define different session states easily and then assign access rules by these states to data, controllers and methods. The classes that manage the session options are the [core of the SessionState](machine/core/SessionState.php). The [controller interface SessionState](machine/controller/SessionState.php) allows for managing the session through API requests - As described in the [README.md](README.md) file.
+A session, for a program, is a data structure that its values are stored per each client, usually from the start untill the end of the interaction with an additional timeout. Sessions are great tools to store a certain "state" about a client when exchanging requests, indicating our program who the client is - is it an admin? a player in our app? a premium user maybe? all these different clients have different restrictions on the functionallity and data they can access. APIShift allows you to define different session states easily and then assign access rules by these states to data, controllers and methods. The classes that manage the session states are the [core of the SessionState](machine/core/SessionState.php). The [controller interface SessionState](machine/controller/SessionState.php) allows for managing the session through API requests.
 
 The core of the SessionState contains the logic and functions that manage the session states, their updates, authorization and communication with the database. The controller of the SessionState provides a interface that a user can use to manipulate the session state - for example change the session on a given request to indicate a login or logout, and more. Each session state has a state structure, indicating how the data about the state is saved, it also needs to know which data entries to take value from to fill them, and who are their children:
 
@@ -134,7 +154,19 @@ The core of the SessionState contains the logic and functions that manage the se
 To manage session states in your API visit the "Session" tab in the control panel.
 
 ### Data
-More will be added later
+ * ___session_state___ - Used to encapsulated the session data strcture at a given state for different types of clients, and other.
+   * _id_ - Identifier of the state.
+   * _name_ - Name identifying the state.
+   * _inactive_timeout_ - Timeout untill system disposes of the session user when not active.
+   * _active_timeout_ - Timeout until system disposes the session since whether active or not.
+   * _auth_task_ - Authorization task running the procedure when a user requests a change into this state. A task can be your own function, more on tasks will be discussed later.
+   * _parent_ - The parent session state of this session
+ * ___session_state_structures___ - Defines the key-value store structure of the session in run-time.
+   * _id_ - Personal identification.
+   * _state_ - Identification of state this entry belongs to.
+   * _key_ - Name of the value the entry is holding.
+   * _entry_ - Identification of the data entry which the value coppied from with when state is changed.
+   * _parent_ - Identification of the parent entry.
 
 ### Core Interface
 More will be added later
@@ -231,6 +263,18 @@ More will be added later
 More will be added later
 
 ## Analysis
+More will be added later
+
+### Data
+More will be added later
+
+### Core Interface
+More will be added later
+
+### Controller Interface
+More will be added later
+
+## Extensions
 More will be added later
 
 ### Data

@@ -21,45 +21,44 @@ The semantics of this architecture document will follow the definitions mentione
 - [Architectural Elements](#architectural-elements)
   - [Cache](#cache)
     - [Data](#data)
-    - [Core Interface](#core-interface)
-    - [Controller Interface](#controller-interface)
+    - [Interface](#interface)
   - [Session States](#session-states)
     - [Data](#data-1)
-    - [Core Interface](#core-interface-1)
-    - [Controller Interface](#controller-interface-1)
+    - [Core Interface](#core-interface)
+    - [Controller Interface](#controller-interface)
   - [Database](#database)
     - [Database Manager](#database-manager)
       - [Data](#data-2)
-      - [Core Interface](#core-interface-2)
-      - [Controller Interface](#controller-interface-2)
+      - [Core Interface](#core-interface-1)
+      - [Controller Interface](#controller-interface-1)
     - [Item](#item)
       - [Data](#data-3)
-      - [Core Interface](#core-interface-3)
-      - [Controller Interface](#controller-interface-3)
+      - [Core Interface](#core-interface-2)
+      - [Controller Interface](#controller-interface-2)
     - [DataModel](#datamodel)
       - [Data](#data-4)
-      - [Core Interface](#core-interface-4)
-      - [Controller Interface](#controller-interface-4)
+      - [Core Interface](#core-interface-3)
+      - [Controller Interface](#controller-interface-3)
   - [Task](#task)
     - [Data](#data-5)
-    - [Core Interface](#core-interface-5)
-    - [Controller Interface](#controller-interface-5)
+    - [Core Interface](#core-interface-4)
+    - [Controller Interface](#controller-interface-4)
   - [Process](#process)
     - [Data](#data-6)
-    - [Core Interface](#core-interface-6)
-    - [Controller Interface](#controller-interface-6)
+    - [Core Interface](#core-interface-5)
+    - [Controller Interface](#controller-interface-5)
   - [Access](#access)
     - [Data](#data-7)
-    - [Core Interface](#core-interface-7)
-    - [Controller Interface](#controller-interface-7)
+    - [Core Interface](#core-interface-6)
+    - [Controller Interface](#controller-interface-6)
   - [Analysis](#analysis)
     - [Data](#data-8)
-    - [Core Interface](#core-interface-8)
-    - [Controller Interface](#controller-interface-8)
+    - [Core Interface](#core-interface-7)
+    - [Controller Interface](#controller-interface-7)
   - [Extensions](#extensions)
     - [Data](#data-9)
-    - [Core Interface](#core-interface-9)
-    - [Controller Interface](#controller-interface-9)
+    - [Core Interface](#core-interface-8)
+    - [Controller Interface](#controller-interface-8)
 - [Project Structure](#project-structure)
   - [Back-End](#back-end)
   - [Control panel UI](#control-panel-ui)
@@ -131,16 +130,20 @@ Part 1 to 3 of this workflow is implemented by the [APIShift.php](machine/APIShi
 This title will discuss the different components, connectors and data elements of the famework, their features, interfaces and responsibility.
 
 ## Cache
-More will be added later
+The cache an interface of a component that provides a handler for cache systems that can work ob different cache systems while hiding the implementation details behind the interface. The cache system is provided by the [CacheManager](machine/core/CacheManager.php).
 
 ### Data
-More will be added later
+> No Data
 
-### Core Interface
-More will be added later
-
-### Controller Interface
-More will be added later
+### Interface
+* `addSystem($system_type, $name, $data)` Add a new cache system (APU, MemCached, Redis). Will be implemented later. This function will be available later for extendability and so the system will be able to integrate into larger system.
+* `initialize()` Initializaes the cache system and return if initialization was successful.
+* `loadDefaults()` Loads the database tables taht are used for system calls to not spend time requesting data from the database for core operations that happen frequently.
+* `set($key, $value, $ttl, $system_name)` Set/modify a varaible in cache. System name is by default "main" which refers to the main cache system defined in the installation.
+* `get($key, $system_name)` Get a variable by name from cache.
+* `exists($key, $system_name)` Returns true if a key exists.
+* `getTable($table_name, $ttl)` Load table data into cache.
+* `getFromTable($table_name, $id, $ttl)` Store element from DB to cache.
 
 ## Session States
 A session, for a program, is a data structure that its values are stored per each client, usually from the start untill the end of the interaction with an additional timeout. Sessions are great tools to store a certain "state" about a client when exchanging requests, indicating our program who the client is - is it an admin? a player in our app? a premium user maybe? all these different clients have different restrictions on the functionallity and data they can access. APIShift allows you to define different session states easily and then assign access rules by these states to data, controllers and methods. The classes that manage the session states are the [core of the SessionState](machine/core/SessionState.php). The [controller interface SessionState](machine/controller/SessionState.php) allows for managing the session through API requests.

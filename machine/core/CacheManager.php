@@ -48,7 +48,7 @@
     /**
      * Initializes the cache system and validates accessibility
      */
-    public static function initialize() {
+    private static function initialize() {
         switch(Configurations::CACHE_TYPE) {
             case self::APCU:
                 if(!extension_loaded("apcu")) Status::message(Status::ERROR, "Please install/enable APCu or configure to use another system (Redis/Memcached)");

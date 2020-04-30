@@ -136,7 +136,7 @@ The cache an interface of a component that provides a handler for cache systems 
 > No Data
 
 ### Interface
-* `addSystem($system_type, $name, $data)` Add a new cache system (APU, MemCached, Redis). Will be implemented later. This function will be available later for extendability and so the system will be able to integrate into larger system.
+* `addSystem($system_type, $name, $credentials)` Add a new cache system (APCU, MemCached, Redis). Will be implemented later. This function will be available later for extendability and so the system will be able to integrate into larger system.
 * `initialize()` Initializaes the cache system and return if initialization was successful.
 * `loadDefaults()` Loads the database tables taht are used for system calls to not spend time requesting data from the database for core operations that happen frequently.
 * `set($key, $value, $ttl, $system_name)` Set/modify a varaible in cache. System name is by default "main" which refers to the main cache system defined in the installation.

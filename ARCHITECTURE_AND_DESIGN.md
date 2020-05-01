@@ -115,64 +115,65 @@ The system also defines 3 higher level concepts that are using the base componen
 Around all of these definitions, the engine defines __Controllers__ as the highest level of abstraction of an API it is concerned with. The controllers are components that contain all the possible requests that make up an API. Each controller makes use of logic, and is surrounded by access and analysis components to complete the full features of the API.
 
 ## Request Workflow
-The APIShift framework provides a general workflow for each request, with an ecosystem that allows you to easily authenticate and analyze them. This workflow is configurable by the components and features of the system.
+The APIShift framework provides a general workflow for each request, with an ecosystem that allows you to authenticate and analyze requests. This workflow is configurable by the components and features of the system.
 
 1. **Connect to main DB**: First and foremost, APIShift establishes a connection with the main DB, which contains the metadata needed to access to the cache, the session, run validation and authentcations on the server.
-2. **Load default cache data**: The APIShift system caches metadata about the different sessions, database structure and more to speed up queries and operations.
-3. **Load default session**: Loads the session, its structure and values.
+2. **Load default cache data**: The APIShift system caches metadata about the different sessions, database structure and more to speed up queries and operations. if cache data is loaded, framework skips this phase.
+3. **Load default session**: Loads the session, its structure and values. Handles session construction and destruction automatically using timeouts.
 4. **Validate Request**: Validates that the request format is valid. Check if request exists as a task (tasks will be discussed later), a controller method or an extension feature.
-5. **Authorize Request**: Reaches the tasks that are attached as the authorization process of the request, compiles them, and by doing so confirms that the request can be accessed by the requesting end-user.
-6. **Run Request**: If all the previous steps are completed successfully then the controller method requests by the user will be called.
+5. **Authorize Request**: Loads and runs tasks that are attached as the authorization process of the request, and by doing so confirm that the request can be accessed by the requesting client.
+6. **Run Request**: If all the previous steps are completed successfully then the controller method/task/extension feature requested by the user will be called.
 
 Part 1 to 3 of this workflow is implemented by the [APIShift.php](machine/APIShift.php) file, and the other part 4 to 6 is implemented by the [API.php](machine/API.php) file. This separation is made so that if a developer wishes to implement server-side rendering or his own components using the framework's features, he can simply include the APIShift.php file, while the API.php file serves at the head file from which requests to the API controllers are made.
 
 # Architectural Elements
-This title will discuss the different components, connectors and data elements of the famework, their features, interfaces and responsibility.
+This title will discuss the different components, connectors and data elements of the famework, their features, interfaces and responsibility. Each element will be desribed by the data elements it affects, which will be discussed in the **Data** subtitle of the element section, and will be decribed by its interfaces - usually the model/core interface and controller interface in their own **\<Some> Interface** subtitle.
 
 ## Cache
-The cache an interface of a component that provides a handler for cache systems that can work ob different cache systems while hiding the implementation details behind the interface. The cache system is provided by the [CacheManager](machine/core/CacheManager.php).
+The cache is an interface that provides a handler for cache systems that can work with different caches such as Memcached, Redis and APCU, while hiding the implementation details behind a simple get-set interface. The cache system is expressed in the [machine/core/CacheManager.php](machine/core/CacheManager.php) class.
 
 ### Data
 > No Data
 
 ### Interface
-* `addSystem($system_type, $name, $credentials)` Add a new cache system (APCU, MemCached, Redis). Will be implemented later. This function will be available later for extendability and so the system will be able to integrate into larger system.
-* `initialize()` Initializaes the cache system and return if initialization was successful.
-* `loadDefaults()` Loads the database tables taht are used for system calls to not spend time requesting data from the database for core operations that happen frequently.
-* `set($key, $value, $ttl, $system_name)` Set/modify a varaible in cache. System name is by default "main" which refers to the main cache system defined in the installation.
-* `get($key, $system_name)` Get a variable by name from cache.
-* `exists($key, $system_name)` Returns true if a key exists.
-* `getTable($table_name, $ttl)` Load table data into cache.
-* `getFromTable($table_name, $id, $ttl)` Store element from DB to cache.
+* `addSystem($system_type, $name, $credentials)` Adds a new cache system (of type APCU, MemCached, Redis) to collection. This function will be available later for extendability and for the framework to be able to integrate into larger projects.
+* `initialize()` Initializaes the cache system, exits on error.
+* `loadDefaults()` Loads the database tables that are used for the main framework calls to not spend time requesting data from the database for core operations that happen frequently.
+* `set($key, $value, $ttl, $system_name)` Set/modify a variable in cache. System name is by default "main" which refers to the main cache system defined in the installation.
+* `get($key, $system_name)` Get a variable by name from cache. System name is by default "main" which refers to the main cache system defined in the installation.
+* `exists($key, $system_name)` Returns true if a key exists. System name is by default "main" which refers to the main cache system defined in the installation.
+* `setFromTable($table_name, $ttl, $system_name)` Load table data into cache. System name is by default "main" which refers to the main cache system defined in the installation.
+* `setFromTable($table_name, $id, $ttl, $system_name)` Store row from DB to cache. System name is by default "main" which refers to the main cache system defined in the installation.
 
 ## Session States
-A session, for a program, is a data structure that its values are stored per each client, usually from the start untill the end of the interaction with an additional timeout. Sessions are great tools to store a certain "state" about a client when exchanging requests, indicating our program who the client is - is it an admin? a player in our app? a premium user maybe? all these different clients have different restrictions on the functionallity and data they can access. APIShift allows you to define different session states easily and then assign access rules by these states to data, controllers and methods. The classes that manage the session states are the [core of the SessionState](machine/core/SessionState.php). The [controller interface SessionState](machine/controller/SessionState.php) allows for managing the session through API requests.
+Sessions store data with a client that is accessible throughout different requests between the client and the server. A simple analogy will be to say that it's somehow like server-side cookies. Sessions are great tools to store a certain "state" about a client when exchanging requests, indicating our program who the client is - is it an admin? a player in our app? a premium user maybe? all these different clients have different restrictions on the functionallity and data they can access. APIShift allows you to define different session states easily and then assign access rules by these states to data, controllers and methods. The classes that manage the session states are the [core of the SessionState](machine/core/SessionState.php). The [controller interface SessionState](machine/controller/SessionState.php) allows for managing the session through API requests.
 
-The core of the SessionState contains the logic and functions that manage the session states, their updates, authorization and communication with the database. The controller of the SessionState provides a interface that a user can use to manipulate the session state - for example change the session on a given request to indicate a login or logout, and more. Each session state has a state structure, indicating how the data about the state is saved, it also needs to know which data entries to take value from to fill them, and who are their children:
+The core of the SessionState contains the logic and functions that manage the session states, their updates, authorization and communication with the database. The controller of the SessionState provides a interface that a user can use to manipulate the session state - for example change the session on a given request to indicate a login or logout, and more. Each session state has a state structure, indicating how the data about the state is saved, it also needs to know which data entries to take value from to fill them, and who are their children that inherit their properties:
 
- * __Structure__: A map, in our case a PHP array structure, with keys without values. It can contain nested maps.
- * __Values__: Indicators to where to which data entry to get the values from to fill in the structure.
- * __Children__: Children states inherit and extend the structure and values of the parent state and use the same authorization process but with additional options or restrictions as you chose. For example a user session state can have a premium children state that applies to premium users and provides access to more features in your application.
+ * __Structure__: A key-value store, in our case in a PHP array.
+ * __Values__: The values in a session state structure indicate from which data entry to get the values to fill in the structure at run-time.
+ * __Children__: Children states inherit and extend the structure and values of the parent state and use the same authorization process but with additional options or restrictions added by the developer. For example a "user" session state can have a "premium" child state that applies to premium users and provides access to more features in your application.
 
 To manage session states in your API visit the "Session" tab in the control panel.
 
 ### Data
- * ___session_state___ - Used to encapsulated the session data strcture at a given state for different types of clients, and other.
+ * ___session_state___ (SQL) - Used to encapsulate and separate session data structures at a given state for different types of sessions.
    * _id_ - Identifier of the state.
    * _name_ - Name identifying the state.
    * _inactive_timeout_ - Timeout untill system disposes of the session user when not active.
    * _active_timeout_ - Timeout until system disposes the session since whether active or not.
    * _auth_task_ - Authorization task running the procedure when a user requests a change into this state. A task can be your own function, more on tasks will be discussed later.
-   * _parent_ - The parent session state of this session
- * ___session_state_structures___ - Defines the key-value store structure of the session in run-time.
+   * _parent_ - id of the parent session.
+ * ___session_state_structures___ (SQL) - Defines the key-value store structure of the session in run-time.
    * _id_ - Personal identification.
    * _state_ - Identification of state this entry belongs to.
    * _key_ - Name of the value the entry is holding.
    * _entry_ - Identification of the data entry which the value coppied from with when state is changed.
-   * _parent_ - Identification of the parent entry.
+   * _parent_ - id of the parent entry.
 
 ### Core Interface
-More will be added later
+* `loadDefaults()` Initializes the session, and runs timeout checks to automate session creation and destruction at run-time.
+* `changeState($name)` Changes the current states into a new state. Automatically runs
 
 ### Controller Interface
 More will be added later

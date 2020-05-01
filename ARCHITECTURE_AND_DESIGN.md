@@ -127,7 +127,7 @@ The APIShift framework provides a general workflow for each request, with an eco
 Part 1 to 3 of this workflow is implemented by the [APIShift.php](machine/APIShift.php) file, and the other part 4 to 6 is implemented by the [API.php](machine/API.php) file. This separation is made so that if a developer wishes to implement server-side rendering or his own components using the framework's features, he can simply include the APIShift.php file, while the API.php file serves at the head file from which requests to the API controllers are made.
 
 # Architectural Elements
-This title will discuss the different components, connectors and data elements of the famework, their features, interfaces and responsibility. Each element will be desribed by the data elements it affects, which will be discussed in the **Data** subtitle of the element section, and will be decribed by its interfaces - usually the model/core interface and controller interface in their own **\<Some> Interface** subtitle.
+This title will discuss the different components, connectors and data elements of the famework, their features, interfaces and responsibility. Each element will be desribed by the data elements it affects, which will be discussed in the **Data** subtitle of the element section, and will also be decribed by their interfaces - usually the model/core interface and controller interface in their own **\<Some> Interface** subtitle.
 
 ## Cache
 The cache is an interface that provides a handler for cache systems that can work with different caches such as Memcached, Redis and APCU, while hiding the implementation details behind a simple get-set interface. The cache system is expressed in the [machine/core/CacheManager.php](machine/core/CacheManager.php) class.

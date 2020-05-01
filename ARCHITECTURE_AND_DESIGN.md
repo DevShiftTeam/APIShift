@@ -25,40 +25,41 @@ The semantics of this architecture document will follow the definitions mentione
   - [Session States](#session-states)
     - [Data](#data-1)
     - [Core Interface](#core-interface)
-    - [Controller Interface](#controller-interface)
+    - [Admin Controller Interface](#admin-controller-interface)
+    - [Main Controller Interface](#main-controller-interface)
   - [Database](#database)
     - [Database Manager](#database-manager)
       - [Data](#data-2)
       - [Core Interface](#core-interface-1)
-      - [Controller Interface](#controller-interface-1)
+      - [Controller Interface](#controller-interface)
     - [Item](#item)
       - [Data](#data-3)
       - [Core Interface](#core-interface-2)
-      - [Controller Interface](#controller-interface-2)
+      - [Controller Interface](#controller-interface-1)
     - [DataModel](#datamodel)
       - [Data](#data-4)
       - [Core Interface](#core-interface-3)
-      - [Controller Interface](#controller-interface-3)
+      - [Controller Interface](#controller-interface-2)
   - [Task](#task)
     - [Data](#data-5)
     - [Core Interface](#core-interface-4)
-    - [Controller Interface](#controller-interface-4)
+    - [Controller Interface](#controller-interface-3)
   - [Process](#process)
     - [Data](#data-6)
     - [Core Interface](#core-interface-5)
-    - [Controller Interface](#controller-interface-5)
+    - [Controller Interface](#controller-interface-4)
   - [Access](#access)
     - [Data](#data-7)
     - [Core Interface](#core-interface-6)
-    - [Controller Interface](#controller-interface-6)
+    - [Controller Interface](#controller-interface-5)
   - [Analysis](#analysis)
     - [Data](#data-8)
     - [Core Interface](#core-interface-7)
-    - [Controller Interface](#controller-interface-7)
+    - [Controller Interface](#controller-interface-6)
   - [Extensions](#extensions)
     - [Data](#data-9)
     - [Core Interface](#core-interface-8)
-    - [Controller Interface](#controller-interface-8)
+    - [Controller Interface](#controller-interface-7)
 - [Project Structure](#project-structure)
   - [Back-End](#back-end)
   - [Control panel UI](#control-panel-ui)
@@ -135,7 +136,7 @@ The cache is an interface that provides a handler for cache systems that can wor
 ### Data
 > No Data
 
-### Interface
+### [Interface](machine/core/CacheManager.php)
 * `addSystem($system_type, $name, $credentials)` Adds a new cache system (of type APCU, MemCached, Redis) to collection. This function will be available later for extendability and for the framework to be able to integrate into larger projects.
 * `initialize()` Initializaes the cache system, exits on error.
 * `loadDefaults()` Loads the database tables that are used for the main framework calls to not spend time requesting data from the database for core operations that happen frequently.
@@ -171,12 +172,21 @@ To manage session states in your API visit the "Session" tab in the control pane
    * _entry_ - Identification of the data entry which the value coppied from with when state is changed.
    * _parent_ - id of the parent entry.
 
-### Core Interface
+### [Core Interface](machine/core/SessionState.php)
 * `loadDefaults()` Initializes the session, and runs timeout checks to automate session creation and destruction at run-time.
-* `changeState($name)` Changes the current states into a new state. Automatically runs
+* `changeState($name)` Changes the current states into a new state. Automatically runs the authentication process attached to the session.
+* `getSessionState()` Returns the ID of the current session state.
+* `getIDFromName($name)` Returns the ID of the session name given.
 
-### Controller Interface
-More will be added later
+### [Admin Controller Interface](machine/controllers/admin/SessionState.php)
+* `getAllSessionStates()` Returns all the sessions states.
+* `add()` Add a new session state and its structure.
+* `update()` Update existing session and its structure.
+* `remove()` Remove a session state and its structure.
+
+### [Main Controller Interface](machine/controllers/main/SessionState.php)
+* `changeState()` Changes the session state to the one required in the post request.
+* `getCurrentState()` Returns the current session state.
 
 ## Database
 This system is configurable from the control panel and comes to life in your code. The system defines the database structure using an Object + Graph model and translates this model to the relational and other NoSQL models (Which makes it both an [ORM](https://en.wikipedia.org/wiki/Object-relational_mapping) & [ODM](https://www.quora.com/What-is-Object-Document-Mapping)). Each entity\object is refered to as an Item (which not only represents a single table, but can reference multiple tables) and each connection, is refered to as a Relation - which in itself acts as an Item (Allowing for relations between relations). It is translated into the relational model - SQL, in future versions also to different NoSQL models for increased integration.

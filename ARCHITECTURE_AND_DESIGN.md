@@ -167,7 +167,7 @@ The APIShift frameworks, as defined in the [Definitions](#definitions) section, 
 
 The ___data_entry_types___ and ___data_source_types___ tables are loaded to cache by the `loadDefaults()` in the cache manager, to make types access faster suring run-time.
 
-### Interface
+### [Interface](machine/core/DataManager.php)
 * `uploadEntryToCacheAndRuntime($id)` Uploads an entry meta data to cache and run-time. An upload to run-time is happening so that other calls for getting or setting the entry will be faster.
 * `getEntryData($id)` Returns the data about an entry, such as its type, source and name.
 * `getEntryValue($id, $where_query_attrib)` Returns the value an entry holds. In case of a table cell, the system will use the where query attributes array to make a where clause, such that the keys will be the column names and values are the comparison values.

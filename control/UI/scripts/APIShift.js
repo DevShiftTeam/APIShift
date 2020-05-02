@@ -381,7 +381,7 @@ class APIHandler {
      * @param {string} name 
      * @param {function} func 
      */
-    addUpdateFunc(name, func) {
+    addUpdateFunction(name, func) {
         this.update_function[name] = func;
     }
 
@@ -390,8 +390,16 @@ class APIHandler {
      * 
      * @param {string} name 
      */
-    removeUpdateFunc(name) {
+    removeUpdateFunction(name) {
         delete this.update_function[name];
+    }
+
+    /**
+     * Clear set of update functions
+     */
+    clearUpdateFunctions() {
+        delete this.update_function; // Make sure reference is deleted
+        this.update_function = {};
     }
 
     /**

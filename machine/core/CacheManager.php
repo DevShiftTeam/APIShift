@@ -81,62 +81,14 @@
         // Initialize cache system
         self::initialize();
 
-        // Get session states into cache if not cached
-        if($refresh || !self::exists('StateCollection')) {
-            $collection_to_load = [];
-            if(DatabaseManager::fetchInto("main", $collection_to_load, "SELECT * FROM session_states", [], 'id') === false)
-                Status::message(Status::ERROR, "Couldn't retrieve collection of States");
-            // Load to cache
-            self::set('StateCollection', $collection_to_load);
-        }
-
-        // Load available return statuses
-        if($refresh || !self::exists('StatusCollection')) {
-            $temp_statuses = [];
-            if(DatabaseManager::fetchInto("main", $temp_statuses, "SELECT * FROM statuses", [], 'id') === false)
-                Status::message(Status::ERROR, "Couldn't retrieve collection of Statuses");
-            self::set('StatusCollection', $temp_statuses);
-        }
-
-        // Load Data source types to cache
-        if($refresh || !self::exists('DataSourceTypes')) {
-            $temp_source_types = [];
-            if(DatabaseManager::fetchInto("main", $temp_source_types, "SELECT * FROM data_source_types", [], 'id') === false)
-                Status::message(Status::ERROR, "Couldn't retrieve collection of data source types");
-            self::set('DataSourceTypes', $temp_source_types);
-        }
-
-        // Load Data entry types to cache
-        if($refresh || !self::exists('DataEntryTypes')) {
-            $temp_entry_types = [];
-            if(DatabaseManager::fetchInto("main", $temp_entry_types, "SELECT * FROM data_entry_types", [], 'id') === false)
-                Status::message(Status::ERROR, "Couldn't retrieve collection of data entry types");
-            self::set('DataEntryTypes', $temp_entry_types);
-        }
-
-        // Load Connection types to cache
-        if($refresh || !self::exists('ConnectionTypes')) {
-            $temp_connection_types = [];
-            if(DatabaseManager::fetchInto("main", $temp_connection_types, "SELECT * FROM connection_types", [], 'id') === false)
-                Status::message(Status::ERROR, "Couldn't retrieve collection of connection types");
-            self::set('ConnectionTypes', $temp_connection_types);
-        }
-
-        // Load Connection node types to cache
-        if($refresh || !self::exists('ConnectionNodeTypes')) {
-            $temp_connection_node_types = [];
-            if(DatabaseManager::fetchInto("main", $temp_connection_node_types, "SELECT * FROM connection_node_types", [], 'id') === false)
-                Status::message(Status::ERROR, "Couldn't retrieve collection of connection node types");
-            self::set('ConnectionNodeTypes', $temp_connection_node_types);
-        }
-
-        // Load request authorizations to cache
-        if($refresh || !self::exists('RequestAuthorizations')) {
-            $temp_request_auth = [];
-            if(DatabaseManager::fetchInto("main", $temp_request_auth, "SELECT * FROM request_authorization", [], 'id') === false)
-                Status::message(Status::ERROR, "Couldn't retrieve collection of request authorizations");
-            self::set('RequestAuthorizations', $temp_request_auth);
-        }
+        // Load frequently used data by the system to cache
+        self::setTable('session_states', $refresh);
+        self::setTable('statuses', $refresh);
+        self::setTable('data_source_types', $refresh);
+        self::setTable('data_entry_types', $refresh);
+        self::setTable('connection_types', $refresh);
+        self::setTable('connection_node_types', $refresh);
+        self::setTable('request_authorization', $refresh);
     }
 
     /**
@@ -209,13 +161,13 @@
     }
 
     /**
-     * Get a data from table into cache of the table if not present and then return it
+     * Loads row from table into cache of the table if not present and then return it
      * 
      * @param string $table_name Name of table
      * @param int $id ID of the item to retrieve
      * @param int $ttl Time to live in cache
      */
-    public static function getFromTable($table_name, $id, $ttl = 120) {
+    public static function setFromTable($table_name, $id, $ttl = 0) {
         // Get from cache if exists
         $existing = self::get($table_name);
         if($existing && isset($existing[$id])) return $existing[$id];
@@ -234,5 +186,22 @@
         
         return $result[$id];
     }
- }
+
+    /**
+     * Loads a table into cache
+     * 
+     * @param string $table_name Name of table
+     * @param int $ttl Time to live in cache
+     */
+    public static function setTable($table_name, $refresh = false, $ttl = 0) {
+        // Check if load needed or forcefully requested by refresh
+        if(self::exists($table_name) && !$refresh) return;
+
+        // Load to cache
+        $data_to_load = [];
+        if(DatabaseManager::fetchInto("main", $data_to_load, "SELECT * FROM {$table_name}", [], 'id') === false)
+                Status::message(Status::ERROR, "Couldn't retrieve `{$table_name}` from DB");
+        self::set($table_name, $data_to_load, $ttl);
+    }
+}
 ?>

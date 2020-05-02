@@ -42,8 +42,8 @@ class Process {
         $result = null;
 
         // Load types from cache
-        $connection_types = CacheManager::get("ConnectionTypes");
-        $connection_node_types = CacheManager::get("ConnectionNodeTypes");
+        $connection_types = CacheManager::get("connection_types");
+        $connection_node_types = CacheManager::get("connection_node_types");
 
         // Get the first connection which is not a result from the connections
         $connection_ids = array_keys($connections_set);
@@ -143,35 +143,9 @@ class Process {
                     $input_names[] = $connections_set[$connections_set[$current_connection]['from']]['name'];
                     break;
                 case "DataEntry":
-                    // Get data entry
-                    $entry = CacheManager::getFromTable("data_entries", $connections_set[$current_connection]['from']);
-                    $entry_type = CacheManager::get("DataEntryTypes")[$entry['type']];
-
-                    // Handle entry by type
-                    switch($entry_type['name']) {
-                        case 'array_key':
-                            // Get source
-                            $source = CacheManager::getFromTable("data_sources", $entry['source'])['name'];
-                            if(isset($GLOBALS[$source])) $inputs[] = $GLOBALS[$source][$entry['name']];
-                            else if(!isset(${$source})) Status::message(Status::ERROR, "Couldn't find array " . $source);
-                            else $inputs[] = ${$source}[$entry['name']];
-                            $input_names[] = $entry['name'];
-                            break;
-                        case 'variable':
-                            if(isset($GLOBALS[$entry['name']])) $inputs[] = $GLOBALS[$entry['name']];
-                            else if(!isset(${$entry['name']})) Status::message(Status::ERROR, "Couldn't find array " . $source);
-                            else $inputs[] = ${$entry['name']};
-                            $input_names[] = $entry['name'];
-                            break;
-                        case 'constant':
-                            $inputs[] = $entry['name'];
-                            $input_names[] = $connections_set[$current_connection]['name'];
-                            break;
-                        case 'table_cell':
-                            // TODO: retrieve data about cell from table
-                            break;
-                    }
-                    break;
+                    $inputs[] = DataManager::getEntryValue($connections_set[$current_connection]['from']);
+                    $input_names[] = DataManager::getEntryType($connections_set[$current_connection]['from'])['name'] == 'constant' ?
+                        $connections_set[$current_connection]['name'] : CacheManager::setFromTable('data_entries', $id)['name'];
                 case "DataSource":
                     break;
             }
@@ -192,13 +166,13 @@ class Process {
                     switch($to_type) {
                         case 'DataEntry':
                             // Get data entry
-                            $entry = CacheManager::getFromTable("data_entries", $connections_set[$current_connection]['to']);
-                            $entry_type = CacheManager::get("DataEntryTypes")[$entry['type']];
+                            $entry = CacheManager::setFromTable("data_entries", $connections_set[$current_connection]['to']);
+                            $entry_type = CacheManager::get("data_entry_types")[$entry['type']];
                             
                             switch($entry_type['name']) {
                                 case 'array_key':
                                     // Get source
-                                    $source = CacheManager::getFromTable("data_sources", $entry['source'])['name'];
+                                    $source = CacheManager::setFromTable("data_sources", $entry['source'])['name'];
                                     // Store inputs
                                     if(isset($GLOBALS[$source])) $GLOBALS[$source][$entry['name']] = self::processValues($inputs, $input_names);
                                     else if(!isset(${$source})) Status::message(Status::ERROR, "Couldn't find array " . $source);
@@ -216,7 +190,7 @@ class Process {
                                     break;
                                 case 'table_cell':
                                     // Get table name
-                                    $table_name = CacheManager::getFromTable("data_sources", $entry['source'])['name'];
+                                    $table_name = CacheManager::setFromTable("data_sources", $entry['source'])['name'];
                                     // Initial query parameters
                                     $query_params = [ ];
 
@@ -261,13 +235,13 @@ class Process {
                     $to_measure = "";
                     if($to_type == 'DataEntry') {
                         // Get data entry
-                        $entry = CacheManager::getFromTable("data_entries", $connections_set[$current_connection]['to']);
-                        $entry_type = CacheManager::get("DataEntryTypes")[$entry['type']];
+                        $entry = CacheManager::setFromTable("data_entries", $connections_set[$current_connection]['to']);
+                        $entry_type = CacheManager::get("data_entry_types")[$entry['type']];
                         
                         switch($entry_type['name']) {
                             case 'array_key':
                                 // Get source
-                                $source = CacheManager::getFromTable("data_sources", $entry['source'])['name'];
+                                $source = CacheManager::setFromTable("data_sources", $entry['source'])['name'];
                                 // Store inputs
                                 if(isset($GLOBALS[$source])) $to_measure = $GLOBALS[$source][$entry['name']];
                                 else if(!isset(${$source})) Status::message(Status::ERROR, "Couldn't find array " . $source);

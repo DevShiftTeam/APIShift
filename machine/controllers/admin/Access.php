@@ -67,7 +67,7 @@ class Access {
                 switch($_POST['rule']['type']) {
                     case "State":
                         // Check if state exists
-                        $states = CacheManager::get("StateCollection");
+                        $states = CacheManager::get("session_states");
                         if(!isset($states[$_POST['rule']['rule']['val']])) Status::message(Status::ERROR, "State doesn't exist");
 
                         // Check if state task exists

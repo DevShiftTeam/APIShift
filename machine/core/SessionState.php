@@ -48,7 +48,7 @@ class SessionState {
         if($state != self::NO_STATE) {
             // Handle other state timeouts
             if ($state > 0) {
-                $state_collection = CacheManager::get("StateCollection"); // Load from cache
+                $state_collection = CacheManager::get("session_states"); // Load from cache
                 // Find if session really exists
                 if(isset($state_collection[$state])) {
                     if(
@@ -90,7 +90,7 @@ class SessionState {
      * @return int The state ID or -1 if not found
      */
     public static function getStateID($name) {
-        $state_collection = CacheManager::get('StateCollection');
+        $state_collection = CacheManager::get('session_states');
         foreach($state_collection as $id => $state) if($state['name'] == $name) return $id;
         return -1;
     }
@@ -110,7 +110,7 @@ class SessionState {
         else {
             // Find state id in collection
             $state_id = -1;
-            $state_collection = CacheManager::get('StateCollection');
+            $state_collection = CacheManager::get('session_states');
             foreach($state_collection as $id => $state) if($state['name'] == $state_name) $state_id = $id;
 
             // In case state not found return error

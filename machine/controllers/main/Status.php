@@ -30,7 +30,7 @@ class Status {
      * Returns to the user all the available statuses
      */
     public static function getAllStatuses() {
-        Core\Status::message(Core\Status::SUCCESS, Core\CacheManager::get('StatusCollection'));
+        Core\Status::message(Core\Status::SUCCESS, Core\CacheManager::get('statuses'));
     }
 }
 ?>

@@ -116,7 +116,7 @@ class Task {
         if (!Configurations::INSTALLED) return [];
 
         $task_list = [];
-        $req_auth = CacheManager::get("RequestAuthorizations");
+        $req_auth = CacheManager::get("request_authorization");
         // Search string to help itereate request validation
         $controller_search_str = $controller;
 

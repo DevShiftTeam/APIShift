@@ -165,61 +165,28 @@ class Process {
                 case 'Flow': // Connection of data flow reacts only by 'to_type'
                     switch($to_type) {
                         case 'DataEntry':
-                            // Get data entry
-                            $entry = CacheManager::setFromTable("data_entries", $connections_set[$current_connection]['to']);
-                            $entry_type = CacheManager::get("data_entry_types")[$entry['type']];
-                            
-                            switch($entry_type['name']) {
-                                case 'array_key':
-                                    // Get source
-                                    $source = CacheManager::setFromTable("data_sources", $entry['source'])['name'];
-                                    // Store inputs
-                                    if(isset($GLOBALS[$source])) $GLOBALS[$source][$entry['name']] = self::processValues($inputs, $input_names);
-                                    else if(!isset(${$source})) Status::message(Status::ERROR, "Couldn't find array " . $source);
-                                    else ${$source}[$entry['name']] = self::processValues($inputs, $input_names);
-                                    break;
-                                case 'variable':
-                                    if(strpos($entry['name'], "::") !== false) {
-                                        $separated = explode("::", $entry['name']);
-                                        $separated[0]::${$separated[1]} = self::processValues($inputs, $input_names);
-                                    }
-                                    else ${$entry['name']} = self::processValues($inputs, $input_names);
-                                    break;
-                                case 'constant':
-                                    $to_measure = $entry['name'];
-                                    break;
-                                case 'table_cell':
-                                    // Get table name
-                                    $table_name = CacheManager::setFromTable("data_sources", $entry['source'])['name'];
-                                    // Initial query parameters
-                                    $query_params = [ ];
+                            $kv_inputs = self::processValues($inputs, $input_names);
+                            if(count($kv_inputs) == 1) {
+                                $kv_inputs[$connections_set[$current_connection]['name']] = $kv_inputs[array_keys($kv_inputs)[0]];
+                                unset($kv_inputs[array_keys($kv_inputs)[0]]);
+                            }
+                            $entry_data = DataManager::getEntryData($connections_set[$current_connection]['to']);
+                            $entry = DataManager::getEntryValue($connections_set[$current_connection]['to'], $kv_inputs);
 
-                                    // TODO: determine query by inputs (SELECT by default)
-                                    $query = "SELECT " . $entry['name'] . " FROM " . $table_name;
-
-                                    // Add inputs to where clause
-                                    if(!empty($inputs)) {
-                                        $query .= " WHERE ";
-                                        foreach($inputs as $index => $value) {
-                                            if(gettype($value) != 'string') continue;
-                                            $query .= ($index == 0 ? $connections_set[$current_connection]['name'] : $input_names[$index]) . " = :" . $input_names[$index] . " ";
-                                            $query_params[$input_names[$index]] = $value;
-                                        }
-                                    }
-
-                                    // Run query to retrive values
-                                    $query_result = [];
-                                    DatabaseManager::fetchInto('main', $query_result, $query, $query_params);
-                                    if(!empty($query_result)) $connection_results[$current_connection] = $query_result[0][$entry['name']];
-                                    else $connection_results[$current_connection] = 0;
-                                    break;
+                            if($entry_data['type']['name'] != 'table_cell') {
+                                if(count($kv_inputs) == 1) $kv_inputs = $kv_inputs[array_keys($kv_inputs)[0]];
+                                DataManager::setEntryValue($connections_set[$current_connection]['to'], $kv_inputs);
+                            } else {
+                                $connection_results[$current_connection] = $entry[0][$entry_data['name']];
                             }
                             break;
                         case 'DataSource':
                             break;
                         default:
-                            // If destination is not an entry or a source then set the inputs as the result
-                            $connection_results[$current_connection] = self::processValues($inputs, $input_names);
+                            // If destination is not an entry nor a source then set the inputs as the result
+                            $kv_inputs = self::processValues($inputs, $input_names);
+                            if(count($kv_inputs) == 1) $kv_inputs = $kv_inputs[array_keys($kv_inputs)[0]];
+                            $connection_results[$current_connection] = $kv_inputs;
                             break;
                     }
                     break;
@@ -321,23 +288,11 @@ class Process {
      * 
      * @param array &$inputs Input collection to assign
      * @param array &$input_names Names of the inputs by index
-     * @return mixed|array The result of the processed inputs
+     * @return array The result of the processed inputs
      */
     private static function processValues(&$inputs, &$input_names) {
-        $result = "";
-        foreach($inputs as $index => $value) {
-            // For one entry, store value only
-            if($index == 0) $result = $value;
-            // For multiple entries store as array
-            else if($index == 1)
-                $result = [
-                    $input_names[0] => $result,
-                    $input_names[1] => $value
-                ];
-            else {
-                $result[$input_names[$index]] = $value;
-            }
-        }
+        $result = [];
+        foreach($inputs as $index => $value) $result[$input_names[$index]] = $value;
         return $result;
     }
 }

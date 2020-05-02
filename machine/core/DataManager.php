@@ -44,7 +44,32 @@ class DataManager {
 
     public static function getEntryData($id) {
         self::uploadEntryToCacheAndRuntime($id);
-        self::$runtime_entries[$id];
+        return self::$runtime_entries[$id];
+    }
+
+    public static function setEntryValue($id, $value) {
+        self::uploadEntryToCacheAndRuntime($id);
+        switch(self::$runtime_entries[$id]['type']['name']) {
+            case 'array_key':
+                if(isset($GLOBALS[self::$runtime_entries[$id]['source']['name']]))
+                    $GLOBALS[self::$runtime_entries[$id]['source']['name']][self::$runtime_entries[$id]['name']] = $value;
+                else if(!isset(${self::$runtime_entries[$id]['source']['name']}))
+                    Status::message(Status::ERROR, "Couldn't find array " . self::$runtime_entries[$id]['source']['name']);
+                else ${self::$runtime_entries[$id]['source']['name']}[self::$runtime_entries[$id]['name']] = $value;
+                break;
+            case 'variable':
+                if(isset($GLOBALS[self::$runtime_entries[$id]['name']])) $GLOBALS[self::$runtime_entries[$id]['name']] = $value;
+                else if(!isset(${self::$runtime_entries[$id]['name']}))
+                    Status::message(Status::ERROR, "Couldn't find variable " . self::$runtime_entries[$id]['name']);
+                else ${self::$runtime_entries[$id]['name']} = $value;
+                break;
+            case 'constant':
+                self::$runtime_entries[$id]['name'] = $value;
+                break;
+            case 'table_cell':
+                // TODO: retrieve data about cell from table
+                break;
+        }
     }
 
     public static function getEntryValue($id, $query_where_inputs = []) {
@@ -81,7 +106,7 @@ class DataManager {
                     $query .= " WHERE ";
                     foreach ($query_where_inputs as $name => $value) {
                         if (gettype($value) != 'string') continue;
-                        $query .= $name . " = :" . $value . " ";
+                        $query .= $name . " = :" . $name . " ";
                     }
                 }
 

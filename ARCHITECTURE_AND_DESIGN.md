@@ -168,6 +168,14 @@ The APIShift frameworks, as defined in the [Definitions](#definitions) section, 
 The ___data_entry_types___ and ___data_source_types___ tables are loaded to cache by the `loadDefaults()` in the cache manager, to make types access faster suring run-time.
 
 ### Interface
+* `uploadEntryToCacheAndRuntime($id)` Uploads an entry meta data to cache and run-time. An upload to run-time is happening so that other calls for getting or setting the entry will be faster.
+* `getEntryData($id)` Returns the data about an entry, such as its type, source and name.
+* `getEntryValue($id, $where_query_attrib)` Returns the value an entry holds. In case of a table cell, the system will use the where query attributes array to make a where clause, such that the keys will be the column names and values are the comparison values.
+* `setEntryValue($id, $value)` Modifies the value of a given entry.
+* `addEntry($name, $type, $source)` Adds a new entry to DB.
+* `addSource($name, $type, $source)` Adds a new source to DB.
+* `removeEntry($id)` Removes an entry from DB.
+* `removeSource($id)` Removes a source from DB.
 
 ## Session States
 Sessions store data with a client that is accessible throughout different requests between the client and the server. A simple analogy will be to say that it's somehow like server-side cookies. Sessions are great tools to store a certain "state" about a client when exchanging requests, indicating our program who the client is - is it an admin? a player in our app? a premium user maybe? all these different clients have different restrictions on the functionallity and data they can access. APIShift allows you to define different session states easily and then assign access rules by these states to data, controllers and methods. The classes that manage the session states are the [core of the SessionState](machine/core/SessionState.php). The [controller interface SessionState](machine/controller/SessionState.php) allows for managing the session through API requests.

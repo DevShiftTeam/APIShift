@@ -34,7 +34,7 @@ class SessionState {
      * Get all the session states available
      */
     public static function getAllSessionStates() {
-        Status::message(Status::SUCCESS, CacheManager::get("StateCollection"));
+        Status::message(Status::SUCCESS, CacheManager::get("session_states"));
     }
 
     /**

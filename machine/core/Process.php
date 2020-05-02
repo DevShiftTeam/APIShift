@@ -130,13 +130,11 @@ class Process {
                     // TODO: retrieve and compile selected process
                     // NOTICE: Making a process call the caller process will create a recursion effect
                     // that might create a memory corruption - be aware!
-                    // TODO: Add mechanism to avoid this type of memory corruption
                     break;
                 case "Task":
                     // TODO: retrieve and compile selected task
                     // NOTICE: Making a task call the caller process will create a recursion effect
                     // that might create a memory corruption - be aware!
-                    // TODO: Add mechanism to avoid this type of memory corruption
                     break;
                 case "Connection":
                     $inputs[] = $connection_results[$connections_set[$current_connection]['from']];

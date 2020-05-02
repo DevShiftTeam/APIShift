@@ -150,7 +150,7 @@ The cache is an interface that provides a handler for cache systems that can wor
 * `setFromTable($table_name, $id, $ttl, $system_name)` Store row from DB to cache. System name is by default "main" which refers to the main cache system defined in the installation.
 
 ## Data Manager
-The APIShift frameworks, as defined in the [Definitions](#definitions) section, expresses what is called data entries and data sources, where a source referes to a "pool" of data entries, and an entry refers to a value holding element in our system. Since a source or an entry can be expressed by different mechanisms (e.g. a source can be an array or a database table), the Data Manager provides a simple interface to access and read data entries and sources in the system regardless of their type or origin while hiding the implementation details from the user. This system will be used to simplify work when defining processes and tasks in the system.
+The APIShift frameworks, as defined in the [Definitions](#definitions) section, expresses what is called data entries and data sources, where a source referes to a "pool" of data entries, and an entry refers to a value in our system. Since a source or an entry can be expressed by different mechanisms (e.g. a source can be an array or a database table), the Data Manager provides a simple interface to access and read data entries and sources in the system regardless of their type or origin while hiding the implementation details from the user. This system will be used to simplify work when defining processes and tasks in the system.
 
 ### Data
 * ___data_sources___ (SQL) - Collection of different data sources that the system uses at run-time for different operations.
@@ -173,7 +173,7 @@ The ___data_entry_types___ and ___data_source_types___ tables are loaded to cach
 * `getEntryValue($id, $where_query_attrib)` Returns the value an entry holds. In case of a table cell, the system will use the where query attributes array to make a where clause, such that the keys will be the column names and values are the comparison values.
 * `setEntryValue($id, $value)` Modifies the value of a given entry.
 * `addEntry($name, $type, $source)` Adds a new entry to DB.
-* `addSource($name, $type, $source)` Adds a new source to DB.
+* `addSource($name, $type)` Adds a new source to DB.
 * `removeEntry($id)` Removes an entry from DB.
 * `removeSource($id)` Removes a source from DB.
 

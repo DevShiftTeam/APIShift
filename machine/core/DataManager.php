@@ -117,8 +117,4 @@ class DataManager {
                 break;
         }
     }
-
-    public static function getSource($id) {
-
-    }
 }

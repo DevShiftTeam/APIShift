@@ -34,35 +34,33 @@ The semantics of this architecture document will follow the definitions mentione
     - [Database Manager](#database-manager)
       - [Data](#data-3)
       - [Core Interface](#core-interface-1)
-      - [Controller Interface](#controller-interface)
-    - [Item](#item)
+    - [DataModel](#datamodel)
       - [Data](#data-4)
       - [Core Interface](#core-interface-2)
-      - [Controller Interface](#controller-interface-1)
-    - [DataModel](#datamodel)
+      - [Controller Interface](#controller-interface)
+    - [Item](#item)
       - [Data](#data-5)
       - [Core Interface](#core-interface-3)
-      - [Controller Interface](#controller-interface-2)
   - [Task](#task)
     - [Data](#data-6)
     - [Core Interface](#core-interface-4)
-    - [Controller Interface](#controller-interface-3)
+    - [Controller Interface](#controller-interface-1)
   - [Process](#process)
     - [Data](#data-7)
     - [Core Interface](#core-interface-5)
-    - [Controller Interface](#controller-interface-4)
+    - [Controller Interface](#controller-interface-2)
   - [Access](#access)
     - [Data](#data-8)
     - [Core Interface](#core-interface-6)
-    - [Controller Interface](#controller-interface-5)
+    - [Controller Interface](#controller-interface-3)
   - [Analysis](#analysis)
     - [Data](#data-9)
     - [Core Interface](#core-interface-7)
-    - [Controller Interface](#controller-interface-6)
+    - [Controller Interface](#controller-interface-4)
   - [Extensions](#extensions)
     - [Data](#data-10)
     - [Core Interface](#core-interface-8)
-    - [Controller Interface](#controller-interface-7)
+    - [Controller Interface](#controller-interface-5)
 - [Project Structure](#project-structure)
   - [Back-End](#back-end)
   - [Control panel UI](#control-panel-ui)
@@ -220,11 +218,7 @@ To manage session states in your API visit the "Session" tab in the control pane
 * `getCurrentState()` Returns the current session state.
 
 ## Database
-This system is configurable from the control panel and comes to life in your code. The system defines the database structure using an Object + Graph model and translates this model to the relational and other NoSQL models (Which makes it both an [ORM](https://en.wikipedia.org/wiki/Object-relational_mapping) & [ODM](https://www.quora.com/What-is-Object-Document-Mapping)). Each entity\object is refered to as an Item (which not only represents a single table, but can reference multiple tables) and each connection, is refered to as a Relation - which in itself acts as an Item (Allowing for relations between relations). It is translated into the relational model - SQL, in future versions also to different NoSQL models for increased integration.
-
-The system strives to provide a graphical framework for constructing data in the database and manage access to the data. The [DataModelManager](machine/core/DataModelManager.php), [Item](machine/core/Item.php) & [Relation](machine/core/Relation.php) serve as the components that work with the graphical framework and translate it to the database's query language for you.
-
-In later versions, you will be able to save your data on different DB servers, and APIShift will manage it for you - acting as a data warehouse. To add, modify and remove long-term data in your application visit the "Database" tab in the control panel.
+The APIShift framework persents three types of database components to manage databases. The DatabaseManager provides an interface to make queries to different databases - it also keeps and manages the collection of database connections the system uses. The Item component provides a set of tools to work with database data with an abstraction layer that the APIShift framework uses to simplify data management in databases on different types of databases, thus providing an interface that allows to integrate into different types of databases. This abstraction layer presents Items, which are data elements, and Relations, that express relations between Items, and are also considered items by themselves. Behind the scenes the system will optimize and map the data in a normalized manner to the database.
 
 ### Database Manager
 More will be added later
@@ -232,22 +226,7 @@ More will be added later
 #### Data
 More will be added later
 
-#### Core Interface
-More will be added later
-
-#### Controller Interface
-More will be added later
-
-### Item
-More will be added later
-
-#### Data
-More will be added later
-
-#### Core Interface
-More will be added later
-
-#### Controller Interface
+#### [Core Interface](machine/core/DatabaseManager.php)
 More will be added later
 
 ### DataModel
@@ -265,10 +244,19 @@ These kind of defintions and components allow us to keep a single query language
 #### Data
 More will be added later
 
-#### Core Interface
+#### [Core Interface](machine/core/DataModel.php)
 More will be added later
 
-#### Controller Interface
+#### [Controller Interface](machine/controllers/admin/DataModel.php)
+More will be added later
+
+### Item
+More will be added later
+
+#### Data
+More will be added later
+
+#### [Core Interface](machine/core/Item.php)
 More will be added later
 
 ## Task

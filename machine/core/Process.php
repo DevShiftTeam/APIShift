@@ -143,9 +143,9 @@ class Process {
                     $input_names[] = $connections_set[$connections_set[$current_connection]['from']]['name'];
                     break;
                 case "DataEntry":
+                    $entry_data = DataManager::getEntryData($connections_set[$current_connection]['from']);
                     $inputs[] = DataManager::getEntryValue($connections_set[$current_connection]['from']);
-                    $input_names[] = DataManager::getEntryType($connections_set[$current_connection]['from'])['name'] == 'constant' ?
-                        $connections_set[$current_connection]['name'] : CacheManager::setFromTable('data_entries', $id)['name'];
+                    $input_names[] = $entry_data['type']['name'] == 'constant' ? $connections_set[$current_connection]['name'] : $entry_data['name'];
                 case "DataSource":
                     break;
             }
@@ -317,7 +317,7 @@ class Process {
     }
 
     /** 
-     * Assigns inputs as value if only one or array if more than one
+     * Store inputs and their names as an array or a single value
      * 
      * @param array &$inputs Input collection to assign
      * @param array &$input_names Names of the inputs by index

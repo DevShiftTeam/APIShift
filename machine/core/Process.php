@@ -200,33 +200,7 @@ class Process {
                 case 'Rule':
                     // Get the variable to measure with from 'to'
                     $to_measure = "";
-                    if($to_type == 'DataEntry') {
-                        // Get data entry
-                        $entry = CacheManager::setFromTable("data_entries", $connections_set[$current_connection]['to']);
-                        $entry_type = CacheManager::get("data_entry_types")[$entry['type']];
-                        
-                        switch($entry_type['name']) {
-                            case 'array_key':
-                                // Get source
-                                $source = CacheManager::setFromTable("data_sources", $entry['source'])['name'];
-                                // Store inputs
-                                if(isset($GLOBALS[$source])) $to_measure = $GLOBALS[$source][$entry['name']];
-                                else if(!isset(${$source})) Status::message(Status::ERROR, "Couldn't find array " . $source);
-                                else $to_measure = ${$source}[$entry['name']];
-                                break;
-                            case 'variable':
-                                if(strpos($entry['name'], "::") !== false) {
-                                    $separated = explode("::", $entry['name']);
-                                    $to_measure = $separated[0]::${$separated[1]};
-                                }
-                                else $to_measure = ${$entry['name']};
-                                break;
-                            case 'constant':
-                                $to_measure = $entry['name'];
-                                break;
-                            default: break;
-                        }
-                    }
+                    if($to_type == 'DataEntry') $to_measure = DataManager::getEntryValue($connections_set[$current_connection]['to']);
                     // Handle comparison rules
                     switch($connections_set[$current_connection]['name']) {
                         case '==': $connection_results[$current_connection] = ($inputs[0] == $to_measure); break;

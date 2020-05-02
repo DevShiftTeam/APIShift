@@ -22,42 +22,45 @@ The semantics of this architecture document will follow the definitions mentione
   - [Cache](#cache)
     - [Data](#data)
     - [Interface](#interface)
-  - [Session States](#session-states)
+  - [Data Manager](#data-manager)
     - [Data](#data-1)
+    - [Interface](#interface-1)
+  - [Session States](#session-states)
+    - [Data](#data-2)
     - [Core Interface](#core-interface)
     - [Admin Controller Interface](#admin-controller-interface)
     - [Main Controller Interface](#main-controller-interface)
   - [Database](#database)
     - [Database Manager](#database-manager)
-      - [Data](#data-2)
+      - [Data](#data-3)
       - [Core Interface](#core-interface-1)
       - [Controller Interface](#controller-interface)
     - [Item](#item)
-      - [Data](#data-3)
+      - [Data](#data-4)
       - [Core Interface](#core-interface-2)
       - [Controller Interface](#controller-interface-1)
     - [DataModel](#datamodel)
-      - [Data](#data-4)
+      - [Data](#data-5)
       - [Core Interface](#core-interface-3)
       - [Controller Interface](#controller-interface-2)
   - [Task](#task)
-    - [Data](#data-5)
+    - [Data](#data-6)
     - [Core Interface](#core-interface-4)
     - [Controller Interface](#controller-interface-3)
   - [Process](#process)
-    - [Data](#data-6)
+    - [Data](#data-7)
     - [Core Interface](#core-interface-5)
     - [Controller Interface](#controller-interface-4)
   - [Access](#access)
-    - [Data](#data-7)
+    - [Data](#data-8)
     - [Core Interface](#core-interface-6)
     - [Controller Interface](#controller-interface-5)
   - [Analysis](#analysis)
-    - [Data](#data-8)
+    - [Data](#data-9)
     - [Core Interface](#core-interface-7)
     - [Controller Interface](#controller-interface-6)
   - [Extensions](#extensions)
-    - [Data](#data-9)
+    - [Data](#data-10)
     - [Core Interface](#core-interface-8)
     - [Controller Interface](#controller-interface-7)
 - [Project Structure](#project-structure)
@@ -143,8 +146,28 @@ The cache is an interface that provides a handler for cache systems that can wor
 * `set($key, $value, $ttl, $system_name)` Set/modify a variable in cache. System name is by default "main" which refers to the main cache system defined in the installation.
 * `get($key, $system_name)` Get a variable by name from cache. System name is by default "main" which refers to the main cache system defined in the installation.
 * `exists($key, $system_name)` Returns true if a key exists. System name is by default "main" which refers to the main cache system defined in the installation.
-* `setFromTable($table_name, $ttl, $system_name)` Load table data into cache. System name is by default "main" which refers to the main cache system defined in the installation.
+* `setTable($table_name, $ttl, $system_name)` Load table data into cache. System name is by default "main" which refers to the main cache system defined in the installation.
 * `setFromTable($table_name, $id, $ttl, $system_name)` Store row from DB to cache. System name is by default "main" which refers to the main cache system defined in the installation.
+
+## Data Manager
+The APIShift frameworks, as defined in the [Definitions](#definitions) section, expresses what is called data entries and data sources, where a source referes to a "pool" of data entries, and an entry refers to a value holding element in our system. Since a source or an entry can be expressed by different mechanisms (e.g. a source can be an array or a database table), the Data Manager provides a simple interface to access and read data entries and sources in the system regardless of their type or origin while hiding the implementation details from the user. This system will be used to simplify work when defining processes and tasks in the system.
+
+### Data
+* ___data_sources___ (SQL) - Collection of different data sources that the system uses at run-time for different operations.
+  * _id_ - Identification.
+  * _name_ - Name of the data source.
+  * _type_ - ID of the type of a data source.
+* ___data_source_types___ (SQL) - A id-name table representing the different types of data sources: arrays, tables, items/relations (will be discussed later), static_class (a class holding static variables), class_instance (a class instance).
+* ___data_entries___ (SQL) - Collection of the data entries used by the system.
+  * _id_ - Identification.
+  * _name_ - Name of the data entry.
+  * _type_ - ID of the type of a data entry.
+  * _source_ - The source which this entry belong to if present.
+* ___data_entry_types___ (SQL) - An id-name table representing the types of entries, can be either of: array_key, variable, constant (In case of constant the name is considered the value), table_cell.
+
+The ___data_entry_types___ and ___data_source_types___ tables are loaded to cache by the `loadDefaults()` in the cache manager, to make types access faster suring run-time.
+
+### Interface
 
 ## Session States
 Sessions store data with a client that is accessible throughout different requests between the client and the server. A simple analogy will be to say that it's somehow like server-side cookies. Sessions are great tools to store a certain "state" about a client when exchanging requests, indicating our program who the client is - is it an admin? a player in our app? a premium user maybe? all these different clients have different restrictions on the functionallity and data they can access. APIShift allows you to define different session states easily and then assign access rules by these states to data, controllers and methods. The classes that manage the session states are the [core of the SessionState](machine/core/SessionState.php). The [controller interface SessionState](machine/controller/SessionState.php) allows for managing the session through API requests.
@@ -222,7 +245,7 @@ More will be added later
 ### DataModel
 When working with database components of the APIShift, you create `Canvases`, where each canvas is a visual representation of database elements and how they are related & constructed. The system uses these terms/components:
  * __Item__: An abstract components that is presented as a collection of keys and values, that represent data elements stired in the DB.
- * __Relation__: A relation is an item that makes and abstract connection between 2 or more items. Since a relation is also an item you can make relations between relations - this is what makes the terminology of the engine as a combination between [graph model semantics](https://en.wikipedia.org/wiki/Graph_database), [object model semantics](https://en.wikipedia.org/wiki/Object_model) and an [entity-relationship model](https://en.wikipedia.org/wiki/Entity%E2%80%93relationship_model). Notice that I wrote 'abstract connection' as a relation doesn't store or address primary or foreign keys, this frees the system from normalizing the database only in one way, and makes it easier to translate between different data models. Each relation is one of those types:
+ * __Relation__: A relation is an item that makes and abstract connection between 2 or more items. Since a relation is also an item you can make relations between relations - this is what makes the terminology of the engine as a combination between [graph model semantics](https://en.wikipedia.org/wiki/Graph_database), [object model semantics](https://en.wikipedia.org/wiki/Object_model) and an [entity-relationship model](https://en.wikipedia.org/wiki/Entity%E2%80%93relationship_model). Each relation is one of those types:
     * *One-To-One*: For each instance of the relation, there can be no more than one instance for each of the parent item/s and related item/s (as you can see a relation can be derived from more that one item, referenced as parent item/s, to any other more than one item, references as related item/s).
     * *One-To-Many*: For each instance of the relation, there can be no more than one instance of parent items but as many related item instances as you like.
     * *Many-To-Many*: For each instance of the relation, there can as many parent and related items instances as you like.
@@ -256,7 +279,12 @@ More will be added later
 More will be added later
 
 ### Data
-More will be added later
+* ___processes___ (SQL) - id-name Table containing the list of names processes in the system.
+* ___connections___ (SQL) - Each process has a list of connections defined in the ___process_connections___ table. A connection defines a directional flow of procedures between data elements.
+  * _id_ - Identification.
+  * _connection_type_ - A connection defines a procedures, this procedure can come as another Process, Task, Function, a rule (a set of pre-made directives) or information transfer.
+  * _name_ - Name of connection (information transfer ref, process, task, function, rule).
+  * _from_type_ - 
 
 ### Core Interface
 More will be added later

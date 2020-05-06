@@ -155,7 +155,7 @@ The APIShift frameworks, as defined in the [Definitions](#definitions) section, 
   * _id_ - Identification.
   * _name_ - Name of the data source.
   * _type_ - ID of the type of a data source.
-* ___data_source_types___ (SQL) - A id-name table representing the different types of data sources: arrays, tables, items/relations (will be discussed later), static_class (a class holding static variables), class_instance (a class instance).
+* ___data_source_types___ (SQL) - An id-name table representing the different types of data sources: arrays, tables, items/relations (will be discussed later), static_class (a class holding static variables), class_instance (a class instance).
 * ___data_entries___ (SQL) - Collection of the data entries used by the system.
   * _id_ - Identification.
   * _name_ - Name of the data entry.
@@ -163,7 +163,7 @@ The APIShift frameworks, as defined in the [Definitions](#definitions) section, 
   * _source_ - The source which this entry belong to if present.
 * ___data_entry_types___ (SQL) - An id-name table representing the types of entries, can be either of: array_key, variable, constant (In case of constant the name is considered the value), table_cell.
 
-The ___data_entry_types___ and ___data_source_types___ tables are loaded to cache by the `loadDefaults()` in the cache manager, to make types access faster suring run-time.
+The ___data_entry_types___ and ___data_source_types___ tables are loaded to cache by the `loadDefaults()` in the cache manager, to make types access faster during run-time.
 
 ### [Interface](machine/core/DataManager.php)
 * `uploadEntryToCacheAndRuntime($id)` Uploads an entry meta data to cache and run-time. An upload to run-time is happening so that other calls for getting or setting the entry will be faster.
@@ -218,7 +218,7 @@ To manage session states in your API visit the "Session" tab in the control pane
 * `getCurrentState()` Returns the current session state.
 
 ## Database
-The APIShift framework persents three types of database components to manage databases. The DatabaseManager provides an interface to make queries to different databases - it also keeps and manages the collection of database connections the system uses. The Item component provides a set of tools to work with database data with an abstraction layer that the APIShift framework uses to simplify data management in databases on different types of databases, thus providing an interface that allows to integrate into different types of databases. This abstraction layer presents Items, which are data elements, and Relations, that express relations between Items, and are also considered items by themselves. Behind the scenes the system will optimize and map the data in a normalized manner to the database.
+The APIShift framework persents three types of database components to manage the long-term data of your app. The DatabaseManager provides an interface to make queries to different databases - it also keeps and manages the collection of database connections the system uses. The Item component provides a set of tools to work with database data with an abstraction layer that the APIShift framework uses to simplify data management in databases on different types of databases with a simple interface. This abstraction layer presents Items, which are data elements, and Relations, that express relations between Items, and are also considered items by themselves. Behind the scenes the system will optimize and map the data in a normalized manner to the database. The last type of database component the system has is the DataModel, which is an interface and controller for creating, managing and ordering items and relations in our system.
 
 ### Database Manager
 More will be added later
@@ -276,11 +276,16 @@ More will be added later
 
 ### Data
 * ___processes___ (SQL) - id-name Table containing the list of names processes in the system.
-* ___connections___ (SQL) - Each process has a list of connections defined in the ___process_connections___ table. A connection defines a directional flow of procedures between data elements.
+* ___connections___ (SQL) - Each process has a list of connections defined in the ___process_connections___ table. A connection defines a procedure between data elements.
   * _id_ - Identification.
   * _connection_type_ - A connection defines a procedures, this procedure can come as another Process, Task, Function, a rule (a set of pre-made directives) or information transfer.
   * _name_ - Name of connection (information transfer ref, process, task, function, rule).
   * _from_type_ - 
+  * _from_ - 
+  * _to_type_ - 
+  * _to_ - 
+* ___connection_types___ (SQL) - 
+* ___connection_node_types___ (SQL) - 
 
 ### Core Interface
 More will be added later

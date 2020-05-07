@@ -167,7 +167,7 @@ The APIShift frameworks, as defined in the [Definitions](#definitions) section, 
 The ___data_entry_types___ and ___data_source_types___ tables are loaded to cache by the `loadDefaults()` in the cache manager, to make types access faster during run-time.
 
 #### Data Access Optimization
-The Data Manager component has 3 levels of access to variables & data:
+The Data Manager component has 3 levels of access to variables & data when accessing from the data manager:
 * **Runtime**: After a variable has been loaded, it is saved as a PHP array (map) that maps metadata about the data entries and sources that have been requested, this way the other time they will called again in the same request, the system will take them from this PHP array which exists at run-time - meaning it is accessing data on the same process.
 * **Cache**: When metadata about the variable has been loaded once, it's metadata will be saved in cache for faster access later. This means that the calls require an IPC communication between processes, which takes a little more time than data on the same process.
 * **Database**: The static way that metadata and data about the data entries and sources is stored, this is the the last station if the data was not found in runtime or cache.

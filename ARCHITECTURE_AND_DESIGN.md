@@ -132,23 +132,23 @@ Part 1 to 3 of this workflow is implemented by the [APIShift.php](machine/APIShi
 # Architectural Elements
 This title will discuss the different components, connectors and data elements of the famework, their features, interfaces and responsibility. Each element will be desribed by the data elements it affects, which will be discussed in the **Data** subtitle of the element section, and will also be decribed by their interfaces - usually the model/core interface and controller interface in their own **\<Some> Interface** subtitle.
 
-## Cache
+## [Cache Manager](machine/core/CacheManager.php)
 The cache is an interface that provides a handler for cache systems that can work with different caches such as Memcached, Redis and APCU, while hiding the implementation details behind a simple get-set interface. The cache system is expressed in the [machine/core/CacheManager.php](machine/core/CacheManager.php) class.
 
 ### Data
 > No Data
 
 ### [Interface](machine/core/CacheManager.php)
-* `addSystem($system_type, $name, $credentials)` Adds a new cache system (of type APCU, MemCached, Redis) to collection. This function will be available later for extendability and for the framework to be able to integrate into larger projects.
-* `initialize()` Initializaes the cache system, exits on error.
-* `loadDefaults()` Loads the database tables that are used for the main framework calls to not spend time requesting data from the database for core operations that happen frequently.
-* `set($key, $value, $ttl, $system_name)` Set/modify a variable in cache. System name is by default "main" which refers to the main cache system defined in the installation.
-* `get($key, $system_name)` Get a variable by name from cache. System name is by default "main" which refers to the main cache system defined in the installation.
-* `exists($key, $system_name)` Returns true if a key exists. System name is by default "main" which refers to the main cache system defined in the installation.
-* `getTable($table_name, $ttl, $system_name)` Load table data into cache. System name is by default "main" which refers to the main cache system defined in the installation.
-* `getFromTable($table_name, $id, $ttl, $system_name)` Store row from DB to cache. System name is by default "main" which refers to the main cache system defined in the installation.
+* `public addSystem($system_type, $name, $credentials)` Adds a new cache system (of type APCU, MemCached, Redis) to collection. This function will be available later for extendability and for the framework to be able to integrate into larger projects.
+* `private initialize()` Initializaes the cache system, exits on error.
+* `public loadDefaults()` Loads the database tables that are used for the main framework calls to not spend time requesting data from the database for core operations that happen frequently.
+* `public set($key, $value, $ttl, $system_name)` Set/modify a variable in cache. System name is by default "main" which refers to the main cache system defined in the installation.
+* `public get($key, $system_name)` Get a variable by name from cache. System name is by default "main" which refers to the main cache system defined in the installation.
+* `public exists($key, $system_name)` Returns true if a key exists. System name is by default "main" which refers to the main cache system defined in the installation.
+* `public getTable($table_name, $ttl, $system_name)` Load table data into cache. System name is by default "main" which refers to the main cache system defined in the installation.
+* `public getFromTable($table_name, $id, $ttl, $system_name)` Store row from DB to cache. System name is by default "main" which refers to the main cache system defined in the installation.
 
-## Data Manager
+## [Data Manager](machine/core/DataManager.php)
 The APIShift frameworks, as defined in the [Definitions](#definitions) section, expresses what is called data entries and data sources, where a source referes to a "pool" of data entries, and an entry refers to a value in our system. Since a source or an entry can be expressed by different mechanisms (e.g. a source can be an array or a database table), the Data Manager provides a simple interface to access and read data entries and sources in the system regardless of their type or origin while hiding the implementation details from the user. This system will be used to simplify work when defining processes and tasks in the system.
 
 ### Data
@@ -173,14 +173,14 @@ The Data Manager component has 3 levels of access to variables & data when acces
 * **Database**: The static way that metadata and data about the data entries and sources is stored, this is the the last station if the data was not found in runtime or cache.
 
 ### [Interface](machine/core/DataManager.php)
-* `uploadEntryToCacheAndRuntime($id)` Uploads an entry meta data to cache and run-time. An upload to run-time is happening so that other calls for getting or setting the entry will be faster.
-* `getEntryData($id)` Returns the data about an entry, such as its type, source and name.
-* `getEntryValue($id, $where_query_attrib)` Returns the value an entry holds. In case of a table cell, the system will use the where query attributes array to make a where clause, such that the keys will be the column names and values are the comparison values.
-* `setEntryValue($id, $value)` Modifies the value of a given entry.
-* `addEntry($name, $type, $source)` Adds a new entry to DB.
-* `addSource($name, $type)` Adds a new source to DB.
-* `removeEntry($id)` Removes an entry from DB.
-* `removeSource($id)` Removes a source from DB.
+* `private uploadEntryToCacheAndRuntime($id)` Uploads an entry meta data to cache and run-time. An upload to run-time is happening so that other calls for getting or setting the entry will be faster.
+* `public getEntryData($id)` Returns the data about an entry, such as its type, source and name.
+* `public getEntryValue($id, $where_query_attrib)` Returns the value an entry holds. In case of a table cell, the system will use the where query attributes array to make a where clause, such that the keys will be the column names and values are the comparison values.
+* `public setEntryValue($id, $value)` Modifies the value of a given entry.
+* `public addEntry($name, $type, $source)` Adds a new entry to DB.
+* `public addSource($name, $type)` Adds a new source to DB.
+* `public removeEntry($id)` Removes an entry from DB.
+* `public removeSource($id)` Removes a source from DB.
 
 ## Session States
 Sessions store data with a client that is accessible throughout different requests between the client and the server. A simple analogy will be to say that it's somehow like server-side cookies. Sessions are great tools to store a certain "state" about a client when exchanging requests, indicating our program who the client is - is it an admin? a player in our app? a premium user maybe? all these different clients have different restrictions on the functionallity and data they can access. APIShift allows you to define different session states easily and then assign access rules by these states to data, controllers and methods. The classes that manage the session states are the [core of the SessionState](machine/core/SessionState.php). The [controller interface SessionState](machine/controller/SessionState.php) allows for managing the session through API requests.
@@ -209,18 +209,21 @@ To manage session states in your API visit the "Session" tab in the control pane
    * _parent_ - id of the parent entry.
 
 ### [Core Interface](machine/core/SessionState.php)
+This interface's functions are all public.
 * `loadDefaults()` Initializes the session, and runs timeout checks to automate session creation and destruction at run-time.
 * `changeState($name)` Changes the current states into a new state. Automatically runs the authentication process attached to the session.
 * `getSessionState()` Returns the ID of the current session state.
 * `getIDFromName($name)` Returns the ID of the session name given.
 
 ### [Admin Controller Interface](machine/controllers/admin/SessionState.php)
+This interface's functions are all public.
 * `getAllSessionStates()` Returns all the sessions states.
 * `add()` Add a new session state and its structure.
 * `update()` Update existing session and its structure.
 * `remove()` Remove a session state and its structure.
 
 ### [Main Controller Interface](machine/controllers/main/SessionState.php)
+This interface's functions are all public.
 * `changeState()` Changes the session state to the one required in the post request.
 * `getCurrentState()` Returns the current session state.
 

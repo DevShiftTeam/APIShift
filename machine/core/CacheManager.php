@@ -167,7 +167,7 @@
      * @param int $id ID of the item to retrieve
      * @param int $ttl Time to live in cache
      */
-    public static function setFromTable($table_name, $id, $ttl = 0) {
+    public static function getFromTable($table_name, $id, $ttl = 0) {
         // Get from cache if exists
         $existing = self::get($table_name);
         if($existing && isset($existing[$id])) return $existing[$id];
@@ -193,7 +193,7 @@
      * @param string $table_name Name of table
      * @param int $ttl Time to live in cache
      */
-    public static function setTable($table_name, $refresh = false, $ttl = 0) {
+    public static function getTable($table_name, $refresh = false, $ttl = 0) {
         // Check if load needed or forcefully requested by refresh
         if(self::exists($table_name) && !$refresh) return;
 

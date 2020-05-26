@@ -145,8 +145,8 @@ The cache is an interface that provides a handler for cache systems that can wor
 * `set($key, $value, $ttl, $system_name)` Set/modify a variable in cache. System name is by default "main" which refers to the main cache system defined in the installation.
 * `get($key, $system_name)` Get a variable by name from cache. System name is by default "main" which refers to the main cache system defined in the installation.
 * `exists($key, $system_name)` Returns true if a key exists. System name is by default "main" which refers to the main cache system defined in the installation.
-* `setTable($table_name, $ttl, $system_name)` Load table data into cache. System name is by default "main" which refers to the main cache system defined in the installation.
-* `setFromTable($table_name, $id, $ttl, $system_name)` Store row from DB to cache. System name is by default "main" which refers to the main cache system defined in the installation.
+* `getTable($table_name, $ttl, $system_name)` Load table data into cache. System name is by default "main" which refers to the main cache system defined in the installation.
+* `getFromTable($table_name, $id, $ttl, $system_name)` Store row from DB to cache. System name is by default "main" which refers to the main cache system defined in the installation.
 
 ## Data Manager
 The APIShift frameworks, as defined in the [Definitions](#definitions) section, expresses what is called data entries and data sources, where a source referes to a "pool" of data entries, and an entry refers to a value in our system. Since a source or an entry can be expressed by different mechanisms (e.g. a source can be an array or a database table), the Data Manager provides a simple interface to access and read data entries and sources in the system regardless of their type or origin while hiding the implementation details from the user. This system will be used to simplify work when defining processes and tasks in the system.

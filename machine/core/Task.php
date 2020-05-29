@@ -138,7 +138,7 @@ class Task {
      * @return array Collection of the results of the tasks
      */
     public static function run($task_list = [], &$params = []) {
-        // Add to array if not so that no modification to the code will be added
+        // Add to array if not array so that no modification to the code will be added
         if(!is_array($task_list)) $task_list = [$task_list];
         
         $results = []; // results collection

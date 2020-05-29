@@ -4,13 +4,15 @@
 # APIShift Engine
 </div>
 
-APIShift is a platform with a set of helpful tools for building your own API/server with a configurable architecture that lets you implement whatever type of style you want, whether it'll be REST, SOAP or your own monster you wish to implement. The environment which APIShift sets you, gives you flexibility and control over the following concept:
- * **Requests**: Develop your own requests & their responses with a helpful and configurable set of tools, and a ready to use workflow set up for you. (*Status*: **``Ready``**)
+APIShift provides a platform with pre-made tools, structure and workflow that can become any API or back-end you want. You can implement architectures from REST, SOAP or your own application specific implementation. The main idea is to allow developers to build a back-end for any site and application much faster and easier using a simple, extendable and agile architecture and workflow. APIShift is made with performance an efficiency in mind, the platform hides a lot of implementation details and provides data access optimization tools to make you access your data much faster during run-time.
+
+The system separates and operates the following areas of your back-end:
+ * **Requests**: Develop your own requests & their responses with a helpful and configurable set of tools, and a ready to use efficient workflow set up for you. (*Status*: **``Ready``**)
  * **Session**: Manage the sessions, their different states, roles, life-cycle and data during run-time with a simple interface. (*Status*: **``Development``**)
  * **Database**: Manage data & structures in different databases using an interface that lets you automate and manage multiple databases and types of databases. (*Status*: **``Development`` ``Planning``**)
- * **Algorithms**: Creating logical procedures using a graph-based UI or your own code to define procedures and attach them to different areas of the code/other procedures/lifecycle of your application using our interface. (*Status*: **``Development`` ``Planning``**)
  * **Authorize**: Buid your unique authorization processes and attach them to any part of your system easily. (*Status*: **``Development`` ``Planning``**)
- * **Analyze**: Track anything you want in your system and collect data about it, then create your own analyzation tools or use our pre-made tools to present data and conclusions about the system and how it functions. (*Status*: **``Planning``**)
+ * **Procedures**: Create logical procedures using a graph-based UI or your own code to define procedures and attach them to different areas of the code/other procedures/lifecycle of your application using our interface. The graphs are translated into a special graph database representation which then compiles in run-time when called, it is highly efficient in memory and speed. (*Status*: **``Development`` ``Planning``**)
+ * **Analyze**: Track anything you want in your system and collect data about it, then create your own analyzation tools or use our pre-made tools to present data and conclusions about the system, how it functions, its users and much more. (*Status*: **``Planning``**)
 
 If you want, you can use your own tools, dependencies and modifications, the architecture lets you add on top of it whatever you want to integrate and use.
 

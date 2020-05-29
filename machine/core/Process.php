@@ -52,7 +52,7 @@ class Process {
         
         // Compile connections until reaching the result
         while(count($connection_results) != count($connections_set)) {
-            // Get type names
+            // Simplify representation of connection types
             $from_type = $connections_set[$current_connection]['from_type'] == null ?
                 '' : $connection_node_types[$connections_set[$current_connection]['from_type']]['name'];
             $to_type = $connections_set[$current_connection]['to_type'] == null ?

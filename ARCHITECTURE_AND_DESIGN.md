@@ -81,11 +81,11 @@ Each component will be divided in a Core-Model-Controller manner, such that: Eac
 This style is not very restrictive in its definitions, as it only divides whatever component given into which part of it define the visible end-user interface of the API (`Controller`) and the other part as a different component/architecture (`Model`/`Core`). The style is intended to be modular, maintainable and extendable to provide the ability to expand the base system into any kind of API by developing your own `Controllers`/`Models`. The base components (`Core`) are developed with functionallity to help you maintain a managed flow of procedures, requests and analysis on the overall system.
 
 ### Definitions
-The system uses the following syntactic terms, which are presented as architectural components. The purpose of those definitions is to create a template for passing different type of data elements between components, such that architectually (and practically) components won't need to worry if the data came in from a coded array or database tuple.
+The system uses the following syntactic terms, which are presented as architectural components. The purpose of those definitions is to create a template for passing different type of data elements between components, such that architectually (and practically) components won't need to worry if the data came in from an array or database.
 
- * __Data Entry__: A data entry is any varaible, constant, key or cell in the project.
+ * __Data Entry__: A data entry is any varaible, constant, key or table cell.
  * __Data Sources__: Data sources are sources of data entries: arrays, tables, documents, items & relation (an Item and a Relation are components that process data elements of tables and documents under a unified definition to create a single query language that can access both types of data, allowing for integration and fast transitions from [relational](https://en.wikipedia.org/wiki/Relational_database) to [document](https://en.wikipedia.org/wiki/Document-oriented_database) models. We will review the Item and Relation components later on).
- * __Procedural Connections__: A connection between data entries, sources or other procedural connection and processing elements (e.g. functions) - each procedural connection represents a function operation in run-time on the connected data. This defintion represents a concept that the APIShift framework uses to run, interpret and create functionallity. Later on this concept will be used to turn diagram made using the framework into run-time elements of your system.
+ * __Procedural Connections__: A connection between data entries, sources or other procedural connection and processing elements (e.g. functions) - each procedural connection represents a function operation in run-time on the connected data. This defintion represents a concept that the APIShift framework uses to run, interpret and create functionallity. Later on this concept will be used to turn graphical diagrams made using the framework into run-time elements of your system.
 
 ## Component Classifications
 <div align="center">
@@ -107,7 +107,7 @@ The system defines 3 main base concepts that give the basic functionallity to co
     * [Session State Management Class](machine/core/SessionState.php)
 
 ### Base Components: 2nd Lvl Abstraction
-The system also defines 3 higher level concepts that are using the base components to build up the logic, restrictions and analysis behind the requests of an API, and as a result, define modular and scalable components to handle it:
+The system also defines 3 higher level concepts that are using the base components to build up the logic, restrictions and analysis behind the requests of an API.
 1. __Logic/Models__: Components that make use of the session, database and core of the API to provide `Model` functionallity. All these components are stored in the [models folder](machine/models), and later can also be made by creating procedures using the system's UI and attaching them using triggers  to other `Controllers`, `Models` and the overall lifecycle of the API.
     * [Task Management Class](machine/core/Task.php), Each task manages a collection of processes.
     * [Processes Management Class](machine/core/Process.php), Each process in a handler of procedural connections, and holds the functionallity to compile them in run-time.
@@ -120,10 +120,10 @@ Around all of these definitions, the engine defines __Controllers__ as the highe
 ## Request Workflow
 The APIShift framework provides a general workflow for each request, with an ecosystem that allows you to authenticate and analyze requests. This workflow is configurable by the components and features of the system.
 
-1. **Connect to main DB**: First and foremost, APIShift establishes a connection with the main DB, which contains the metadata needed to access to the cache, the session, run validation and authentcations on the server.
-2. **Load default cache data**: The APIShift system caches metadata about the different sessions, database structure and more to speed up queries and operations. if cache data is loaded, framework skips this phase.
-3. **Load default session**: Loads the session, its structure and values. Handles session construction and destruction automatically using timeouts.
-4. **Validate Request**: Validates that the request format is valid. Check if request exists as a task (tasks will be discussed later), a controller method or an extension feature.
+1. **Connect to main DB**: First and foremost, APIShift establishes a connection with the main DB, which contains the metadata needed to access to the cache, the session, run validations and authentcations on the server.
+2. **Load default cache data**: The APIShift system caches metadata about the different sessions, database structure and more to speed up queries and operations. if cache data is loaded or a cache system is not enabled, the framework skips this phase.
+3. **Load default session**: Loads the session, its structure and values. Handles session construction and destruction automatically by the given timeouts.
+4. **Validate Request**: Validates the format of a request. Checks if request exists as a task (tasks will be discussed later), a controller method or an extension feature.
 5. **Authorize Request**: Loads and runs tasks that are attached as the authorization process of the request, and by doing so confirm that the request can be accessed by the requesting client.
 6. **Run Request**: If all the previous steps are completed successfully then the controller method/task/extension feature requested by the user will be called.
 
@@ -132,7 +132,7 @@ Part 1 to 3 of this workflow is implemented by the [APIShift.php](machine/APIShi
 # Architectural Elements
 This title will discuss the different components, connectors and data elements of the famework, their features, interfaces and responsibility. Each element will be desribed by the data elements it affects, which will be discussed in the **Data** subtitle of the element section, and will also be decribed by their interfaces - usually the model/core interface and controller interface in their own **\<Some> Interface** subtitle.
 
-## [Cache Manager](machine/core/CacheManager.php)
+## Cache
 The cache is an interface that provides a handler for cache systems that can work with different caches such as Memcached, Redis and APCU, while hiding the implementation details behind a simple get-set interface. The cache system is expressed in the [machine/core/CacheManager.php](machine/core/CacheManager.php) class.
 
 ### Data

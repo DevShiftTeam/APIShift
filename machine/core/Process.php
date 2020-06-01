@@ -32,11 +32,11 @@ class Process {
      * free nodes will not produce a correct compilation process
      * 
      * @param array $connections_set The set of connection to compile
-     * @param array &$params Refernce to the params to pass to the compilation process
+     * @param array &$inputs Refernce to the inputs to pass to the compilation process
      * 
      * @return mixed The result of the compilation
      */
-    public static function compileConnections(&$connections_set, &$params = []) {
+    public static function compileConnections(&$connections_set, &$inputs = []) {
         // Key-value store of results of each connection
         $connection_results = [];
         $result = null;

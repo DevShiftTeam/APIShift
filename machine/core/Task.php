@@ -133,11 +133,11 @@ class Task {
      * Run a task list and store results
      * 
      * @param array|int $task_list The tasks IDs to run
-     * @param array& $params Refernce to the parameters to use for authentication
+     * @param array& $inputs Inputs provided for the task
      * 
      * @return array Collection of the results of the tasks
      */
-    public static function run($task_list = [], &$params = []) {
+    public static function run($task_list = [], &$inputs = []) {
         // Add to array if not so that no modification to the code will be added
         if(!is_array($task_list)) $task_list = [$task_list];
         
@@ -168,7 +168,7 @@ class Task {
                 }
 
                 // Compile & store result
-                $results[$task][] = Process::compileConnections($ordered_connections, $params);
+                $results[$task][] = Process::compileConnections($ordered_connections, $inputs);
             }
         }
 

@@ -231,13 +231,13 @@ This interface's functions are all public.
 The APIShift framework persents three types of database components to manage the long-term data of your app. The DatabaseManager provides an interface to make queries to different databases - it also keeps and manages the collection of database connections the system uses. The Item component provides a set of tools to work with database data with an abstraction layer that the APIShift framework uses to simplify data management in databases on different types of databases with a simple interface. This abstraction layer presents Items, which are data elements, and Relations, that express relations between Items, and are also considered items by themselves. Behind the scenes the system will optimize and map the data in a normalized manner to the database. The last type of database component the system has is the DataModel, which is an interface and controller for creating, managing and ordering items and relations in our system.
 
 ### Database Manager
-More will be added later
+The purpose of the Database Manager is to provide an interface for working with multiple databases. Right now it is build to work with SQL databases, hopefully later will also integrate with mongodb and other types of databases. It has a pool of database servers mapped by keys. The "main" key is saved for the database holding the core databases of the APIShift framework. The Database Manager in general holds all your connection objects and provides a unified interface to use them.
 
 #### Data
-More will be added later
+ * `private $connections_set[]` A PHP array where the keys hold the connection objects to other databases.
 
 #### [Core Interface](machine/core/DatabaseManager.php)
-More will be added later
+ * `public static addConnection($name, $type, $credentials)` 
 
 ### DataModel
 When working with database components of the APIShift, you create `Canvases`, where each canvas is a visual representation of database elements and how they are related & constructed. The system uses these terms/components:

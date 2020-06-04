@@ -31,7 +31,7 @@ if (Configurations::USE_HTTPS && empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] =
 
 // Step 4: Start main connection & load default cache & session if not present
 if(Configurations::INSTALLED) {
-    DatabaseManager::startConnection("main");
+    DatabaseManager::addConnection("main");
     CacheManager::loadDefaults();
     SessionState::loadDefaults();
 }

@@ -45,7 +45,7 @@ class DatabaseManager {
      * 
      * @return void
      */
-    public static function startConnection($connectionName, $db_host = null, $db_user = null, $db_pass = null, $db_port = null, $db_name = null, $exit_on_error = true) {
+    public static function addConnection($connectionName, $db_host = null, $db_user = null, $db_pass = null, $db_port = null, $db_name = null, $exit_on_error = true) {
         // Check if connection already exists is queue
         if(isset(self::$connections[$connectionName]) && (self::$connections[$connectionName] instanceof PDO)) return;
         try {

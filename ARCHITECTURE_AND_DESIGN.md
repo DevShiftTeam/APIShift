@@ -237,9 +237,10 @@ The purpose of the Database Manager is to provide an interface for working with 
  * `private $connections_set[]` A PHP array where the keys hold the connection objects to other databases.
 
 #### [Core Interface](machine/core/DatabaseManager.php)
- * `public static addConnection($name, $type, $credentials)` Adds a new connection to the pool of connections the DatabaseManager holds.
+ * `public static addConnection($name, $type, $credentials)` Adds a new connection to the pool of connections the DatabaseManager holds. Also starts the connection if no connection object exists.
  * `public static getInstance($name)` Returns the connection object associated with the name.
- * ``
+ * `public static closeConnection($name)` Closes the matching connection.
+ * `public static query($name, $query, $data)` Runs a query with the data attached on the connection specified.
 
 ### DataModel
 When working with database components of the APIShift, you create `Canvases`, where each canvas is a visual representation of database elements and how they are related & constructed. The system uses these terms/components:

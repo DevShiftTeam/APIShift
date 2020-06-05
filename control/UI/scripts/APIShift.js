@@ -346,7 +346,7 @@ class APIHandler {
         // Map of functions to run on server update loop
         this.update_function = {
             KeepAlive: function() {
-                APIShift.API.request("Main\\KeepAlive", "stillHere", {});
+                APIShift.API.request("Main\\KeepAlive", "stillHere", {}, () => {}, false);
             }
         };
         this.update_function_running = false;

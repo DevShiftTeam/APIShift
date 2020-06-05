@@ -243,16 +243,16 @@ The purpose of the Database Manager is to provide an interface for working with 
  * `public static query($name, $query, $data)` Runs a query with the data attached on the connection specified.
 
 ### DataModel
-When working with database components of the APIShift, you create `Canvases`, where each canvas is a visual representation of database elements and how they are related & constructed. The system uses these terms/components:
- * __Item__: An abstract components that is presented as a collection of keys and values, that represent data elements stired in the DB.
+When working with database components of the APIShift, you create `Canvases`, where each canvas is a graph representation of database elements and how they are related & constructed. The system uses these terms/components:
+ * __Item__: An abstract components that is presented as a collection of keys and values, that represent data elements stored in the DB.
  * __Relation__: A relation is an item that makes and abstract connection between 2 or more items. Since a relation is also an item you can make relations between relations - this is what makes the terminology of the engine as a combination between [graph model semantics](https://en.wikipedia.org/wiki/Graph_database), [object model semantics](https://en.wikipedia.org/wiki/Object_model) and an [entity-relationship model](https://en.wikipedia.org/wiki/Entity%E2%80%93relationship_model). Each relation is one of those types:
     * *One-To-One*: For each instance of the relation, there can be no more than one instance for each of the parent item/s and related item/s (as you can see a relation can be derived from more that one item, referenced as parent item/s, to any other more than one item, references as related item/s).
     * *One-To-Many*: For each instance of the relation, there can be no more than one instance of parent items but as many related item instances as you like.
-    * *Many-To-Many*: For each instance of the relation, there can as many parent and related items instances as you like.
- * __Group__: Items & Relations can be grouped together - grouping abstracts items and relations as a single elements which helps developers create relations between multiple items in a single connection, it is made for better user experience. Practically, when a relation is pointing to a group or from a group, the table representing the relation will have a `from_type` and `to_type` respectively, which are foreign keys related to a table holding the types of items in the group.
+    * *Many-To-Many*: For each instance of the relation, there can as many parents and related item instances as you like.
+ * __Group__: Items & Relations can be grouped together - grouping abstracts items and relations as a single element which helps developers create relations between multiple items in a single connection, it is made for better user experience. Practically, when a relation is pointing to a group or from a group, the table representing the relation will have a `from_type` and `to_type` respectively, which are foreign keys related to a table holding the types of items in the group.
  * __Type__: Each Item & Relation can have types - for example the users item can be of type admin, premium or regular - this feature is also for better user experience, as developers can view and manage types in system queries, and even relate only specific types of items, which offers more flexibility.
 
-These kind of defintions and components allow us to keep a single query language to access, cunstruct and normalize data elements in a database of any type (SQL and NoSQL structures like mongodb, graphQL and more).
+These kind of defintions and components allow us to keep a single query language to access, construct and normalize data elements in a database of any type (SQL and NoSQL structures like mongodb, graphQL and more).
 
 #### Data
 More will be added later

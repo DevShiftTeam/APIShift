@@ -63,7 +63,7 @@ class Access {
                 // TODO: finish here
                 break;
             case 'controller':
-                // Determine to method of authentication
+                // Determine the method of authentication
                 switch($_POST['rule']['type']) {
                     case "State":
                         // Check if state exists
@@ -74,8 +74,8 @@ class Access {
                         $name = 'state_' . $_POST['rule']['rule']['text'];
                         $task_res = [];
                         $task_id = 0;
-                        $check = DatabaseManager::fetchInto("main", $task_res, "SELECT id FROM tasks WHERE name = :name", [ 'name' => $name ]);
-                        if(!$check || gettype($task_res) !== 'array' || count($task_res) == 0) {
+                        DatabaseManager::fetchInto("main", $task_res, "SELECT id FROM tasks WHERE name = :name", [ 'name' => $name ]);
+                        if(!is_array($task_res) || count($task_res) == 0) {
                             // Add process
                             DatabaseManager::query("main", "INSERT INTO processes (name) VALUES (:name)", [ 'name' => $name ]);
 
@@ -87,28 +87,30 @@ class Access {
                                 ((SELECT id FROM tasks WHERE name = :task),
                                 (SELECT id FROM processes WHERE name = :process))", [ 'task' => $name, 'proccess' => $name ]);
                             
-                            // TODO: Add validation connections
+                            // TODO: Add validation connections to validate state
                         }
                         else $task_id = $task_res[0]['id'];
 
                         // Assign task to controller
                         $result = DatabaseManager::query("main", 
-                        "INSERT INTO request_authorization (controller, method, auth_task) VALUES (:controller, :method, :auth)",
+                        "INSERT INTO request_authorization (controller, method, task) VALUES (:controller, :method, :auth)",
                         [
                             'controller' => $_POST['rule']['controller'],
                             'method' => $_POST['rule']['method'],
                             'auth' => $task_id
                         ]);
+                        if(!$result) Status::message(Status::ERROR, "Couldn't create request authorization in DB");
                         break;
                     case "Function":
                         // TODO: check if function exists
                         // TODO: add function as task
                         // TODO: assign task to controller
                         break;
-                    default:
+                    case "Task":
                         // TODO: check if task exists
                         // TODO: assign task to controller
                         break;
+                    default: Status::message(Status::ERROR, "Unknown rule type, please select a function, state or task.");
                 }
                 break;
             case 'database':

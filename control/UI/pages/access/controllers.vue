@@ -82,19 +82,13 @@
                 }
             },
             createAccessRule: function () {
-                if(this.is_creating) {
-                    this.is_creating = false;
-                    this.edit_dialog = false;
-                    return;
-                }
-
                 this.is_creating = true;
                 this.edit_dialog = true;
                 this.in_edit = {
                     controller: '',
                     method: '',
-                    name: '',
-                    type: ''
+                    type: '',
+                    rule: 0
                 }
             },
             discard: function() {
@@ -108,7 +102,34 @@
                 this.access_names = []; // Empty access names
             },
             save: function() {
+                if(this.in_edit.controller === ""
+                    || this.in_edit.method === ""
+                    || this.in_edit.type === "") {
+                    APIShift.API.notify("Please fill in valid data", 'warning');
+                    return;
+                }
 
+                APIShift.API.request("Admin\\Access", "createAccessRule", { 
+                        elem: 'controller',
+                        rule: {
+                            type: this.in_edit.type,
+                            rule: this.access_names[this.in_edit.rule - 1],
+                            controller: this.in_edit.controller,
+                            method: this.in_edit.method
+                        }
+                    }, function(response) {
+                    if(response.status === APIShift.API.status_codes.SUCCESS) {
+                        APIShift.API.notify(response.data, 'success');
+                    }
+                    else {
+                        APIShift.API.notify(response.data, 'error');
+                    }
+                    cahandler.updateControllerTasks();
+                });
+
+                this.is_creating = false;
+                this.edit_dialog = false;
+                return;
             },
             editAccessRule: function(access_rule) {
                 this.edit_dialog = true;
@@ -241,7 +262,7 @@
                                         <v-select @change="getAvailableRulesForType()" v-model="in_edit.type" :items="access_types" label="Authentication type"></v-select>
                                     </v-col>
                                     <v-col cols="12" sm="6" md="6">
-                                        <v-autocomplete :value="in_edit.rule" :items="access_names" item-text="text" item-value="val" label="Task"></v-autocomplete>
+                                        <v-autocomplete v-model="in_edit.rule" :items="access_names" item-text="text" item-value="val" :label="in_edit.type"></v-autocomplete>
                                     </v-col>
                                 </v-row>
                             </v-container>

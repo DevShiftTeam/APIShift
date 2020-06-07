@@ -167,7 +167,7 @@
                         APIShift.API.request("Admin\\SessionState", "getAllSessionStates", {}, function(response) {
                             cahandler.access_names = [];
                             if(response.status == APIShift.API.status_codes.SUCCESS) {
-                                cahandler.access_names.push({ text: "DEFAULT_STATE", val: 0 }); // Add default state
+                                cahandler.access_names.push({ text: "DEFAULT_VIEWER", val: 0 }); // Add default state
                                 for(key in response.data) {
                                     let current = response.data[key];
                                     let name = response.data[key].name;

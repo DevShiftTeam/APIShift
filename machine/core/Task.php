@@ -104,6 +104,26 @@ class Task {
     }
 
     /**
+     * Retrieve the inputs data entries and sources
+     * 
+     * @param array $input_ids The id's of the inuts to load
+     * 
+     * @return array The input data entries and sources separated by names
+     */
+    private static function retrieveInputs($input_ids) {
+        if(count($input_ids) == 0) return []; //  Skip no inputs
+        // Retrieve inputs from DB
+        $results = [];
+        DatabaseManager::fetchInto("main", $results,
+        "SELECT inputs.id, input_values.is_source, input_values.value, input_values.name FROM inputs
+            JOIN input_values ON inputs.id = input_values.id WHERE inputs.id IN (:input_ids)", [
+                'input_ids' => implode(',', array_keys($input_ids))
+            ], 'name', false
+        );
+        return $results;
+    }
+
+    /**
      * Find all authorization tasks related to the current request
      * 
      * @param string $controller Name of the controller to authorize
@@ -130,7 +150,7 @@ class Task {
         }
         
         // Run valid tasks
-        return Task::run($task_list, $inputs);
+        return Task::run($task_list, self::retrieveInputs($inputs));
     }
 
     /**

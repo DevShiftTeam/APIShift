@@ -129,6 +129,7 @@
 
                 this.is_creating = false;
                 this.edit_dialog = false;
+                this.access_names = []; // Empty access names
                 return;
             },
             editAccessRule: function(access_rule) {

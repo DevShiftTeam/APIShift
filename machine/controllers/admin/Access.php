@@ -68,7 +68,7 @@ class Access {
                     case "State":
                         // Check if state exists
                         $states = CacheManager::get("session_states");
-                        if(!isset($states[$_POST['rule']['rule']['val']])) Status::message(Status::ERROR, "State doesn't exist");
+                        if(!isset($states[$_POST['rule']['rule']['val']]) || $_POST['rule']['rule']['val'] != 0) Status::message(Status::ERROR, "State doesn't exist");
 
                         // Check if state task exists
                         $name = 'state_' . $_POST['rule']['rule']['text'];
@@ -93,11 +93,12 @@ class Access {
 
                         // Assign task to controller
                         $result = DatabaseManager::query("main", 
-                        "INSERT INTO request_authorization (controller, method, task) VALUES (:controller, :method, :auth)",
+                        "INSERT INTO request_authorization (controller, method, task, input) VALUES (:controller, :method, :auth, :input)",
                         [
                             'controller' => $_POST['rule']['controller'],
                             'method' => $_POST['rule']['method'],
-                            'auth' => $task_id
+                            'auth' => $task_id,
+                            'input' => ''
                         ]);
                         if(!$result) Status::message(Status::ERROR, "Couldn't create request authorization in DB");
                         break;

@@ -113,7 +113,7 @@
                         elem: 'controller',
                         rule: {
                             type: this.in_edit.type,
-                            rule: this.access_names[this.in_edit.rule - 1],
+                            rule: this.access_names[this.in_edit.rule],
                             controller: this.in_edit.controller,
                             method: this.in_edit.method
                         }
@@ -167,7 +167,7 @@
                         APIShift.API.request("Admin\\SessionState", "getAllSessionStates", {}, function(response) {
                             cahandler.access_names = [];
                             if(response.status == APIShift.API.status_codes.SUCCESS) {
-                                cahandler.access_names.push({ text: 'DEFAULT_STATE', val: 0 });
+                                cahandler.access_names.push({ text: "DEFAULT_STATE", val: 0 }); // Add default state
                                 for(key in response.data) {
                                     let current = response.data[key];
                                     let name = response.data[key].name;

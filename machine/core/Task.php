@@ -116,17 +116,21 @@ class Task {
         if (!Configurations::INSTALLED) return [];
 
         $task_list = [];
+        $inputs = [];
         $req_auth = CacheManager::get("request_authorization");
         // Search string to help itereate request validation
         $controller_search_str = $controller;
 
         // Find all tasks associated to request
-        foreach($req_auth as $key => $val)
-            if(self::isDirectiveMatching($val['controller'], $controller) && self::isDirectiveMatching($val['method'], $method))
+        foreach($req_auth as $key => $val) {
+            if(self::isDirectiveMatching($val['controller'], $controller) && self::isDirectiveMatching($val['method'], $method)) {
                 $task_list[] = $val['task'];
+                $inputs[] = $val['input'];
+            }
+        }
         
         // Run valid tasks
-        return Task::run($task_list);
+        return Task::run($task_list, $inputs);
     }
 
     /**
@@ -137,7 +141,7 @@ class Task {
      * 
      * @return array Collection of the results of the tasks
      */
-    public static function run($task_list = [], &$inputs = []) {
+    public static function run($task_list = [], $inputs = []) {
         // Add to array if not array so that no modification to the code will be added
         if(!is_array($task_list)) $task_list = [$task_list];
         
@@ -155,7 +159,7 @@ class Task {
         );
 
         // Run all task processes
-        foreach($task_list as $task)
+        foreach($task_list as $index => $task)
         {
             $results[$task] = [];
             // Loop through connection & compile to reach result
@@ -168,7 +172,7 @@ class Task {
                 }
 
                 // Compile & store result
-                $results[$task][] = Process::compileConnections($ordered_connections, $inputs);
+                $results[$task][] = Process::compileConnections($ordered_connections, $inputs[$index]);
             }
         }
 

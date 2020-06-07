@@ -125,7 +125,7 @@ class Task {
         foreach($req_auth as $key => $val) {
             if(self::isDirectiveMatching($val['controller'], $controller) && self::isDirectiveMatching($val['method'], $method)) {
                 $task_list[] = $val['task'];
-                $inputs[] = $val['input'];
+                if($val['input'] != NULL || $val['input'] != 0) $inputs[$val['task']] = $val['input'];
             }
         }
         
@@ -159,7 +159,7 @@ class Task {
         );
 
         // Run all task processes
-        foreach($task_list as $index => $task)
+        foreach($task_list as $task)
         {
             $results[$task] = [];
             // Loop through connection & compile to reach result
@@ -172,7 +172,7 @@ class Task {
                 }
 
                 // Compile & store result
-                $results[$task][] = Process::compileConnections($ordered_connections, $inputs[$index]);
+                $results[$task][] = Process::compileConnections($ordered_connections, $inputs[$task]);
             }
         }
 

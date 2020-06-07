@@ -235,6 +235,53 @@ INSERT INTO `data_sources` VALUES (1,'_SESSION',1),(2,'_POST',1),(3,'_GET',1),(4
 UNLOCK TABLES;
 
 --
+-- Table structure for table `input_values`
+--
+
+DROP TABLE IF EXISTS `input_values`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `input_values` (
+  `id` int NOT NULL,
+  `value` int NOT NULL,
+  `is_source` tinyint(1) NOT NULL,
+  PRIMARY KEY (`id`,`value`,`is_source`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `input_values`
+--
+
+LOCK TABLES `input_values` WRITE;
+/*!40000 ALTER TABLE `input_values` DISABLE KEYS */;
+/*!40000 ALTER TABLE `input_values` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `inputs`
+--
+
+DROP TABLE IF EXISTS `inputs`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `inputs` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `inputs`
+--
+
+LOCK TABLES `inputs` WRITE;
+/*!40000 ALTER TABLE `inputs` DISABLE KEYS */;
+/*!40000 ALTER TABLE `inputs` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `items`
 --
 
@@ -389,8 +436,9 @@ CREATE TABLE `request_authorization` (
   `controller` text,
   `method` text,
   `task` int DEFAULT NULL,
+  `input` int DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -399,7 +447,7 @@ CREATE TABLE `request_authorization` (
 
 LOCK TABLES `request_authorization` WRITE;
 /*!40000 ALTER TABLE `request_authorization` DISABLE KEYS */;
-INSERT INTO `request_authorization` VALUES (1,'Admin\\*','*',2);
+INSERT INTO `request_authorization` VALUES (1,'Admin\\*','*',2,NULL);
 /*!40000 ALTER TABLE `request_authorization` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -443,6 +491,7 @@ CREATE TABLE `session_states` (
   `active_timeout` int DEFAULT '0',
   `auth_task` int DEFAULT NULL,
   `parent` int DEFAULT '0',
+  `auth_input` int DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -453,7 +502,7 @@ CREATE TABLE `session_states` (
 
 LOCK TABLES `session_states` WRITE;
 /*!40000 ALTER TABLE `session_states` DISABLE KEYS */;
-INSERT INTO `session_states` VALUES (1,'ADMIN_STATE',600,0,1,0);
+INSERT INTO `session_states` VALUES (1,'ADMIN_STATE',600,0,1,0,NULL);
 /*!40000 ALTER TABLE `session_states` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -633,4 +682,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-03-31  2:11:44
+-- Dump completed on 2020-06-07 11:04:58

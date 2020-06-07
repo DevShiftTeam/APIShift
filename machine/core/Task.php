@@ -118,7 +118,7 @@ class Task {
         "SELECT inputs.id, input_values.is_source, input_values.value, input_values.name FROM inputs
             JOIN input_values ON inputs.id = input_values.id WHERE inputs.id IN (:input_ids)", [
                 'input_ids' => implode(',', array_keys($input_ids))
-            ], 'name', false
+            ], 'id', false
         );
         return $results;
     }
@@ -150,7 +150,7 @@ class Task {
         }
         
         // Run valid tasks
-        return Task::run($task_list, self::retrieveInputs($inputs));
+        return Task::run($task_list, self::retrieveInputs($inputs), $inputs);
     }
 
     /**
@@ -161,7 +161,7 @@ class Task {
      * 
      * @return array Collection of the results of the tasks
      */
-    public static function run($task_list = [], $inputs = []) {
+    public static function run($task_list = [], $inputs = [], $task_to_inputs = []) {
         // Add to array if not array so that no modification to the code will be added
         if(!is_array($task_list)) $task_list = [$task_list];
         
@@ -184,15 +184,27 @@ class Task {
             $results[$task] = [];
             // Loop through connection & compile to reach result
             foreach($processes_to_compile as $process) {
-                // Order connections by IDs
-                $ordered_connections = [];
+                // Map connections by IDs
+                $mapped_connections = [];
                 foreach($process as $connection) {
-                    $ordered_connections[$connection['id']] = $connection;
-                    unset($ordered_connections[$connection['id']]['id']);
+                    $mapped_connections[$connection['id']] = $connection;
+                    unset($mapped_connections[$connection['id']]['id']);
+                }
+
+                // Create task inputs list by input name
+                $task_input_list = [];
+                if(isset($task_to_inputs[$task])) {
+                    $temp = $inputs[$task_to_inputs[$task]];
+                    // Separate inputs by names
+                    foreach($temp as $key => $value) {
+                        $task_input_list[$value['name']] = $value;
+                        unset($task_input_list[$value['name']]['name']);
+                    }
+                    unset($temp);
                 }
 
                 // Compile & store result
-                $results[$task][] = Process::compileConnections($ordered_connections, $inputs[$task]);
+                $results[$task][] = Process::compileConnections($mapped_connections, $task_input_list);
             }
         }
 

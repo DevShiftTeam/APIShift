@@ -34,7 +34,7 @@ class Access {
      */
     public static function getAllTasks() {
         $res = [];
-        if(DatabaseManager::fetchInto("main", $res, "SELECT * FROM tasks") === false) Status::message(Status::ERROR, "Couldn't retrieve tasks");;
+        if(DatabaseManager::fetchInto("main", $res, "SELECT * FROM tasks") === false) Status::message(Status::ERROR, "Couldn't retrieve tasks");
         Status::message(Status::SUCCESS, $res);
     }
 

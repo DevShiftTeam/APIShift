@@ -204,7 +204,7 @@ class Task {
                 }
 
                 // Compile & store result
-                $GLOBALS['inputs'] = $task_input_list;
+                $GLOBALS['task_inputs'] = $task_input_list;
                 $results[$task][] = Process::compileConnections($mapped_connections);
             }
         }

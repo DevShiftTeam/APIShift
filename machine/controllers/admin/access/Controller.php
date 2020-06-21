@@ -59,22 +59,21 @@ class Controller
                 // Check if state task exists
                 $name = 'state_' . $_POST['rule']['text'];
                 $task_res = [];
-                $task_id = 0;
-                DatabaseManager::fetchInto("main", $task_res, "SELECT id FROM tasks WHERE name = :name", ['name' => $name]);
+                $input_id = 0;
+                DatabaseManager::fetchInto("main", $task_res, "SELECT id FROM inputs WHERE name = :name", ['name' => $name]);
                 if (!is_array($task_res) || count($task_res) == 0) {
-                    // Add process
-                    DatabaseManager::query("main", "INSERT INTO processes (name) VALUES (:name)", ['name' => $name]);
+                    // Add input collection with the session state name
+                    DatabaseManager::query("main", "INSERT INTO inputs (name) VALUES (:name)", ['name' => $name]);
+                    DatabaseManager::fetchInto("main", $task_res, "SELECT id FROM inputs WHERE name = :name", ['name' => $name]);
+                    $input_id = $task_res[0]['id'];
 
-                    // Add task
-                    DatabaseManager::query("main", "INSERT INTO tasks (name) VALUES (:name)", ['name' => $name]);
-
-                    // Connect task and process
-                    DatabaseManager::query("main", "INSERT INTO task_processes (task, process) VALUES
-                                ((SELECT id FROM tasks WHERE name = :task),
-                                (SELECT id FROM processes WHERE name = :process))", ['task' => $name, 'proccess' => $name]);
-
-                    // TODO: Add validation connections to validate state
-                } else $task_id = $task_res[0]['id'];
+                    // Add session state ID value
+                    DatabaseManager::query("main", "INSERT INTO input_values (id, `value`, is_source, name) VALUES (:input_id, :state_id, 0, :name)", [
+                        'input_id' => $input_id,
+                        'state_id' => $_POST['rule']['val'],
+                        'name' => 'state_id'
+                    ]);
+                } else $input_id = $task_res[0]['id'];
 
                 // Assign task to controller
                 $result = DatabaseManager::query(
@@ -83,8 +82,8 @@ class Controller
                     [
                         'controller' => $_POST['controller'],
                         'method' => $_POST['method'],
-                        'auth' => $task_id,
-                        'input' => ''
+                        'auth' => 3, // The 'state_auth' task
+                        'input' => $input_id
                     ]
                 );
                 if (!$result) Status::message(Status::ERROR, "Couldn't create request authorization in DB");

@@ -53,9 +53,6 @@ class Controller
                 $states = CacheManager::get("session_states");
                 if (!isset($states[$_POST['rule']['val']]) && $_POST['rule']['val'] != 0) Status::message(Status::ERROR, "State doesn't exist");
 
-                // TODO: Create input list
-                // TODO: Create entry in request_authorization with task 3 and input group
-
                 // Check if state task exists
                 $name = 'state_' . $_POST['rule']['text'];
                 $task_res = [];

@@ -55,7 +55,7 @@
         },
         methods: {
             updateControllerTasks: function() {
-                APIShift.API.request("Admin\\Access", "getControllersTasks", {}, function (response) {
+                APIShift.API.request("Admin\\Access\\Controller", "getControllersTasks", {}, function (response) {
                     if(response.status == APIShift.API.status_codes.SUCCESS) {
                         cahandler.controller_access_list = Object.assign([], response.data);
                     } else {
@@ -109,14 +109,11 @@
                     return;
                 }
 
-                APIShift.API.request("Admin\\Access", "createAccessRule", { 
-                        elem: 'controller',
-                        rule: {
-                            type: this.in_edit.type,
-                            rule: this.access_names[this.in_edit.rule],
-                            controller: this.in_edit.controller,
-                            method: this.in_edit.method
-                        }
+                APIShift.API.request("Admin\\Access\\Controller", "createAccessRule", {
+                        type: this.in_edit.type,
+                        rule: this.access_names[this.in_edit.rule],
+                        controller: this.in_edit.controller,
+                        method: this.in_edit.method
                     }, function(response) {
                     if(response.status === APIShift.API.status_codes.SUCCESS) {
                         APIShift.API.notify(response.data, 'success');
@@ -146,7 +143,7 @@
                     return;
                 }
 
-                APIShift.API.request("Admin\\Access", "removeAccessRule", { elem: 'controller', id: this.in_edit.id }, function(response) {
+                APIShift.API.request("Admin\\Access\\Controller", "removeAccessRule", { id: this.in_edit.id }, function(response) {
                     if(response.status === APIShift.API.status_codes.SUCCESS) {
                         APIShift.API.notify(response.data, 'success');
                     }
@@ -188,7 +185,7 @@
                         break;
                     default:
                         // Get all available tasks
-                        APIShift.API.request("Admin\\Access", "getAllTasks", {}, function(response) {
+                        APIShift.API.request("Admin\\Access\\Main", "getAllTasks", {}, function(response) {
                             cahandler.access_names = [];
                             if(response.status == APIShift.API.status_codes.SUCCESS) {
                                 for(key in response.data) {

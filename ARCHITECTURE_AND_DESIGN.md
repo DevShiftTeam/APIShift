@@ -29,6 +29,8 @@ The semantics of this architecture document will follow the definitions mentione
     - [Tasks](#tasks)
       - [Database](#database-2)
     - [Languages & Translation](#languages--translation)
+      - [Database](#database-3)
+      - [Memory](#memory-2)
     - [Items](#items)
   - [Cache](#cache)
     - [Interface](#interface)
@@ -39,7 +41,7 @@ The semantics of this architecture document will follow the definitions mentione
     - [Core Interface](#core-interface)
     - [Admin Controller Interface](#admin-controller-interface)
     - [Main Controller Interface](#main-controller-interface)
-  - [Database](#database-3)
+  - [Database](#database-4)
     - [Database Manager](#database-manager)
       - [Run-time Data](#run-time-data)
       - [Core Interface](#core-interface-1)
@@ -183,7 +185,7 @@ Each session state has a state structure, indicating how the data about the stat
 The current session state is loaded into the `$_SESSION` array in PHP. The meta-data about the different states is stored in the cache under the key `session_states`. If no cache system is present, when when accessing data about session states, it will be loaded directly from the database. The system responsible for manipulating the session states is the [SessionState](#session-states-1).
 
 ### Tasks
-We encapsulate different processes as tasks, such that they can be called and attaches to any other part of the system as authorization processes and more. A Task holds a collection of processes, and each process has a representation of the flow of data between different entries and function during runtime. This way we save "meta-data" about the operation we want to make, and encapsulate it under a task. This kind of representation helps define processes using our control panel, and can be easily attached to other parts of the system.
+We encapsulate different processes as tasks, such that they can be called and attached to any other part of the system as authorization processes and more. A Task holds a collection of processes, and each process has a representation of the flow of data between different entries and function during runtime. This way we save "meta-data" about the operations we want to make, and encapsulate it under a "task". This kind of representation helps define processes using our control panel, and can be easily attached to other parts of the system.
 
 #### Database
 * ___tasks___ - id-name collection of the different tasks.
@@ -205,6 +207,23 @@ We encapsulate different processes as tasks, such that they can be called and at
 * ___connection_node_types___ - A connection can hold different nodes, the from node represents the input node, and the to node represents the output node. Each node can be a sata entry (DataEntry) or source (DataSource), another connection's output (Connection) or a task (Task) or process (Process).
 
 ### Languages & Translation
+We configure the APIShift framework in a way that will help developers present and translate content with a pre-configured structure and tools. To achieve this we provide a set of tables that contain the meta-data about the translatable content and its translation, which is then used by our components when a language is selected.
+
+#### Database
+* ___languages___ - The list of available languages in your program, saved as id-name.
+* ___translatable_tables___ - Tables that contain content that can be translated. Saved in an id-name manner.
+* ___translatable_columns___ - The specific columns in a table that have translatable content into the languages available.
+  * _id_ - Id of the column
+  * _table_ - Table ID according to the translatable_tables table.
+  * _name_ - Name of the column that can be translated.
+* ___translations___ - A table relating between the language, the table, the column and specific entry that can be translated with the translation at hand.
+  * _column_ - Column ID according to translatable_columns table.
+  * _lang_ - ID of the language from the languages table.
+  * _entry_ - ID of the specific entry in the table that has a translation.
+  * _translation_ - The translation of the value present in the entry.
+
+#### Memory
+The data representing the translation is still not integrated into the system's components, and can be manually accounted for in the code by the need of the developer. The structure in the DB creates a general and easy to use approach to add different languages and translation into your system. In later versions the component will take the translation for you automatically on command.
 
 ### Items
 

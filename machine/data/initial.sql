@@ -122,7 +122,7 @@ CREATE TABLE `connections` (
   `to_type` int DEFAULT NULL,
   `to` int DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -131,7 +131,7 @@ CREATE TABLE `connections` (
 
 LOCK TABLES `connections` WRITE;
 /*!40000 ALTER TABLE `connections` DISABLE KEYS */;
-INSERT INTO `connections` VALUES (1,0,'username',5,2,5,4),(2,4,'password_verify',5,3,3,3),(3,0,'result',NULL,NULL,NULL,NULL),(4,0,'password',3,1,3,2),(5,0,'name',5,6,5,7),(6,3,'==',3,5,5,1);
+INSERT INTO `connections` VALUES (1,0,'username',5,2,5,4),(2,4,'password_verify',5,3,3,3),(3,0,'result',NULL,NULL,NULL,NULL),(4,0,'password',3,1,3,2),(5,0,'name',5,6,5,7),(6,3,'==',3,5,5,1),(7,3,'==',5,8,5,1);
 /*!40000 ALTER TABLE `connections` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -148,7 +148,7 @@ CREATE TABLE `data_entries` (
   `type` int DEFAULT NULL,
   `source` int DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -157,7 +157,7 @@ CREATE TABLE `data_entries` (
 
 LOCK TABLES `data_entries` WRITE;
 /*!40000 ALTER TABLE `data_entries` DISABLE KEYS */;
-INSERT INTO `data_entries` VALUES (1,'state',1,1),(2,'login',1,2),(3,'password',1,2),(4,'password',4,5),(5,'username',4,5),(6,'ADMIN_STATE',3,0),(7,'id',4,6);
+INSERT INTO `data_entries` VALUES (1,'state',1,1),(2,'login',1,2),(3,'password',1,2),(4,'password',4,5),(5,'username',4,5),(6,'ADMIN_STATE',3,0),(7,'id',4,6),(8,'state_id',1,4);
 /*!40000 ALTER TABLE `data_entries` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -230,7 +230,7 @@ CREATE TABLE `data_sources` (
 
 LOCK TABLES `data_sources` WRITE;
 /*!40000 ALTER TABLE `data_sources` DISABLE KEYS */;
-INSERT INTO `data_sources` VALUES (1,'_SESSION',1),(2,'_POST',1),(3,'_GET',1),(4,'params',1),(5,'admin_users',2),(6,'session_states',2);
+INSERT INTO `data_sources` VALUES (1,'_SESSION',1),(2,'_POST',1),(3,'_GET',1),(4,'task_inputs',1),(5,'admin_users',2),(6,'session_states',2);
 /*!40000 ALTER TABLE `data_sources` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -256,6 +256,7 @@ CREATE TABLE `input_values` (
 
 LOCK TABLES `input_values` WRITE;
 /*!40000 ALTER TABLE `input_values` DISABLE KEYS */;
+INSERT INTO `input_values` VALUES (1,1,0,'state_id');
 /*!40000 ALTER TABLE `input_values` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -270,7 +271,7 @@ CREATE TABLE `inputs` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -279,6 +280,7 @@ CREATE TABLE `inputs` (
 
 LOCK TABLES `inputs` WRITE;
 /*!40000 ALTER TABLE `inputs` DISABLE KEYS */;
+INSERT INTO `inputs` VALUES (1,'state_ADMIN_STATE');
 /*!40000 ALTER TABLE `inputs` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -348,7 +350,7 @@ CREATE TABLE `process_connections` (
 
 LOCK TABLES `process_connections` WRITE;
 /*!40000 ALTER TABLE `process_connections` DISABLE KEYS */;
-INSERT INTO `process_connections` VALUES (1,1),(1,2),(1,3),(1,4),(2,5),(2,6);
+INSERT INTO `process_connections` VALUES (1,1),(1,2),(1,3),(1,4),(2,5),(2,6),(3,7);
 /*!40000 ALTER TABLE `process_connections` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -363,7 +365,7 @@ CREATE TABLE `processes` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -372,7 +374,7 @@ CREATE TABLE `processes` (
 
 LOCK TABLES `processes` WRITE;
 /*!40000 ALTER TABLE `processes` DISABLE KEYS */;
-INSERT INTO `processes` VALUES (1,'admin_auth'),(2,'admin_state_auth');
+INSERT INTO `processes` VALUES (1,'admin_auth'),(2,'admin_state_auth'),(3,'state_auth');
 /*!40000 ALTER TABLE `processes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -448,7 +450,7 @@ CREATE TABLE `request_authorization` (
 
 LOCK TABLES `request_authorization` WRITE;
 /*!40000 ALTER TABLE `request_authorization` DISABLE KEYS */;
-INSERT INTO `request_authorization` VALUES (1,'Admin\\*','*',2,NULL);
+INSERT INTO `request_authorization` VALUES (1,'Admin\\*','*',3,1);
 /*!40000 ALTER TABLE `request_authorization` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -575,7 +577,7 @@ CREATE TABLE `task_processes` (
 
 LOCK TABLES `task_processes` WRITE;
 /*!40000 ALTER TABLE `task_processes` DISABLE KEYS */;
-INSERT INTO `task_processes` VALUES (1,1),(2,2);
+INSERT INTO `task_processes` VALUES (1,1),(2,2),(3,3);
 /*!40000 ALTER TABLE `task_processes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -590,7 +592,7 @@ CREATE TABLE `tasks` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -599,7 +601,7 @@ CREATE TABLE `tasks` (
 
 LOCK TABLES `tasks` WRITE;
 /*!40000 ALTER TABLE `tasks` DISABLE KEYS */;
-INSERT INTO `tasks` VALUES (1,'admin_auth'),(2,'state_ADMIN_STATE');
+INSERT INTO `tasks` VALUES (1,'admin_auth'),(2,'state_ADMIN_STATE'),(3,'state_auth');
 /*!40000 ALTER TABLE `tasks` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -683,4 +685,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-06-07 11:55:24
+-- Dump completed on 2020-06-21 21:19:17

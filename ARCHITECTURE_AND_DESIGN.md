@@ -27,10 +27,10 @@ The semantics of this architecture document will follow the definitions mentione
       - [Database](#database-1)
       - [Memory](#memory-1)
     - [Tasks](#tasks)
+      - [Database](#database-2)
     - [Languages & Translation](#languages--translation)
     - [Items](#items)
   - [Cache](#cache)
-    - [Data](#data-1)
     - [Interface](#interface)
   - [Data Manager](#data-manager)
       - [Data Access Optimization](#data-access-optimization)
@@ -39,35 +39,28 @@ The semantics of this architecture document will follow the definitions mentione
     - [Core Interface](#core-interface)
     - [Admin Controller Interface](#admin-controller-interface)
     - [Main Controller Interface](#main-controller-interface)
-  - [Database](#database-2)
+  - [Database](#database-3)
     - [Database Manager](#database-manager)
-      - [Data](#data-2)
+      - [Run-time Data](#run-time-data)
       - [Core Interface](#core-interface-1)
     - [DataModel](#datamodel)
-      - [Data](#data-3)
       - [Core Interface](#core-interface-2)
       - [Controller Interface](#controller-interface)
     - [Item](#item)
-      - [Data](#data-4)
       - [Core Interface](#core-interface-3)
   - [Task](#task)
-    - [Data](#data-5)
     - [Core Interface](#core-interface-4)
     - [Controller Interface](#controller-interface-1)
   - [Process](#process)
-    - [Data](#data-6)
     - [Core Interface](#core-interface-5)
     - [Controller Interface](#controller-interface-2)
   - [Access](#access)
-    - [Data](#data-7)
     - [Core Interface](#core-interface-6)
     - [Controller Interface](#controller-interface-3)
   - [Analysis](#analysis)
-    - [Data](#data-8)
     - [Core Interface](#core-interface-7)
     - [Controller Interface](#controller-interface-4)
   - [Extensions](#extensions)
-    - [Data](#data-9)
     - [Core Interface](#core-interface-8)
     - [Controller Interface](#controller-interface-5)
 - [Project Structure](#project-structure)
@@ -147,17 +140,17 @@ Since we use a data-oriented approach, the guiding elements of our architecture 
 Data can come from a lot of sources, e.g. databases and arrays. To access data better, we keep a meta-data representation of the data in the system, this way other components can share and work with data elements in the system more effectively. As we have defined before, our model uses data sources and data entries notations.
 
 #### Database
-* ___data_sources___ (SQL) - Collection of different data sources that the system uses at run-time for different operations.
+* ___data_sources___ - Collection of different data sources that the system uses at run-time for different operations.
   * _id_ - Identification.
   * _name_ - Name of the data source.
   * _type_ - ID of the type of a data source.
-* ___data_source_types___ (SQL) - An id-name table representing the different types of data sources: arrays, tables, items/relations (will be discussed later), static_class (a class holding static variables), class_instance (a class instance).
-* ___data_entries___ (SQL) - Collection of the data entries used by the system.
+* ___data_source_types___ - An id-name table representing the different types of data sources: arrays, tables, items/relations (will be discussed later), static_class (a class holding static variables), class_instance (a class instance).
+* ___data_entries___ - Collection of the data entries used by the system.
   * _id_ - Identification.
   * _name_ - Name of the data entry.
   * _type_ - ID of the type of a data entry.
   * _source_ - The source which this entry belong to if present.
-* ___data_entry_types___ (SQL) - An id-name table representing the types of entries, can be either of: array_key, variable, constant (In case of constant the name is considered the value), table_cell.
+* ___data_entry_types___ - An id-name table representing the types of entries, can be either of: array_key, variable, constant (In case of constant the name is considered the value), table_cell.
 
 #### Memory
 The database tables are loaded into cache when the system does its first run, if no cache system is present then the data is loaded during runtime from the database - which requires to make a query, thus effects the performance of the system. That's why we recommend using a cache system. When a value of a data entry is called, it is loaded into run-time using the meta-data about the entry. The system responsible for getting data based on meta-data is [DataManager](#data-manager).
@@ -172,14 +165,14 @@ Each session state has a state structure, indicating how the data about the stat
  * __Children__: Children states inherit and extend the structure and values of the parent state and use the same authorization process but with additional options or restrictions added by the developer. For example a "user" session state can have a "premium" child state that applies to premium users and provides access to more features in your application.
 
 #### Database
- * ___session_state___ (SQL) - Used to encapsulate and separate session data structures at a given state for different types of sessions.
+ * ___session_state___ - Used to encapsulate and separate session data structures at a given state for different types of sessions.
    * _id_ - Identifier of the state.
    * _name_ - Name identifying the state.
    * _inactive_timeout_ - Timeout untill system disposes of the session user when not active.
    * _active_timeout_ - Timeout until system disposes the session since whether active or not.
    * _auth_task_ - Authorization task running the procedure when a user requests a change into this state. A task can be your own function, more on tasks will be discussed later.
    * _parent_ - id of the parent session.
- * ___session_state_structures___ (SQL) - Defines the key-value store structure of the session in run-time.
+ * ___session_state_structures___ - Defines the key-value store structure of the session in run-time.
    * _id_ - Personal identification.
    * _state_ - Identification of state this entry belongs to.
    * _key_ - Name of the value the entry is holding.
@@ -187,9 +180,29 @@ Each session state has a state structure, indicating how the data about the stat
    * _parent_ - id of the parent entry.
 
 #### Memory
-The current session state is loaded into the `$_SESSION` array in PHP. The meta-data about the different states is stored in the cache under the key `session_states`. If no cache system is present, when when accessing data about session states, it will be loaded directly from the database.
+The current session state is loaded into the `$_SESSION` array in PHP. The meta-data about the different states is stored in the cache under the key `session_states`. If no cache system is present, when when accessing data about session states, it will be loaded directly from the database. The system responsible for manipulating the session states is the [SessionState](#session-states-1).
 
 ### Tasks
+We encapsulate different processes as tasks, such that they can be called and attaches to any other part of the system as authorization processes and more. A Task holds a collection of processes, and each process has a representation of the flow of data between different entries and function during runtime. This way we save "meta-data" about the operation we want to make, and encapsulate it under a task. This kind of representation helps define processes using our control panel, and can be easily attached to other parts of the system.
+
+#### Database
+* ___tasks___ - id-name collection of the different tasks.
+* ___task_processes___ - A collection of task ids and the proccesses present for each task.
+  * _task_ - Id of the task.
+  * _process_ - Id of the process attached.
+* ___processes___ - id-name Table containing the list of names processes in the system.
+* ___process_connections___ - Represents which connections belong to which process.
+  * _process_ - Id of the process.
+  * _connection_ - Id of the connection.
+* ___connections___ - Each process has a list of connections. A connection defines a procedure between data elements.
+  * _id_ - Identification.
+  * _connection_type_ - Represents a connection type (defined below).
+  * _from_type_ - Represents a connection node type of the input (defined below).
+  * _from_ - Represents the ID of the input.
+  * _to_type_ - Represents a connection node type of the output (defined below).
+  * _to_ - Represents the ID of the output.
+* ___connection_types___ - A connection can represent a flow of data from one element to another (Flow), a function (Function), a predefined comparison rule (Rule) or another task (Task) or process (Process).
+* ___connection_node_types___ - A connection can hold different nodes, the from node represents the input node, and the to node represents the output node. Each node can be a sata entry (DataEntry) or source (DataSource), another connection's output (Connection) or a task (Task) or process (Process).
 
 ### Languages & Translation
 
@@ -197,9 +210,6 @@ The current session state is loaded into the `$_SESSION` array in PHP. The meta-
 
 ## Cache
 The cache is an interface that provides a handler for cache systems that can work with different caches such as Memcached, Redis and APCU, while hiding the implementation details behind a simple get-set interface. The cache system is expressed in the [machine/core/CacheManager.php](machine/core/CacheManager.php) class.
-
-### Data
-> No Data
 
 ### [Interface](machine/core/CacheManager.php)
 * `public addSystem($system_type, $name, $credentials)` Adds a new cache system (of type APCU, MemCached, Redis) to collection. This function will be available later for extendability and for the framework to be able to integrate into larger projects.
@@ -264,7 +274,7 @@ The APIShift framework persents three types of database components to manage the
 ### Database Manager
 The purpose of the Database Manager is to provide an interface for working with multiple databases. Right now it is build to work with SQL databases, hopefully later will also integrate with mongodb and other types of databases. It has a pool of database servers mapped by keys. The "main" key is saved for the database holding the core databases of the APIShift framework. The Database Manager in general holds all your connection objects and provides a unified interface to use them.
 
-#### Data
+#### Run-time Data
  * `private $connections_set[]` A PHP array where the keys hold the connection objects to other databases.
 
 #### [Core Interface](machine/core/DatabaseManager.php)
@@ -285,9 +295,6 @@ When working with database components of the APIShift, you create `Canvases`, wh
 
 These kind of defintions and components allow us to keep a single query language to access, construct and normalize data elements in a database of any type (SQL and NoSQL structures like mongodb, graphQL and more).
 
-#### Data
-More will be added later
-
 #### [Core Interface](machine/core/DataModel.php)
 More will be added later
 
@@ -297,16 +304,10 @@ More will be added later
 ### Item
 More will be added later
 
-#### Data
-More will be added later
-
 #### [Core Interface](machine/core/Item.php)
 More will be added later
 
 ## Task
-More will be added later
-
-### Data
 More will be added later
 
 ### Core Interface
@@ -318,19 +319,6 @@ More will be added later
 ## Process
 More will be added later
 
-### Data
-* ___processes___ (SQL) - id-name Table containing the list of names processes in the system.
-* ___connections___ (SQL) - Each process has a list of connections defined in the ___process_connections___ table. A connection defines a procedure between data elements.
-  * _id_ - Identification.
-  * _connection_type_ - A connection defines a procedures, this procedure can come as another Process, Task, Function, a rule (a set of pre-made directives) or information transfer.
-  * _name_ - Name of connection (information transfer ref, process, task, function, rule).
-  * _from_type_ - 
-  * _from_ - 
-  * _to_type_ - 
-  * _to_ - 
-* ___connection_types___ (SQL) - 
-* ___connection_node_types___ (SQL) - 
-
 ### Core Interface
 More will be added later
 
@@ -338,9 +326,6 @@ More will be added later
 More will be added later
 
 ## Access
-More will be added later
-
-### Data
 More will be added later
 
 ### Core Interface
@@ -352,9 +337,6 @@ More will be added later
 ## Analysis
 More will be added later
 
-### Data
-More will be added later
-
 ### Core Interface
 More will be added later
 
@@ -362,9 +344,6 @@ More will be added later
 More will be added later
 
 ## Extensions
-More will be added later
-
-### Data
 More will be added later
 
 ### Core Interface

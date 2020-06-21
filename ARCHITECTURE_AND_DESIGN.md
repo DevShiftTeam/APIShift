@@ -6,7 +6,7 @@
 
 This document organizes the different components, sub-components and their properties that make up the engine. The goal of this document is to provide both a high level overview of the architecture of the system and guidelines for the functionality and algorithmics behind the engine practically. All new systems and components first need to be integrated in the code design before going into development stages to keep a clean, understandable flow of development, organization and efficiency. It is always better to initially design the components and overall system before developing, it helps others follow up with the same ideas and standards when developing and contributing to the system.
 
-The semantics of this architecture document will follow the definitions mentioned in [Architectural Styles and the Design of Network-based Software Architectures. Doctoral dissertation by Roy Thomas Fielding, University of California, Irvine, 2000. Chapter 1](https://www.ics.uci.edu/~fielding/pubs/dissertation/software_arch.htm).
+The semantics of this document will follow the definitions mentioned in [Architectural Styles and the Design of Network-based Software Architectures. Doctoral dissertation by Roy Thomas Fielding, University of California, Irvine, 2000. Chapter 1](https://www.ics.uci.edu/~fielding/pubs/dissertation/software_arch.htm).
 
 # Table of contents
 - [APIShift Architecture And Design](#apishift-architecture-and-design)
@@ -22,15 +22,16 @@ The semantics of this architecture document will follow the definitions mentione
   - [Data](#data)
     - [Meta-data of data](#meta-data-of-data)
       - [Database](#database)
-      - [Memory](#memory)
+      - [Run-time](#run-time)
     - [Session States](#session-states)
       - [Database](#database-1)
-      - [Memory](#memory-1)
+      - [Run-time](#run-time-1)
     - [Tasks](#tasks)
       - [Database](#database-2)
+      - [Run-time](#run-time-2)
     - [Languages & Translation](#languages--translation)
       - [Database](#database-3)
-      - [Memory](#memory-2)
+      - [Run-time](#run-time-3)
     - [Items](#items)
   - [Cache](#cache)
     - [Interface](#interface)
@@ -154,11 +155,11 @@ Data can come from a lot of sources, e.g. databases and arrays. To access data b
   * _source_ - The source which this entry belong to if present.
 * ___data_entry_types___ - An id-name table representing the types of entries, can be either of: array_key, variable, constant (In case of constant the name is considered the value), table_cell.
 
-#### Memory
+#### Run-time
 The database tables are loaded into cache when the system does its first run, if no cache system is present then the data is loaded during runtime from the database - which requires to make a query, thus effects the performance of the system. That's why we recommend using a cache system. When a value of a data entry is called, it is loaded into run-time using the meta-data about the entry. The system responsible for getting data based on meta-data is [DataManager](#data-manager).
 
 ### Session States
-Sessions store data about a client that is accessible throughout the different requests between the client and the server. A simple analogy will be to say that it's somehow like server-side cookies. Sessions are great tools to store a certain "state" about a client when exchanging requests, indicating our program who the client is - is it an admin? a player in our app? a premium user maybe? all these different clients have different restrictions on the functionallity and data they can access.
+Sessions store data about a client that is accessible throughout the different requests between the client and the server. A simple analogy will be to say that it's like server-side cookies. Sessions are a great tool to store a certain "state" about a client when exchanging requests, indicating our program who the client is - is it an admin? a player in our app? a premium user maybe? all these different clients have different restrictions on the functionallity and data they can access.
 
 Each session state has a state structure, indicating how the data about the state is saved, it also needs to know which data entries to take value from to fill them, and who are their children that inherit their properties:
 
@@ -181,7 +182,7 @@ Each session state has a state structure, indicating how the data about the stat
    * _entry_ - Identification of the data entry which the value coppied from with when state is changed.
    * _parent_ - id of the parent entry.
 
-#### Memory
+#### Run-time
 The current session state is loaded into the `$_SESSION` array in PHP. The meta-data about the different states is stored in the cache under the key `session_states`. If no cache system is present, when when accessing data about session states, it will be loaded directly from the database. The system responsible for manipulating the session states is the [SessionState](#session-states-1).
 
 ### Tasks
@@ -206,6 +207,9 @@ We encapsulate different processes as tasks, such that they can be called and at
 * ___connection_types___ - A connection can represent a flow of data from one element to another (Flow), a function (Function), a predefined comparison rule (Rule) or another task (Task) or process (Process).
 * ___connection_node_types___ - A connection can hold different nodes, the from node represents the input node, and the to node represents the output node. Each node can be a sata entry (DataEntry) or source (DataSource), another connection's output (Connection) or a task (Task) or process (Process).
 
+#### Run-time
+A task can be placed in different parts of your code using the [Task](#task) system. A task can also be assigned to session states, function and controllers as an authorization processes required before changing a state, running a function or accessing any function in a controller accordingly. The process connections are loaded once a task is called, and are compiled into instruction at run-time using the [Process](#process) system.
+
 ### Languages & Translation
 We configure the APIShift framework in a way that will help developers present and translate content with a pre-configured structure and tools. To achieve this we provide a set of tables that contain the meta-data about the translatable content and its translation, which is then used by our components when a language is selected.
 
@@ -222,10 +226,11 @@ We configure the APIShift framework in a way that will help developers present a
   * _entry_ - ID of the specific entry in the table that has a translation.
   * _translation_ - The translation of the value present in the entry.
 
-#### Memory
+#### Run-time
 The data representing the translation is still not integrated into the system's components, and can be manually accounted for in the code by the need of the developer. The structure in the DB creates a general and easy to use approach to add different languages and translation into your system. In later versions the component will take the translation for you automatically on command.
 
 ### Items
+More will be added later
 
 ## Cache
 The cache is an interface that provides a handler for cache systems that can work with different caches such as Memcached, Redis and APCU, while hiding the implementation details behind a simple get-set interface. The cache system is expressed in the [machine/core/CacheManager.php](machine/core/CacheManager.php) class.

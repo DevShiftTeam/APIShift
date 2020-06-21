@@ -51,11 +51,10 @@ class Controller
             case "State":
                 // Check if state exists
                 $states = CacheManager::get("session_states");
-                if (
-                    !isset($states[$_POST['rule']['val']])
-                    && ($_POST['rule']['val'] != 0
-                        && $_POST['rule']['text'] != 'DEFAULT_VIEWER')
-                ) Status::message(Status::ERROR, "State doesn't exist");
+                if (!isset($states[$_POST['rule']['val']]) && $_POST['rule']['val'] != 0) Status::message(Status::ERROR, "State doesn't exist");
+
+                // TODO: Create input list
+                // TODO: Create entry in request_authorization with task 3 and input group
 
                 // Check if state task exists
                 $name = 'state_' . $_POST['rule']['text'];

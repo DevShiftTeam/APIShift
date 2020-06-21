@@ -36,7 +36,7 @@ class Process {
      * 
      * @return mixed The result of the compilation
      */
-    public static function compileConnections(&$connections_set, &$inputs = []) {
+    public static function compileConnections(&$connections_set) {
         // Key-value store of results of each connection
         $connection_results = [];
         $result = null;

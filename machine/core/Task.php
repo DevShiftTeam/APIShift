@@ -117,7 +117,7 @@ class Task {
         DatabaseManager::fetchInto("main", $results,
         "SELECT inputs.id, input_values.is_source, input_values.value, input_values.name FROM inputs
             JOIN input_values ON inputs.id = input_values.id WHERE inputs.id IN (:input_ids)", [
-                'input_ids' => implode(',', array_keys($input_ids))
+                'input_ids' => implode(',', array_values($input_ids))
             ], 'id', false
         );
         return $results;
@@ -197,14 +197,15 @@ class Task {
                     $temp = $inputs[$task_to_inputs[$task]];
                     // Separate inputs by names
                     foreach($temp as $key => $value) {
-                        $task_input_list[$value['name']] = $value;
+                        $task_input_list[$value['name']] = $value['value'];
                         unset($task_input_list[$value['name']]['name']);
                     }
                     unset($temp);
                 }
 
                 // Compile & store result
-                $results[$task][] = Process::compileConnections($mapped_connections, $task_input_list);
+                $GLOBALS['inputs'] = $task_input_list;
+                $results[$task][] = Process::compileConnections($mapped_connections);
             }
         }
 

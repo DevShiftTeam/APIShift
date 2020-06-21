@@ -29,7 +29,7 @@ class DataManager {
      * Stores data entries which are used at runtime - thus saving speed when accessing data when working with entries on the same request
      * which most likely will happen, and this trick keeps things fast throughout requests
      */
-    private static $runtime_entries = [];
+    public static $runtime_entries = [];
 
     /**
      * Upload entry data to/from cache and current runtime

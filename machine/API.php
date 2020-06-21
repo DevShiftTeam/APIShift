@@ -38,5 +38,5 @@ if (!Configurations::INSTALLED && $_GET["c"] != "Main\Installer") Status::messag
 // Step 3: Authorize & run the request
 Authorizer::authorizeAndRun($_GET["c"], $_GET["m"], $_POST);
 
-// Step 4: Post message if controller didn't exit application
+// Step 4: Post message if controller doesn't exit application
 Status::respond();

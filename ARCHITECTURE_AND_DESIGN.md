@@ -19,47 +19,55 @@ The semantics of this architecture document will follow the definitions mentione
     - [Base Components: 2nd Lvl Abstraction](#base-components-2nd-lvl-abstraction)
   - [Request Workflow](#request-workflow)
 - [Architectural Elements](#architectural-elements)
+  - [Data](#data)
+    - [Meta-data of data](#meta-data-of-data)
+      - [Database](#database)
+      - [Memory](#memory)
+    - [Session States](#session-states)
+      - [Database](#database-1)
+      - [Memory](#memory-1)
+    - [Tasks](#tasks)
+    - [Languages & Translation](#languages--translation)
+    - [Items](#items)
   - [Cache](#cache)
-    - [Data](#data)
+    - [Data](#data-1)
     - [Interface](#interface)
   - [Data Manager](#data-manager)
-    - [Data](#data-1)
       - [Data Access Optimization](#data-access-optimization)
     - [Interface](#interface-1)
-  - [Session States](#session-states)
-    - [Data](#data-2)
+  - [Session States](#session-states-1)
     - [Core Interface](#core-interface)
     - [Admin Controller Interface](#admin-controller-interface)
     - [Main Controller Interface](#main-controller-interface)
-  - [Database](#database)
+  - [Database](#database-2)
     - [Database Manager](#database-manager)
-      - [Data](#data-3)
+      - [Data](#data-2)
       - [Core Interface](#core-interface-1)
     - [DataModel](#datamodel)
-      - [Data](#data-4)
+      - [Data](#data-3)
       - [Core Interface](#core-interface-2)
       - [Controller Interface](#controller-interface)
     - [Item](#item)
-      - [Data](#data-5)
+      - [Data](#data-4)
       - [Core Interface](#core-interface-3)
   - [Task](#task)
-    - [Data](#data-6)
+    - [Data](#data-5)
     - [Core Interface](#core-interface-4)
     - [Controller Interface](#controller-interface-1)
   - [Process](#process)
-    - [Data](#data-7)
+    - [Data](#data-6)
     - [Core Interface](#core-interface-5)
     - [Controller Interface](#controller-interface-2)
   - [Access](#access)
-    - [Data](#data-8)
+    - [Data](#data-7)
     - [Core Interface](#core-interface-6)
     - [Controller Interface](#controller-interface-3)
   - [Analysis](#analysis)
-    - [Data](#data-9)
+    - [Data](#data-8)
     - [Core Interface](#core-interface-7)
     - [Controller Interface](#controller-interface-4)
   - [Extensions](#extensions)
-    - [Data](#data-10)
+    - [Data](#data-9)
     - [Core Interface](#core-interface-8)
     - [Controller Interface](#controller-interface-5)
 - [Project Structure](#project-structure)
@@ -74,7 +82,7 @@ We also want to keep our system as clean as possible from other complex technolo
 ## Architectural Style
 An architectural style, is a set of restrictions that guide how we define architectural elements and relate between them in ways that satisfy the given style.
 
-Our style is a component based architectural style, that follows the definitions presented in the [Component Classifications](#component-classifications) section. Meaning that any component in our architecture will belong to a specific classification defined in that section. We strive to follow a data-oriented design, where the data is visible to all the components, which requires no visibility notations on data like public, protected or private, it makes the architecture more clean, and since data is shared and no private data is needed, then no internal component states about data need to be saved - which in a lot of practices has minimized the amount of data used throughout the program. Every component acts as a system - a collection of functions. Some data will be saved in different components, but will remain public. The data components will be stored in cache and loaded into runtime when called, if no cache system is present, then they will automatically be loaded into runtime - therefore a cache system like APCu, Redis or Memcache is recommended to increase speed.
+Our style is a component based architectural style, that follows the definitions presented in the [Component Classifications](#component-classifications) section. Meaning that any component in our architecture will belong to a specific classification defined in that section. We strive to follow a data-oriented design, where the data is visible to all the components, which requires no visibility notations on data like public, protected or private, it makes the architecture more clean, and since data is shared and no private data is needed, then no internal component states about data need to be saved - which in a lot of practices has minimized the amount of data used throughout the program. Every component acts as a system - a collection of functions. Some data will be saved in different components, but will remain public. Some data elements will be stored in cache and loaded into runtime when called, if no cache system is present, then they will automatically be loaded into runtime - therefore a cache system like APCu, Redis or Memcache is recommended to increase speed.
 
 Each component will be divided in a Core-Model-Controller manner, such that: Each component's functionallity that is visible, and can be triggered by an end-user will be referred by a `Controller` component. And any functionallity that is not visible to the end-user will be referred by a `Model` component. User-made components may choose any style he desires for `Model` components, but must create `Controller` components on top of them when making it visible to the end-user through the API. `Core` components are basically `Model` components  that define the overall system's workflow and give user-made components the basic functionallity needed to integrate with the system's workflow and features.
 
@@ -130,7 +138,62 @@ The APIShift framework provides a general workflow for each request, with an eco
 Part 1 to 3 of this workflow is implemented by the [APIShift.php](machine/APIShift.php) file, and the other part 4 to 6 is implemented by the [API.php](machine/API.php) file. This separation is made so that if a developer wishes to implement server-side rendering or his own components using the framework's features, he can simply include the APIShift.php file, while the API.php file serves at the head file from which requests to the API controllers are made.
 
 # Architectural Elements
-This title will discuss the different components, connectors and data elements of the famework, their features, interfaces and responsibility. Each element will be desribed by the data elements it affects, which will be discussed in the **Data** subtitle of the element section, and will also be decribed by their interfaces - usually the model/core interface and controller interface in their own **\<Some> Interface** subtitle.
+This title will discuss the different components, connectors and data elements of the famework, their features, interfaces and responsibility. Each element will be desribed by the data elements it affects, which will be discussed in the [**Data**](#data) subtitle, and will also be decribed by their interfaces - usually the model/core interface and controller interface in their own **\<Some> Interface** subtitle.
+
+## Data
+Since we use a data-oriented approach, the guiding elements of our architecture are the data elements themselves. Though our components are separated based on classification which do not relay on data, but the components themselves act as systems working by the program's data.
+
+### Meta-data of data
+Data can come from a lot of sources, e.g. databases and arrays. To access data better, we keep a meta-data representation of the data in the system, this way other components can share and work with data elements in the system more effectively. As we have defined before, our model uses data sources and data entries notations.
+
+#### Database
+* ___data_sources___ (SQL) - Collection of different data sources that the system uses at run-time for different operations.
+  * _id_ - Identification.
+  * _name_ - Name of the data source.
+  * _type_ - ID of the type of a data source.
+* ___data_source_types___ (SQL) - An id-name table representing the different types of data sources: arrays, tables, items/relations (will be discussed later), static_class (a class holding static variables), class_instance (a class instance).
+* ___data_entries___ (SQL) - Collection of the data entries used by the system.
+  * _id_ - Identification.
+  * _name_ - Name of the data entry.
+  * _type_ - ID of the type of a data entry.
+  * _source_ - The source which this entry belong to if present.
+* ___data_entry_types___ (SQL) - An id-name table representing the types of entries, can be either of: array_key, variable, constant (In case of constant the name is considered the value), table_cell.
+
+#### Memory
+The database tables are loaded into cache when the system does its first run, if no cache system is present then the data is loaded during runtime from the database - which requires to make a query, thus effects the performance of the system. That's why we recommend using a cache system. When a value of a data entry is called, it is loaded into run-time using the meta-data about the entry. The system responsible for getting data based on meta-data is [DataManager](#data-manager).
+
+### Session States
+Sessions store data about a client that is accessible throughout the different requests between the client and the server. A simple analogy will be to say that it's somehow like server-side cookies. Sessions are great tools to store a certain "state" about a client when exchanging requests, indicating our program who the client is - is it an admin? a player in our app? a premium user maybe? all these different clients have different restrictions on the functionallity and data they can access.
+
+Each session state has a state structure, indicating how the data about the state is saved, it also needs to know which data entries to take value from to fill them, and who are their children that inherit their properties:
+
+ * __Structure__: A key-value store, in our case in a PHP array.
+ * __Values__: The meta-data about where we get the values in a session state structure to fill in the structure at run-time.
+ * __Children__: Children states inherit and extend the structure and values of the parent state and use the same authorization process but with additional options or restrictions added by the developer. For example a "user" session state can have a "premium" child state that applies to premium users and provides access to more features in your application.
+
+#### Database
+ * ___session_state___ (SQL) - Used to encapsulate and separate session data structures at a given state for different types of sessions.
+   * _id_ - Identifier of the state.
+   * _name_ - Name identifying the state.
+   * _inactive_timeout_ - Timeout untill system disposes of the session user when not active.
+   * _active_timeout_ - Timeout until system disposes the session since whether active or not.
+   * _auth_task_ - Authorization task running the procedure when a user requests a change into this state. A task can be your own function, more on tasks will be discussed later.
+   * _parent_ - id of the parent session.
+ * ___session_state_structures___ (SQL) - Defines the key-value store structure of the session in run-time.
+   * _id_ - Personal identification.
+   * _state_ - Identification of state this entry belongs to.
+   * _key_ - Name of the value the entry is holding.
+   * _entry_ - Identification of the data entry which the value coppied from with when state is changed.
+   * _parent_ - id of the parent entry.
+
+#### Memory
+The current session state is loaded into the `$_SESSION` array in PHP. The meta-data about the different states is stored in the cache under the key `session_states`. If no cache system is present, when when accessing data about session states, it will be loaded directly from the database.
+
+### Tasks
+
+### Languages & Translation
+
+### Items
 
 ## Cache
 The cache is an interface that provides a handler for cache systems that can work with different caches such as Memcached, Redis and APCU, while hiding the implementation details behind a simple get-set interface. The cache system is expressed in the [machine/core/CacheManager.php](machine/core/CacheManager.php) class.
@@ -151,19 +214,6 @@ The cache is an interface that provides a handler for cache systems that can wor
 ## [Data Manager](machine/core/DataManager.php)
 The APIShift frameworks, as defined in the [Definitions](#definitions) section, expresses what is called data entries and data sources, where a source referes to a "pool" of data entries, and an entry refers to a value in our system. Since a source or an entry can be expressed by different mechanisms (e.g. a source can be an array or a database table), the Data Manager provides a simple interface to access and read data entries and sources in the system regardless of their type or origin while hiding the implementation details from the user. This system will be used to simplify work when defining processes and tasks in the system.
 
-### Data
-* ___data_sources___ (SQL) - Collection of different data sources that the system uses at run-time for different operations.
-  * _id_ - Identification.
-  * _name_ - Name of the data source.
-  * _type_ - ID of the type of a data source.
-* ___data_source_types___ (SQL) - An id-name table representing the different types of data sources: arrays, tables, items/relations (will be discussed later), static_class (a class holding static variables), class_instance (a class instance).
-* ___data_entries___ (SQL) - Collection of the data entries used by the system.
-  * _id_ - Identification.
-  * _name_ - Name of the data entry.
-  * _type_ - ID of the type of a data entry.
-  * _source_ - The source which this entry belong to if present.
-* ___data_entry_types___ (SQL) - An id-name table representing the types of entries, can be either of: array_key, variable, constant (In case of constant the name is considered the value), table_cell.
-
 The ___data_entry_types___ and ___data_source_types___ tables are loaded to cache by the `loadDefaults()` in the cache manager, to make types access faster during run-time.
 
 #### Data Access Optimization
@@ -183,30 +233,11 @@ The Data Manager component has 3 levels of access to variables & data when acces
 * `public removeSource($id)` Removes a source from DB.
 
 ## Session States
-Sessions store data with a client that is accessible throughout different requests between the client and the server. A simple analogy will be to say that it's somehow like server-side cookies. Sessions are great tools to store a certain "state" about a client when exchanging requests, indicating our program who the client is - is it an admin? a player in our app? a premium user maybe? all these different clients have different restrictions on the functionallity and data they can access. APIShift allows you to define different session states easily and then assign access rules by these states to data, controllers and methods. The classes that manage the session states are the [core of the SessionState](machine/core/SessionState.php). The [controller interface SessionState](machine/controller/SessionState.php) allows for managing the session through API requests.
+APIShift allows you to define different session states easily and then assign access rules by these states to data, controllers and methods. The classes that manage the session states are the [core of the SessionState](machine/core/SessionState.php). The [controller interface SessionState](machine/controller/SessionState.php) allows for managing the session through API requests.
 
-The core of the SessionState contains the logic and functions that manage the session states, their updates, authorization and communication with the database. The controller of the SessionState provides a interface that a user can use to manipulate the session state - for example change the session on a given request to indicate a login or logout, and more. Each session state has a state structure, indicating how the data about the state is saved, it also needs to know which data entries to take value from to fill them, and who are their children that inherit their properties:
-
- * __Structure__: A key-value store, in our case in a PHP array.
- * __Values__: The values in a session state structure indicate from which data entry to get the values to fill in the structure at run-time.
- * __Children__: Children states inherit and extend the structure and values of the parent state and use the same authorization process but with additional options or restrictions added by the developer. For example a "user" session state can have a "premium" child state that applies to premium users and provides access to more features in your application.
+The core of the SessionState contains the logic and functions that manage the session states, their updates, authorization and communication with the database. The controller of the SessionState provides a interface that a user can use to manipulate the session state - for example change the session on a given request to indicate a login or logout, and more.
 
 To manage session states in your API visit the "Session" tab in the control panel.
-
-### Data
- * ___session_state___ (SQL) - Used to encapsulate and separate session data structures at a given state for different types of sessions.
-   * _id_ - Identifier of the state.
-   * _name_ - Name identifying the state.
-   * _inactive_timeout_ - Timeout untill system disposes of the session user when not active.
-   * _active_timeout_ - Timeout until system disposes the session since whether active or not.
-   * _auth_task_ - Authorization task running the procedure when a user requests a change into this state. A task can be your own function, more on tasks will be discussed later.
-   * _parent_ - id of the parent session.
- * ___session_state_structures___ (SQL) - Defines the key-value store structure of the session in run-time.
-   * _id_ - Personal identification.
-   * _state_ - Identification of state this entry belongs to.
-   * _key_ - Name of the value the entry is holding.
-   * _entry_ - Identification of the data entry which the value coppied from with when state is changed.
-   * _parent_ - id of the parent entry.
 
 ### [Core Interface](machine/core/SessionState.php)
 This interface's functions are all public.

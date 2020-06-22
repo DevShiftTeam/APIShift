@@ -107,7 +107,7 @@
 
                 APIShift.API.request("Admin\\Access\\Controller", "createAccessRule", {
                         type: this.in_edit.type,
-                        rule: this.access_names[this.in_edit.rule],
+                        rule: this.in_edit.type != 'Function' ? this.access_names[this.in_edit.rule] : this.in_edit.rule,
                         controller: this.in_edit.controller,
                         method: this.in_edit.method
                     }, function(response) {
@@ -257,7 +257,8 @@
                                         <v-select @change="getAvailableRulesForType()" v-model="in_edit.type" :items="access_types" label="Authentication type"></v-select>
                                     </v-col>
                                     <v-col cols="12" sm="6" md="6">
-                                        <v-autocomplete v-model="in_edit.rule" :items="access_names" item-text="text" item-value="val" :label="in_edit.type"></v-autocomplete>
+                                        <v-autocomplete v-if="in_edit.type != 'Function'" v-model="in_edit.rule" :items="access_names" item-text="text" item-value="val" :label="in_edit.type"></v-autocomplete>
+                                        <v-text-field v-else v-model="in_edit.rule"  label="Function"></v-text-field>
                                     </v-col>
                                 </v-row>
                             </v-container>

@@ -56,6 +56,11 @@ class Status {
     const INVALID_CONFIG_FILE = 5;
 
     /**
+     * A warning/notice
+     */
+    const WARNING = 6;
+
+    /**
      * Container of the last status output
      */
     private static $output = [ 'status' => Status::SUCCESS, 'data' => "Status haven't changed" ];

@@ -340,7 +340,8 @@ class APIHandler {
             NO_AUTH: 2,
             NOT_INSTALLED: 3,
             DB_CONNECTION_FAILED: 4,
-            INVALID_CONFIG_FILE: 5
+            INVALID_CONFIG_FILE: 5,
+            WARNING: 6
         };
 
         // Map of functions to run on server update loop

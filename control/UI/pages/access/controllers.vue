@@ -104,8 +104,8 @@
                     APIShift.API.notify("Please fill in valid data", 'warning');
                     return;
                 }
-
-                APIShift.API.request("Admin\\Access\\Controller", "createAccessRule", {
+                
+                APIShift.API.request("Admin\\Access\\Controller", this.is_creating ? "createAccessRule" : "editAccessRule", {
                         type: this.in_edit.type,
                         rule: this.in_edit.type != 'Function' ? this.access_names[this.in_edit.rule] : this.in_edit.rule,
                         controller: this.in_edit.controller,
@@ -242,7 +242,7 @@
                 <!-- Edit/Add dialog -->
                 <v-dialog v-if="edit_dialog" v-model="edit_dialog" max-width="500px">
                     <v-card>
-                        <v-card-title><span class="headline">{{ is_creating ? "Add New" : "Edit" }}</span></v-card-title>
+                        <v-card-title><span class="headline">{{ is_creating ? "Create New Rule" : "Edit" }}</span></v-card-title>
 
                         <v-card-text>
                             <v-container>
@@ -266,7 +266,7 @@
 
                         <v-card-actions>
                             <v-spacer></v-spacer>
-                            <v-btn color="primary" text @click="save()">Save</v-btn>
+                            <v-btn color="primary" text @click="save()">{{ is_creating ? "Create" : "Save" }}</v-btn>
                             <v-btn text @click="discard()">Cancel</v-btn>
                         </v-card-actions>
                     </v-card>

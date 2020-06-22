@@ -65,21 +65,17 @@
             },
             getRuleType(rule) {
                 if(rule.name.indexOf("_") == -1) return "Task";
+                if(rule.name == 'state_auth') return "State";
                 let prefix = rule.name.substring(0, rule.name.indexOf("_"));
-                switch(prefix) {
-                    case "function": return "Function";
-                    case "state": return "State";
-                    default: return "Task";
-                }
+                if(prefix == 'function') return "Function";
+                return "Task";
             },
             getRuleName(rule) {
                 if(rule.name.indexOf("_") == -1) return rule.name;
+                if(rule.name == 'state_auth') return rule.input_name.substring(rule.name.indexOf("_") + 1);
                 let prefix = rule.name.substring(0, rule.name.indexOf("_"));
-                switch(prefix) {
-                    case "function": return rule.name.substring(rule.name.indexOf("_") + 1);
-                    case "state": return rule.name.substring(rule.name.indexOf("_") + 1);
-                    default: return rule.name;
-                }
+                if(prefix == 'function') return rule.name.substring(rule.name.indexOf("_") + 1);
+                return rule.name;
             },
             createAccessRule: function () {
                 this.is_creating = true;

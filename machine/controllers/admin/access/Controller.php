@@ -36,8 +36,11 @@ class Controller
     public static function getControllersTasks()
     {
         $res = [];
-        if (DatabaseManager::fetchInto("main", $res, "SELECT * FROM tasks JOIN request_authorization ON tasks.id = request_authorization.task") === false)
-            Status::message(Status::ERROR, "Couldn't retrieve controller tasks");;
+        if (DatabaseManager::fetchInto("main", $res,
+            "SELECT inputs.name as input_name, tasks.*, request_authorization.* FROM tasks
+                JOIN request_authorization ON tasks.id = request_authorization.task
+                JOIN inputs ON request_authorization.input = inputs.id") === false)
+            Status::message(Status::ERROR, "Couldn't retrieve controller tasks");
         Status::message(Status::SUCCESS, $res);
     }
 

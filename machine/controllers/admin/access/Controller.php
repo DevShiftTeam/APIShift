@@ -39,7 +39,7 @@ class Controller
         if (DatabaseManager::fetchInto("main", $res,
             "SELECT inputs.name as input_name, tasks.*, request_authorization.* FROM tasks
                 JOIN request_authorization ON tasks.id = request_authorization.task
-                JOIN inputs ON request_authorization.input = inputs.id") === false)
+                LEFT JOIN inputs ON request_authorization.input = inputs.id") === false)
             Status::message(Status::ERROR, "Couldn't retrieve controller tasks");
         Status::message(Status::SUCCESS, $res);
     }
@@ -99,7 +99,8 @@ class Controller
                 break;
             case "Task":
                 // Check if task exists
-                $check_task = DatabaseManager::query("main", "SELECT * FROM tasks WHERE id = :id", [ 'id' => $_POST['rule']['val'] ]);
+                $check_task = [];
+                DatabaseManager::fetchInto("main", $check_task, "SELECT * FROM tasks WHERE id = :id", [ 'id' => $_POST['rule']['val'] ]);
                 if(!is_array($check_task) || count($check_task) == 0) Status::message(Status::ERROR, "Task wasn't found");
                 // Assign task to controller
                 $result = DatabaseManager::query(
@@ -108,9 +109,10 @@ class Controller
                     [
                         'controller' => $_POST['controller'],
                         'method' => $_POST['method'],
-                        'auth' => $_POST['rule']['val'],
+                        'auth' => $_POST['rule']['val']
                     ]
                 );
+                if (!$result) Status::message(Status::ERROR, "Couldn't create request authorization in DB");
                 break;
             default:
                 Status::message(Status::ERROR, "Unknown rule type, please select a function, state or task.");

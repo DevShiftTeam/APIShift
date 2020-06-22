@@ -187,7 +187,7 @@
                             cahandler.access_names = [];
                             if(response.status == APIShift.API.status_codes.SUCCESS) {
                                 for(key in response.data) {
-                                    cahandler.access_names.push({ text: response.data[key].name, val: key });
+                                    cahandler.access_names.push({ text: response.data[key].name, val: response.data[key].id });
                                 }
                             }
                             else {

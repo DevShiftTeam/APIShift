@@ -187,7 +187,7 @@ class Controller
         if(isset($_POST['controller']) && $_POST['controller'] != $check_rule[0]['controller']) $new_values['controller'] = $_POST['controller'];
         if(isset($_POST['method']) && $_POST['method'] != $check_rule[0]['method']) $new_values['method'] = $_POST['method'];
 
-        if(count($new_values) == 1) Status::message(Status::ERROR, "Nothing to change");
+        if(count($new_values) == 0) Status::message(Status::ERROR, "Nothing to change");
 
         // Create query string dynamically
         $query = "UPDATE request_authorization SET ";

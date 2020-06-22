@@ -77,6 +77,12 @@
                 if(prefix == 'function') return rule.name.substring(rule.name.indexOf("_") + 1);
                 return rule.name;
             },
+            getAccessNameByValue: function(val) {
+                for(let key in this.access_names) {
+                    if(this.access_names[key].val == val) return this.access_names[key];
+                }
+                return null;
+            },
             createAccessRule: function () {
                 this.is_creating = true;
                 this.edit_dialog = true;
@@ -104,11 +110,13 @@
                     APIShift.API.notify("Please fill in valid data", 'warning');
                     return;
                 }
+
+                console.log(this.getAccessNameByValue(this.in_edit.rule));
                 
                 APIShift.API.request("Admin\\Access\\Controller", this.is_creating ? "createAccessRule" : "editAccessRule", {
                         id: this.is_creating ? undefined : this.in_edit.id,
                         type: this.in_edit.type,
-                        rule: this.in_edit.type != 'Function' ? this.access_names[this.in_edit.rule] : this.in_edit.rule,
+                        rule: this.in_edit.type != 'Function' ? this.getAccessNameByValue(this.in_edit.rule) : this.in_edit.rule,
                         controller: this.in_edit.controller,
                         method: this.in_edit.method
                     }, function(response) {
@@ -128,10 +136,13 @@
             },
             editAccessRule: function(access_rule) {
                 this.edit_dialog = true;
-                this.in_edit = Object.assign({}, access_rule);
-                this.in_edit.rule = 0;
-                this.in_edit.type = this.getRuleType(access_rule);
-                this.in_edit.id = access_rule.id;
+                this.in_edit = {
+                    controller: access_rule.controller,
+                    method: access_rule.method,
+                    type: this.getRuleType(access_rule),
+                    rule: 0,
+                    id: access_rule.id
+                }
                 this.getAvailableRulesForType();
             },
             removeAccessRule: function(rule_id) {
@@ -260,7 +271,7 @@
                                     </v-col>
                                     <v-col cols="12" sm="6" md="6">
                                         <v-autocomplete v-if="in_edit.type != 'Function'" v-model="in_edit.rule" :items="access_names" item-text="text" item-value="val" :label="in_edit.type"></v-autocomplete>
-                                        <v-text-field v-else v-model="in_edit.rule"  label="Function"></v-text-field>
+                                        <v-text-field v-else v-model="in_edit.rule" label="Function"></v-text-field>
                                     </v-col>
                                 </v-row>
                             </v-container>

@@ -131,7 +131,8 @@ class Controller
         $new_values = [];
 
         // Check if rule exists
-        $check_rule = DatabaseManager::query("main", "SELECT * FROM request_authorization WHERE id = :id", [ 'id' => $_POST['id'] ]);
+        $check_rule = [];
+        DatabaseManager::fetchInto("main", $check_rule, "SELECT * FROM request_authorization WHERE id = :id", [ 'id' => $_POST['id'] ]);
         if(!is_array($check_rule) || count($check_rule) == 0) Status::message(Status::ERROR, "Rule ID not found");
 
         // Check if data is new
@@ -184,20 +185,20 @@ class Controller
         if(isset($_POST['controller']) && $_POST['controller'] != $check_rule[0]['controller']) $new_values['controller'] = $_POST['controller'];
         if(isset($_POST['method']) && $_POST['method'] != $check_rule[0]['method']) $new_values['method'] = $_POST['method'];
 
-        if(count($new_values) == 0) Status::message(Status::ERROR, "Nothing to change");
+        if(count($new_values) == 1) Status::message(Status::ERROR, "Nothing to change");
 
         // Create query string dynamically
-        $query = "UPDATE request_authorization SET";
-        foreach ($new_values as $name => $value) {
-            if (gettype($value) != 'string') continue;
-            $query .= $name . " = :" . $name . ",";
-        }
-        $query = mb_strimwidth($query, 0, strlen($query) - 2); // Get rid of last letter
+        $query = "UPDATE request_authorization SET ";
+        foreach ($new_values as $name => $value) $query .= "`" . $name . "` = :" . $name . ", ";
+        $query = mb_strimwidth($query, 0, strlen($query) - 2); // Get rid of last comma
         $query .= " WHERE id = :id";
+        $new_values['id'] = $_POST['id'];
 
-        // Updatein database
+        // Update in database
         $result = DatabaseManager::query("main", $query, $new_values);
         if (!$result) Status::message(Status::ERROR, "Couldn't edit request authorization in DB");
+
+        Status::message(Status::SUCCESS, "Edited Successfully!");
     }
 
     /**

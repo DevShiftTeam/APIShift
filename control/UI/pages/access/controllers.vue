@@ -106,6 +106,7 @@
                 }
                 
                 APIShift.API.request("Admin\\Access\\Controller", this.is_creating ? "createAccessRule" : "editAccessRule", {
+                        id: this.is_creating ? undefined : this.in_edit.id,
                         type: this.in_edit.type,
                         rule: this.in_edit.type != 'Function' ? this.access_names[this.in_edit.rule] : this.in_edit.rule,
                         controller: this.in_edit.controller,
@@ -128,8 +129,9 @@
             editAccessRule: function(access_rule) {
                 this.edit_dialog = true;
                 this.in_edit = Object.assign({}, access_rule);
-                this.in_edit.rule = { text: this.getRuleName(access_rule), val: 0 };
+                this.in_edit.rule = 0;
                 this.in_edit.type = this.getRuleType(access_rule);
+                this.in_edit.id = access_rule.id;
                 this.getAvailableRulesForType();
             },
             removeAccessRule: function(rule_id) {

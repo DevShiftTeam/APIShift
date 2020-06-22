@@ -89,13 +89,27 @@ class Controller
                 if (!$result) Status::message(Status::ERROR, "Couldn't create request authorization in DB");
                 break;
             case "Function":
-                // TODO: check if function exists
-                // TODO: add function as task
-                // TODO: assign task to controller
+                // Check if function exists
+                // if(!is_callable($_POST['rule'])) Status::message(Status::ERROR, "Function not found");
+                // TODO: Add function as task if not exists
+                // TODO: Create function inputs as instructed
+                // TODO: Assign task to controller
+                Status::message(Status::ERROR, "Comming Soon!");
                 break;
             case "Task":
-                // TODO: check if task exists
-                // TODO: assign task to controller
+                // Check if task exists
+                $check_task = DatabaseManager::query("main", "SELECT * FROM tasks WHERE id = :id", [ 'id' => $_POST['rule']['val'] ]);
+                if(!is_array($check_task) || count($check_task) == 0) Status::message(Status::ERROR, "Task wasn't found");
+                // Assign task to controller
+                $result = DatabaseManager::query(
+                    "main",
+                    "INSERT INTO request_authorization (controller, method, task, input) VALUES (:controller, :method, :auth, NULL)",
+                    [
+                        'controller' => $_POST['controller'],
+                        'method' => $_POST['method'],
+                        'auth' => $_POST['rule']['val'],
+                    ]
+                );
                 break;
             default:
                 Status::message(Status::ERROR, "Unknown rule type, please select a function, state or task.");

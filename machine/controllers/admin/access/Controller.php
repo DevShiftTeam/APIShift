@@ -91,8 +91,22 @@ class Controller
                 break;
             case "Function":
                 // Check if function exists
-                // if(!is_callable($_POST['rule'])) Status::message(Status::ERROR, "Function not found");
-                // TODO: Add function as task if not exists
+                if(!is_callable($_POST['rule'])) Status::message(Status::ERROR, "Function not found");
+                
+                // Add function as task if not exists
+                $name = 'function_' . $_POST['rule'];
+                $task_res = [];
+                $input_id = 0;
+
+                DatabaseManager::fetchInto("main", $task_res, "SELECT id FROM tasks WHERE name = :name", ['name' => $name]);
+                if (!is_array($task_res) || count($task_res) == 0) {
+                    DatabaseManager::query(
+                        "main",
+                        "INSERT INTO connections (connection_type, name, from_type, `from`, to_type, `to`) VALUES (4, :name, 0, 0, 0, 0)",
+                        ['name' => $name]
+                    );
+
+                }
                 // TODO: Create function inputs as instructed
                 // TODO: Assign task to controller
                 Status::message(Status::ERROR, "Comming Soon!");
@@ -118,6 +132,7 @@ class Controller
                 Status::message(Status::ERROR, "Unknown rule type, please select a function, state or task.");
         }
 
+        CacheManager::getTable('request_authorization', true); // Refresh cache
         Status::message(Status::SUCCESS, "Created Successfully!");
     }
 
@@ -133,9 +148,9 @@ class Controller
         $new_values = [];
 
         // Check if rule exists
-        $check_rule = [];
-        DatabaseManager::fetchInto("main", $check_rule, "SELECT * FROM request_authorization WHERE id = :id", [ 'id' => $_POST['id'] ]);
-        if(!is_array($check_rule) || count($check_rule) == 0) Status::message(Status::ERROR, "Rule ID not found");
+        $check_rule = CacheManager::get('request_authorization');
+        if(!isset($check_rule[$_POST['id']])) Status::message(Status::ERROR, "Rule ID not found");
+        $check_rule = $check_rule[$_POST['id']];
 
         // Check if data is new
         if(isset($_POST['type'])) {
@@ -180,12 +195,12 @@ class Controller
             }
 
             // Unset input values if they are already set
-            if($new_values['input'] == $check_rule[0]['input']) unset($new_values['input']);
+            if($new_values['input'] == $check_rule['input']) unset($new_values['input']);
         }
 
         // Add controller and method if they are set
-        if(isset($_POST['controller']) && $_POST['controller'] != $check_rule[0]['controller']) $new_values['controller'] = $_POST['controller'];
-        if(isset($_POST['method']) && $_POST['method'] != $check_rule[0]['method']) $new_values['method'] = $_POST['method'];
+        if(isset($_POST['controller']) && $_POST['controller'] != $check_rule['controller']) $new_values['controller'] = $_POST['controller'];
+        if(isset($_POST['method']) && $_POST['method'] != $check_rule['method']) $new_values['method'] = $_POST['method'];
 
         if(count($new_values) == 0) Status::message(Status::ERROR, "Nothing to change");
 
@@ -200,6 +215,7 @@ class Controller
         $result = DatabaseManager::query("main", $query, $new_values);
         if (!$result) Status::message(Status::ERROR, "Couldn't edit request authorization in DB");
 
+        CacheManager::getTable('request_authorization', true); // Refresh cache
         Status::message(Status::SUCCESS, "Edited Successfully!");
     }
 

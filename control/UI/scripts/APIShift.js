@@ -138,6 +138,7 @@ class APIShift {
             APIShift.API.getComponent("footer");
             APIShift.API.getComponent("navigator");
             APIShift.API.getComponent("loader");
+            APIShift.API.getMixin('access/rule')
             resolve(0);
         });
     };

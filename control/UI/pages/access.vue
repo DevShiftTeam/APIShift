@@ -37,15 +37,7 @@
         },
         beforeRouteUpdate (to, from, next) {
             if(to.path == '/access' || to.path == '/access/') this.is_main_page = true;
-            else {
-                this.is_main_page = false;
-                var mixin_check = APIShift.API.getMixin('access/rule');
-                if(mixin_check.then && typeof mixin_check.then === 'function') {
-                    mixin_check.then(function() {
-                        next();
-                    });
-                }
-            }
+            else this.is_main_page = false;
             next();
         },
         methods: {

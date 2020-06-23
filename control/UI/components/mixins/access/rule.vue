@@ -30,7 +30,6 @@
                 access_names: []
             }
         },
-        created() { },
         methods: {
             getRuleType(rule) {
                 if(rule.name.indexOf("_") == -1) return "Task";

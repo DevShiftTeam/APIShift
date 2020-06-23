@@ -195,7 +195,7 @@
                                         <v-text-field v-model="in_edit.method"  label="Method"></v-text-field>
                                     </v-col>
                                     <v-col cols="12" sm="6" md="6">
-                                        <v-select @change="getAvailableRulesForType(this.in_edit.type)" v-model="in_edit.type" :items="access_types" label="Authentication type"></v-select>
+                                        <v-select @change="getAvailableRulesForType(in_edit.type)" v-model="in_edit.type" :items="access_types" label="Authentication type"></v-select>
                                     </v-col>
                                     <v-col cols="12" sm="6" md="6">
                                         <v-autocomplete v-if="in_edit.type != 'Function'" v-model="in_edit.rule" :items="access_names" item-text="text" item-value="val" :label="in_edit.type"></v-autocomplete>

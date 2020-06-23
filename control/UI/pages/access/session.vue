@@ -84,7 +84,7 @@
                     else {
                         APIShift.API.notify(response.data, 'error');
                     }
-                    sahandler.updateControllerTasks();
+                    sahandler.updateSessionTasks();
                 });
 
                 this.edit_dialog = false;

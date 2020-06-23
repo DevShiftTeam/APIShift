@@ -37,7 +37,7 @@ class Controller
     {
         $res = [];
         if (DatabaseManager::fetchInto("main", $res,
-            "SELECT inputs.name as input_name, tasks.*, request_authorization.* FROM tasks
+            "SELECT inputs.name as input_name, tasks.name as task_name, tasks.*, request_authorization.* FROM tasks
                 JOIN request_authorization ON tasks.id = request_authorization.task
                 LEFT JOIN inputs ON request_authorization.input = inputs.id") === false)
             Status::message(Status::ERROR, "Couldn't retrieve controller tasks");

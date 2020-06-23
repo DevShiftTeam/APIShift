@@ -30,6 +30,20 @@ use APIShift\Core\Status;
  */
 class Session {
     /**
+     * Returns all the sessions and their access tasks
+     */
+    public static function getSessionTasks()
+    {
+        $res = [];
+        if (DatabaseManager::fetchInto("main", $res,
+            "SELECT inputs.name as input_name, tasks.name as task_name, tasks.*, session_states.* FROM tasks
+                JOIN session_states ON tasks.id = session_states.auth_task
+                LEFT JOIN inputs ON session_states.auth_input = inputs.id") === false)
+            Status::message(Status::ERROR, "Couldn't retrieve session tasks");
+        Status::message(Status::SUCCESS, $res);
+    }
+
+    /**
      * Remove an access rule.
      * The structure of the request should like like this:
      * [

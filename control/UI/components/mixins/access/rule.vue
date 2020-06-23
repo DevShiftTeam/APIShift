@@ -32,24 +32,25 @@
         },
         methods: {
             getRuleType(rule) {
-                if(rule.name.indexOf("_") == -1) return "Task";
-                if(rule.name == 'state_auth') return "State";
-                let prefix = rule.name.substring(0, rule.name.indexOf("_"));
+                if(rule.task_name.indexOf("_") == -1) return "Task";
+                if(rule.task_name == 'state_auth') return "State";
+                let prefix = rule.task_name.substring(0, rule.task_name.indexOf("_"));
                 if(prefix == 'function') return "Function";
                 return "Task";
             },
             getRuleName(rule) {
-                if(rule.name.indexOf("_") == -1) return rule.name;
-                if(rule.name == 'state_auth') return rule.input_name.substring(rule.name.indexOf("_") + 1);
-                let prefix = rule.name.substring(0, rule.name.indexOf("_"));
-                if(prefix == 'function') return rule.name.substring(rule.name.indexOf("_") + 1);
-                return rule.name;
+                if(rule.task_name.indexOf("_") == -1) return rule.task_name;
+                if(rule.task_name == 'state_auth') return rule.input_name.substring(rule.task_name.indexOf("_") + 1);
+                let prefix = rule.task_name.substring(0, rule.task_name.indexOf("_"));
+                if(prefix == 'function') return rule.task_name.substring(rule.task_name.indexOf("_") + 1);
+                return rule.task_name;
             },
             getAccessNameByValue: function(val) {
                 for(let key in this.access_names) if(this.access_names[key].val == val) return this.access_names[key];
                 return null;
             },
             getAvailableRulesForType(type) {
+                let handler = this;
                 switch(type) {
                     case "Function":
                         // Get all available functions
@@ -58,9 +59,9 @@
                     case "State":
                         // Get all available states
                         APIShift.API.request("Admin\\SessionState", "getAllSessionStates", {}, function(response) {
-                            cahandler.access_names = [];
+                            handler.access_names = [];
                             if(response.status == APIShift.API.status_codes.SUCCESS) {
-                                cahandler.access_names.push({ text: "DEFAULT_VIEWER", val: 0 }); // Add default state
+                                handler.access_names.push({ text: "DEFAULT_VIEWER", val: 0 }); // Add default state
                                 for(key in response.data) {
                                     let current = response.data[key];
                                     let name = response.data[key].name;
@@ -70,7 +71,7 @@
                                         current = response.data[current.parent];
                                     }
 
-                                    cahandler.access_names.push({ text: name, val: key});
+                                    handler.access_names.push({ text: name, val: key});
                                 }
                             }
                             else {
@@ -81,10 +82,10 @@
                     default:
                         // Get all available tasks
                         APIShift.API.request("Admin\\Access\\Main", "getAllTasks", {}, function(response) {
-                            cahandler.access_names = [];
+                            handler.access_names = [];
                             if(response.status == APIShift.API.status_codes.SUCCESS) {
                                 for(key in response.data) {
-                                    cahandler.access_names.push({ text: response.data[key].name, val: response.data[key].id });
+                                    handler.access_names.push({ text: response.data[key].name, val: response.data[key].id });
                                 }
                             }
                             else {

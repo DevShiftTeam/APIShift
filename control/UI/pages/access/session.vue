@@ -20,15 +20,10 @@
      */
 
     module.exports = {
+        mixins: [APIShift.API.getMixin('access/rule')],
         data() {
             return {
-                controller_access_list: [],
-                access_types: [
-                    "Function",
-                    "State",
-                    "Task",
-                ],
-                access_names: [],
+                sessions_access_list: [],
                 search: '',
                 loader: {
                     visible: false,
@@ -36,66 +31,36 @@
                     processes: 0
                 },
                 headers: [
-                    { text: 'Name', value: 'name', },
-                    { text: 'Authorization Task Name', value: 'auth' },
+                    { text: 'State Name', value: 'name', },
+                    { text: 'Authorization Task', value: 'task_name' },
                     { text: 'Actions', value: 'actions', sortable: false }
                 ],
                 in_edit: null,
-                is_creating: false,
                 delete_dialog: false,
                 edit_dialog: false,
                 discard_dialog: false
             }
         },
         created() {
-            APIShift.Loader.changeLoader("access_controllers", this.loader);
-            window.cahandler = this;
-            this.updateControllerTasks();            
+            APIShift.Loader.changeLoader("access_sessions", this.loader);
+            window.sahandler = this;
+            this.updateSessionTasks();            
         },
         methods: {
-            updateControllerTasks: function() {
+            updateSessionTasks: function() {
                 APIShift.API.request("Admin\\Access\\Session", "getSessionTasks", {}, function (response) {
                     if(response.status == APIShift.API.status_codes.SUCCESS) {
-                        cahandler.controller_access_list = Object.assign([], response.data);
+                        sahandler.sessions_access_list = Object.assign([], response.data);
                     } else {
                         APIShift.API.notify(response.data, "error");
                     }
                 }, true);
             },
-            getRuleType(rule) {
-                if(rule.name.indexOf("_") == -1) return "Task";
-                if(rule.name == 'state_auth') return "State";
-                let prefix = rule.name.substring(0, rule.name.indexOf("_"));
-                if(prefix == 'function') return "Function";
-                return "Task";
-            },
-            getRuleName(rule) {
-                if(rule.name.indexOf("_") == -1) return rule.name;
-                if(rule.name == 'state_auth') return rule.input_name.substring(rule.name.indexOf("_") + 1);
-                let prefix = rule.name.substring(0, rule.name.indexOf("_"));
-                if(prefix == 'function') return rule.name.substring(rule.name.indexOf("_") + 1);
-                return rule.name;
-            },
-            getAccessNameByValue: function(val) {
-                for(let key in this.access_names) if(this.access_names[key].val == val) return this.access_names[key];
-                return null;
-            },
-            createAccessRule: function () {
-                this.is_creating = true;
-                this.edit_dialog = true;
-                this.in_edit = {
-                    controller: '',
-                    method: '',
-                    type: '',
-                    rule: 0
-                }
-            },
             discard: function() {
-                if(this.is_creating && !this.discard_dialog) {
+                if(!this.discard_dialog) {
                     this.discard_dialog = true;
                     return;
                 }
-                if(this.is_creating) this.is_creating = false;
                 this.edit_dialog = false;
                 this.discard_dialog = false;
                 this.access_names = []; // Empty access names
@@ -108,12 +73,10 @@
                     return;
                 }
                 
-                APIShift.API.request("Admin\\Access\\Session", this.is_creating ? "createAccessRule" : "editAccessRule", {
-                        id: this.is_creating ? undefined : this.in_edit.id,
+                APIShift.API.request("Admin\\Access\\Session", "editAccessRule", {
+                        id: this.in_edit.id,
                         type: this.in_edit.type,
-                        rule: this.in_edit.type != 'Function' ? this.getAccessNameByValue(this.in_edit.rule) : this.in_edit.rule,
-                        controller: this.in_edit.controller,
-                        method: this.in_edit.method
+                        rule: this.in_edit.type != 'Function' ? this.getAccessNameByValue(this.in_edit.rule) : this.in_edit.rule
                     }, function(response) {
                     if(response.status === APIShift.API.status_codes.SUCCESS) {
                         APIShift.API.notify(response.data, 'success');
@@ -121,10 +84,9 @@
                     else {
                         APIShift.API.notify(response.data, 'error');
                     }
-                    cahandler.updateControllerTasks();
+                    sahandler.updateControllerTasks();
                 });
 
-                this.is_creating = false;
                 this.edit_dialog = false;
                 this.access_names = []; // Empty access names
                 return;
@@ -132,8 +94,6 @@
             editAccessRule: function(access_rule) {
                 this.edit_dialog = true;
                 this.in_edit = {
-                    controller: access_rule.controller,
-                    method: access_rule.method,
                     type: this.getRuleType(access_rule),
                     rule: 0,
                     id: access_rule.id
@@ -142,66 +102,21 @@
             },
             removeAccessRule: function(rule_id) {
                 if(!this.delete_dialog) {
-                    this.in_edit = Object.assign({}, this.controller_access_list.find(r => r.id === rule_id));
+                    this.in_edit = Object.assign({}, this.sessions_access_list.find(r => r.id === rule_id));
                     this.delete_dialog = true;
                     return;
                 }
 
-                APIShift.API.request("Admin\\Access\\Controller", "removeAccessRule", { id: this.in_edit.id }, function(response) {
+                APIShift.API.request("Admin\\Access\\Session", "removeAccessRule", { id: this.in_edit.id }, function(response) {
                     if(response.status === APIShift.API.status_codes.SUCCESS) {
                         APIShift.API.notify(response.data, 'success');
                     }
                     else {
                         APIShift.API.notify(response.data, 'error');
                     }
-                    cahandler.updateControllerTasks();
+                    sahandler.updateSessionTasks();
                 });
                 this.delete_dialog = false;
-            },
-            getAvailableRulesForType() {
-                switch(this.in_edit.type) {
-                    case "Function":
-                        // Get all available functions
-                        this.access_names = [];
-                        break;
-                    case "State":
-                        // Get all available states
-                        APIShift.API.request("Admin\\SessionState", "getAllSessionStates", {}, function(response) {
-                            cahandler.access_names = [];
-                            if(response.status == APIShift.API.status_codes.SUCCESS) {
-                                cahandler.access_names.push({ text: "DEFAULT_VIEWER", val: 0 }); // Add default state
-                                for(key in response.data) {
-                                    let current = response.data[key];
-                                    let name = response.data[key].name;
-
-                                    while(current.parent != 0) {
-                                        name = response.data[current.parent].name + "/" + name;
-                                        current = response.data[current.parent];
-                                    }
-
-                                    cahandler.access_names.push({ text: name, val: key});
-                                }
-                            }
-                            else {
-                                APIShift.API.notify(response.data, 'error');
-                            }
-                        });
-                        break;
-                    default:
-                        // Get all available tasks
-                        APIShift.API.request("Admin\\Access\\Main", "getAllTasks", {}, function(response) {
-                            cahandler.access_names = [];
-                            if(response.status == APIShift.API.status_codes.SUCCESS) {
-                                for(key in response.data) {
-                                    cahandler.access_names.push({ text: response.data[key].name, val: response.data[key].id });
-                                }
-                            }
-                            else {
-                                APIShift.API.notify(response.data, 'error');
-                            }
-                        });
-                        break;
-                }
             }
         }
     };
@@ -211,7 +126,7 @@
         <v-data-table
             class="mx-auto ca_table" elevation-2 max-height="75%"
             :headers="headers"
-            :items="controller_access_list"
+            :items="sessions_access_list"
             :search="search">
             <template v-slot:top>
                 <v-app-bar>
@@ -235,34 +150,18 @@
                         :loading-text="loader.message"
                         hide-details></v-text-field>
                     <v-spacer></v-spacer>
-                    <v-tooltip top>
-                        <template #activator="{ on }">
-                            <v-btn icon v-on="on" @click="createAccessRule()">
-                                <v-icon v-if="is_creating">mdi-close-circle</v-icon>
-                                <v-icon v-else>mdi-plus-circle</v-icon>
-                            </v-btn>
-                        </template>
-                        <span v-if="is_creating">Discard new session state</span>
-                        <span v-else>Add new session state</span>
-                    </v-tooltip>
                 </v-app-bar>
 
                 <!-- Edit/Add dialog -->
                 <v-dialog v-if="edit_dialog" v-model="edit_dialog" max-width="500px">
                     <v-card>
-                        <v-card-title><span class="headline">{{ is_creating ? "Create New Rule" : "Edit" }}</span></v-card-title>
+                        <v-card-title><span class="headline">{{ "Edit" }}</span></v-card-title>
 
                         <v-card-text>
                             <v-container>
                                 <v-row>
                                     <v-col cols="12" sm="6" md="6">
-                                        <v-text-field v-model="in_edit.controller" label="Controller"></v-text-field>
-                                    </v-col>
-                                    <v-col cols="12" sm="6" md="6">
-                                        <v-text-field v-model="in_edit.method"  label="Method"></v-text-field>
-                                    </v-col>
-                                    <v-col cols="12" sm="6" md="6">
-                                        <v-select @change="getAvailableRulesForType()" v-model="in_edit.type" :items="access_types" label="Authentication type"></v-select>
+                                        <v-select @change="getAvailableRulesForType(in_edit.type)" v-model="in_edit.type" :items="access_types" label="Authentication type"></v-select>
                                     </v-col>
                                     <v-col cols="12" sm="6" md="6">
                                         <v-autocomplete v-if="in_edit.type != 'Function'" v-model="in_edit.rule" :items="access_names" item-text="text" item-value="val" :label="in_edit.type"></v-autocomplete>
@@ -274,7 +173,7 @@
 
                         <v-card-actions>
                             <v-spacer></v-spacer>
-                            <v-btn color="primary" text @click="save()">{{ is_creating ? "Create" : "Save" }}</v-btn>
+                            <v-btn color="primary" text @click="save()">{{ "Save" }}</v-btn>
                             <v-btn text @click="discard()">Cancel</v-btn>
                         </v-card-actions>
                     </v-card>
@@ -297,7 +196,7 @@
                 </v-dialog>
             </template>
 
-            <template v-slot:item.name="{ item }">
+            <template v-slot:item.task_name="{ item }">
                 <v-chip>{{ getRuleType(item) }}</v-chip>
                 <span>{{ getRuleName(item) }}</span>
             </template>

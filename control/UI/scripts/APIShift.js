@@ -485,7 +485,7 @@ class APIHandler {
     }
 
     /**
-     * Get full path of the page
+     * Get page vue element
      * @param {string} page_name Page name to get path to
      */
     getPage(page_name) {
@@ -494,12 +494,26 @@ class APIHandler {
     }
 
     /**
-     * Get full path of the component
+     * Get component page element
      * @param {string} component_name Page name to get path to
      */
     getComponent(component_name) {
         if(APIShift.components[component_name] === undefined) APIShift.components[component_name] = httpVueLoader("UI/components/" + component_name + ".vue");
         return APIShift.components[component_name];
+    }
+
+    /**
+     * Load a mixin object and return it
+     * @param {string} mixin_name Name of the mixin to add
+     */
+    getMixin(mixin_name) {
+        if(APIShift.mixins[mixin_name] === undefined) {
+            // Load mixin as object
+            return httpVueLoader.getObject("UI/components/mixins/" + mixin_name + ".vue")().then(function(obj) {
+                APIShift.mixins[mixin_name] = obj;
+            });
+        }
+        return APIShift.mixins[mixin_name];
     }
 
     hasOwnProperty(obj, prop) {
@@ -522,6 +536,7 @@ APIShift.components = {};
 APIShift.load_components = true;
 APIShift.logged_in = false;
 APIShift.installed = true;
+APIShift.mixins = {};
 /**
  * Helpers
  */

@@ -20,15 +20,10 @@
      */
 
     module.exports = {
+        mixins: [APIShift.API.getMixin('access/rule')],
         data() {
             return {
                 controller_access_list: [],
-                access_types: [
-                    "Function",
-                    "State",
-                    "Task",
-                ],
-                access_names: [],
                 search: '',
                 loader: {
                     visible: false,
@@ -63,26 +58,6 @@
                     }
                 }, true);
             },
-            getRuleType(rule) {
-                if(rule.name.indexOf("_") == -1) return "Task";
-                if(rule.name == 'state_auth') return "State";
-                let prefix = rule.name.substring(0, rule.name.indexOf("_"));
-                if(prefix == 'function') return "Function";
-                return "Task";
-            },
-            getRuleName(rule) {
-                if(rule.name.indexOf("_") == -1) return rule.name;
-                if(rule.name == 'state_auth') return rule.input_name.substring(rule.name.indexOf("_") + 1);
-                let prefix = rule.name.substring(0, rule.name.indexOf("_"));
-                if(prefix == 'function') return rule.name.substring(rule.name.indexOf("_") + 1);
-                return rule.name;
-            },
-            getAccessNameByValue: function(val) {
-                for(let key in this.access_names) {
-                    if(this.access_names[key].val == val) return this.access_names[key];
-                }
-                return null;
-            },
             createAccessRule: function () {
                 this.is_creating = true;
                 this.edit_dialog = true;
@@ -110,8 +85,6 @@
                     APIShift.API.notify("Please fill in valid data", 'warning');
                     return;
                 }
-
-                console.log(this.getAccessNameByValue(this.in_edit.rule));
                 
                 APIShift.API.request("Admin\\Access\\Controller", this.is_creating ? "createAccessRule" : "editAccessRule", {
                         id: this.is_creating ? undefined : this.in_edit.id,
@@ -143,7 +116,7 @@
                     rule: 0,
                     id: access_rule.id
                 }
-                this.getAvailableRulesForType();
+                this.getAvailableRulesForType(this.in_edit.type);
             },
             removeAccessRule: function(rule_id) {
                 if(!this.delete_dialog) {
@@ -162,51 +135,6 @@
                     cahandler.updateControllerTasks();
                 });
                 this.delete_dialog = false;
-            },
-            getAvailableRulesForType() {
-                switch(this.in_edit.type) {
-                    case "Function":
-                        // Get all available functions
-                        this.access_names = [];
-                        break;
-                    case "State":
-                        // Get all available states
-                        APIShift.API.request("Admin\\SessionState", "getAllSessionStates", {}, function(response) {
-                            cahandler.access_names = [];
-                            if(response.status == APIShift.API.status_codes.SUCCESS) {
-                                cahandler.access_names.push({ text: "DEFAULT_VIEWER", val: 0 }); // Add default state
-                                for(key in response.data) {
-                                    let current = response.data[key];
-                                    let name = response.data[key].name;
-
-                                    while(current.parent != 0) {
-                                        name = response.data[current.parent].name + "/" + name;
-                                        current = response.data[current.parent];
-                                    }
-
-                                    cahandler.access_names.push({ text: name, val: key});
-                                }
-                            }
-                            else {
-                                APIShift.API.notify(response.data, 'error');
-                            }
-                        });
-                        break;
-                    default:
-                        // Get all available tasks
-                        APIShift.API.request("Admin\\Access\\Main", "getAllTasks", {}, function(response) {
-                            cahandler.access_names = [];
-                            if(response.status == APIShift.API.status_codes.SUCCESS) {
-                                for(key in response.data) {
-                                    cahandler.access_names.push({ text: response.data[key].name, val: response.data[key].id });
-                                }
-                            }
-                            else {
-                                APIShift.API.notify(response.data, 'error');
-                            }
-                        });
-                        break;
-                }
             }
         }
     };
@@ -267,7 +195,7 @@
                                         <v-text-field v-model="in_edit.method"  label="Method"></v-text-field>
                                     </v-col>
                                     <v-col cols="12" sm="6" md="6">
-                                        <v-select @change="getAvailableRulesForType()" v-model="in_edit.type" :items="access_types" label="Authentication type"></v-select>
+                                        <v-select @change="getAvailableRulesForType(this.in_edit.type)" v-model="in_edit.type" :items="access_types" label="Authentication type"></v-select>
                                     </v-col>
                                     <v-col cols="12" sm="6" md="6">
                                         <v-autocomplete v-if="in_edit.type != 'Function'" v-model="in_edit.rule" :items="access_names" item-text="text" item-value="val" :label="in_edit.type"></v-autocomplete>

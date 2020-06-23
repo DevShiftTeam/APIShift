@@ -404,6 +404,17 @@
     };
 
 
+    httpVueLoader.getObject = function(url, name) {
+        return function () {
+            return new Component(name).load(url)
+                .then(function(component) {
+                    component.script.compile();
+                    return component.script !== null ? component.script.module.exports : {};
+                });
+        }
+    }
+
+
     httpVueLoader.register = function (Vue, url) {
 
         var comp = parseComponentURL(url);

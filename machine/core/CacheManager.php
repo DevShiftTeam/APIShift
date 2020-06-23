@@ -85,7 +85,9 @@
         self::getTable('session_states', $refresh);
         self::getTable('statuses', $refresh);
         self::getTable('data_source_types', $refresh);
+        self::getTable('data_sources', $refresh);
         self::getTable('data_entry_types', $refresh);
+        self::getTable('data_entries', $refresh);
         self::getTable('connection_types', $refresh);
         self::getTable('connection_node_types', $refresh);
         self::getTable('request_authorization', $refresh);

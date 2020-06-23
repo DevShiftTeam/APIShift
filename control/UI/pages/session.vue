@@ -87,7 +87,7 @@
                 // Add next ID
                 this.in_edit = Number.parseInt(biggest) + 1;
                 this.states_collection[this.in_edit] = {
-                    name: 'new' + this.in_edit,
+                    name: 'new' + (Object.keys(this.states_collection).length + 1),
                     active_timeout: 0,
                     inactive_timeout: 0,
                     parent: this.current_parent
@@ -180,7 +180,13 @@
                 this.discard_dialog = false;
             },
             deleteState: function(id) {
-                APIShift.API.request("Admin\\SessionState", "removeSessionState", { 'id' : id }, function(response) {
+                if(!this.delete_dialog) {
+                    this.in_edit = id;
+                    this.delete_dialog = true;
+                    return;
+                }
+
+                APIShift.API.request("Admin\\SessionState", "removeSessionState", { 'id' : this.in_edit }, function(response) {
                     if(response.status == true) {
                         APIShift.API.notify(response.data, 'success');
                     }
@@ -268,7 +274,7 @@
                                         <!-- Remove state dialog & trigger -->
                                         <v-tooltip top>
                                             <template #activator="{ on }">
-                                                <v-btn icon v-on="on" @click="delete_dialog = true" :disabled="(key == in_edit && adding_state) || (in_edit != key && in_edit != 0)">
+                                                <v-btn icon v-on="on" @click="deleteState(key)" :disabled="(key == in_edit && adding_state) || (in_edit != key && in_edit != 0)">
                                                     <v-icon>mdi-minus-circle</v-icon>
                                                 </v-btn>
                                             </template>
@@ -283,7 +289,7 @@
                                                 <v-divider></v-divider>
                                                 <v-card-actions>
                                                     <v-spacer></v-spacer>
-                                                    <v-btn color="primary" text @click="deleteState(key)">Remove</v-btn>
+                                                    <v-btn color="primary" text @click="deleteState()">Remove</v-btn>
                                                     <v-btn text @click="delete_dialog = false">Cancel</v-btn>
                                                 </v-card-actions>
                                             </v-card>

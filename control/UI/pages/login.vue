@@ -126,9 +126,9 @@
                         APIShift.Loader.load((resolve, reject) => {
                             APIShift.logged_in = true;
                             app.$router.push("/main");
-                            app.app_loader = APIShift.components["loader"];
-                            app.app_navigator = APIShift.components["navigator"];
-                            app.app_footer = APIShift.components["footer"];
+                            app.app_loader = APIShift.API.getComponent("loader");
+                            app.app_navigator = APIShift.API.getComponent("navigator");
+                            app.app_footer = APIShift.API.getComponent("footer");
                             resolve(0);
                         });
                     }

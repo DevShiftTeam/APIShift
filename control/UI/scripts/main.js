@@ -50,7 +50,7 @@ window.app = new Vue({
         
         // Link components to apishift
         APIShift.Loader.load((resolve, reject) => {
-            app.app_notifications = APIShift.components["notifications"];
+            app.app_notifications = APIShift.API.getComponent("notifications");
             resolve(0);
         });
 
@@ -71,9 +71,9 @@ window.app = new Vue({
 
             //  Don't load other components if system isn't installed
             if(APIShift.load_components) {
-                app.app_loader = APIShift.components["loader"];
-                app.app_navigator = APIShift.components["navigator"];
-                app.app_footer = APIShift.components["footer"];
+                app.app_loader = APIShift.API.getComponent("loader");
+                app.app_navigator = APIShift.API.getComponent("navigator");
+                app.app_footer = APIShift.API.getComponent("footer");
             }
 
             // Navigation gaurd for control panel

@@ -56,7 +56,7 @@ class APIShift {
             if (location.pathname.indexOf("/control") == 0) {
                 APIShift.admin_mode = true;
                 // Load default components
-                APIShift.components['notifications'] = httpVueLoader(APIShift.API.getComponent("notifications"));
+                APIShift.API.getComponent("notifications");
             }
             resolve(0);
         });
@@ -79,7 +79,7 @@ class APIShift {
                     else {
                         APIShift.admin_routes.push({
                             path: '/installer',
-                            component: httpVueLoader(APIShift.API.getPage("installer"))
+                            component: APIShift.API.getPage("installer")
                         });
                         APIShift.installed = false; // Don't continue loading system if not installed
                     }
@@ -108,11 +108,11 @@ class APIShift {
             // Load default pages
             APIShift.admin_routes.push({
                 path: '/main',
-                component: httpVueLoader(APIShift.API.getPage("main"))
+                component: APIShift.API.getPage("main")
             });
             APIShift.admin_routes.push({
                 path: '/login',
-                component: httpVueLoader(APIShift.API.getPage("login"))
+                component: APIShift.API.getPage("login")
             });
 
             resolve(0);
@@ -135,9 +135,9 @@ class APIShift {
             }
 
             // Load admin components
-            APIShift.components['footer'] = httpVueLoader(APIShift.API.getComponent("footer"));
-            APIShift.components['navigator'] = httpVueLoader(APIShift.API.getComponent("navigator"));
-            APIShift.components['loader'] = httpVueLoader(APIShift.API.getComponent("loader"));
+            APIShift.API.getComponent("footer");
+            APIShift.API.getComponent("navigator");
+            APIShift.API.getComponent("loader");
             resolve(0);
         });
     };
@@ -489,7 +489,8 @@ class APIHandler {
      * @param {string} page_name Page name to get path to
      */
     getPage(page_name) {
-        return "UI/pages/" + page_name + ".vue";
+        if(APIShift.pages[page_name] === undefined) APIShift.pages[page_name] = httpVueLoader("UI/pages/" + page_name + ".vue");
+        return APIShift.pages[page_name];
     }
 
     /**
@@ -497,7 +498,8 @@ class APIHandler {
      * @param {string} component_name Page name to get path to
      */
     getComponent(component_name) {
-        return "UI/components/" + component_name + ".vue";
+        if(APIShift.components[component_name] === undefined) APIShift.components[component_name] = httpVueLoader("UI/components/" + component_name + ".vue");
+        return APIShift.components[component_name];
     }
 
     hasOwnProperty(obj, prop) {

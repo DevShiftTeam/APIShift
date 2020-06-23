@@ -53,14 +53,14 @@
                             if(response.data[item].parent === 0) {
                                 APIShift.admin_routes.push({
                                     path: "/" + response.data[item].path,
-                                    component: httpVueLoader(APIShift.API.getPage(response.data[item].path))
+                                    component: APIShift.API.getPage(response.data[item].path)
                                 });
                             } else {
                                 let routeData = APIShift.admin_routes.find(r => r.path === "/" + response.data[response.data[item].parent].path);
                                 if(routeData.children === undefined) routeData.children = [];
                                 routeData.children.push({
                                     path: response.data[item].path,
-                                    component: httpVueLoader(APIShift.API.getPage(response.data[response.data[item].parent].path + "/" + response.data[item].path))
+                                    component: APIShift.API.getPage(response.data[response.data[item].parent].path + "/" + response.data[item].path)
                                 });
                             }
                         }

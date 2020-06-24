@@ -56,7 +56,7 @@ class APIShift {
             if (location.pathname.indexOf("/control") == 0) {
                 APIShift.admin_mode = true;
                 // Load default components
-                APIShift.API.getComponent("notifications");
+                APIShift.API.getComponent("notifications", true);
             }
             resolve(0);
         });
@@ -79,7 +79,7 @@ class APIShift {
                     else {
                         APIShift.admin_routes.push({
                             path: '/installer',
-                            component: APIShift.API.getPage("installer")
+                            component: APIShift.API.getPage("installer", true)
                         });
                         APIShift.installed = false; // Don't continue loading system if not installed
                     }
@@ -94,12 +94,12 @@ class APIShift {
         APIShift.Loader.load((resolve, reject) => {
             // Preceding code is only for the CP
             if(!APIShift.admin_mode) {
-                resolve(2); // Jump 2 stage forward
+                return resolve(2); // Jump 2 stage forward
             }
 
             // Installation check
             if(!APIShift.installed) {
-                resolve(2); // Jump 2 stage forward
+                return resolve(2); // Jump 2 stage forward
             }
 
             // Start update loop with server
@@ -108,11 +108,11 @@ class APIShift {
             // Load default pages
             APIShift.admin_routes.push({
                 path: '/main',
-                component: APIShift.API.getPage("main")
+                component: APIShift.API.getPage("main", true)
             });
             APIShift.admin_routes.push({
                 path: '/login',
-                component: APIShift.API.getPage("login")
+                component: APIShift.API.getPage("login", true)
             });
 
             resolve(0);
@@ -135,10 +135,10 @@ class APIShift {
             }
 
             // Load admin components
-            APIShift.API.getComponent("footer");
-            APIShift.API.getComponent("navigator");
-            APIShift.API.getComponent("loader");
-            APIShift.API.getMixin('access/rule')
+            APIShift.API.getComponent("footer", true);
+            APIShift.API.getComponent("navigator", true);
+            APIShift.API.getComponent("loader", true);
+            APIShift.API.getMixin('access/rule', true)
             resolve(0);
         });
     };
@@ -488,27 +488,30 @@ class APIHandler {
     /**
      * Get page vue element
      * @param {string} page_name Page name to get path to
+     * @param {boolean} init Set true to retrieve element if not exists
      */
-    getPage(page_name) {
-        if(APIShift.pages[page_name] === undefined) APIShift.pages[page_name] = httpVueLoader("UI/pages/" + page_name + ".vue");
+    getPage(page_name, init = false) {
+        if(init && APIShift.pages[page_name] === undefined) APIShift.pages[page_name] = httpVueLoader("UI/pages/" + page_name + ".vue");
         return APIShift.pages[page_name];
     }
 
     /**
      * Get component page element
      * @param {string} component_name Page name to get path to
+     * @param {boolean} init Set true to retrieve element if not exists
      */
-    getComponent(component_name) {
-        if(APIShift.components[component_name] === undefined) APIShift.components[component_name] = httpVueLoader("UI/components/" + component_name + ".vue");
+    getComponent(component_name, init = false) {
+        if(init && APIShift.components[component_name] === undefined) APIShift.components[component_name] = httpVueLoader("UI/components/" + component_name + ".vue");
         return APIShift.components[component_name];
     }
 
     /**
      * Load a mixin object and return it
      * @param {string} mixin_name Name of the mixin to add
+     * @param {boolean} init Set true to retrieve element if not exists
      */
-    getMixin(mixin_name) {
-        if(APIShift.mixins[mixin_name] === undefined) {
+    getMixin(mixin_name, init = false) {
+        if(init && APIShift.mixins[mixin_name] === undefined) {
             // Load mixin as object
             return httpVueLoader.getObject("UI/components/mixins/" + mixin_name + ".vue")().then(function(obj) {
                 APIShift.mixins[mixin_name] = obj;

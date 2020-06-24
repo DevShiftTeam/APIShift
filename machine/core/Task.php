@@ -165,7 +165,7 @@ class Task {
             foreach($task_processes[$task_id] as $process) {
                 $processes_to_compile[$process['process']] = [];
                 foreach($process_connections[$process['process']] as $connection) {
-                    $processes_to_compile[$process['process']][] = $connections[$connection['connection']];
+                    $processes_to_compile[$process['process']][$connection['connection']] = $connections[$connection['connection']];
                 }
             }
         }

@@ -180,7 +180,7 @@ class Task {
             if(isset($task_to_inputs[$task])) {
                 $temp = $inputs[$task_to_inputs[$task]];
                 // Separate inputs by names
-                foreach($temp as $key => $value) $task_input_list[$value['name']] = $value['value'];
+                foreach($temp as $key => $value) $task_input_list[$value['name']] = DataManager::getEntryValue($value['value']);
                 unset($temp);
             }
             // Compile & store result

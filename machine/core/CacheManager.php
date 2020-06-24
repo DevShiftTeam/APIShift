@@ -41,6 +41,11 @@
     const REDIS = 2;
 
     /**
+     * Indicates that no cache system has been integrated with the system
+     */
+    const NO_CACHE = 3;
+
+    /**
      * Holds the connection object to call the cache system
      */
     private static $cache_connection = null;
@@ -67,6 +72,7 @@
                 $result = self::$cache_connection->auth(Configurations::CACHE_PASS);
                 if(!$result) Status::message("Redis: Couldn't authenticate credentials with cache system");
             break;
+            case self::NO_CACHE: break; // Do nothing if no cache system is available
             default:
                 Status::message(Status::ERROR, "Unrecognized cache system, please check your configurations");
         }
@@ -88,9 +94,16 @@
         self::getTable('data_sources', $refresh);
         self::getTable('data_entry_types', $refresh);
         self::getTable('data_entries', $refresh);
+        self::getTable('tasks', $refresh);
+        self::getTable('task_processes', $refresh, 0, 'task', false);
+        self::getTable('processes', $refresh);
+        self::getTable('process_connections', $refresh, 0, 'process', false);
+        self::getTable('connections', $refresh);
         self::getTable('connection_types', $refresh);
         self::getTable('connection_node_types', $refresh);
         self::getTable('request_authorization', $refresh);
+        self::getTable('inputs', $refresh);
+        self::getTable('input_values', $refresh);
     }
 
     /**
@@ -194,14 +207,17 @@
      * 
      * @param string $table_name Name of table
      * @param int $ttl Time to live in cache
+     * @param string $table_key Cell name from table to use as key in map
+     * @param boolean $single_row Saves multiple row under the same key if key matches when true
+     * 
      */
-    public static function getTable($table_name, $refresh = false, $ttl = 0) {
+    public static function getTable($table_name, $refresh = false, $ttl = 0, $table_key = 'id', $single_row = true) {
         // Check if load needed or forcefully requested by refresh
         if(self::exists($table_name) && !$refresh) return;
 
         // Load to cache
         $data_to_load = [];
-        if(DatabaseManager::fetchInto("main", $data_to_load, "SELECT * FROM {$table_name}", [], 'id') === false)
+        if(DatabaseManager::fetchInto("main", $data_to_load, "SELECT * FROM {$table_name}", [], $table_key, $single_row) === false)
                 Status::message(Status::ERROR, "Couldn't retrieve `{$table_name}` from DB");
         self::set($table_name, $data_to_load, $ttl);
     }

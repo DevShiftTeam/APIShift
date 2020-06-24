@@ -10,7 +10,7 @@ The system separates and operates the following areas of your back-end:
  * **Requests**: Develop your own requests & their responses with a helpful and configurable set of tools, and a ready to use efficient workflow set up for you. (*Status*: **``Ready``**)
  * **Session**: Manage the sessions, their different states, roles, life-cycle and data during run-time with a simple interface. (*Status*: **``Development``**)
  * **Database**: Manage data & structures in different databases using an interface that lets you automate and manage multiple databases and types of databases. (*Status*: **``Development`` ``Planning``**)
- * **Authorize**: Buid your unique authorization processes and attach them to any part of your system easily. (*Status*: **``Development`` ``Planning``**)
+ * **Authorize**: Buid your unique authorization processes and attach them to any part of your system easily. (*Status*: **``Development``**)
  * **Procedures**: Create logical procedures using a graph-based UI or your own code to define procedures and attach them to different areas of the code/other procedures/lifecycle of your application using our interface. The graphs are translated into a special graph database representation which then compiles in run-time when called, it is highly efficient in memory and speed. (*Status*: **``Development`` ``Planning``**)
  * **Analyze**: Track anything you want in your system and collect data about it, then create your own analyzation tools or use our pre-made tools to present data and conclusions about the system, how it functions, its users and much more. (*Status*: **``Planning``**)
 

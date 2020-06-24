@@ -94,12 +94,12 @@ class APIShift {
         APIShift.Loader.load((resolve, reject) => {
             // Preceding code is only for the CP
             if(!APIShift.admin_mode) {
-                return resolve(2); // Jump 2 stage forward
+                resolve(2); // Jump 2 stage forward
             }
 
             // Installation check
             if(!APIShift.installed) {
-                return resolve(2); // Jump 2 stage forward
+                resolve(2); // Jump 2 stage forward
             }
 
             // Start update loop with server

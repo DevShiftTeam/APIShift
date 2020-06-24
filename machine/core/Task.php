@@ -174,21 +174,19 @@ class Task {
         foreach($task_list as $task)
         {
             $results[$task] = [];
-            // Loop through connection & compile to reach result
-            foreach($processes_to_compile as $process) {
-                // Create task inputs list by input name
-                $task_input_list = [];
-                if(isset($task_to_inputs[$task])) {
-                    $temp = $inputs[$task_to_inputs[$task]];
-                    // Separate inputs by names
-                    foreach($temp as $key => $value) $task_input_list[$value['name']] = $value['value'];
-                    unset($temp);
-                }
 
-                // Compile & store result
-                $GLOBALS['task_inputs'] = $task_input_list;
-                $results[$task][] = Process::compileConnections($process);
+            // Create task inputs list by input name
+            $task_input_list = [];
+            if(isset($task_to_inputs[$task])) {
+                $temp = $inputs[$task_to_inputs[$task]];
+                // Separate inputs by names
+                foreach($temp as $key => $value) $task_input_list[$value['name']] = $value['value'];
+                unset($temp);
             }
+            // Compile & store result
+            if(!empty($task_input_list)) $GLOBALS['task_inputs'] = $task_input_list;
+            // Loop through connection & compile to reach result
+            foreach($processes_to_compile as $process) $results[$task][] = Process::compileConnections($process);
         }
 
         return $results;

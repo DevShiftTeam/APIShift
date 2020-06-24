@@ -131,8 +131,10 @@ class Task {
         
         // Retrieve inputs from DB
         $results = [];
-        $input_values = CacheManager::get('input_values');
-        foreach($input_ids as $input_id) if(isset($input_values[$input_id])) $results[$input_id] = $input_values[$input_id];
+        if(count($input_ids) != 0) {
+            $input_values = CacheManager::get('input_values');
+            foreach($input_ids as $input_id) if(isset($input_values[$input_id])) $results[$input_id] = $input_values[$input_id];
+        }
         
         // Run valid tasks
         return Task::run($task_list, $results, $input_ids);
@@ -151,17 +153,22 @@ class Task {
         if(!is_array($task_list)) $task_list = [$task_list];
         
         $results = []; // results collection
-        $processes_to_compile = []; // Processes to compile
 
-        // Load procedure connections from DB
-        DatabaseManager::fetchInto("main", $processes_to_compile, 
-            "SELECT processes.id AS proc_id, connections.* FROM tasks
-                JOIN task_processes ON tasks.id = task_processes.task
-                JOIN processes ON processes.id = task_processes.process
-                JOIN process_connections ON process_connections.process = processes.id
-                JOIN connections ON connections.id = process_connections.connection WHERE tasks.id IN (:task_ids)",
-            array("task_ids" => implode(',', $task_list)), 'proc_id', false
-        );
+        // Get proccesses to compile and their connections
+        $processes_to_compile = []; // Processes to compile
+        $task_processes = CacheManager::get('task_processes');
+        $process_connections = CacheManager::get('process_connections');
+        $connections = CacheManager::get('connections');
+
+        foreach($task_list as $task_id) {
+            if(!isset($task_processes[$task_id])) continue;
+            foreach($task_processes[$task_id] as $process) {
+                $processes_to_compile[$process['process']] = [];
+                foreach($process_connections[$process['process']] as $connection) {
+                    $processes_to_compile[$process['process']][] = $connections[$connection['connection']];
+                }
+            }
+        }
 
         // Run all task processes
         foreach($task_list as $task)
@@ -169,28 +176,18 @@ class Task {
             $results[$task] = [];
             // Loop through connection & compile to reach result
             foreach($processes_to_compile as $process) {
-                // Map connections by IDs
-                $mapped_connections = [];
-                foreach($process as $connection) {
-                    $mapped_connections[$connection['id']] = $connection;
-                    unset($mapped_connections[$connection['id']]['id']);
-                }
-
                 // Create task inputs list by input name
                 $task_input_list = [];
                 if(isset($task_to_inputs[$task])) {
                     $temp = $inputs[$task_to_inputs[$task]];
                     // Separate inputs by names
-                    foreach($temp as $key => $value) {
-                        $task_input_list[$value['name']] = $value['value'];
-                        unset($task_input_list[$value['name']]['name']);
-                    }
+                    foreach($temp as $key => $value) $task_input_list[$value['name']] = $value['value'];
                     unset($temp);
                 }
 
                 // Compile & store result
                 $GLOBALS['task_inputs'] = $task_input_list;
-                $results[$task][] = Process::compileConnections($mapped_connections);
+                $results[$task][] = Process::compileConnections($process);
             }
         }
 

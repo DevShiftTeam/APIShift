@@ -35,12 +35,18 @@ class Controller
      */
     public static function getControllersTasks()
     {
-        $res = [];
-        if (DatabaseManager::fetchInto("main", $res,
-            "SELECT inputs.name as input_name, tasks.name as task_name, tasks.*, request_authorization.* FROM tasks
-                JOIN request_authorization ON tasks.id = request_authorization.task
-                LEFT JOIN inputs ON request_authorization.input = inputs.id") === false)
-            Status::message(Status::ERROR, "Couldn't retrieve controller tasks");
+        $tasks = CacheManager::get('tasks');
+        $req_auth = CacheManager::get('request_authorization');
+        $inputs = CacheManager::get('inputs');
+        $counter = 0;
+
+        foreach($req_auth as $key => $val) {
+            $res[$counter] = $val;
+            $res[$counter]['id'] = $key;
+            $res[$counter]['task_name'] = $tasks[$val['task']]['name'];
+            $res[$counter]['input_name'] = $inputs[$val['input']]['name'];
+            $counter++;
+        }
         Status::message(Status::SUCCESS, $res);
     }
 
@@ -59,14 +65,33 @@ class Controller
 
                 // Check if state task exists
                 $name = 'state_' . $_POST['rule']['text'];
-                $task_res = [];
+                $inputs = CacheManager::get('inputs');
+                $input_test = false;
                 $input_id = 0;
-                DatabaseManager::fetchInto("main", $task_res, "SELECT id FROM inputs WHERE name = :name", ['name' => $name]);
-                if (!is_array($task_res) || count($task_res) == 0) {
+
+                // Check by inputs
+                foreach($inputs as $key => $val) {
+                    if ($val['name'] == $name) { 
+                        $input_test = true;
+                        $input_id = $key;
+                        break;
+                    }
+                }
+
+                // Add corresponding input is missing
+                if (!$input_test) {
                     // Add input collection with the session state name
                     DatabaseManager::query("main", "INSERT INTO inputs (name) VALUES (:name)", ['name' => $name]);
-                    DatabaseManager::fetchInto("main", $task_res, "SELECT id FROM inputs WHERE name = :name", ['name' => $name]);
-                    $input_id = $task_res[0]['id'];
+                    CacheManager::getTable('inputs', true); // Refresh cache
+                    $inputs = CacheManager::get('inputs');
+
+                    // Get the ID of the newly added input
+                    foreach($inputs as $key => $val) {
+                        if ($val['name'] == $name) { 
+                            $input_id = $key;
+                            break;
+                        }
+                    }
 
                     // Add session state ID value
                     DatabaseManager::query("main", "INSERT INTO input_values (id, `value`, is_source, name) VALUES (:input_id, :state_id, 0, :name)", [
@@ -74,7 +99,8 @@ class Controller
                         'state_id' => $_POST['rule']['val'],
                         'name' => 'state_id'
                     ]);
-                } else $input_id = $task_res[0]['id'];
+                    CacheManager::getTable('input_values', true); // Refresh cache
+                }
 
                 // Assign task to controller
                 $result = DatabaseManager::query(
@@ -95,11 +121,17 @@ class Controller
                 
                 // Add function as task if not exists
                 $name = 'function_' . $_POST['rule'];
-                $task_res = [];
+                $tasks = CacheManager::get('tasks');
+                $task_test = false;
                 $input_id = 0;
 
-                DatabaseManager::fetchInto("main", $task_res, "SELECT id FROM tasks WHERE name = :name", ['name' => $name]);
-                if (!is_array($task_res) || count($task_res) == 0) {
+                foreach($tasks as $key => $val) {
+                    if ($val['name'] == $name) { 
+                        $task_test = true;
+                        break;
+                    }
+                }
+                if (!$task_test) {
                     DatabaseManager::query(
                         "main",
                         "INSERT INTO connections (connection_type, name, from_type, `from`, to_type, `to`) VALUES (4, :name, 0, 0, 0, 0)",
@@ -113,9 +145,7 @@ class Controller
                 break;
             case "Task":
                 // Check if task exists
-                $check_task = [];
-                DatabaseManager::fetchInto("main", $check_task, "SELECT * FROM tasks WHERE id = :id", [ 'id' => $_POST['rule']['val'] ]);
-                if(!is_array($check_task) || count($check_task) == 0) Status::message(Status::ERROR, "Task wasn't found");
+                if(!isset(CacheManager::get('tasks')[$_POST['rule']['val']])) Status::message(Status::ERROR, "Task wasn't found");
                 // Assign task to controller
                 $result = DatabaseManager::query(
                     "main",
@@ -163,13 +193,33 @@ class Controller
 
                     // Check if state task exists
                     $name = 'state_' . $_POST['rule']['text'];
-                    $task_res = [];
-                    DatabaseManager::fetchInto("main", $task_res, "SELECT id FROM inputs WHERE name = :name", ['name' => $name]);
-                    if (!is_array($task_res) || count($task_res) == 0) {
+                    $inputs = CacheManager::get('inputs');
+                    $input_test = false;
+                    $input_id = 0;
+    
+                    // Check by inputs
+                    foreach($inputs as $key => $val) {
+                        if ($val['name'] == $name) { 
+                            $input_test = true;
+                            $new_values['input'] = $key;
+                            break;
+                        }
+                    }
+    
+                    // Add corresponding input is missing
+                    if (!$input_test) {
                         // Add input collection with the session state name
                         DatabaseManager::query("main", "INSERT INTO inputs (name) VALUES (:name)", ['name' => $name]);
-                        DatabaseManager::fetchInto("main", $task_res, "SELECT id FROM inputs WHERE name = :name", ['name' => $name]);
-                        $new_values['input'] = $task_res[0]['id'];
+                        CacheManager::getTable('inputs', true); // Refresh cache
+                        $inputs = CacheManager::get('inputs');
+                        
+                        // Get the ID of the newly added input
+                        foreach($inputs as $key => $val) {
+                            if ($val['name'] == $name) { 
+                                $new_values['input'] = $key;
+                                break;
+                            }
+                        }
 
                         // Add session state ID value
                         DatabaseManager::query("main", "INSERT INTO input_values (id, `value`, is_source, name) VALUES (:input_id, :state_id, 0, :name)", [
@@ -177,7 +227,7 @@ class Controller
                             'state_id' => $_POST['rule']['val'],
                             'name' => 'state_id'
                         ]);
-                    } else $new_values['input'] = $task_res[0]['id'];
+                    }
                     break;
                 case "Function":
                     // TODO: Check if function exists
@@ -231,6 +281,7 @@ class Controller
     {
         $res = DatabaseManager::query("main", "DELETE FROM request_authorization WHERE id = :id", ['id' => $_POST['id']]);
         if (!$res) Status::message(Status::ERROR, "Couldn't remove rule from DB");
+        CacheManager::getTable('request_authorization', true); // Refresh cache
         Status::message(Status::SUCCESS, "Updated Successfully!");
     }
 }

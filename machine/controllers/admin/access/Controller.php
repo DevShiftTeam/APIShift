@@ -35,6 +35,7 @@ class Controller
      */
     public static function getControllersTasks()
     {
+        $res = [];
         $tasks = CacheManager::get('tasks');
         $req_auth = CacheManager::get('request_authorization');
         $inputs = CacheManager::get('inputs');
@@ -47,6 +48,7 @@ class Controller
             $res[$counter]['input_name'] = $inputs[$val['input']]['name'];
             $counter++;
         }
+
         Status::message(Status::SUCCESS, $res);
     }
 

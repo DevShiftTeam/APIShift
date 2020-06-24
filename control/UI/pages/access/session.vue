@@ -98,7 +98,7 @@
                     rule: 0,
                     id: access_rule.id
                 }
-                this.getAvailableRulesForType();
+                this.getAvailableRulesForType(this.in_edit.type);
             },
             removeAccessRule: function(rule_id) {
                 if(!this.delete_dialog) {

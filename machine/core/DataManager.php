@@ -117,4 +117,37 @@ class DataManager {
                 break;
         }
     }
+
+    /**
+     * Creates a new entry and returns its ID, or returns an ID of an existing entry
+     */
+    public static function createEntry($name, $type, $source) {
+        // Check if entry exists
+        $data_entries = CacheManager::get('data_entries');
+        foreach($data_entries as $id => $entry)
+            if($entry['name'] == $name && $entry['type'] == $type && $entry['source'] == $source)
+                return $id; // Return ID if does exist
+        
+        // Check if source/type exist
+        if($entry['source'] != 0 && !isset(CacheManager::get('data_sources')[$entry['source']]))
+            Status::message(Status::ERROR, "Couldn't find source of the entry provided");
+        if(!isset(CacheManager::get('data_entry_types')[$entry['type']]))
+            Status::message(Status::ERROR, "Couldn't find type of the entry provided");
+
+        // Create data entry in database
+        $result = DatabaseManager::query("main", "INSERT INTO data_entries (name, `type`, source) VALUE (:name, :type, :source)", [
+            "name" => $name,
+            "type" => $type,
+            "source" => $source
+        ]);
+        if(!$result) Status::message(Status::ERROR, "Couldn't create data entry in database");
+
+        CacheManager::getTable('data_entries', true); // Refresh cache
+        $data_entries = CacheManager::get('data_entries'); // Re-get data
+
+        // Return new data entry ID
+        foreach($data_entries as $id => $entry)
+            if($entry['name'] == $name && $entry['type'] == $type && $entry['source'] == $source)
+                return $id; // Return ID if does exist
+    }
 }

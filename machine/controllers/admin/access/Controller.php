@@ -22,6 +22,7 @@
 namespace APIShift\Controllers\Admin\Access;
 
 use APIShift\Core\CacheManager;
+use APIShift\Core\DataManager;
 use APIShift\Core\DatabaseManager;
 use APIShift\Core\Status;
 
@@ -98,10 +99,12 @@ class Controller
                     // Add session state ID value
                     DatabaseManager::query("main", "INSERT INTO input_values (id, `value`, is_source, name) VALUES (:input_id, :state_id, 0, :name)", [
                         'input_id' => $input_id,
-                        'state_id' => $_POST['rule']['val'],
+                        // Will create a new entry if not exists
+                        'state_id' => DataManager::createEntry($_POST['rule']['val'], 3, 0),
                         'name' => 'state_id'
                     ]);
                     CacheManager::getTable('input_values', true); // Refresh cache
+                    CacheManager::getTable('inputs', true); // Refresh cache
                 }
 
                 // Assign task to controller
@@ -226,9 +229,11 @@ class Controller
                         // Add session state ID value
                         DatabaseManager::query("main", "INSERT INTO input_values (id, `value`, is_source, name) VALUES (:input_id, :state_id, 0, :name)", [
                             'input_id' => $new_values['input'],
-                            'state_id' => $_POST['rule']['val'],
+                            'state_id' => DataManager::createEntry($_POST['rule']['val'], 3, 0),
                             'name' => 'state_id'
                         ]);
+                        CacheManager::getTable('input_values', true); // Refresh cache
+                        CacheManager::getTable('inputs', true); // Refresh cache
                     }
                     break;
                 case "Function":

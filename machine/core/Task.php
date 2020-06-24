@@ -104,26 +104,6 @@ class Task {
     }
 
     /**
-     * Retrieve the inputs data entries and sources
-     * 
-     * @param array $input_ids The id's of the inuts to load
-     * 
-     * @return array The input data entries and sources separated by names
-     */
-    private static function retrieveInputs($input_ids) {
-        if(count($input_ids) == 0) return []; //  Skip no inputs
-        // Retrieve inputs from DB
-        $results = [];
-        DatabaseManager::fetchInto("main", $results,
-        "SELECT inputs.id, input_values.is_source, input_values.value, input_values.name FROM inputs
-            JOIN input_values ON inputs.id = input_values.id WHERE inputs.id IN (:input_ids)", [
-                'input_ids' => implode(',', array_values($input_ids))
-            ], 'id', false
-        );
-        return $results;
-    }
-
-    /**
      * Find all authorization tasks related to the current request
      * 
      * @param string $controller Name of the controller to authorize
@@ -136,7 +116,7 @@ class Task {
         if (!Configurations::INSTALLED) return [];
 
         $task_list = [];
-        $inputs = [];
+        $input_ids = [];
         $req_auth = CacheManager::get("request_authorization");
         // Search string to help itereate request validation
         $controller_search_str = $controller;
@@ -145,12 +125,17 @@ class Task {
         foreach($req_auth as $key => $val) {
             if(self::isDirectiveMatching($val['controller'], $controller) && self::isDirectiveMatching($val['method'], $method)) {
                 $task_list[] = $val['task'];
-                if($val['input'] != NULL || $val['input'] != 0) $inputs[$val['task']] = $val['input'];
+                if($val['input'] != NULL || $val['input'] != 0) $input_ids[$val['task']] = $val['input'];
             }
         }
         
+        // Retrieve inputs from DB
+        $results = [];
+        $input_values = CacheManager::get('input_values');
+        foreach($input_ids as $input_id) if(isset($input_values[$input_id])) $results[$input_id] = $input_values[$input_id];
+        
         // Run valid tasks
-        return Task::run($task_list, self::retrieveInputs($inputs), $inputs);
+        return Task::run($task_list, $results, $input_ids);
     }
 
     /**

@@ -103,7 +103,7 @@
         self::getTable('connection_node_types', $refresh);
         self::getTable('request_authorization', $refresh);
         self::getTable('inputs', $refresh);
-        self::getTable('input_values', $refresh);
+        self::getTable('input_values', $refresh, 0, 'id', false);
     }
 
     /**

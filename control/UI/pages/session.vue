@@ -65,12 +65,8 @@
             },
             updateSessionStates: function() {
                 APIShift.API.request("Admin\\SessionState", "getAllSessionStates", {}, function(response) {
-                    if(response.status == true) {
-                        handler.states_collection = Object.assign({}, response.data);
-                    }
-                    else {
-                        APIShift.API.notify(response.data, 'error');
-                    }
+                    if(response.status == true) handler.states_collection = Object.assign({}, response.data);
+                    else APIShift.API.notify(response.data, 'error');
                 });
             },
             createState: function() {
@@ -122,12 +118,8 @@
                 if(this.adding_state) {
                     this.adding_state = false
                     APIShift.API.request("Admin\\SessionState", "addSessionState", this.states_collection[this.in_edit], function(response) {
-                        if(response.status == true) {
-                            APIShift.API.notify(response.data, 'success');
-                        }
-                        else {
-                            APIShift.API.notify(response.data, 'error');
-                        }
+                        if(response.status == true) APIShift.API.notify(response.data, 'success');
+                        else APIShift.API.notify(response.data, 'error');
                         handler.in_edit = 0;
                         handler.updateSessionStates();
                     }, true);
@@ -145,12 +137,8 @@
                     to_send.inactive_timeout = this.states_collection[this.in_edit].inactive_timeout;
                 // Update
                 APIShift.API.request("Admin\\SessionState", "updateSessionState", to_send, function(response) {
-                    if(response.status == APIShift.API.status_codes.SUCCESS) {
-                        APIShift.API.notify(response.data, 'success');
-                    }
-                    else {
-                        APIShift.API.notify(response.data, 'error');
-                    }
+                    if(response.status == APIShift.API.status_codes.SUCCESS) APIShift.API.notify(response.data, 'success');
+                    else APIShift.API.notify(response.data, 'error');
                     handler.in_edit = 0;
                     handler.updateSessionStates();
                 }, true);
@@ -187,12 +175,8 @@
                 }
 
                 APIShift.API.request("Admin\\SessionState", "removeSessionState", { 'id' : this.in_edit }, function(response) {
-                    if(response.status == true) {
-                        APIShift.API.notify(response.data, 'success');
-                    }
-                    else {
-                        APIShift.API.notify(response.data, 'error');
-                    }
+                    if(response.status == true) APIShift.API.notify(response.data, 'success');
+                    else APIShift.API.notify(response.data, 'error');
                     handler.in_edit = 0;
                     handler.updateSessionStates();
                 }, true);

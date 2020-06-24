@@ -173,13 +173,14 @@ Each session state has a state structure, indicating how the data about the stat
    * _name_ - Name identifying the state.
    * _inactive_timeout_ - Timeout untill system disposes of the session user when not active.
    * _active_timeout_ - Timeout until system disposes the session since whether active or not.
-   * _auth_task_ - Authorization task running the procedure when a user requests a change into this state. A task can be your own function, more on tasks will be discussed later.
+   * _auth_task_ - Authorization task running the procedure when a user requests a change into this state. A task can be your own function, more on tasks will be discussed [later](#tasks).
+   * _auth_input_ - ID of the input collection to the authorization task. Inputs are discussed [later](#tasks).
    * _parent_ - id of the parent session.
  * ___session_state_structures___ - Defines the key-value store structure of the session in run-time.
    * _id_ - Personal identification.
    * _state_ - Identification of state this entry belongs to.
    * _key_ - Name of the value the entry is holding.
-   * _entry_ - Identification of the data entry which the value coppied from with when state is changed.
+   * _entry_ - Identification of the data entry which the value coppied from with when state is changed/created.
    * _parent_ - id of the parent entry.
 
 #### Run-time
@@ -206,6 +207,12 @@ We encapsulate different processes as tasks, such that they can be called and at
   * _to_ - Represents the ID of the output.
 * ___connection_types___ - A connection can represent a flow of data from one element to another (Flow), a function (Function), a predefined comparison rule (Rule) or another task (Task) or process (Process).
 * ___connection_node_types___ - A connection can hold different nodes, the from node represents the input node, and the to node represents the output node. Each node can be a sata entry (DataEntry) or source (DataSource), another connection's output (Connection) or a task (Task) or process (Process).
+* ___inputs___ - A collection of ID-name pairs, each representing a set of value that are considered as task inputs. This kind of feature was created to reuse existing tasks with new data.
+* ___input_values___ - Represents the specific entries and sources that are used to take an input.
+  * _id_ - Input collection ID (from `inputs` table).
+  * _value_id_ - The ID ot the data source/entry to take the value from.
+  * _is_source_ - TRUE if the `value_id` is a source, FALSE if it's an entry.
+  * _name_ - String key of the input value in the input collection (represented as a global PHP array at run-time).
 
 #### Run-time
 A task can be placed in different parts of your code using the [Task](#task) system. A task can also be assigned to session states, function and controllers as an authorization processes required before changing a state, running a function or accessing any function in a controller accordingly. The process connections are loaded once a task is called, and are compiled into instruction at run-time using the [Process](#process) system.

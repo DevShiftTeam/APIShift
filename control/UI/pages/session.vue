@@ -297,7 +297,7 @@
                                         <!-- Authorization trigger -->
                                         <v-tooltip top>
                                             <template #activator="{ on }">
-                                                <v-btn icon v-on="on" to="/access">
+                                                <v-btn icon v-on="on" to="/access/session">
                                                     <v-icon>mdi-lock</v-icon>
                                                 </v-btn>
                                             </template>

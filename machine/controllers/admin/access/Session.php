@@ -24,7 +24,9 @@ namespace APIShift\Controllers\Admin\Access;
 use APIShift\Core\CacheManager;
 use APIShift\Core\DataManager;
 use APIShift\Core\DatabaseManager;
+use APIShift\Core\Process;
 use APIShift\Core\Status;
+use APIShift\Core\Task;
 
 /**
  * Interface containing the available main request of the system's control panel
@@ -116,12 +118,26 @@ class Session {
                     }
                     break;
                 case "Function":
-                    // TODO: Check if function exists
-                    // if(!is_callable($_POST['rule'])) Status::message(Status::ERROR, "Function not found");
-                    // TODO: Add function as task if not exists
+                    // Check if function exists
+                    if(!is_callable($_POST['rule'])) Status::message(Status::ERROR, "Function not found");
+
+                    // Get task ID
+                    $task_name = 'function_' . $_POST['rule'];
+                    $task_id = 0;
+                    $task_id = Task::taskExists($task_name);
+                    // Add function as task if not exists
+                    if(!$task_id) {
+                        // Add connection and get its ID
+                        $connection_id = Process::createConnection($_POST['rule'], 4, null, null, null, null);
+                        // Add process and get it's ID
+                        $process_id = Process::createProcess($task_name, [ $connection_id ]);
+                        // Create task and get it's ID
+                        $task_id = Task::createTask($task_name, [ $process_id ]);
+                    }
+                    
                     // TODO: Create function inputs as instructed
                     $new_values['auth_input'] = 0;
-                    Status::message(Status::ERROR, "Comming Soon!");
+                    $new_values['auth_task'] = $task_id;
                     break;
                 case "Task":
                     $new_values['auth_input'] = 0;

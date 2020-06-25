@@ -337,7 +337,7 @@ class Process {
         $connections = CacheManager::get('connections');
         foreach($connections as $id => $connection) {
             if($connection['name'] == $name
-                && $connection['type'] == $type
+                && $connection['connection_type'] == $type
                 && $connection['from'] == $from
                 && $connection['from_type'] == $from_type
                 && $connection['to'] == $to

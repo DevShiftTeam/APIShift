@@ -21,6 +21,8 @@
 
 namespace APIShift\Core;
 
+use OCI_Lob;
+
 /**
  * Provides an interface to compile and manage procedural connections in the system
  * Procedural connection are explained in the ARCHITECTURE_AND_DESIGN.md file
@@ -41,10 +43,6 @@ class Process {
         $connection_results = [];
         $result = null;
 
-        // Load types from cache
-        $connection_types = CacheManager::get("connection_types");
-        $connection_node_types = CacheManager::get("connection_node_types");
-
         // Get the first connection which is not a result from the connections
         $connection_ids = array_keys($connections_set);
         $current_connection = $connection_ids[0];
@@ -53,12 +51,9 @@ class Process {
         // Compile connections until reaching the result
         while(count($connection_results) != count($connections_set)) {
             // Simplify representation of connection types
-            $from_type = $connections_set[$current_connection]['from_type'] == null ?
-                '' : $connection_node_types[$connections_set[$current_connection]['from_type']]['name'];
-            $to_type = $connections_set[$current_connection]['to_type'] == null ?
-                '' : $connection_node_types[$connections_set[$current_connection]['to_type']]['name'];
-            $type = $connections_set[$current_connection]['connection_type'] == 0 ?
-                'Flow' : $connection_types[$connections_set[$current_connection]['connection_type']]['name'];
+            $from_type = $connections_set[$current_connection]['from_type'];
+            $to_type = $connections_set[$current_connection]['to_type'];
+            $type = $connections_set[$current_connection]['connection_type'];
 
             /**
              * This section handles moving in the process graph to retrieve all the necessary results
@@ -68,15 +63,14 @@ class Process {
             // Move to next connection if result exists
             if(isset($connection_results[$current_connection])) {
                 // Load next connection if is of type connection and no result is present
-                if($to_type == "Connection" && !isset($connection_results[$connections_set[$current_connection]['to']])) {
+                if($to_type == 3 && !isset($connection_results[$connections_set[$current_connection]['to']])) {
                     $current_connection = $connections_set[$current_connection]['to'];
                 }
                 // Load next connection who has 'from' as this
                 else {
                     $break_from_loop = false;
                     foreach($connections_set as $id => $connection) {
-                        if($connection_node_types[$connection['from_type']]['name'] == "Connection"
-                            && $connection['from'] == $current_connection) {
+                        if($connection['from_type'] == 3 && $connection['from'] == $current_connection) {
                             $current_connection = $id;
                             $break_from_loop = true;
                             break;
@@ -90,13 +84,13 @@ class Process {
             }
 
             // Move to previous connection if no result exists
-            if($from_type == "Connection" && !isset($connection_results[$connections_set[$current_connection]['from']])) {
+            if($from_type == 3 && !isset($connection_results[$connections_set[$current_connection]['from']])) {
                 $current_connection = $connections_set[$current_connection]['from'];
                 continue;
             }
 
             // Manuver in connectors who point to the current connection to get results
-            if($from_type == 'Connection' && !isset($connection_results[$connections_set[$current_connection]['from']])) {
+            if($from_type == 3 && !isset($connection_results[$connections_set[$current_connection]['from']])) {
                 $current_connection = $connections_set[$current_connection]['from'];
                 continue;
             }
@@ -104,8 +98,7 @@ class Process {
                 $break_from_loop = false;
                 foreach($connections_set as $id => $connection) {
                     // Move to connection with no result
-                    if($connection['to_type'] != null && $connection_node_types[$connection['to_type']]['name'] == "Conenction"
-                        && $connection['to'] == $current_connection
+                    if($connection['to_type'] == 3 && $connection['to'] == $current_connection
                         && !isset($connection_results[$id])) {
                         $current_connection = $id;
                         $break_from_loop = true;
@@ -126,32 +119,32 @@ class Process {
             // Retrive results from 'from' and other connected
             // TODO: Fill in missing cases
             switch($from_type) {
-                case "Process":
+                case 1: // Process
                     // TODO: retrieve and compile selected process
                     // NOTICE: Making a process call the caller process will create a recursion effect
                     // that might create a memory corruption - be aware!
                     break;
-                case "Task":
+                case 2: // Task
                     // TODO: retrieve and compile selected task
                     // NOTICE: Making a task call the caller process will create a recursion effect
                     // that might create a memory corruption - be aware!
                     break;
-                case "Connection":
+                case 3: // Connection
                     $inputs[] = $connection_results[$connections_set[$current_connection]['from']];
                     $input_names[] = $connections_set[$connections_set[$current_connection]['from']]['name'];
                     break;
-                case "DataEntry":
+                case 4: // Data Source
+                    break;
+                case 5: // Data Entry
                     $entry_data = DataManager::getEntryData($connections_set[$current_connection]['from']);
                     $inputs[] = DataManager::getEntryValue($connections_set[$current_connection]['from']);
-                    $input_names[] = $entry_data['type']['name'] == 'constant' ? $connections_set[$current_connection]['name'] : $entry_data['name'];
-                case "DataSource":
-                    break;
+                    // If constant then get name
+                    $input_names[] = $entry_data['type'] == 3 ? $connections_set[$current_connection]['name'] : $entry_data['name'];
             }
             
-            // Retrive results from connections  who point to this
+            // Retrive results from connections who point to this
             foreach($connections_set as $id => $connection) {
-                if($connection['to_type'] != null && $connection_node_types[$connection['to_type']]['name'] == "Connection"
-                    && $connection['to'] == $current_connection) {
+                if($connection['to_type'] == 3 && $connection['to'] == $current_connection) {
                         $inputs[] = $connection_results[$id];
                         $input_names[] = $connection['name'];
                 }
@@ -160,9 +153,11 @@ class Process {
             // Compute results of current connection
             // TODO: Fill in missing cases
             switch($type) {
-                case 'Flow': // Connection of data flow reacts only by 'to_type'
+                case 0: // Flow
                     switch($to_type) {
-                        case 'DataEntry':
+                        case 4: // Data Source
+                            break;
+                        case 5: // Data Entry
                             $kv_inputs = self::processValues($inputs, $input_names);
                             if(count($kv_inputs) == 1) {
                                 $kv_inputs[$connections_set[$current_connection]['name']] = $kv_inputs[array_keys($kv_inputs)[0]];
@@ -178,8 +173,6 @@ class Process {
                                 $connection_results[$current_connection] = $entry[0][$entry_data['name']];
                             }
                             break;
-                        case 'DataSource':
-                            break;
                         default:
                             // If destination is not an entry nor a source then set the inputs as the result
                             $kv_inputs = self::processValues($inputs, $input_names);
@@ -188,17 +181,14 @@ class Process {
                             break;
                     }
                     break;
-                case 'Function':
-                    $connection_results[$current_connection] = call_user_func_array($connections_set[$current_connection]['name'], $inputs);
+                case 1: // Process
                     break;
-                case 'Task':
+                case 2: // Task
                     break;
-                case 'Process':
-                    break;
-                case 'Rule':
+                case 3: // Rule
                     // Get the variable to measure with from 'to'
                     $to_measure = "";
-                    if($to_type == 'DataEntry') $to_measure = DataManager::getEntryValue($connections_set[$current_connection]['to']);
+                    if($to_type == 5) $to_measure = DataManager::getEntryValue($connections_set[$current_connection]['to']);
                     // Handle comparison rules
                     switch($connections_set[$current_connection]['name']) {
                         case '==': $connection_results[$current_connection] = ($inputs[0] == $to_measure); break;
@@ -208,28 +198,30 @@ class Process {
                         case '>=': $connection_results[$current_connection] = ($inputs[0] >= $to_measure); break;
                     }
                     break;
+                case 4: // Function
+                    $connection_results[$current_connection] = call_user_func_array($connections_set[$current_connection]['name'], $inputs);
+                    break;
             }
 
             // If result is not set - then make as true
             if(!isset($connection_results[$current_connection])) $connection_results[$current_connection] = true;
 
             // If result is computed then break
-            // Or in case all connection got concluded and no result found
+            // Or in case all connection got concluded and no result connection found
             if(self::isResult($connections_set[$current_connection]) || count($connection_results) == count($connections_set))
             {
                 $result = $connection_results[$current_connection];
                 break;
             }
             // Load next connection if is of type connection and no result is present
-            if($to_type == "Connection" && !isset($connection_results[$connections_set[$current_connection]['to']])) {
+            if($to_type == 3 && !isset($connection_results[$connections_set[$current_connection]['to']])) {
                 $current_connection = $connections_set[$current_connection]['to'];
             }
             // Load next connection who has 'from' as this
             else {
                 $break_from_loop = false;
                 foreach($connections_set as $id => $connection) {
-                    if($connection['from_type'] != null && $connection_node_types[$connection['from_type']]['name'] == "Connection"
-                        && $connection['from'] == $current_connection) {
+                    if($connection['from_type'] == 3 && $connection['from'] == $current_connection) {
                         $current_connection = $id;
                         $break_from_loop = true;
                         break;
@@ -269,7 +261,29 @@ class Process {
     }
 
     /**
+     * Checks if a process exists
+     * 
+     * @param string $name The name of the process
+     * 
+     * @return int|bool The ID of the process or FALSE if doesn't exist
+     */
+    public static function processExists($name) {
+        $processes = CacheManager::get('processes');
+        foreach($processes as $id => $process) if($process['name'] == $name) return $id;
+        return false;
+    }
+
+    /**
      * Check if a connection already exists
+     * 
+     * @param string $name The name of the connection
+     * @param string $type Type of the connection
+     * @param string $from ID of the element the conenction is coming from
+     * @param string $from_type The type of the from element
+     * @param string $to ID of the element connected is going to
+     * @param string $to_type The type of the to element
+     * 
+     * @return int|bool The ID of the process or FALSE if doesn't exist
      */
     public static function connectionExists($name, $type, $from, $from_type, $to, $to_type) {
         $connections = CacheManager::get('connections');

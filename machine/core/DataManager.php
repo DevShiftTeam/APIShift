@@ -30,6 +30,7 @@ class DataManager {
      * which most likely will happen, and this trick keeps things fast throughout requests
      */
     public static $runtime_entries = [];
+    public static $runtime_sources = [];
 
     /**
      * Upload entry data to/from cache and current runtime
@@ -37,36 +38,42 @@ class DataManager {
     private static function uploadEntryToCacheAndRuntime($id) {
         if(!isset(self::$runtime_entries[$id])) {
             self::$runtime_entries[$id] = CacheManager::getFromTable('data_entries', $id);
-            self::$runtime_entries[$id]['source'] = CacheManager::getFromTable('data_sources', self::$runtime_entries[$id]['source']);
-            self::$runtime_entries[$id]['type'] = CacheManager::get('data_entry_types')[self::$runtime_entries[$id]['type']];
+            self::$runtime_sources[self::$runtime_entries[$id]['source']]
+                = CacheManager::getFromTable('data_sources', self::$runtime_entries[$id]['source']);
         }
     }
 
     public static function getEntryData($id) {
         self::uploadEntryToCacheAndRuntime($id);
-        return self::$runtime_entries[$id];
+        $to_ret = self::$runtime_entries[$id];
+        $to_ret['source'] = self::$runtime_sources[$to_ret['source']];
+        return $to_ret;
     }
 
     public static function setEntryValue($id, $value) {
         self::uploadEntryToCacheAndRuntime($id);
-        switch(self::$runtime_entries[$id]['type']['name']) {
-            case 'array_key':
-                if(isset($GLOBALS[self::$runtime_entries[$id]['source']['name']]))
-                    $GLOBALS[self::$runtime_entries[$id]['source']['name']][self::$runtime_entries[$id]['name']] = $value;
-                else if(!isset(${self::$runtime_entries[$id]['source']['name']}))
-                    Status::message(Status::ERROR, "Couldn't find array " . self::$runtime_entries[$id]['source']['name']);
-                else ${self::$runtime_entries[$id]['source']['name']}[self::$runtime_entries[$id]['name']] = $value;
+        // Keeping a reference for ease
+        $entry = &self::$runtime_entries[$id];
+        $source = &self::$runtime_sources[$entry['source']];
+        // Handle base on type
+        switch($entry['type']) {
+            case 1: // Array key
+                if(isset($GLOBALS[$source['name']]))
+                    $GLOBALS[$source['name']][$source['name']] = $value;
+                else if(!isset(${$source['name']}))
+                    Status::message(Status::ERROR, "Couldn't find array " . $source['name']);
+                else ${$source['name']}[$entry['name']] = $value;
                 break;
-            case 'variable':
-                if(isset($GLOBALS[self::$runtime_entries[$id]['name']])) $GLOBALS[self::$runtime_entries[$id]['name']] = $value;
-                else if(!isset(${self::$runtime_entries[$id]['name']}))
-                    Status::message(Status::ERROR, "Couldn't find variable " . self::$runtime_entries[$id]['name']);
-                else ${self::$runtime_entries[$id]['name']} = $value;
+            case 2: // Variable
+                if(isset($GLOBALS[$entry['name']])) $GLOBALS[$entry['name']] = $value;
+                else if(!isset(${$entry['name']}))
+                    Status::message(Status::ERROR, "Couldn't find variable " . $entry['name']);
+                else ${$entry['name']} = $value;
                 break;
-            case 'constant':
-                self::$runtime_entries[$id]['name'] = $value;
+            case 3: // Constant
+                $entry['name'] = $value;
                 break;
-            case 'table_cell':
+            case 4: // Cell
                 // TODO: retrieve data about cell from table
                 break;
         }
@@ -74,32 +81,34 @@ class DataManager {
 
     public static function getEntryValue($id, $query_where_inputs = []) {
         self::uploadEntryToCacheAndRuntime($id);
-        switch(self::$runtime_entries[$id]['type']['name']) {
-            case 'array_key':
-                if(isset($GLOBALS[self::$runtime_entries[$id]['source']['name']]))
-                    return $GLOBALS[self::$runtime_entries[$id]['source']['name']][self::$runtime_entries[$id]['name']];
-                else if(!isset(${self::$runtime_entries[$id]['source']['name']}))
-                    Status::message(Status::ERROR, "Couldn't find array " . self::$runtime_entries[$id]['source']['name']);
-                else return ${self::$runtime_entries[$id]['source']['name']}[self::$runtime_entries[$id]['name']];
+        // Keeping a reference for ease
+        $entry = &self::$runtime_entries[$id];
+        $source = &self::$runtime_sources[$entry['source']];
+        // Handle based on type
+        switch($entry['type']) {
+            case 1: // Array Key
+                if(isset($GLOBALS[$source['name']]))
+                    return $GLOBALS[$source['name']][$entry['name']];
+                else if(!isset(${$source['name']}))
+                    Status::message(Status::ERROR, "Couldn't find array " . $source['name']);
+                else return ${$source['name']}[$entry['name']];
                 break;
-            case 'variable':
-                if(isset($GLOBALS[self::$runtime_entries[$id]['name']])) return $GLOBALS[self::$runtime_entries[$id]['name']];
-                else if(!isset(${self::$runtime_entries[$id]['name']}))
-                    Status::message(Status::ERROR, "Couldn't find variable " . self::$runtime_entries[$id]['name']);
-                else return ${self::$runtime_entries[$id]['name']};
+            case 2: // Variable
+                if(isset($GLOBALS[$entry['name']])) return $GLOBALS[$entry['name']];
+                else if(!isset(${$entry['name']}))
+                    Status::message(Status::ERROR, "Couldn't find variable " . $entry['name']);
+                else return ${$entry['name']};
                 break;
-            case 'constant':
-                return self::$runtime_entries[$id]['name'];
+            case 3: // Constant
+                return $entry['name'];
                 break;
-            case 'table_cell':
+            case 4: // Cell
                 // TODO: retrieve data about cell from table
                 // Get table name
-                $table_name = self::$runtime_entries[$id]['source']['name'];
-                // Initial query parameters
-                $query_params = [];
+                $table_name = $source['name'];
 
                 // TODO: determine query by inputs (SELECT by default)
-                $query = "SELECT " . self::$runtime_entries[$id]['name'] . " FROM " . $table_name;
+                $query = "SELECT " . $entry['name'] . " FROM " . $table_name;
 
                 // Add inputs to where clause
                 if (!empty($query_where_inputs)) {

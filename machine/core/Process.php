@@ -166,7 +166,7 @@ class Process {
                             $entry_data = DataManager::getEntryData($connections_set[$current_connection]['to']);
                             $entry = DataManager::getEntryValue($connections_set[$current_connection]['to'], $kv_inputs);
 
-                            if($entry_data['type']['name'] != 'table_cell') {
+                            if($entry_data['type'] != 4) { // No a table cell
                                 if(count($kv_inputs) == 1) $kv_inputs = $kv_inputs[array_keys($kv_inputs)[0]];
                                 DataManager::setEntryValue($connections_set[$current_connection]['to'], $kv_inputs);
                             } else {

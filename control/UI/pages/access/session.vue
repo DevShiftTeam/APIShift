@@ -95,7 +95,7 @@
                 this.edit_dialog = true;
                 this.in_edit = {
                     type: this.getRuleType(access_rule),
-                    rule: 0,
+                    rule: null,
                     id: access_rule.id
                 }
                 this.getAvailableRulesForType(this.in_edit.type);

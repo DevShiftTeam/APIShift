@@ -267,6 +267,49 @@ class Process {
         foreach($inputs as $index => $value) $result[$input_names[$index]] = $value;
         return $result;
     }
+
+    /**
+     * Check if a connection already exists
+     */
+    public static function connectionExists($name, $type, $from, $from_type, $to, $to_type) {
+        $connections = CacheManager::get('connections');
+        foreach($connections as $id => $connection) {
+            if($connection['name'] == $name
+                && $connection['type'] == $type
+                && $connection['from'] == $from
+                && $connection['from_type'] == $from_type
+                && $connection['to'] == $to
+                && $connection['to_type'] == $to_type) return $id;
+        }
+        return false;
+    }
+
+    /**
+     * Creates a new connection and returns it's ID, if a connection exists it returns the ID.
+     */
+    public static function createConnection($name, $type, $from, $from_type, $to, $to_type) {
+        // Check if a connection already exists
+        $to_ret = self::connectionExists($name, $type, $from, $from_type, $to, $to_type);
+        if($to_ret) return $to_ret;
+
+        // Create a new connection
+        $result = DatabaseManager::query("main", 
+            "INSERT INTO connections (`name`, `type`, `from`, `from_type`, `to`, `to_type`)
+            VALUES
+            (:name, :type, :from, :from_type, :to, :to_type)", [
+                "name" => $name,
+                "type" => $type,
+                "from" => $from,
+                "from_type" => $from_type,
+                "to" => $to,
+                "to_type" => $to_type
+            ]);
+        if(!$result) Status::message(Status::ERROR, "Couldn't create a connection if the DB");
+
+        CacheManager::getTable('connections', true); // Refresh cache
+        // Return connection ID
+        return self::connectionExists($name, $type, $from, $from_type, $to, $to_type);
+    }
 }
 
 ?>

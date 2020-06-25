@@ -210,5 +210,66 @@ class Task {
         // If no result is true then return false
         return false;
     }
+
+    /**
+     * Checks if a task exists
+     * 
+     * @param string $name The name of the task
+     * 
+     * @return int|bool The ID of the task or FALSE if doesn't exist
+     */
+    public static function taskExists($name) {
+        $tasks = CacheManager::get('tasks');
+        foreach($tasks as $id => $task) if($task['name'] == $name) return $id;
+        return false;
+    }
+
+    /**
+     * Create a new task or return it's ID if exists
+     * 
+     * @param string $name The name of the task
+     * @param array $process_ids ID's of the processes to associate with the task
+     * 
+     * @return int The ID of the task
+     */
+    public static function createTask($name, $process_ids) {
+        // If task exist then return its ID
+        $task_id = self::taskExists($name);
+        if($task_id) return $task_id;
+
+        // Check if processes are valid
+        $processes = CacheManager::get('processes');
+        foreach($process_ids as $id)
+            if(!isset($processes[$id]))
+                Status::message(Status::ERROR, "Process ID's provided do not exist");
+
+        // Add task
+        $result = DatabaseManager::query("main", "INSERT INTO tasks (name) VALUES (:name)", [ "name" => $name ]);
+        if(!$result) Status::message(Status::ERROR, "Couldn't create task in database");
+        CacheManager::getTable('tasks', true); // Refresh cache
+        $task_id = self::taskExists($name);
+
+        // Create task<->process list
+        $task_process_list = [];
+        $insert_values = []; // Used for insert query
+        foreach($process_ids as $id) {
+            $insert_values[] = "(:task_" . $id . ", :process_" . $id . ")";
+            $task_process_list['task_' . $id] = $task_id;
+            $task_process_list['process_' . $id] = $id;
+        }
+        $query = "INSERT INTO task_processes (task, process) VALUES " . implode(",", $insert_values);
+
+        // Connect the connections
+        $result = DatabaseManager::query("main", $query, $task_process_list);
+        if(!$result) { // In case of error
+            // Remove process
+            DatabaseManager::query("main", "DELETE FROM tasks WHERE name = :name", [ "name" => $name ]);
+            CacheManager::getTable('tasks', true); // Refresh cache
+            Status::message(Status::ERROR, "Couldn't link task with given processes in DB");
+        }
+
+        CacheManager::getTable('task_processes', true, 0, 'task', false); // Refresh cache
+        return $task_id;
+    }
 }
 ?>

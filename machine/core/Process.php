@@ -274,6 +274,54 @@ class Process {
     }
 
     /**
+     * Create a new process or return it's ID if exists
+     * 
+     * @param string $name The name of the process
+     * @param array $connection_ids ID's of the connections to associate with the process
+     * 
+     * @return int The ID of the process
+     */
+    public static function createProcess($name, $connection_ids) {
+        // Return process if exists
+        $process_id = self::processExists($name);
+        if($process_id) return $process_id;
+        
+        // Check if connections are valid
+        $connections = CacheManager::get('connections');
+        foreach($connection_ids as $id)
+            if(!isset($connections[$id]))
+                Status::message(Status::ERROR, "Connection ID's provided do not exist");
+
+        // Add process
+        $result = DatabaseManager::query("main", "INSERT INTO processes (name) VALUES (:name)", [ "name" => $name ]);
+        if(!$result) Status::message(Status::ERROR, "Couldn't create process in database");
+        CacheManager::getTable('processes', true); // Refresh cache
+        $process_id = self::processExists($name);
+
+        // Create connection<->process list
+        $connection_process_list = [];
+        $insert_values = []; // Used for insert query
+        foreach($connection_ids as $id) {
+            $insert_values[] = "(:process_" . $id . ", :connection_" . $id . ")";
+            $connection_process_list['process_' . $id] = $process_id;
+            $connection_process_list['connection_' . $id] = $id;
+        }
+        $query = "INSERT INTO process_connections (process, connection) VALUES " . implode(",", $insert_values);
+
+        // Connect the connections
+        $result = DatabaseManager::query("main", $query, $connection_process_list);
+        if(!$result) { // In case of error
+            // Remove process
+            DatabaseManager::query("main", "DELETE FROM processes WHERE name = :name", [ "name" => $name ]);
+            CacheManager::getTable('processes', true); // Refresh cache
+            Status::message(Status::ERROR, "Couldn't link process with given connections in DB");
+        }
+
+        CacheManager::getTable('process_connections', true, 0, 'process', false); // Refresh cache
+        return $process_id;
+    }
+
+    /**
      * Check if a connection already exists
      * 
      * @param string $name The name of the connection
@@ -283,7 +331,7 @@ class Process {
      * @param string $to ID of the element connected is going to
      * @param string $to_type The type of the to element
      * 
-     * @return int|bool The ID of the process or FALSE if doesn't exist
+     * @return int|bool The ID of the connection or FALSE if doesn't exist
      */
     public static function connectionExists($name, $type, $from, $from_type, $to, $to_type) {
         $connections = CacheManager::get('connections');
@@ -300,6 +348,15 @@ class Process {
 
     /**
      * Creates a new connection and returns it's ID, if a connection exists it returns the ID.
+     * 
+     * @param string $name The name of the connection
+     * @param string $type Type of the connection
+     * @param string $from ID of the element the conenction is coming from
+     * @param string $from_type The type of the from element
+     * @param string $to ID of the element connected is going to
+     * @param string $to_type The type of the to element
+     * 
+     * @return int|bool The ID of the connection
      */
     public static function createConnection($name, $type, $from, $from_type, $to, $to_type) {
         // Check if a connection already exists
@@ -308,7 +365,7 @@ class Process {
 
         // Create a new connection
         $result = DatabaseManager::query("main", 
-            "INSERT INTO connections (`name`, `type`, `from`, `from_type`, `to`, `to_type`)
+            "INSERT INTO connections (`name`, `connection_type`, `from`, `from_type`, `to`, `to_type`)
             VALUES
             (:name, :type, :from, :from_type, :to, :to_type)", [
                 "name" => $name,
@@ -318,7 +375,7 @@ class Process {
                 "to" => $to,
                 "to_type" => $to_type
             ]);
-        if(!$result) Status::message(Status::ERROR, "Couldn't create a connection if the DB");
+        if(!$result) Status::message(Status::ERROR, "Couldn't create a connection in the DB");
 
         CacheManager::getTable('connections', true); // Refresh cache
         // Return connection ID

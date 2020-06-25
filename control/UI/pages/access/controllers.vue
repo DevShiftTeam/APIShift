@@ -65,7 +65,7 @@
                     controller: '',
                     method: '',
                     type: '',
-                    rule: 0
+                    rule: null
                 }
             },
             discard: function() {

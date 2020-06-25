@@ -24,7 +24,9 @@ namespace APIShift\Controllers\Admin\Access;
 use APIShift\Core\CacheManager;
 use APIShift\Core\DataManager;
 use APIShift\Core\DatabaseManager;
+use APIShift\Core\Process;
 use APIShift\Core\Status;
+use APIShift\Core\Task;
 
 /**
  * Interface containing the available request to manipulate access rules to controllers
@@ -123,30 +125,34 @@ class Controller
             case "Function":
                 // Check if function exists
                 if(!is_callable($_POST['rule'])) Status::message(Status::ERROR, "Function not found");
-                
-                // Add function as task if not exists
-                $name = 'function_' . $_POST['rule'];
+
+                // Get task ID
+                $task_name = 'function_' . $_POST['rule'];
+                $task_id = 0;
                 $tasks = CacheManager::get('tasks');
-                $task_test = false;
-                $input_id = 0;
-
-                foreach($tasks as $key => $val) {
-                    if ($val['name'] == $name) { 
-                        $task_test = true;
-                        break;
-                    }
+                foreach($tasks as $id => $task) if($task['name'] == $task_name) $task_id = $id;
+                // Add function as task if not exists
+                if($task_id == 0) {
+                    // Add connection and get its ID
+                    $connection_id = Process::createConnection($_POST['rule'], 0, null, null, null, null);
+                    // Add process and get it's ID
+                    $process_id = Process::createProcess($task_name, [ $connection_id ]);
+                    // Create task and get it's ID
+                    $task_id = Task::createTask($task_name, [ $process_id ]);
                 }
-                if (!$task_test) {
-                    DatabaseManager::query(
-                        "main",
-                        "INSERT INTO connections (connection_type, name, from_type, `from`, to_type, `to`) VALUES (4, :name, 0, 0, 0, 0)",
-                        ['name' => $name]
-                    );
-
-                }
-                // TODO: Create function inputs as instructed
-                // TODO: Assign task to controller
-                Status::message(Status::ERROR, "Comming Soon!");
+                
+                // Assign task to controller
+                $result = DatabaseManager::query(
+                    "main",
+                    "INSERT INTO request_authorization (controller, method, task, input) VALUES (:controller, :method, :auth, :input)",
+                    [
+                        'controller' => $_POST['controller'],
+                        'method' => $_POST['method'],
+                        'auth' => $task_id,
+                        'input' => 0
+                    ]
+                );
+                if (!$result) Status::message(Status::ERROR, "Couldn't create request authorization in DB");
                 break;
             case "Task":
                 // Check if task exists
@@ -237,12 +243,26 @@ class Controller
                     }
                     break;
                 case "Function":
-                    // TODO: Check if function exists
-                    // if(!is_callable($_POST['rule'])) Status::message(Status::ERROR, "Function not found");
-                    // TODO: Add function as task if not exists
+                    // Check if function exists
+                    if(!is_callable($_POST['rule'])) Status::message(Status::ERROR, "Function not found");
+
+                    // Get task ID
+                    $task_name = 'function_' . $_POST['rule'];
+                    $task_id = 0;
+                    $task_id = Task::taskExists($task_name);
+                    // Add function as task if not exists
+                    if(!$task_id) {
+                        // Add connection and get its ID
+                        $connection_id = Process::createConnection($_POST['rule'], 4, null, null, null, null);
+                        // Add process and get it's ID
+                        $process_id = Process::createProcess($task_name, [ $connection_id ]);
+                        // Create task and get it's ID
+                        $task_id = Task::createTask($task_name, [ $process_id ]);
+                    }
+                    
                     // TODO: Create function inputs as instructed
                     $new_values['input'] = 0;
-                    Status::message(Status::ERROR, "Comming Soon!");
+                    $new_values['task'] = $task_id;
                     break;
                 case "Task":
                     $new_values['input'] = 0;

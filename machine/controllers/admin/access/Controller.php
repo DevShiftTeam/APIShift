@@ -116,7 +116,7 @@ class Controller
                     [
                         'controller' => $_POST['controller'],
                         'method' => $_POST['method'],
-                        'auth' => 3, // The 'state_auth' task
+                        'auth' => 2, // The 'state_auth' task
                         'input' => $input_id
                     ]
                 );
@@ -200,7 +200,7 @@ class Controller
                     // Check if state exists
                     $states = CacheManager::get("session_states");
                     if (!isset($states[$_POST['rule']['val']]) && $_POST['rule']['val'] != 0) Status::message(Status::ERROR, "State doesn't exist");
-                    $new_values['task'] = 3; // The 'state_auth' task ID
+                    $new_values['task'] = 2; // The 'state_auth' task ID
 
                     // Check if state task exists
                     $name = 'state_' . $_POST['rule']['text'];

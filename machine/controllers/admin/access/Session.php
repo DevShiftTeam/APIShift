@@ -76,7 +76,7 @@ class Session {
                 case "State":
                     // Check if state exists
                     if (!isset($states[$_POST['rule']['val']]) && $_POST['rule']['val'] != 0) Status::message(Status::ERROR, "State doesn't exist");
-                    $new_values['auth_task'] = 3; // The 'state_auth' task ID
+                    $new_values['auth_task'] = 2; // The 'state_auth' task ID
 
                     // Check if state task exists
                     $name = 'state_' . $_POST['rule']['text'];

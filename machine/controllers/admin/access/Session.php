@@ -171,7 +171,6 @@ class Session {
      * Remove an access rule.
      * The structure of the request should like like this:
      * [
-     *  'elem' => To which element to apply the auth rule (session, controller, database)
      *  'id' => Element ID to remove from
      * ]
      */

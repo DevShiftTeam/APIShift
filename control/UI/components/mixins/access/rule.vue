@@ -59,7 +59,7 @@
                         break;
                     case "State":
                         // Get all available states
-                        APIShift.API.request("Admin\\SessionState", "getAllSessionStates", {}, function(response) {
+                        APIShift.API.request("Admin\\Session\\Main", "getAllSessionStates", {}, function(response) {
                             handler.access_names = [];
                             if(response.status == APIShift.API.status_codes.SUCCESS) {
                                 handler.access_names.push({ text: "DEFAULT_VIEWER", val: 0 }); // Add default state

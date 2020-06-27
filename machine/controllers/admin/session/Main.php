@@ -19,7 +19,7 @@
  * @author Sapir Shemer
  */
 
-namespace APIShift\Controllers\Admin;
+namespace APIShift\Controllers\Admin\Session;
 
 use APIShift\Core;
 use APIShift\Core\CacheManager;
@@ -29,7 +29,7 @@ use APIShift\Core\Status;
 /**
  * Provides a set of request handlers that allows users to manipulate the session state element
  */
-class SessionState {
+class Main {
     /**
      * Get all the session states available
      */

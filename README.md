@@ -4,7 +4,7 @@
 # APIShift Engine
 </div>
 
-APIShift provides a platform with pre-made tools, structure and workflow that can become any API or back-end you want. You can implement architectures from REST, SOAP or your own application specific implementation. The main idea is to allow developers to build a back-end for any site and application much faster and easier using a simple, extendable and agile architecture and workflow. APIShift is made with performance an efficiency in mind, the platform hides a lot of implementation details and provides data access optimization tools to make you access your data much faster during run-time.
+APIShift provides a platform with pre-made tools, structure and workflow that can become any API or back-end you want. You can implement architectures from REST, SOAP or your own application specific implementation. The main idea is to allow developers to build a back-end for any site and application much faster and easier using a simple, extendable and agile architecture and workflow. APIShift is made with performance an efficiency in mind, the platform hides implementation details under simple interfaces and provides data access optimization tools to make you access your data much faster during run-time.
 
 The system separates and operates the following areas of your back-end:
  * **Requests**: Develop your own requests & their responses with a helpful and configurable set of tools, and a ready to use efficient workflow set up for you. (*Status*: **``Ready``**)

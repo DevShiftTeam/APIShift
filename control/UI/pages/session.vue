@@ -259,7 +259,8 @@
                                         <!-- Remove state dialog & trigger -->
                                         <v-tooltip top>
                                             <template #activator="{ on }">
-                                                <v-btn icon v-on="on" @click="deleteState(key)" :disabled="adding_state || delete_dialog || (in_edit != key && in_edit != 0)">
+                                                <v-btn icon v-on="on" @click="deleteState(key)"
+                                                    :disabled="(in_edit != key && in_edit != 0) || (in_edit == key && (!adding_state || !delete_dialog))">
                                                     <v-icon>mdi-minus-circle</v-icon>
                                                 </v-btn>
                                             </template>

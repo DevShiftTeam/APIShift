@@ -336,7 +336,7 @@
                                                 </v-btn>
                                             </template>
                                             <v-card>
-                                                <v-card-title>Edit {{ states_collection[in_edit] !== undefined ? states_collection[in_edit].name : '' }} Structure</v-card-title>
+                                                <v-card-title>Edit {{ val.name }} Structure</v-card-title>
                                                 <v-card-text>
                                                 </v-card-text>
                                                 <v-divider></v-divider>

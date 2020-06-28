@@ -21,6 +21,7 @@
     module.exports = {
         data() {
             return {
+                search: '',
                 states_collection: {},
                 editor_previous: {},
                 current_parent: 0,
@@ -29,7 +30,14 @@
                 delete_dialog: false,
                 discard_dialog: false,
                 adding_state: false,
-                edit_state_structure: false
+                edit_state_structure: false,
+                structure_headers: [
+                    { text: 'Name', value: 'name', },
+                    { text: 'Task', value: 'task_name', },
+                    { text: 'Actions', value: 'actions' },
+                ],
+                structures: {},
+                structure_in_edit: false
             }
         },
         created() {
@@ -65,9 +73,17 @@
                 this.current_parent = parent;
             },
             updateSessionStates: function() {
+                // Get all sessions
                 APIShift.API.request("Admin\\Session\\Main", "getAllSessionStates", {}, function(response) {
                     if(response.status == true) handler.states_collection = Object.assign({}, response.data);
                     else APIShift.API.notify(response.data, 'error');
+                });
+
+                // Get all structures
+                APIShift.API.request("Admin\\Session\\Structure", "getAllSessionStructures", { }, function(response) {
+                    if(response.status == true) handler.structures = Object.assign({}, response.data);
+                    else APIShift.API.notify(response.data, 'error');
+                    handler.in_edit = 0;
                 });
             },
             createState: function() {
@@ -329,16 +345,44 @@
                                     </v-card-text>
 
                                     <v-card-actions>
-                                        <v-dialog v-model="edit_state_structure" max-width="500px">
+                                        <v-dialog v-model="edit_state_structure" max-width="1000px">
                                             <template v-slot:activator="{ on }">
                                                 <v-btn v-on="on" text color="blue accent-4" width="100%" :click="function() {in_edit = key;}">
                                                     Edit Structure
                                                 </v-btn>
                                             </template>
                                             <v-card>
-                                                <v-card-title>Edit {{ val.name }} Structure</v-card-title>
-                                                <v-card-text>
-                                                </v-card-text>
+                                                <v-data-table
+                                                    class="mx-auto ca_table" elevation-2 max-height="75%"
+                                                    :headers="structure_headers"
+                                                    :items="structures[key]"
+                                                    :search="search">
+                                                        <template v-slot:top>
+                                                            <v-app-bar>
+                                                                <v-toolbar-title>Edit {{ val.name }} Structure</v-toolbar-title>
+                                                                <v-spacer></v-spacer>
+                                                                <v-text-field
+                                                                    v-model="search"
+                                                                    append-icon="mdi-magnify"
+                                                                    label="Search"
+                                                                    single-line
+                                                                    :loading="app.loader.visible"
+                                                                    :loading-text="app.loader.message"
+                                                                    hide-details></v-text-field>
+                                                                <v-spacer></v-spacer>
+                                                                <v-tooltip top>
+                                                                    <template #activator="{ on }">
+                                                                        <v-btn icon v-on="on">
+                                                                            <v-icon v-if="structure_in_edit">mdi-close-circle</v-icon>
+                                                                            <v-icon v-else>mdi-plus-circle</v-icon>
+                                                                        </v-btn>
+                                                                    </template>
+                                                                    <span v-if="structure_in_edit">Discard new session structure key</span>
+                                                                    <span v-else>Add new session structure key</span>
+                                                                </v-tooltip>
+                                                            </v-app-bar>
+                                                        </template>
+                                                    </v-data-table>
                                                 <v-divider></v-divider>
                                                 <v-card-actions>
                                                     <v-spacer></v-spacer>

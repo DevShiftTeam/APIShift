@@ -28,6 +28,23 @@ use APIShift\Core\Status;
  * This controller provides an interface to manipulate each session state structure
  */
 class Structure {
+    public static function getAllSessionStructures () {
+        $structures = CacheManager::get('session_state_structures');
+
+        // Attach inputs and tasks to structure
+        $inputs = CacheManager::get('inputs');
+        $tasks = CacheManager::get('tasks');
+        foreach($structures as &$states) {
+            foreach($states as &$keys) {
+                $keys['task_name'] = $tasks[$keys['task']]['name'];
+                $keys['input_name'] = $inputs[$keys['input']]['name'];
+                unset($keys['task']); unset($keys['input']);
+            }
+        }
+
+        Status::message(Status::SUCCESS, $structures); // Return the result
+    }
+
     public static function getSessionStructure() {
         if(!isset($_POST['id'])) Status::message(Status::ERROR, "No state ID specified");
         if($_POST['id'] != 0 && !isset(CacheManager::get('session_states')[$_POST['id']])) Status::message(Status::ERROR, "Invalid state ID");

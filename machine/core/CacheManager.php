@@ -89,6 +89,7 @@
 
         // Load frequently used data by the system to cache
         self::getTable('session_states', $refresh);
+        self::getTable('session_state_structures', $refresh, 0, 'state', false);
         self::getTable('statuses', $refresh);
         self::getTable('data_source_types', $refresh);
         self::getTable('data_sources', $refresh);

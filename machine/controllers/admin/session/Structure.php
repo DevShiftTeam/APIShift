@@ -21,9 +21,33 @@
 
 namespace APIShift\Controllers\Admin\Session;
 
+use APIShift\Core\CacheManager;
+use APIShift\Core\Status;
+
 /**
  * This controller provides an interface to manipulate each session state structure
  */
 class Structure {
+    public static function getSessionStructure() {
+        if(!isset($_POST['id'])) Status::message(Status::ERROR, "No state ID specified");
+        if($_POST['id'] != 0 && !isset(CacheManager::get('session_states')[$_POST['id']])) Status::message(Status::ERROR, "Invalid state ID");
+
+        $structures = CacheManager::get('session_state_structures');
+        if(!isset($structures[$_POST['id']])) Status::message(Status::SUCCESS, []); // Return empty set of no structure found
+        $structures = $structures[$_POST['id']]; // Get specific state only
+
+        // Attach inputs and tasks to structure
+        $inputs = CacheManager::get('inputs');
+        $tasks = CacheManager::get('tasks');
+        foreach($structures as &$keys) {
+            $keys['task'] = $tasks[$keys['task']]['name'];
+            $keys['input'] = $inputs[$keys['input']]['name'];
+        }
+
+        Status::message(Status::SUCCESS, $structures); // Return the result
+    }
+
+    public static function addSessionStructure() {}
     
+    public static function removeSessionStructure() {}
 }

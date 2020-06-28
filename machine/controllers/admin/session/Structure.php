@@ -40,14 +40,15 @@ class Structure {
         $inputs = CacheManager::get('inputs');
         $tasks = CacheManager::get('tasks');
         foreach($structures as &$keys) {
-            $keys['task'] = $tasks[$keys['task']]['name'];
-            $keys['input'] = $inputs[$keys['input']]['name'];
+            $keys['task_name'] = $tasks[$keys['task']]['name'];
+            $keys['input_name'] = $inputs[$keys['input']]['name'];
+            unset($keys['task']); unset($keys['input']);
         }
 
         Status::message(Status::SUCCESS, $structures); // Return the result
     }
 
     public static function addSessionStructure() {}
-    
+
     public static function removeSessionStructure() {}
 }

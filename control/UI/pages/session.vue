@@ -28,7 +28,8 @@
                 in_edit: 0,
                 delete_dialog: false,
                 discard_dialog: false,
-                adding_state: false
+                adding_state: false,
+                edit_state_structure: false
             }
         },
         created() {
@@ -220,7 +221,7 @@
                                         <v-toolbar-title>{{ val.name }}</v-toolbar-title>
                                         <v-spacer></v-spacer>
                                         <!-- Discard changes -->
-                                        <v-tooltip v-if="key == in_edit" top>
+                                        <v-tooltip v-if="key == in_edit && !delete_dialog" top>
                                             <template #activator="{ on }">
                                                 <v-btn icon v-on="on" @click="discardStateEdit()">
                                                     <v-icon>mdi-close-circle</v-icon>
@@ -245,7 +246,7 @@
                                         <!-- Edit state dialog & trigger -->
                                         <v-tooltip top>
                                             <template #activator="{ on }">
-                                                <v-btn v-if="key == in_edit" icon v-on="on" @click="saveStateEdit()">
+                                                <v-btn v-if="key == in_edit && !delete_dialog" icon v-on="on" @click="saveStateEdit()">
                                                     <v-icon>mdi-checkbox-marked-circle</v-icon>
                                                 </v-btn>
                                                 <v-btn v-else icon v-on="on" @click="startStateEdit(key)" :disabled="in_edit != key && in_edit != 0">
@@ -258,7 +259,7 @@
                                         <!-- Remove state dialog & trigger -->
                                         <v-tooltip top>
                                             <template #activator="{ on }">
-                                                <v-btn icon v-on="on" @click="deleteState(key)" :disabled="(key == in_edit && adding_state) || (in_edit != key && in_edit != 0)">
+                                                <v-btn icon v-on="on" @click="deleteState(key)" :disabled="adding_state || delete_dialog || (in_edit != key && in_edit != 0)">
                                                     <v-icon>mdi-minus-circle</v-icon>
                                                 </v-btn>
                                             </template>
@@ -268,13 +269,13 @@
                                             <v-card>
                                                 <v-card-title>Sure?</v-card-title>
                                                 <v-card-text>
-                                                    Deleting the session state will remove all authorization processes attached to it.
+                                                    Deleting the session state will break all the state changes happening to it.
                                                 </v-card-text>
                                                 <v-divider></v-divider>
                                                 <v-card-actions>
                                                     <v-spacer></v-spacer>
                                                     <v-btn color="primary" text @click="deleteState()">Remove</v-btn>
-                                                    <v-btn text @click="delete_dialog = false">Cancel</v-btn>
+                                                    <v-btn text @click="delete_dialog = false; in_edit = 0;">Cancel</v-btn>
                                                 </v-card-actions>
                                             </v-card>
                                         </v-dialog>
@@ -297,7 +298,7 @@
                                                         class="session_field"
                                                         type="text" label="name"
                                                         v-model="val.name"
-                                                        :disabled="in_edit != key"></v-text-field>
+                                                        :disabled="in_edit != key || delete_dialog"></v-text-field>
                                                 </template>
                                                 <span>Session Name</span>
                                             </v-tooltip>
@@ -308,7 +309,7 @@
                                                         type="number"
                                                         label="active timeout"
                                                         v-model="val.active_timeout"
-                                                        :disabled="in_edit != key"></v-text-field>
+                                                        :disabled="in_edit != key || delete_dialog"></v-text-field>
                                                 </template>
                                                 <span>Timeout When User Active (s)</span>
                                             </v-tooltip>
@@ -319,7 +320,7 @@
                                                         type="number"
                                                         label="inactive timeout"
                                                         v-model="val.inactive_timeout"
-                                                        :disabled="in_edit != key"></v-text-field>
+                                                        :disabled="in_edit != key || delete_dialog"></v-text-field>
                                                 </template>
                                                 <span>Timeout When User Inactive (s)</span>
                                             </v-tooltip>
@@ -327,9 +328,24 @@
                                     </v-card-text>
 
                                     <v-card-actions>
-                                        <v-btn text color="blue accent-4" width="100%">
-                                            Edit Structure
-                                        </v-btn>
+                                        <v-dialog v-model="edit_state_structure" max-width="500px">
+                                            <template v-slot:activator="{ on }">
+                                                <v-btn v-on="on" text color="blue accent-4" width="100%" :click="function() {in_edit = key;}">
+                                                    Edit Structure
+                                                </v-btn>
+                                            </template>
+                                            <v-card>
+                                                <v-card-title>Edit {{ states_collection[in_edit] !== undefined ? states_collection[in_edit].name : '' }} Structure</v-card-title>
+                                                <v-card-text>
+                                                </v-card-text>
+                                                <v-divider></v-divider>
+                                                <v-card-actions>
+                                                    <v-spacer></v-spacer>
+                                                    <v-btn color="primary" text>Save</v-btn>
+                                                    <v-btn text @click="edit_state_structure = false">Cancel</v-btn>
+                                                </v-card-actions>
+                                            </v-card>
+                                        </v-dialog>
                                         <v-btn text color="purple accent-4" width="100%" @click="setParentView(key)">
                                             View Children
                                         </v-btn>

@@ -32,12 +32,28 @@
                 adding_state: false,
                 edit_state_structure: false,
                 structure_headers: [
-                    { text: 'Name', value: 'name', },
+                    { text: 'Key Name', value: 'name', },
                     { text: 'Task', value: 'task_name', },
                     { text: 'Actions', value: 'actions' },
                 ],
                 structures: {},
-                structure_in_edit: false
+                structure_in_edit: false,
+                delete_structure_key_dialog: false,
+                data_entries: {},
+                data_sources: {},
+                task_input_values: {},
+                key_types: [
+                    "Function",
+                    "Task",
+                    "Const",
+                    "Variable",
+                    "Array Key",
+                    "Table",
+                    "Array",
+                    "Class",
+                    "Instance"
+                ],
+                key_names: []
             }
         },
         created() {
@@ -81,7 +97,18 @@
 
                 // Get all structures
                 APIShift.API.request("Admin\\Session\\Structure", "getAllSessionStructures", { }, function(response) {
-                    if(response.status == true) handler.structures = Object.assign({}, response.data);
+                    if(response.status == APIShift.API.status_codes.SUCCESS) handler.structures = Object.assign({}, response.data);
+                    else APIShift.API.notify(response.data, 'error');
+                    handler.in_edit = 0;
+                });
+
+                // Get entries metadata
+                APIShift.API.request("Admin\\Data", "getMetadata", {}, function(response) {
+                    if(response.status == APIShift.API.status_codes.SUCCESS) {
+                        handler.data_entries = Object.assign({}, response.data.entries);
+                        handler.data_sources = Object.assign({}, response.data.sources);
+                        handler.task_input_values = Object.assign({}, response.data.inputs);
+                    }
                     else APIShift.API.notify(response.data, 'error');
                     handler.in_edit = 0;
                 });
@@ -200,8 +227,64 @@
                 // Close dialog
                 Vue.delete(this.states_collection, id);
                 this.delete_dialog = false;
+            },
+            
+            getKeyType: function(key) {
+                if(key.task_name == null || key.task_name == "") return "Not Set";
+                if(key.task_name.indexOf("_") == -1) return "Task";
+                if(key.task_name == 'entry_fetch') {
+                    // Get entry type and return it
+                    let entry = handler.data_entries[handler.task_input_values[key.input][0].value];
+                    switch(entry.type) {
+                        case 1: return "Array Key"; break; 
+                        case 2: return "Variable"; break;
+                        case 3: return "Constant"; break;
+                    }
+                }
+                if(key.task_name == 'source_fetch') {
+                    // Get source type and return it
+                    let sources = handler.data_sources[handler.task_input_values[key.input][0].value];
+                    switch(entry.type) {
+                        case 1: return "Array"; break; 
+                        case 2: return "Table"; break;
+                        case 5: return "Class"; break;
+                        case 6: return "Instance"; break;
+                    }
+                }
+                let prefix = key.task_name.substring(0, key.task_name.indexOf("_"));
+                if(prefix == 'function') return "Function";
+                return "Task";
+            },
+
+            getKeyName: function(key) {
+                let type = this.getKeyType(key);
+                var entry = null;
+                var source = null;
+                switch(type) {
+                    case "Task": return key.task_name;
+                    case "Not Set": return "";
+                    case "Array Key":
+                        entry = this.data_entries[this.task_input_values[key.input][0].value];
+                        source = this.data_sources[entry.source];
+                        return source.name + "['" + entry.name + "']";
+                    case "Variable":
+                        entry = this.data_entries[this.task_input_values[key.input][0].value];
+                        if(entry.source == 0) return '$' + entry.name;
+                        source = this.data_sources[entry.source];
+                        switch(source.type) {
+                            case 5: return source.name + "::$" + entry.name;
+                            case 6: return "$" + source.name + "->$" + entry.name;
+                        }
+                        break;
+                    case "Constant": return '"' + this.data_entries[this.task_input_values[key.input][0].value].name + '"';
+                    case "Array":
+                    case "Table":
+                    case "Instance": return '$' + this.data_sources[this.task_input_values[key.input][0].value].name;
+                    case "Class": return this.data_sources[this.task_input_values[key.input][0].value].name;
+                }
+                
             }
-        },
+        }
     };
 </script>
 
@@ -381,6 +464,36 @@
                                                                     <span v-else>Add new session structure key</span>
                                                                 </v-tooltip>
                                                             </v-app-bar>
+                                                        </template>
+
+                                                        <template v-slot:item.task_name="{ item }">
+                                                            <v-chip>{{ getKeyType(item) }}</v-chip>
+                                                            <span>{{ getKeyName(item) }}</span>
+                                                        </template>
+
+                                                        <template v-slot:item.actions="{ }">
+                                                            <v-icon>
+                                                                mdi-pencil-circle
+                                                            </v-icon>
+                                                            <!-- Delete dialog -->
+                                                            <v-dialog v-model="delete_structure_key_dialog" max-width="500px">
+                                                                <template v-slot:activator="{ on }">
+                                                                    <v-icon v-on="on">
+                                                                        mdi-delete-circle
+                                                                    </v-icon>
+                                                                </template>
+                                                                <v-card>
+                                                                    <v-card-title>Sure?</v-card-title>
+                                                                    <v-card-text>
+                                                                    </v-card-text>
+                                                                    <v-divider></v-divider>
+                                                                    <v-card-actions>
+                                                                        <v-spacer></v-spacer>
+                                                                        <v-btn color="primary" text>Remove</v-btn>
+                                                                        <v-btn text @click="delete_structure_key_dialog = false">Cancel</v-btn>
+                                                                    </v-card-actions>
+                                                                </v-card>
+                                                            </v-dialog>
                                                         </template>
                                                     </v-data-table>
                                                 <v-divider></v-divider>

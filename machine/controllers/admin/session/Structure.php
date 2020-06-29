@@ -35,34 +35,41 @@ class Structure {
         $inputs = CacheManager::get('inputs');
         $tasks = CacheManager::get('tasks');
         foreach($structures as &$states) {
-            foreach($states as &$keys) {
-                $keys['task_name'] = $tasks[$keys['task']]['name'];
-                $keys['input_name'] = $inputs[$keys['input']]['name'];
-                unset($keys['task']); unset($keys['input']);
+            foreach($states as &$key) {
+                // Get name with parents
+                $full_name = $key['key'];
+                $iterator = $key;
+                while($iterator['parent'] != 0) {
+                    $iterator = $states[$iterator['parent']];
+                    $full_name = $iterator['key'] . "\\" . $key;
+                }
+                $key['name'] = $full_name;
+                $key['task_name'] = $tasks[$key['task']]['name'];
+                unset($key['task']);
             }
         }
 
-        Status::message(Status::SUCCESS, $structures); // Return the result
+        Status::message(Status::SUCCESS, $structures);
     }
 
     public static function getSessionStructure() {
         if(!isset($_POST['id'])) Status::message(Status::ERROR, "No state ID specified");
         if($_POST['id'] != 0 && !isset(CacheManager::get('session_states')[$_POST['id']])) Status::message(Status::ERROR, "Invalid state ID");
 
+        // Get specific state
         $structures = CacheManager::get('session_state_structures');
         if(!isset($structures[$_POST['id']])) Status::message(Status::SUCCESS, []); // Return empty set of no structure found
-        $structures = $structures[$_POST['id']]; // Get specific state only
+        $structures = $structures[$_POST['id']];
 
         // Attach inputs and tasks to structure
         $inputs = CacheManager::get('inputs');
         $tasks = CacheManager::get('tasks');
         foreach($structures as &$keys) {
             $keys['task_name'] = $tasks[$keys['task']]['name'];
-            $keys['input_name'] = $inputs[$keys['input']]['name'];
-            unset($keys['task']); unset($keys['input']);
+            unset($keys['task']);
         }
 
-        Status::message(Status::SUCCESS, $structures); // Return the result
+        Status::message(Status::SUCCESS, $structures);
     }
 
     public static function addSessionStructure() {}

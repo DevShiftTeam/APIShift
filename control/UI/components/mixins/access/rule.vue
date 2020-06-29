@@ -33,7 +33,6 @@
         methods: {
             getRuleType(rule) {
                 if(rule.task_name == null || rule.task_name == "") return "Not Set";
-                if(rule.task_name.indexOf("_") == -1) return "Task";
                 if(rule.task_name == 'state_auth') return "State";
                 let prefix = rule.task_name.substring(0, rule.task_name.indexOf("_"));
                 if(prefix == 'function') return "Function";

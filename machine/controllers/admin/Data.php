@@ -37,20 +37,10 @@ class Data {
     }
 
     public static function getMetadata() {
-        // Get sources and entries separately
-        $data_sources = CacheManager::get('data_sources');
-        $data_sources[0] = [ 'name' => 'No Source' ]; // Entries with no source belong to this
-        $data_entries = CacheManager::get('data_entries');
-
-        // Add entries to each source as array ordered by ID's
-        foreach($data_entries as $eid => &$entry) {
-            if(!isset($data_sources[$entry['source']]['entries'])) $data_sources[$entry['source']]['entries'] = [];
-            $data_sources[$entry['source']]['entries'][$eid] = &$entry;
-            unset($entry['source']); // Source not needed since already nested
-        }
-
-        // TODO: sources should have parents and children - needs to be first implemented in the database
-
-        Status::message(Status::SUCCESS, $data_sources);
+        Status::message(Status::SUCCESS, [
+            "entries" => CacheManager::get('data_entries'),
+            "sources" => CacheManager::get('data_sources'),
+            "inputs" => CacheManager::get('input_values')
+        ]);
     }
 }

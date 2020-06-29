@@ -231,28 +231,27 @@
             
             getKeyType: function(key) {
                 if(key.task_name == null || key.task_name == "") return "Not Set";
-                if(key.task_name.indexOf("_") == -1) return "Task";
-                if(key.task_name == 'entry_fetch') {
-                    // Get entry type and return it
-                    let entry = handler.data_entries[handler.task_input_values[key.input][0].value];
-                    switch(entry.type) {
-                        case 1: return "Array Key"; break; 
-                        case 2: return "Variable"; break;
-                        case 3: return "Constant"; break;
+                if(key.task_name == 'data_fetch') {
+                    if(handler.task_input_values[key.input][0].is_source) {
+                        // Get entry type and return it
+                        let entry = handler.data_entries[handler.task_input_values[key.input][0].value];
+                        switch(entry.type) {
+                            case 1: return "Array Key"; break; 
+                            case 2: return "Variable"; break;
+                            case 3: return "Constant"; break;
+                        }
+                    }
+                    else {
+                        let sources = handler.data_sources[handler.task_input_values[key.input][0].value];
+                        switch(entry.type) {
+                            case 1: return "Array"; break; 
+                            case 2: return "Table"; break;
+                            case 5: return "Class"; break;
+                            case 6: return "Instance"; break;
+                        }
                     }
                 }
-                if(key.task_name == 'source_fetch') {
-                    // Get source type and return it
-                    let sources = handler.data_sources[handler.task_input_values[key.input][0].value];
-                    switch(entry.type) {
-                        case 1: return "Array"; break; 
-                        case 2: return "Table"; break;
-                        case 5: return "Class"; break;
-                        case 6: return "Instance"; break;
-                    }
-                }
-                let prefix = key.task_name.substring(0, key.task_name.indexOf("_"));
-                if(prefix == 'function') return "Function";
+                if(key.task_name.indexOf('function') == 0) return "Function";
                 return "Task";
             },
 

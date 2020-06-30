@@ -277,8 +277,8 @@
                         break;
                     case "Constant": return '"' + this.data_entries[this.task_input_values[key.input][0].value].name + '"';
                     case "Array":
-                    case "Table":
                     case "Instance": return '$' + this.data_sources[this.task_input_values[key.input][0].value].name;
+                    case "Table":
                     case "Class": return this.data_sources[this.task_input_values[key.input][0].value].name;
                 }
                 
@@ -429,7 +429,7 @@
                                     <v-card-actions>
                                         <v-dialog v-model="edit_state_structure" max-width="1000px">
                                             <template v-slot:activator="{ on }">
-                                                <v-btn v-on="on" text color="blue accent-4" width="100%" :click="function() {in_edit = key;}">
+                                                <v-btn v-on="on" text color="blue accent-4" width="100%" @click="in_edit = key">
                                                     Edit Structure
                                                 </v-btn>
                                             </template>
@@ -437,64 +437,63 @@
                                                 <v-data-table
                                                     class="mx-auto ca_table" elevation-2 max-height="75%"
                                                     :headers="structure_headers"
-                                                    :items="structures[key]"
+                                                    :items="structures[in_edit]"
                                                     :search="search">
-                                                        <template v-slot:top>
-                                                            <v-app-bar>
-                                                                <v-toolbar-title>Edit {{ val.name }} Structure</v-toolbar-title>
-                                                                <v-spacer></v-spacer>
-                                                                <v-text-field
-                                                                    v-model="search"
-                                                                    append-icon="mdi-magnify"
-                                                                    label="Search"
-                                                                    single-line
-                                                                    :loading="app.loader.visible"
-                                                                    :loading-text="app.loader.message"
-                                                                    hide-details></v-text-field>
-                                                                <v-spacer></v-spacer>
-                                                                <v-tooltip top>
-                                                                    <template #activator="{ on }">
-                                                                        <v-btn icon v-on="on">
-                                                                            <v-icon v-if="structure_in_edit">mdi-close-circle</v-icon>
-                                                                            <v-icon v-else>mdi-plus-circle</v-icon>
-                                                                        </v-btn>
-                                                                    </template>
-                                                                    <span v-if="structure_in_edit">Discard new session structure key</span>
-                                                                    <span v-else>Add new session structure key</span>
-                                                                </v-tooltip>
-                                                            </v-app-bar>
-                                                        </template>
-
-                                                        <template v-slot:item.task_name="{ item }">
-                                                            <v-chip>{{ getKeyType(item) }}</v-chip>
-                                                            <span>{{ getKeyName(item) }}</span>
-                                                        </template>
-
-                                                        <template v-slot:item.actions="{ }">
-                                                            <v-icon>
-                                                                mdi-pencil-circle
-                                                            </v-icon>
-                                                            <!-- Delete dialog -->
-                                                            <v-dialog v-model="delete_structure_key_dialog" max-width="500px">
-                                                                <template v-slot:activator="{ on }">
-                                                                    <v-icon v-on="on">
-                                                                        mdi-delete-circle
-                                                                    </v-icon>
+                                                    <template v-slot:top>
+                                                        <v-app-bar>
+                                                            <v-toolbar-title>Edit {{ states_collection[in_edit].name }} Structure</v-toolbar-title>
+                                                            <v-spacer></v-spacer>
+                                                            <v-text-field
+                                                                v-model="search"
+                                                                append-icon="mdi-magnify"
+                                                                label="Search"
+                                                                single-line
+                                                                :loading="app.loader.visible"
+                                                                :loading-text="app.loader.message"
+                                                                hide-details></v-text-field>
+                                                            <v-spacer></v-spacer>
+                                                            <v-tooltip top>
+                                                                <template #activator="{ on }">
+                                                                    <v-btn icon v-on="on">
+                                                                        <v-icon v-if="structure_in_edit">mdi-close-circle</v-icon>
+                                                                        <v-icon v-else>mdi-plus-circle</v-icon>
+                                                                    </v-btn>
                                                                 </template>
-                                                                <v-card>
-                                                                    <v-card-title>Sure?</v-card-title>
-                                                                    <v-card-text>
-                                                                    </v-card-text>
-                                                                    <v-divider></v-divider>
-                                                                    <v-card-actions>
-                                                                        <v-spacer></v-spacer>
-                                                                        <v-btn color="primary" text>Remove</v-btn>
-                                                                        <v-btn text @click="delete_structure_key_dialog = false">Cancel</v-btn>
-                                                                    </v-card-actions>
-                                                                </v-card>
-                                                            </v-dialog>
-                                                        </template>
-                                                    </v-data-table>
+                                                                <span v-if="structure_in_edit">Discard new session structure key</span>
+                                                                <span v-else>Add new session structure key</span>
+                                                            </v-tooltip>
+                                                        </v-app-bar>
+                                                    </template>
+
+                                                    <template v-slot:item.task_name="{ item }">
+                                                        <v-chip>{{ getKeyType(item) }}</v-chip>
+                                                        <span>{{ getKeyName(item) }}</span>
+                                                    </template>
+                                                    <template v-slot:item.actions="{ }">
+                                                        <v-icon>
+                                                            mdi-pencil-circle
+                                                        </v-icon>
+                                                        <!-- Delete dialog -->
+                                                        <v-dialog v-model="delete_structure_key_dialog" max-width="500px">
+                                                            <template v-slot:activator="{ on }">
+                                                                <v-icon v-on="on">
+                                                                    mdi-delete-circle
+                                                                </v-icon>
+                                                            </template>
+                                                            <v-card>
+                                                                <v-card-title>Sure?</v-card-title>
+                                                                <v-card-text>
+                                                                </v-card-text>
+                                                                <v-divider></v-divider>
+                                                                <v-card-actions>
+                                                                    <v-spacer></v-spacer>
+                                                                    <v-btn color="primary" text>Remove</v-btn>
+                                                                    <v-btn text @click="delete_structure_key_dialog = false">Cancel</v-btn>
+                                                                </v-card-actions>
+                                                            </v-card>
+                                                        </v-dialog>
+                                                    </template>
+                                                </v-data-table>
                                                 <v-divider></v-divider>
                                                 <v-card-actions>
                                                     <v-spacer></v-spacer>

@@ -31,8 +31,8 @@
                     processes: 0
                 },
                 headers: [
-                    { text: 'Controller', value: 'controller', },
-                    { text: 'Method', value: 'method', },
+                    { text: 'Controller', value: 'controller' },
+                    { text: 'Method', value: 'method' },
                     { text: 'Task name', value: 'name' },
                     { text: 'Actions', value: 'actions', sortable: false }
                 ],

@@ -113,7 +113,7 @@ class Session {
                             'state_id' => DataManager::createEntry($_POST['rule']['val'], 3, 0),
                             'name' => 'state_id'
                         ]);
-                        CacheManager::getTable('input_values', true); // Refresh cache
+                        CacheManager::getTable('input_values', true, 0, 'id', false); // Refresh cache
                         CacheManager::getTable('inputs', true); // Refresh cache
                     }
                     break;

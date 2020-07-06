@@ -37,7 +37,8 @@
                     { text: 'Actions', value: 'actions' },
                 ],
                 structures: {},
-                structure_in_edit: false,
+                structure_in_edit: 0,
+                structure_key_in_edit: false,
                 delete_structure_key_dialog: false,
                 data_entries: {},
                 data_sources: {},
@@ -429,7 +430,7 @@
                                     <v-card-actions>
                                         <v-dialog v-model="edit_state_structure" max-width="1000px">
                                             <template v-slot:activator="{ on }">
-                                                <v-btn v-on="on" text color="blue accent-4" width="100%" @click="in_edit = key">
+                                                <v-btn v-on="on" text color="blue accent-4" width="100%" @click="structure_in_edit = key;">
                                                     Edit Structure
                                                 </v-btn>
                                             </template>
@@ -437,11 +438,11 @@
                                                 <v-data-table
                                                     class="mx-auto ca_table" elevation-2 max-height="75%"
                                                     :headers="structure_headers"
-                                                    :items="structures[in_edit]"
+                                                    :items="structures[structure_in_edit]"
                                                     :search="search">
                                                     <template v-slot:top>
                                                         <v-app-bar>
-                                                            <v-toolbar-title>Edit {{ states_collection[in_edit].name }} Structure</v-toolbar-title>
+                                                            <v-toolbar-title>Edit {{ states_collection[structure_in_edit].name }} Structure</v-toolbar-title>
                                                             <v-spacer></v-spacer>
                                                             <v-text-field
                                                                 v-model="search"
@@ -455,11 +456,11 @@
                                                             <v-tooltip top>
                                                                 <template #activator="{ on }">
                                                                     <v-btn icon v-on="on">
-                                                                        <v-icon v-if="structure_in_edit">mdi-close-circle</v-icon>
+                                                                        <v-icon v-if="structure_key_in_edit">mdi-close-circle</v-icon>
                                                                         <v-icon v-else>mdi-plus-circle</v-icon>
                                                                     </v-btn>
                                                                 </template>
-                                                                <span v-if="structure_in_edit">Discard new session structure key</span>
+                                                                <span v-if="structure_key_in_edit">Discard new session structure key</span>
                                                                 <span v-else>Add new session structure key</span>
                                                             </v-tooltip>
                                                         </v-app-bar>
@@ -469,17 +470,20 @@
                                                         <v-chip>{{ getKeyType(item) }}</v-chip>
                                                         <span>{{ getKeyName(item) }}</span>
                                                     </template>
-                                                    <template v-slot:item.actions="{ }">
+                                                    <template v-slot:item.actions="{ item }">
                                                         <v-icon>
                                                             mdi-pencil-circle
                                                         </v-icon>
                                                         <!-- Delete dialog -->
-                                                        <v-dialog v-model="delete_structure_key_dialog" max-width="500px">
+                                                        <v-tooltip top>
                                                             <template v-slot:activator="{ on }">
-                                                                <v-icon v-on="on">
+                                                                <v-icon v-on="on" @click="delete_structure_key_dialog = true">
                                                                     mdi-delete-circle
                                                                 </v-icon>
                                                             </template>
+                                                            <span>Delete Key</span>
+                                                        </v-tooltip>
+                                                        <v-dialog v-model="delete_structure_key_dialog" max-width="500px">
                                                             <v-card>
                                                                 <v-card-title>Sure?</v-card-title>
                                                                 <v-card-text>
@@ -498,7 +502,7 @@
                                                 <v-card-actions>
                                                     <v-spacer></v-spacer>
                                                     <v-btn color="primary" text>Save</v-btn>
-                                                    <v-btn text @click="edit_state_structure = false">Cancel</v-btn>
+                                                    <v-btn text @click="edit_state_structure = false;">Cancel</v-btn>
                                                 </v-card-actions>
                                             </v-card>
                                         </v-dialog>

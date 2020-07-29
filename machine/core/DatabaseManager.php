@@ -50,11 +50,11 @@ class DatabaseManager {
         if(isset(self::$connections[$connectionName]) && (self::$connections[$connectionName] instanceof PDO)) return;
         try {
             // Null values are updated using the configurations class
-            if($db_host == null) $db_host = Configurations::DB_HOST;
-            if($db_user == null) $db_user = Configurations::DB_USER;
-            if($db_pass == null) $db_pass = Configurations::DB_PASS;
-            if($db_port == null) $db_port = Configurations::DB_PORT;
-            if($db_name == null && Configurations::INSTALLED) $db_name = Configurations::DB_NAME;
+            if($db_host === null) $db_host = Configurations::DB_HOST;
+            if($db_user === null) $db_user = Configurations::DB_USER;
+            if($db_pass === null) $db_pass = Configurations::DB_PASS;
+            if($db_port === null) $db_port = Configurations::DB_PORT;
+            if($db_name === null && Configurations::INSTALLED) $db_name = Configurations::DB_NAME;
 
             // Connect to specific DB if specified
             if($db_name != null) self::$connections[$connectionName] = new PDO("mysql:host={$db_host};dbname={$db_name};port={$db_port}", $db_user, $db_pass);

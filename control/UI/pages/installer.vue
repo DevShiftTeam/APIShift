@@ -45,10 +45,7 @@
                             {label: "DB Post", name: "db_port", icon: "fas fa-cloud", type: "number", data: 3306 },
                             {label: "DB User", name: "db_user", icon: "person", type: "text", data: "root" },
                             {label: "DB Name", name: "db_name", icon: "fa fa-id-card", type: "text", data: "" },
-                            {
-                                label: "DB Password", name: "db_pass", icon: "lock", type: "password", data: "",
-                                regex: "^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{8,})", format: "At least 8 characters, with numbers and characters"
-                            }
+                            { label: "DB Password", name: "db_pass", icon: "lock", type: "password", data: "", can_empty: true }
                         ]
                     },
                     {
@@ -119,7 +116,7 @@
                         continue;
                     
                     // Not empty
-                    if(field.data == "")
+                    if(!field.can_empty && field.data == "")
                     {
                         if(update) APIShift.API.notify("Please fill in all data correctly first", "warning");
                         return field_id; // return field who is incorrect or empty

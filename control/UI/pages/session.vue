@@ -471,9 +471,14 @@
                                                         <span>{{ getKeyName(item) }}</span>
                                                     </template>
                                                     <template v-slot:item.actions="{ item }">
-                                                        <v-icon>
-                                                            mdi-pencil-circle
-                                                        </v-icon>
+                                                        <v-tooltip top>
+                                                            <template v-slot:activator="{ on }">
+                                                                <v-icon v-on="on">
+                                                                    mdi-pencil-circle
+                                                                </v-icon>
+                                                            </template>
+                                                            <span>Edit Key</span>
+                                                        </v-tooltip>
                                                         <!-- Delete dialog -->
                                                         <v-tooltip top>
                                                             <template v-slot:activator="{ on }">

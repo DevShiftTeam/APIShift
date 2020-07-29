@@ -38,7 +38,7 @@ When contributing you either help with an existing issue or work on your own ide
 Your database login information is stored in the [configurations file](machine/core/Configurations.php). to make sure you don't upload your personal information on commits to the server, please make sure to assume no changes in the configurations file:
 
 ```git
-git update-index --assume-unchanged machince/core/Configurations.php
+git update-index --assume-unchanged machine/core/Configurations.php
 ```
 
 Moreover, when pulling new commits uploaded to the repo you will get an error saying that you have uncommited work and that you should stash it or something. Well, this happens because git is stupid sometimes (as we all have experienced it in some way or another) - Basically, when you have changes you marked as unchanged, and you changed something, then when pulling git will think that it is changed and will ask you to stash the changed or commit them - when you cannot do it because you marked them as unchanged - so you have 2 options here:

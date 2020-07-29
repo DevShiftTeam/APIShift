@@ -44,7 +44,7 @@ class Installer {
         || (!isset($_POST['db_host']) || $_POST['db_host'] == "")
         || (!isset($_POST['db_port']) || $_POST['db_port'] == "")
         || (!isset($_POST['db_user']) || $_POST['db_user'] == "")
-        || (!isset($_POST['db_pass']))
+        || (!isset($_POST['db_pass'])) // Can stay empty
         || (!isset($_POST['db_name']) || $_POST['db_name'] == "")
         || (!isset($_POST['cc_system']) || $_POST['cc_system'] == "")
         || (!isset($_POST['cc_host'])) // Can stay empty

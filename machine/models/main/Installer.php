@@ -45,7 +45,7 @@ class Installer {
      */
     public function createDB($db_host, $db_name, $db_user, $db_pass, $db_port = 3306, $user, $pass) {
         // Step 1: Connect to DB
-        DatabaseManager::addConnection("main", $db_host, $db_user, $db_pass, $db_port, $db_name, false);
+        DatabaseManager::startConnection("main", $db_host, $db_user, $db_pass, $db_port, $db_name, false);
 
         try {
             // Create schema if not exists

@@ -46,7 +46,6 @@ class DatabaseManager {
      */
     public static function loadDefaults(bool $refresh = false) {
         // Start main connection and retrieve all other databases data
-        self::addConnection("main");
         self::startConnection("main");
         CacheManager::getTable('databases', $refresh, 0, 'name', false);
         self::$connections_metadata = CacheManager::get('databases'); // Get all databases
@@ -66,22 +65,23 @@ class DatabaseManager {
      * @return void
      */
     public static function addConnection($connection_name, $db_host = null, $db_user = null, $db_pass = null, $db_port = null, $db_name = null) {
+        $exists = isset(self::$connections_metadata[$connection_name]);
         self::$connections_metadata[$connection_name] = [
             "host" => $db_host == null ?
-                (isset(self::$connections_metadata[$connection_name]) && isset(self::$connections_metadata[$connection_name]['host']) ?
+                ($exists && isset(self::$connections_metadata[$connection_name]['host']) ?
                     self::$connections_metadata[$connection_name]['host'] : Configurations::DB_HOST) : $db_host,
             "user" => $db_user == null ?
-                (isset(self::$connections_metadata[$connection_name]) && isset(self::$connections_metadata[$connection_name]['user']) ?
-                    self::$connections_metadata[$connection_name]['user'] : Configurations::DB_HOST) : $db_user,
+                ($exists && isset(self::$connections_metadata[$connection_name]['user']) ?
+                    self::$connections_metadata[$connection_name]['user'] : Configurations::DB_USER) : $db_user,
             "pass" => $db_pass == null ?
-               (isset(self::$connections_metadata[$connection_name]) && isset(self::$connections_metadata[$connection_name]['pass']) ?
-                    self::$connections_metadata[$connection_name]['pass'] : Configurations::DB_HOST) : $db_pass,
+               ($exists && isset(self::$connections_metadata[$connection_name]['pass']) ?
+                    self::$connections_metadata[$connection_name]['pass'] : Configurations::DB_PASS) : $db_pass,
             "db" => $db_name == null ?
-                (isset(self::$connections_metadata[$connection_name]) && isset(self::$connections_metadata[$connection_name]['db']) ?
-                    self::$connections_metadata[$connection_name]['db'] : Configurations::DB_HOST) : $db_name,
+                ($exists && isset(self::$connections_metadata[$connection_name]['db']) ?
+                    self::$connections_metadata[$connection_name]['db'] : Configurations::DB_NAME) : $db_name,
             "port" => $db_port == null ?
-                (isset(self::$connections_metadata[$connection_name]) && isset(self::$connections_metadata[$connection_name]['port']) ?
-                    self::$connections_metadata[$connection_name]['port'] : Configurations::DB_HOST) : $db_port
+                ($exists && isset(self::$connections_metadata[$connection_name]['port']) ?
+                    self::$connections_metadata[$connection_name]['port'] : Configurations::DB_PORT) : $db_port
         ];
     }
 
@@ -103,21 +103,12 @@ class DatabaseManager {
         if(isset(self::$connections[$connection_name]) && (self::$connections[$connection_name] instanceof PDO)) return;
         try {
             // Null values are updated using the configurations class or by the present metadata if exists
-            if($db_host === null) $db_host =
-                isset(self::$connections_metadata[$connection_name]) && isset(self::$connections_metadata[$connection_name]['host'])
-                    ? self::$connections_metadata[$connection_name]['host'] : Configurations::DB_HOST;
-            if($db_user === null) $db_user =
-                isset(self::$connections_metadata[$connection_name]) && isset(self::$connections_metadata[$connection_name]['user'])
-                    ? self::$connections_metadata[$connection_name]['user'] : Configurations::DB_USER;
-            if($db_pass === null) $db_pass =
-                isset(self::$connections_metadata[$connection_name]) && isset(self::$connections_metadata[$connection_name]['pass'])
-                    ? self::$connections_metadata[$connection_name]['pass'] : Configurations::DB_PASS;
-            if($db_port === null) $db_port =
-                isset(self::$connections_metadata[$connection_name]) && isset(self::$connections_metadata[$connection_name]['port'])
-                    ? self::$connections_metadata[$connection_name]['port'] : Configurations::DB_PORT;
-            if($db_name === null) $db_name =
-                isset(self::$connections_metadata[$connection_name]) && isset(self::$connections_metadata[$connection_name]['db'])
-                    ? self::$connections_metadata[$connection_name]['db'] : Configurations::DB_NAME;
+            if(!isset(self::$connections_metadata[$connection_name])) self::addConnection($connection_name, $db_host, $db_user, $db_pass, $db_port, $db_name);
+            if($db_host === null) $db_host = self::$connections_metadata[$connection_name]['host'];
+            if($db_user === null) $db_user = self::$connections_metadata[$connection_name]['user'];
+            if($db_pass === null) $db_pass = self::$connections_metadata[$connection_name]['pass'];
+            if($db_name === null) $db_name = self::$connections_metadata[$connection_name]['db'];
+            if($db_port === null) $db_port = self::$connections_metadata[$connection_name]['port'];
 
             // Connect to specific DB if specified
             if($db_name != null) self::$connections[$connection_name] = new PDO("mysql:host={$db_host};dbname={$db_name};port={$db_port}", $db_user, $db_pass);

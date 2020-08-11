@@ -31,11 +31,31 @@ class DatabaseManager {
      * Array of all connections created by the API
      */
     private static $connections = array();
+    private static $connections_metadata = [
+        "main" => [
+            "host" => Configurations::DB_HOST,
+            "user" => Configurations::DB_USER,
+            "pass" => Configurations::DB_PASS,
+            "db" => Configurations::DB_NAME,
+            "port" => Configurations::DB_PORT,
+        ]
+    ];
 
     /**
-     * Start the connection and add ID name
+     * Load all main connection and all connections in cache (load them if not present)
+     */
+    public static function loadDefaults(bool $refresh = false) {
+        // Start main connection and retrieve all other databases data
+        self::addConnection("main");
+        self::startConnection("main");
+        CacheManager::getTable('databases', $refresh, 0, 'name', false);
+        self::$connections_metadata = CacheManager::get('databases'); // Get all databases
+    }
+
+    /**
+     * Add the data of the connection to the metadatalist
      * 
-     * @param string $connectionName Key of the connection object
+     * @param string $connection_name Key of the connection object
      * @param string $db_host Hostname of DB
      * @param string $db_user Username of DB
      * @param string $db_pass Password of DB
@@ -45,28 +65,71 @@ class DatabaseManager {
      * 
      * @return void
      */
-    public static function addConnection($connectionName, $db_host = null, $db_user = null, $db_pass = null, $db_port = null, $db_name = null, $exit_on_error = true) {
+    public static function addConnection($connection_name, $db_host = null, $db_user = null, $db_pass = null, $db_port = null, $db_name = null) {
+        self::$connections_metadata[$connection_name] = [
+            "host" => $db_host == null ?
+                (isset(self::$connections_metadata[$connection_name]) && isset(self::$connections_metadata[$connection_name]['host']) ?
+                    self::$connections_metadata[$connection_name]['host'] : Configurations::DB_HOST) : $db_host,
+            "user" => $db_user == null ?
+                (isset(self::$connections_metadata[$connection_name]) && isset(self::$connections_metadata[$connection_name]['user']) ?
+                    self::$connections_metadata[$connection_name]['user'] : Configurations::DB_HOST) : $db_user,
+            "pass" => $db_pass == null ?
+               (isset(self::$connections_metadata[$connection_name]) && isset(self::$connections_metadata[$connection_name]['pass']) ?
+                    self::$connections_metadata[$connection_name]['pass'] : Configurations::DB_HOST) : $db_pass,
+            "db" => $db_name == null ?
+                (isset(self::$connections_metadata[$connection_name]) && isset(self::$connections_metadata[$connection_name]['db']) ?
+                    self::$connections_metadata[$connection_name]['db'] : Configurations::DB_HOST) : $db_name,
+            "port" => $db_port == null ?
+                (isset(self::$connections_metadata[$connection_name]) && isset(self::$connections_metadata[$connection_name]['port']) ?
+                    self::$connections_metadata[$connection_name]['port'] : Configurations::DB_HOST) : $db_port
+        ];
+    }
+
+    /**
+     * Start the connection and add ID name
+     * 
+     * @param string $connection_name Key of the connection object
+     * @param string $db_host Hostname of DB
+     * @param string $db_user Username of DB
+     * @param string $db_pass Password of DB
+     * @param int $db_port Port of DB
+     * @param string $db_name DB name in server
+     * @param bool $exit_on_error Set to false to not exit
+     * 
+     * @return void
+     */
+    public static function startConnection($connection_name, $db_host = null, $db_user = null, $db_pass = null, $db_port = null, $db_name = null, $exit_on_error = true) {
         // Check if connection already exists is queue
-        if(isset(self::$connections[$connectionName]) && (self::$connections[$connectionName] instanceof PDO)) return;
+        if(isset(self::$connections[$connection_name]) && (self::$connections[$connection_name] instanceof PDO)) return;
         try {
-            // Null values are updated using the configurations class
-            if($db_host === null) $db_host = Configurations::DB_HOST;
-            if($db_user === null) $db_user = Configurations::DB_USER;
-            if($db_pass === null) $db_pass = Configurations::DB_PASS;
-            if($db_port === null) $db_port = Configurations::DB_PORT;
-            if($db_name === null && Configurations::INSTALLED) $db_name = Configurations::DB_NAME;
+            // Null values are updated using the configurations class or by the present metadata if exists
+            if($db_host === null) $db_host =
+                isset(self::$connections_metadata[$connection_name]) && isset(self::$connections_metadata[$connection_name]['host'])
+                    ? self::$connections_metadata[$connection_name]['host'] : Configurations::DB_HOST;
+            if($db_user === null) $db_user =
+                isset(self::$connections_metadata[$connection_name]) && isset(self::$connections_metadata[$connection_name]['user'])
+                    ? self::$connections_metadata[$connection_name]['user'] : Configurations::DB_USER;
+            if($db_pass === null) $db_pass =
+                isset(self::$connections_metadata[$connection_name]) && isset(self::$connections_metadata[$connection_name]['pass'])
+                    ? self::$connections_metadata[$connection_name]['pass'] : Configurations::DB_PASS;
+            if($db_port === null) $db_port =
+                isset(self::$connections_metadata[$connection_name]) && isset(self::$connections_metadata[$connection_name]['port'])
+                    ? self::$connections_metadata[$connection_name]['port'] : Configurations::DB_PORT;
+            if($db_name === null) $db_name =
+                isset(self::$connections_metadata[$connection_name]) && isset(self::$connections_metadata[$connection_name]['db'])
+                    ? self::$connections_metadata[$connection_name]['db'] : Configurations::DB_NAME;
 
             // Connect to specific DB if specified
-            if($db_name != null) self::$connections[$connectionName] = new PDO("mysql:host={$db_host};dbname={$db_name};port={$db_port}", $db_user, $db_pass);
-            else self::$connections[$connectionName] = new PDO("mysql:host={$db_host};port={$db_port}", $db_user, $db_pass);
+            if($db_name != null) self::$connections[$connection_name] = new PDO("mysql:host={$db_host};dbname={$db_name};port={$db_port}", $db_user, $db_pass);
+            else self::$connections[$connection_name] = new PDO("mysql:host={$db_host};port={$db_port}", $db_user, $db_pass);
 
             // Avoid possible SQL injections
-            self::$connections[$connectionName]->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+            self::$connections[$connection_name]->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
         } catch (PDOException $e) {
-            self::closeConnection($connectionName);
+            self::closeConnection($connection_name);
             Status::message(
                 Status::DB_CONNECTION_FAILED,
-                "Couldn't create `" . $connectionName . "` db connection ",
+                "Couldn't create `" . $connection_name . "` db connection ",
                 $exit_on_error
             );
         }

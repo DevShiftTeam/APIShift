@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.19, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.21, for Linux (x86_64)
 --
 -- Host: localhost    Database: apishift
 -- ------------------------------------------------------
--- Server version	8.0.19
+-- Server version	8.0.21-0ubuntu0.20.04.4
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -57,6 +57,16 @@ CREATE TABLE `admin_users` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `admin_users`
+--
+
+LOCK TABLES `admin_users` WRITE;
+/*!40000 ALTER TABLE `admin_users` DISABLE KEYS */;
+INSERT INTO `admin_users` VALUES (1,'admin','$2y$10$628g2MlZrUXTlNVTRax0TuR9St/IRg5e2tqaSok9iIzy15pqk/sfi','2020-08-11 18:03:17');
+/*!40000 ALTER TABLE `admin_users` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `connection_node_types`
@@ -232,6 +242,34 @@ LOCK TABLES `data_sources` WRITE;
 /*!40000 ALTER TABLE `data_sources` DISABLE KEYS */;
 INSERT INTO `data_sources` VALUES (1,'_SESSION',1),(2,'_POST',1),(3,'_GET',1),(4,'task_inputs',1),(5,'admin_users',2),(6,'session_states',2);
 /*!40000 ALTER TABLE `data_sources` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `databases`
+--
+
+DROP TABLE IF EXISTS `databases`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `databases` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(45) DEFAULT NULL,
+  `host` varchar(45) DEFAULT NULL,
+  `user` varchar(45) DEFAULT NULL,
+  `pass` varchar(45) DEFAULT NULL,
+  `db` varchar(45) DEFAULT NULL,
+  `port` int DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `databases`
+--
+
+LOCK TABLES `databases` WRITE;
+/*!40000 ALTER TABLE `databases` DISABLE KEYS */;
+/*!40000 ALTER TABLE `databases` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -686,4 +724,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-06-27 19:55:28
+-- Dump completed on 2020-08-11 19:11:51

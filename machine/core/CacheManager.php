@@ -218,7 +218,7 @@
 
         // Load to cache
         $data_to_load = [];
-        if(DatabaseManager::fetchInto("main", $data_to_load, "SELECT * FROM {$table_name}", [], $table_key, $single_row) === false)
+        if(DatabaseManager::fetchInto("main", $data_to_load, "SELECT * FROM `{$table_name}`", [], $table_key, $single_row) === false)
                 Status::message(Status::ERROR, "Couldn't retrieve `{$table_name}` from DB");
         self::set($table_name, $data_to_load, $ttl);
     }

@@ -21,6 +21,7 @@
 
 namespace APIShift\Models\Main;
 
+use APIShift\Controllers\Admin\Data;
 use APIShift\Core\CacheManager;
 use APIShift\Core\DatabaseManager;
 use APIShift\Core\Status;
@@ -50,11 +51,16 @@ class Installer {
         try {
             // Create schema if not exists
             if(Status::getStatus() == Status::DB_CONNECTION_FAILED) {
-                DatabaseManager::addConnection("main", $db_host, $db_user, $db_pass, $db_port);
-                $add_schema = DatabaseManager::query("main", "CREATE SCHEMA {$db_name}");
-                if(!$add_schema) Status::message(Status::ERROR, "Couldn't create DB schema");
-                $add_schema = DatabaseManager::query("main", "USE {$db_name}");
-                if(!$add_schema) Status::message(Status::ERROR, "Couldn't use DB schema");
+                Status::message(Status::SUCCESS, null, false);
+                // Re-start connection with no database name
+                DatabaseManager::deleteConnection("main");
+                DatabaseManager::startConnection("main", $db_host, $db_user, $db_pass, $db_port, null, false);
+                if(Status::getStatus() == Status::DB_CONNECTION_FAILED) Status::message(Status::ERROR, "Couldn't connect to DB");
+                if(!DatabaseManager::query("main", "CREATE SCHEMA {$db_name}")) Status::message(Status::ERROR, "Couldn't create DB schema");
+                // Re-start connection with database name
+                DatabaseManager::deleteConnection("main");
+                DatabaseManager::addConnection("main", $db_host, $db_user, $db_pass, $db_port, $db_name);
+                DatabaseManager::startConnection("main");
             }
 
             // Step 2: Load sql file of installation, and import the initial data

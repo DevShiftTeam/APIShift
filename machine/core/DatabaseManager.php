@@ -67,19 +67,19 @@ class DatabaseManager {
     public static function addConnection($connection_name, $db_host = null, $db_user = null, $db_pass = null, $db_port = null, $db_name = null) {
         $exists = isset(self::$connections_metadata[$connection_name]);
         self::$connections_metadata[$connection_name] = [
-            "host" => $db_host == null ?
+            "host" => $db_host == null && Configurations::INSTALLED ?
                 ($exists && isset(self::$connections_metadata[$connection_name]['host']) ?
                     self::$connections_metadata[$connection_name]['host'] : Configurations::DB_HOST) : $db_host,
-            "user" => $db_user == null ?
+            "user" => $db_user == null && Configurations::INSTALLED ?
                 ($exists && isset(self::$connections_metadata[$connection_name]['user']) ?
                     self::$connections_metadata[$connection_name]['user'] : Configurations::DB_USER) : $db_user,
-            "pass" => $db_pass == null ?
+            "pass" => $db_pass == null && Configurations::INSTALLED ?
                ($exists && isset(self::$connections_metadata[$connection_name]['pass']) ?
                     self::$connections_metadata[$connection_name]['pass'] : Configurations::DB_PASS) : $db_pass,
-            "db" => $db_name == null ?
+            "db" => $db_name == null && Configurations::INSTALLED ?
                 ($exists && isset(self::$connections_metadata[$connection_name]['db']) ?
                     self::$connections_metadata[$connection_name]['db'] : Configurations::DB_NAME) : $db_name,
-            "port" => $db_port == null ?
+            "port" => $db_port == null && Configurations::INSTALLED ?
                 ($exists && isset(self::$connections_metadata[$connection_name]['port']) ?
                     self::$connections_metadata[$connection_name]['port'] : Configurations::DB_PORT) : $db_port
         ];
@@ -103,7 +103,7 @@ class DatabaseManager {
         if(isset(self::$connections[$connection_name]) && (self::$connections[$connection_name] instanceof PDO)) return;
         try {
             // Null values are updated using the configurations class or by the present metadata if exists
-            if(!isset(self::$connections_metadata[$connection_name])) self::addConnection($connection_name, $db_host, $db_user, $db_pass, $db_port, $db_name);
+            self::addConnection($connection_name, $db_host, $db_user, $db_pass, $db_port, $db_name);
             if($db_host === null) $db_host = self::$connections_metadata[$connection_name]['host'];
             if($db_user === null) $db_user = self::$connections_metadata[$connection_name]['user'];
             if($db_pass === null) $db_pass = self::$connections_metadata[$connection_name]['pass'];
@@ -149,6 +149,18 @@ class DatabaseManager {
     {
         if(!isset(self::$connections[$connectionName])) return;
         unset(self::$connections[$connectionName]);
+    }
+
+    /**
+     * Closes a connection and removes its metadata
+     * @param string $connection_name Name of the connection
+     * 
+     * @return void
+     */
+    public static function deleteConnection(string $connection_name) {
+        self::closeConnection($connection_name); // Close connection first
+        if(!isset(self::$connections_metadata[$connection_name])) return;
+        unset(self::$connections_metadata[$connection_name]);
     }
 
     /**
@@ -207,6 +219,10 @@ class DatabaseManager {
      * @return bool|PDOStatement Returns FALSE on failure and PDOStatement on success
      */
     public static function query($connectionName, $query, $data = array()) {
+        if(self::$connections[$connectionName] == null) {
+            self::startConnection($connectionName); // Try to establish a connection
+            if(self::$connections[$connectionName] == null) return false;
+        }
         try {
             $result = self::$connections[$connectionName]->prepare($query);
             if(!$result) return false;

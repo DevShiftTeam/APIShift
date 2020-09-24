@@ -114,7 +114,7 @@
      */
     public static function exists($key) {
         switch(Configurations::CACHE_TYPE) {
-            case self::APCU: return apcu_exists($key) !== false;
+            case self::APCU: return \apcu_exists($key) !== false;
             case self::MEMCACHED:
                 return self::$cache_connection->get($key) !== false;
                 break;
@@ -136,7 +136,7 @@
      */
     public static function get($key) {
         switch(Configurations::CACHE_TYPE) {
-            case self::APCU: return apcu_fetch($key);
+            case self::APCU: return \apcu_fetch($key);
             case self::MEMCACHED:
                 return self::$cache_connection->get($key);
                 break;
@@ -162,7 +162,7 @@
     public static function set($key, $value, $ttl = 0) {
         switch(Configurations::CACHE_TYPE) {
             case self::APCU:
-                apcu_store($key, $value, $ttl);
+                \apcu_store($key, $value, $ttl);
                 break;
             case self::MEMCACHED:
                 self::$cache_connection->set($key, $value, $ttl);

@@ -30,7 +30,9 @@
                         name: "Admin configurations",
                         fields: [
                             // regex is used for validating the data before sending it to server for further validation
-                            {label: "Admin User", name: "login", icon: "person", type: "text", data: "admin" },
+                            {label: "Admin User", name: "login", icon: "person", type: "text", data: "admin",
+                             regex:"^[a-z0-9_-]{5,16}$",format:"At least 5 characters,Max is 16 characters"
+                            },
                             {
                                 label: "Admin Password", name: "password", icon: "lock", type: "password", data: "",
                                 regex: "^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{8,})", format: "At least 8 characters, with numbers and characters"

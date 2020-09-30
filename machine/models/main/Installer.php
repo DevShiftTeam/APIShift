@@ -178,5 +178,60 @@ EOT;
         if(!file_put_contents("core/Configurations.php", $newConfigFileData))
             Status::message(Status::ERROR, "Couldn't change the configurations file, please check permissions");
     }
+    public function validate()
+    {
+        if(!isset($_POST['login'])){
+            Status::message(Status::ERROR, "Username is Empty");
+        }
+        if(strlen($_POST['login']) < 5){
+            Status::message(Status::ERROR, "Username cannot be less then 5 lettters");
+        }
+        if(!isset($_POST['password'])){
+            Status::message(Status::ERROR, "Password is empty");
+        }
+        if(strlen($_POST['password']) < 8){
+            Status::message(Status::ERROR, "Invalid password: At least 8 characters, with numbers and characters");
+        }
+        if((!isset($_POST['db_host']) || $_POST['db_host'] == "")){
+            Status::message(Status::ERROR, "DB Host cannot be empty!");
+        }
+        if((!isset($_POST['db_port']) || $_POST['db_port'] == "")){
+            Status::message(Status::ERROR, "DB Port cannot be empty!");
+        }
+        if((!isset($_POST['db_user']) || $_POST['db_user'] == "")){
+            Status::message(Status::ERROR, "DB Port cannot be empty!");
+        }
+        // db_pass Can stay empty
+        if(!isset($_POST['db_pass'])){
+            Status::message(Status::ERROR, "DB Pass not set!");
+        }
+        if((!isset($_POST['db_name']) || $_POST['db_name'] == "")){
+            Status::message(Status::ERROR, "DB Name cannot be empty!");
+        }
+        if((!isset($_POST['cc_system']) || $_POST['cc_system'] == "")){
+            Status::message(Status::ERROR, "Cache System cannot be empty!");
+        }
+        // cc_host Can stay empty
+        if(!isset($_POST['cc_host'])){
+            Status::message(Status::ERROR, "Cache host not set!");
+        }
+        // cc_port Can stay empty
+        if(!isset($_POST['cc_port'])){
+            Status::message(Status::ERROR, "Cache port not set!");
+        }
+        // cc_pass Can stay empty
+        if(!isset($_POST['cc_pass'])){
+            Status::message(Status::ERROR, "Cache pass not set!");
+        }
+        if((!isset($_POST['site_name']) || $_POST['site_name'] == "")){
+            Status::message(Status::ERROR, "Site Name cannot be empty!");
+        }
+        if((!isset($_POST['site_desc']) || $_POST['site_desc'] == "")){
+            Status::message(Status::ERROR, "Site Description cannot be empty!");
+        }
+        if((!isset($_POST['site_keys']) || $_POST['site_keys'] == "")){
+            Status::message(Status::ERROR, "Site Keys cannot be empty!");
+        }
+    }
   }
 ?>

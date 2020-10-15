@@ -19,26 +19,24 @@
      * @author Sapir Shemer
      */
 
+    // This shit is made for scripting
     module.exports = {
-        data() {
+        mixins: [APIShift.API.getMixin('orm/graph_element')],
+        data () {
             return {
-                graph_view: null
-            };
+                drawer: null
+            }
         },
-        created() {
-            APIShift.API.getMixin('orm/graph_element', true);
-            this.graph_view = APIShift.API.getComponent("orm/graphview", true);
+        created () {
+            
         }
-    };
+    }
 </script>
 
 <template>
-    <v-content>
-        <div>
-            <component :is="graph_view"></component>
-        </div>
-    </v-content>
+<div></div>
 </template>
-<style scoped>
 
+<style scoped>
+/* Please style this crap, with style */
 </style>

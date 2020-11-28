@@ -34,6 +34,18 @@ class APIShift {
         // Store site title reference
         document.title = title;
         this.main_title = title;
+        // Understand correct parent path
+        let correctPath = window.location.pathname;
+        // Ignore control folder
+        let controlCheck = correctPath.indexOf("/control/");
+        if(controlCheck != -1) correctPath = correctPath.substr(0, controlCheck - 1);
+        // Ignore index folder
+        else {
+            let indexCheck = correctPath.indexOf("/index.html");
+            if(indexCheck != -1) correctPath = correctPath.substr(0, indexCheck - 1);
+        }
+        // Correct the server path
+        MyServer = MyServer + correctPath;
         // Set default loader
         APIShift.Loader.changeLoader("main", loader);
         // Initialize

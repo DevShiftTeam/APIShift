@@ -38,14 +38,14 @@ class APIShift {
         let correctPath = window.location.pathname;
         // Ignore control folder
         let controlCheck = correctPath.indexOf("/control/");
-        if(controlCheck != -1) correctPath = correctPath.substr(0, controlCheck - 1);
+        if(controlCheck != -1) correctPath = correctPath.substr(0, controlCheck);
         // Ignore index folder
         else {
             let indexCheck = correctPath.indexOf("/index.html");
-            if(indexCheck != -1) correctPath = correctPath.substr(0, indexCheck - 1);
+            if(indexCheck != -1) correctPath = correctPath.substr(0, indexCheck);
         }
         // Correct the server path
-        MyServer = MyServer + correctPath;
+        MyServer = MyServer + correctPath.substr(0, correctPath.length - 1);
         // Set default loader
         APIShift.Loader.changeLoader("main", loader);
         // Initialize

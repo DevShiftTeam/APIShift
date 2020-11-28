@@ -24,7 +24,7 @@
 // Header
 // APIHandler
 
-let MyServer = "https://" + location.host;
+let MyServer = location.href;
 
 /**
  * APIShift library constructor
@@ -34,18 +34,15 @@ class APIShift {
         // Store site title reference
         document.title = title;
         this.main_title = title;
-        // Understand correct parent path
-        let correctPath = window.location.pathname;
         // Ignore control folder
-        let controlCheck = correctPath.indexOf("/control/");
-        if(controlCheck != -1) correctPath = correctPath.substr(0, controlCheck);
+        let controlCheck = MyServer.indexOf("/control/");
+        if(controlCheck != -1) MyServer = MyServer.substr(0, controlCheck);
         // Ignore index folder
         else {
-            let indexCheck = correctPath.indexOf("/index.html");
-            if(indexCheck != -1) correctPath = correctPath.substr(0, indexCheck);
+            let indexCheck = MyServer.indexOf("/index.html");
+            if(indexCheck != -1) MyServer = MyServer.substr(0, indexCheck);
         }
-        // Correct the server path
-        MyServer = MyServer + correctPath.substr(0, correctPath.length - 1);
+        if(MyServer.charAt(MyServer.length - 1) == '/') MyServer = MyServer.substr(0, MyServer.length - 1);
         // Set default loader
         APIShift.Loader.changeLoader("main", loader);
         // Initialize
@@ -65,7 +62,7 @@ class APIShift {
         APIShift.Loader.show("main"); // Show main loader
         // Set admin mode in case the user is in admin page
         APIShift.Loader.load((resolve, reject) => {
-            if (location.pathname.indexOf("/control") == 0) {
+            if (location.href.indexOf(MyServer + "/control") == 0) {
                 APIShift.admin_mode = true;
                 // Load default components
                 APIShift.API.getComponent("notifications", true);

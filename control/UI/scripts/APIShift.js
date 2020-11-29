@@ -24,28 +24,17 @@
 // Header
 // APIHandler
 
-let MyServer = location.href;
-
 /**
  * APIShift library constructor
  */
 class APIShift {
     constructor(loader = app.loader, title = "APIShift") {
-        // Store site title reference
+        // Step 1: Store site title reference
         document.title = title;
         this.main_title = title;
-        // Ignore control folder
-        let controlCheck = MyServer.indexOf("/control/");
-        if(controlCheck != -1) MyServer = MyServer.substr(0, controlCheck);
-        // Ignore index folder
-        else {
-            let indexCheck = MyServer.indexOf("/index.html");
-            if(indexCheck != -1) MyServer = MyServer.substr(0, indexCheck);
-        }
-        if(MyServer.charAt(MyServer.length - 1) == '/') MyServer = MyServer.substr(0, MyServer.length - 1);
-        // Set default loader
+        // Step 2: Set default loader
         APIShift.Loader.changeLoader("main", loader);
-        // Initialize
+        // Step 3: Initialize
         APIShift.Loader.message("Loading System");
         this.initialize();
     }
@@ -62,7 +51,7 @@ class APIShift {
         APIShift.Loader.show("main"); // Show main loader
         // Set admin mode in case the user is in admin page
         APIShift.Loader.load((resolve, reject) => {
-            if (location.href.indexOf(MyServer + "/control") == 0) {
+            if (location.href.indexOf(APIShift.server + "/control") == 0) {
                 APIShift.admin_mode = true;
                 // Load default components
                 APIShift.API.getComponent("notifications", true);
@@ -83,7 +72,7 @@ class APIShift {
                     break;
                 case APIShift.API.status_codes.NOT_INSTALLED:
                     // Redirect user to admin page if system is not installed
-                    if (!APIShift.admin_mode) location.href = MyServer + "/control/index.html";
+                    if (!APIShift.admin_mode) location.href = APIShift.server + "/control/index.html";
                     // Route to installation page
                     else {
                         APIShift.admin_routes.push({
@@ -437,7 +426,7 @@ class APIHandler {
         return APIShift.Loader.load((resolve, reject) => {
             $.ajax({
                 type: "POST",
-                url: MyServer + "/machine/API.php?c=" + controller + "&m=" + method,
+                url: APIShift.server + "/machine/API.php?c=" + controller + "&m=" + method,
                 data: attached_data,
                 dataType: "json",
                 success: function (response) {
@@ -535,6 +524,12 @@ class APIHandler {
     }
 };
 
+
+/**
+ * Holds the APIShift server installation parent url on the server
+ * Calculated automatically when APIShift object is constructed
+ */
+APIShift.server = null;
 /**
  * Determines if the user is working in admin page
  * Admin mode is client based, admin operations are authenticated by the server separately
@@ -555,3 +550,10 @@ APIShift.mixins = {};
  */
 APIShift.Loader = new Loader();
 APIShift.API = new APIHandler();
+
+// Calculate installation parent folder url
+(function() {
+    APIShift.server = document.currentScript.src;
+    APIShift.server = APIShift.server.substr(0, APIShift.server.indexOf("/control/UI/scripts/"));
+    console.log(APIShift.server);
+})();

@@ -555,5 +555,4 @@ APIShift.API = new APIHandler();
 (function() {
     APIShift.server = document.currentScript.src;
     APIShift.server = APIShift.server.substr(0, APIShift.server.indexOf("/control/UI/scripts/"));
-    console.log(APIShift.server);
 })();

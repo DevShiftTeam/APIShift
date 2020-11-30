@@ -34,7 +34,7 @@ If you want, you can use your own tools, dependencies and modifications, the arc
 
 ## About
 APIShift is an open-source PHP system that was designed by Sapir Shemer and its releases are maintained by [DevShift](https://devshift.biz). If you want to help and join the community, you are more than welcome to contribute. Just visit the [DevShift](https://devshift.biz) site or contact Sapir in any way you feel comfortable with: [LinkedIn](https://www.linkedin.com/in/sapir-shemer/), [Facebook](https://www.facebook.com/sapir.shemer).
-Released under the MIT license.
+Released under the Apache-2.0 license.
 
 ### Meet Our Team
  * [Sapir Shemer](https://github.com/LessComplexity) as the architect.

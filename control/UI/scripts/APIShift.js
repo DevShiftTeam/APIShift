@@ -483,13 +483,17 @@ class APIHandler {
         }, timeout, message);
     }
 
+    getUIFolder() {
+        return APIShift.server + (APIShift.admin_mode ? "/control" : "") + "/UI";
+    }
+
     /**
      * Get page vue element
      * @param {string} page_name Page name to get path to
      * @param {boolean} init Set true to retrieve element if not exists
      */
     getPage(page_name, init = false) {
-        if(init && APIShift.pages[page_name] === undefined) APIShift.pages[page_name] = httpVueLoader("UI/pages/" + page_name + ".vue");
+        if(init && APIShift.pages[page_name] === undefined) APIShift.pages[page_name] = httpVueLoader(this.getUIFolder() + "/pages/" + page_name + ".vue");
         return APIShift.pages[page_name];
     }
 
@@ -499,7 +503,7 @@ class APIHandler {
      * @param {boolean} init Set true to retrieve element if not exists
      */
     getComponent(component_name, init = false) {
-        if(init && APIShift.components[component_name] === undefined) APIShift.components[component_name] = httpVueLoader("UI/components/" + component_name + ".vue");
+        if(init && APIShift.components[component_name] === undefined) APIShift.components[component_name] = httpVueLoader(this.getUIFolder() + "/components/" + component_name + ".vue");
         return APIShift.components[component_name];
     }
 
@@ -511,7 +515,7 @@ class APIHandler {
     getMixin(mixin_name, init = false) {
         if(init && APIShift.mixins[mixin_name] === undefined) {
             // Load mixin as object
-            return httpVueLoader.getObject("UI/components/mixins/" + mixin_name + ".vue")().then(function(obj) {
+            return httpVueLoader.getObject(this.getUIFolder() + "/components/mixins/" + mixin_name + ".vue")().then(function(obj) {
                 APIShift.mixins[mixin_name] = obj;
             });
         }
@@ -527,7 +531,7 @@ class APIHandler {
 
 /**
  * Holds the APIShift server installation parent url on the server
- * Calculated automatically when APIShift object is constructed
+ * Calculated automatically when APIShift file is loaded
  */
 APIShift.server = null;
 /**

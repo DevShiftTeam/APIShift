@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>DevShift</title>
+        <title>APIShift | Welcome</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -16,13 +16,17 @@
     </head>
     <body>
         <div id="app">
-        <!-- Loader -->
+            <!-- Notifications -->
+            <component :is="app_notifications" :alerts="alerts"></component>
 
-        <!-- Navigator -->
+            <!-- Loader -->
 
-        <!-- Page Body -->
+            <!-- Navigator -->
 
-        <!-- Footer -->
+            <!-- Page Body -->
+            <router-view></router-view>
+
+            <!-- Footer -->
         </div>
         
         <!-- Scripts -->

@@ -542,7 +542,7 @@ APIShift.admin_mode = false;
 /**
  * Pages are loaded using the loader from the API
  */
-APIShift.pages = {};
+APIShift.pages = [];
 APIShift.admin_routes = [];
 APIShift.components = {};
 APIShift.load_components = true;

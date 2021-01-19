@@ -51,12 +51,17 @@ class Installer {
         try {
             // Create schema if not exists
             if(Status::getStatus() == Status::DB_CONNECTION_FAILED) {
-                Status::message(Status::SUCCESS, null, false);
                 // Re-start connection with no database name
+                Status::message(Status::SUCCESS, null, false);
                 DatabaseManager::deleteConnection("main");
                 DatabaseManager::startConnection("main", $db_host, $db_user, $db_pass, $db_port, null, false);
-                if(Status::getStatus() == Status::DB_CONNECTION_FAILED) Status::message(Status::ERROR, "Couldn't connect to DB");
-                if(!DatabaseManager::query("main", "CREATE SCHEMA {$db_name}")) Status::message(Status::ERROR, "Couldn't create DB schema");
+
+                // Check for possible errors
+                if(Status::getStatus() == Status::DB_CONNECTION_FAILED)
+                    Status::message(Status::ERROR, "Couldn't connect to DB '" . $db_user . "'@'" . $db_host);
+                if(!DatabaseManager::query("main", "CREATE SCHEMA {$db_name}"))
+                    Status::message(Status::ERROR, "Couldn't create DB schema");
+                
                 // Re-start connection with database name
                 DatabaseManager::deleteConnection("main");
                 DatabaseManager::addConnection("main", $db_host, $db_user, $db_pass, $db_port, $db_name);
@@ -178,6 +183,10 @@ EOT;
         if(!file_put_contents("core/Configurations.php", $newConfigFileData))
             Status::message(Status::ERROR, "Couldn't change the configurations file, please check permissions");
     }
+
+    /**
+     * Validate incoming request
+     */
     public function validate()
     {
         if(!isset($_POST['login'])){

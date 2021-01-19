@@ -98,7 +98,8 @@ class DatabaseManager {
      * 
      * @return void
      */
-    public static function startConnection($connection_name, $db_host = null, $db_user = null, $db_pass = null, $db_port = null, $db_name = null, $exit_on_error = true) {
+    public static function startConnection($connection_name, $db_host = null, $db_user = null, $db_pass = null, $db_port = null,
+                                            $db_name = null, $exit_on_error = true) {
         // Check if connection already exists is queue
         if(isset(self::$connections[$connection_name]) && (self::$connections[$connection_name] instanceof PDO)) return;
         try {
@@ -111,8 +112,12 @@ class DatabaseManager {
             if($db_port === null) $db_port = self::$connections_metadata[$connection_name]['port'];
 
             // Connect to specific DB if specified
-            if($db_name != null) self::$connections[$connection_name] = new PDO("mysql:host={$db_host};dbname={$db_name};port={$db_port}", $db_user, $db_pass);
-            else self::$connections[$connection_name] = new PDO("mysql:host={$db_host};port={$db_port}", $db_user, $db_pass);
+            if($db_name != null)
+                self::$connections[$connection_name] = 
+                    new PDO("mysql:host={$db_host};dbname={$db_name};port={$db_port}", $db_user, $db_pass);
+            else
+                self::$connections[$connection_name] = 
+                    new PDO("mysql:host={$db_host};port={$db_port}", $db_user, $db_pass);
 
             // Avoid possible SQL injections
             self::$connections[$connection_name]->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
@@ -120,7 +125,7 @@ class DatabaseManager {
             self::closeConnection($connection_name);
             Status::message(
                 Status::DB_CONNECTION_FAILED,
-                "Couldn't create `" . $connection_name . "` db connection ",
+                "Couldn't create `" . $connection_name . "` db connection",
                 $exit_on_error
             );
         }

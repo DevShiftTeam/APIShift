@@ -119,6 +119,7 @@ class Installer {
             case CacheManager::APCU: $cache_system = "CacheManager::APCU"; break;
             case CacheManager::REDIS: $cache_system = "CacheManager::REDIS"; break;
             case CacheManager::MEMCACHED: $cache_system = "CacheManager::MEMCACHED"; break;
+            case CacheManager::NO_CACHE: $cache_system = "CacheManager::NO_CACHE"; break;
             default: Status::message(Status::ERROR, "Invalid cache system");
         }
 

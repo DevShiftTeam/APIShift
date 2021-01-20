@@ -38,7 +38,7 @@ class Task {
     }
 
     /**
-     * Checks if a request exiasts as a task
+     * Checks if a request exists as a task
      * 
      * @param string $controller Controller name
      * @param string $method Method name

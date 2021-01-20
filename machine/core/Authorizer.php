@@ -76,10 +76,12 @@ class Authorizer {
     {
         // Step 1: Find controller & method
         $request_type = Authorizer::validateRequest($controller, $method);
-        if($request_type == self::REQUEST_INVALID) Status::message(Status::ERROR, "Invalid Request Form: Please check controller or method name");
+        if($request_type == self::REQUEST_INVALID)
+            Status::message(Status::ERROR, "Invalid Request Form: Please check controller or method name");
 
         // Step 2: Call authorization tasks
-        if(!Task::validateResult(Task::runAuthorizationTasks($controller, $method))) Status::message(Status::NO_AUTH, "You have no authorization to access this request");
+        if(!Task::validateResult(Task::runAuthorizationTasks($controller, $method)))
+            Status::message(Status::NO_AUTH, "You have no authorization to access this request");
         
         // Step 3: Tasks triggered before request
         Task::placeTrigger("BeforeRun");

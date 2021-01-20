@@ -15,6 +15,7 @@ window.app = new Vue({
         app_navigator: {},
         app_footer: {},
         app_notifications: {},
+        pages: [],
         apishift: null
     },
     created() {
@@ -23,7 +24,7 @@ window.app = new Vue({
         // Link components & pages to apishift
         APIShift.Loader.load((resolve, reject) => {
             app.app_notifications = APIShift.API.getComponent("notifications");
-            APIShift.pages.push({
+            app.pages.push({
                 path: '/main',
                 component: APIShift.API.getPage("main", true)
             });
@@ -32,7 +33,7 @@ window.app = new Vue({
 
 
         APIShift.Loader.load((resolve, reject) => {
-            app.$router.addRoutes(APIShift.pages);
+            app.$router.addRoutes(app.pages);
             // Handle first load of page
             if(app.$route.path == "/") app.$router.push("/main");
 

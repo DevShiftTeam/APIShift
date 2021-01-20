@@ -31,6 +31,10 @@ class DatabaseManager {
      * Array of all connections created by the API
      */
     private static $connections = array();
+
+    /**
+     * Metadata of every connection at run-time
+     */
     private static $connections_metadata = [
         "main" => [
             "host" => Configurations::DB_HOST,
@@ -134,9 +138,9 @@ class DatabaseManager {
     /**
      * Return PDO instance of connection
      * 
-     * @param $connectionName Name of the connection
+     * @param string $connectionName Name of the connection
      * 
-     * @return PDO Instance of connection
+     * @return \PDO Instance of connection
      */
     public static function getInstance(string $connectionName)
     {
@@ -146,7 +150,8 @@ class DatabaseManager {
 
     /**
      * Close a connection
-     * @param $connectionName Name of the connection
+     * 
+     * @param string $connectionName Name of the connection
      * 
      * @return void
      */
@@ -173,7 +178,7 @@ class DatabaseManager {
      * Order keys by desired column
      * 
      * @param string $connectionName name of the connection
-     * @param array& $collector query to run
+     * @param array &$collector query to run
      * @param string $query query to run
      * @param array $data Parameters to pass when parsing query
      * @param string|null $column Comlumn to order as key
@@ -221,7 +226,7 @@ class DatabaseManager {
      * @param string $query Query to run
      * @param array $data Parameters to pass when parsing query
      * 
-     * @return bool|PDOStatement Returns FALSE on failure and PDOStatement on success
+     * @return bool|\PDOStatement Returns FALSE on failure and PDOStatement on success
      */
     public static function query($connectionName, $query, $data = array()) {
         if(self::$connections[$connectionName] == null) {

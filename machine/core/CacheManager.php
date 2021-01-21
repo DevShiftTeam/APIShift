@@ -171,7 +171,7 @@ use DateTime;
                 if($_SESSION['in_session_cache'][$key][1] != 0
                     && $_SESSION['in_session_cache'][$key][1] > (new DateTime())->getTimestamp())
                 {
-                    unset($_SESSION['in_session_cache'][$key][0]);
+                    unset($_SESSION['in_session_cache'][$key]);
                     return false;
                 }
                 return isset($_SESSION['in_session_cache'][$key]) ?
@@ -213,7 +213,8 @@ use DateTime;
                  * The second is the end time.
                  */
                 $_SESSION['in_session_cache'][$key] = [
-                    $value, $ttl == 0 ? 0 : (new DateTime())->getTimestamp() + $ttl
+                    $value,
+                    $ttl == 0 ? 0 : (new DateTime())->getTimestamp() + $ttl
                 ];
                 break;
             default:

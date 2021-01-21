@@ -58,10 +58,11 @@
                             {label: "Cache Pass", name: "cc_pass", icon: "lock", type: "password", data: "", values: [1] }
                         ],
                         selector: { label: "Cache System", name: "cc_system", items: [ 
+                                { text: "No Cache", value: 3 },
                                 { text: "APCu", value: 0 },
                                 { text: "Redis", value: 1 },
                                 { text: "Memcached", value: 2 }
-                            ], data: 0, icon: ""}
+                            ], data: 3, icon: ""}
                     },
                     {
                         name: "Site data",

@@ -38,7 +38,7 @@ class Task {
     }
 
     /**
-     * Checks if a request exiasts as a task
+     * Checks if a request exists as a task
      * 
      * @param string $controller Controller name
      * @param string $method Method name
@@ -144,7 +144,7 @@ class Task {
      * Run a task list and store results
      * 
      * @param array|int $task_list The tasks IDs to run
-     * @param array& $inputs Inputs provided for the task
+     * @param array &$inputs Inputs provided for the task
      * 
      * @return array Collection of the results of the tasks
      */

@@ -33,7 +33,8 @@ class Control {
      */
     public static function getPages() {
         $res = [];
-        if(DatabaseManager::fetchInto("main", $res, "SELECT * FROM admin_pages", [], 'id') === false) Status::message(Status::ERROR, "Couldn't retrieve pages");;
+        if(DatabaseManager::fetchInto("main", $res, "SELECT * FROM admin_pages", [], 'id') === false)
+            Status::message(Status::ERROR, "Couldn't retrieve pages");;
         Status::message(Status::SUCCESS, $res);
     }
 }

@@ -38,8 +38,11 @@ class DataManager {
     private static function uploadEntryToCacheAndRuntime($id) {
         if(!isset(self::$runtime_entries[$id])) {
             self::$runtime_entries[$id] = CacheManager::getFromTable('data_entries', $id);
-            self::$runtime_sources[self::$runtime_entries[$id]['source']]
-                = CacheManager::getFromTable('data_sources', self::$runtime_entries[$id]['source']);
+            // Add source if there is one
+            if(self::$runtime_entries[$id]['source'] != 0) {
+                self::$runtime_sources[self::$runtime_entries[$id]['source']]
+                    = CacheManager::getFromTable('data_sources', self::$runtime_entries[$id]['source']);
+            }
         }
     }
 

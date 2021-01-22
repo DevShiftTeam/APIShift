@@ -54,10 +54,10 @@ class SessionState {
                     if(
                         // Timeout if a user was inactive by the timeout rule attached to the session
                         ($state_collection[$state]['inactive_timeout'] > 0
-                        && $_SERVER['REQUEST_TIME'] - $_SESSION['lastActivity'] > $state_collection[$state]['inactive_timeout'])
+                        && $_SERVER['REQUEST_TIME'] - $_SESSION['last_activity'] > $state_collection[$state]['inactive_timeout'])
                         // Timeout if the time since the state was validated & authenticated passed the user defined rule
                         || ($state_collection[$state]['active_timeout'] > 0
-                        && $_SERVER['REQUEST_TIME'] - $_SESSION['whenActivated'] > $state_collection[$state]['active_timeout'])
+                        && $_SERVER['REQUEST_TIME'] - $_SESSION['when_activated'] > $state_collection[$state]['active_timeout'])
                     ) {
                         session_unset();
                         session_destroy();
@@ -75,7 +75,7 @@ class SessionState {
             }
 
             // Update last request time and return
-            $_SESSION['lastActivity'] = $_SERVER['REQUEST_TIME'];
+            $_SESSION['last_activity'] = $_SERVER['REQUEST_TIME'];
             return;
         }
         
@@ -123,8 +123,8 @@ class SessionState {
 
             // Save session active timeout
             if($state_collection[$state_id]['active_timeout'] > 0) {
-                // $_SESSION['whenActivated'] defines the last time since the state has validate
-                $_SESSION['whenActivated'] = $_SERVER['REQUEST_TIME'];
+                // $_SESSION['when_activated'] defines the last time since the state has validate
+                $_SESSION['when_activated'] = $_SERVER['REQUEST_TIME'];
             }
 
             // Change state

@@ -88,13 +88,8 @@ class Process {
                 $current_connection = $connections_set[$current_connection]['from'];
                 continue;
             }
-
-            // Manuver in connectors who point to the current connection to get results
-            if($from_type == 3 && !isset($connection_results[$connections_set[$current_connection]['from']])) {
-                $current_connection = $connections_set[$current_connection]['from'];
-                continue;
-            }
             else {
+                // Manuver in connectors who point to the current connection to get results
                 $break_from_loop = false;
                 foreach($connections_set as $id => $connection) {
                     // Move to connection with no result

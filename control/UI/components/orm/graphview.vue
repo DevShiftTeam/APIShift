@@ -25,10 +25,7 @@
             return {
                 drawer: null,
                 item_comp: APIShift.API.getComponent('orm/item', true),
-                items: [
-                    { is_relation: false, name: "wait" },
-                    { is_relation: false, name: "haha" }
-                ],
+                items: [ ],
                 relative: {
                     x: 0,
                     y: 0
@@ -37,11 +34,7 @@
             }
         },
         created () {
-            for(var x in [...Array(100).keys()]) {
-                this.items.push({
-                    is_relation: false, name: "w" + x
-                })
-            }
+            
         }
     }
 </script>

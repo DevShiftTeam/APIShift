@@ -2,4 +2,3 @@ vendor/*
 composer.json
 composer.lock
 .vs/
-*Configurations.php*

@@ -16,7 +16,7 @@
      * See the License for the specific language governing permissions and
      * limitations under the License.
      * 
-     * @author Sapir Shemer
+     * @author DevShift Team
      */
 
     // This shit is made for scripting
@@ -33,19 +33,13 @@
         },
         created () {
             
-        }, 
-        mounted () {
-            this.$el.ref = this.name;
-            console.log(this);
         },
         methods: {
             drag_start () {
-                // console.log('Drag Start');
+                console.log('Drag Start');
             },
             drag (vmove) {
-                // console.log(`Drag by ${vmove[0]}px,${vmove[1]}px `);
-                console.log(vmove);
-                requestAnimationFrame(() => this.move_by(vmove))
+                console.log(`Drag by ${vmove[0]}px,${vmove[1]}px `);
             },
             drag_end () {
                 
@@ -55,7 +49,10 @@
 </script>
 
 <template>
-    <div class="item graph_element" :style="transformation">
+    <div draggable @dragstart="drag_start($event)" @drag="drag($event)" @dragend="drag($event)" class="item" :style="{
+        'margin-top': y + 'px',
+        'margin-left': x + 'px'
+    }">
         <div class="item_type">{{ is_relation ? 'R' : 'I' }}</div>
         <div style="display: inline;">{{ name }}</div>
     </div>

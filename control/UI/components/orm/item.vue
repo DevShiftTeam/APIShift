@@ -28,36 +28,54 @@
         },
         data () {
             return {
-                drawer: null
+                drawer: null,
+                item_rect: {},
+                drag_range: {
+                    x: 0,
+                    y: 0
+                },
+                init_relative_drag: {
+                    x: 0,
+                    y: 0
+                }
             }
         },
         created () {
-            
         }, 
         mounted () {
             this.$el.ref = this.name;
-            console.log(this);
         },
         methods: {
-            drag_start () {
-                // console.log('Drag Start');
+            drag_start (event) {
+                // Get mouse coordinates relative to element
+                this.item_rect = this.$el.getBoundingClientRect();
+                this.init_relative_drag.x = event.clientX - this.item_rect.left;
+                this.init_relative_drag.y = event.clientY - this.item_rect.top;
+
+                // Set global drag function
+                graph_view.drag_handler = this.drag;
             },
-            drag (vmove) {
-                // console.log(`Drag by ${vmove[0]}px,${vmove[1]}px `);
-                console.log(vmove);
-                requestAnimationFrame(() => this.move_by(vmove))
+            drag (event) {
+
+                this.drag_range.x = event.clientX - this.init_relative_drag.x - graph_view.graph_rect.left - graph_view.camera.x;
+                this.drag_range.y = event.clientY - this.init_relative_drag.y - graph_view.graph_rect.top - graph_view.camera.y;
+                this.move_to(this.drag_range);
             },
-            drag_end () {
-                
+            drag_end (event) {
+                // Reset global drag function
+                graph_view.drag_handler = graph_view.pointer_move;
             }
         }
     }
 </script>
 
 <template>
-    <div class="item graph_element" :style="transformation">
-        <div class="item_type">{{ is_relation ? 'R' : 'I' }}</div>
-        <div style="display: inline;">{{ name }}</div>
+    <div class="item"
+        :style="transformation"
+        @pointerdown.prevent="drag_start"
+        @pointerup.prevent="drag_end">
+            <div class="item_type">{{ is_relation ? 'R' : 'I' }}</div>
+            <div style="display: inline;">{{ name }}</div>
     </div>
 </template>
 

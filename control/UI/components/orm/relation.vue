@@ -16,7 +16,7 @@
      * See the License for the specific language governing permissions and
      * limitations under the License.
      * 
-     * @author Sapir Shemer
+     * @author DevShift Team
      */
 
     // This shit is made for scripting
@@ -28,54 +28,33 @@
         },
         data () {
             return {
-                drawer: null,
-                item_rect: {},
-                drag_range: {
-                    x: 0,
-                    y: 0
-                },
-                init_relative_drag: {
-                    x: 0,
-                    y: 0
-                }
+                drawer: null
             }
         },
         created () {
-        }, 
-        mounted () {
-            this.$el.ref = this.name;
+            
         },
         methods: {
-            drag_start (event) {
-                // Get mouse coordinates relative to element
-                this.item_rect = this.$el.getBoundingClientRect();
-                this.init_relative_drag.x = event.clientX - this.item_rect.left;
-                this.init_relative_drag.y = event.clientY - this.item_rect.top;
-
-                // Set global drag function
-                graph_view.drag_handler = this.drag;
+            drag_start () {
+                console.log('Drag Start');
             },
-            drag (event) {
-
-                this.drag_range.x = event.clientX - this.init_relative_drag.x - graph_view.graph_rect.left - graph_view.camera.x;
-                this.drag_range.y = event.clientY - this.init_relative_drag.y - graph_view.graph_rect.top - graph_view.camera.y;
-                this.move_to(this.drag_range);
+            drag (vmove) {
+                console.log(`Drag by ${vmove[0]}px,${vmove[1]}px `);
             },
-            drag_end (event) {
-                // Reset global drag function
-                graph_view.drag_handler = graph_view.pointer_move;
+            drag_end () {
+                
             }
         }
     }
 </script>
 
 <template>
-    <div class="item"
-        :style="transformation"
-        @pointerdown.prevent="drag_start"
-        @pointerup.prevent="drag_end">
-            <div class="item_type">{{ is_relation ? 'R' : 'I' }}</div>
-            <div style="display: inline;">{{ name }}</div>
+    <div draggable @dragstart="drag_start($event)" @drag="drag($event)" @dragend="drag($event)" class="item" :style="{
+        'margin-top': y + 'px',
+        'margin-left': x + 'px'
+    }">
+        <div class="item_type">{{ is_relation ? 'R' : 'I' }}</div>
+        <div style="display: inline;">{{ name }}</div>
     </div>
 </template>
 

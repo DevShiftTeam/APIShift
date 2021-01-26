@@ -17,50 +17,62 @@
      * limitations under the License.
      * 
      * @author Sapir Shemer
+     * @author Ilan Dazanashvili
      */
+
 
     module.exports = {
         data() {
             return {
-                // Original position
-                origin_x: 0,
-                origin_y: 0,
-                // Mouse and start position data while dragging
-                drag_data: null
+                // Functional data 
+                left: 0,
+                top: 20,
+                scale: 1,
+                lines: []
             }
         },
+        mounted () {
+            this.$el.type = 'graph_element';
+            this.$el.ref = this.$props.name;
+        },
         props: {
+            name: String,
             scale: Number,
             // The point from which the scale is happening
             relative: Object
         },
         methods: {
-            move (x, y) {
-                this.origin_x = x > 0 ? x : 0;
-                this.origin_y = y > 0 ? y : 0;
+            // Move by a specified vector on the plane 
+            move_by: function(vmove) {
+                this.left += vmove.x;
+                this.top += vmove.y;
+                this.updateLines();
             },
-            drag_start (event) {
-                this.drag_data = {
-                    mouse_x: event.clientX,
-                    mouse_y: event.clientY,
-                    start_x: this.origin_x,
-                    start_y: this.origin_y
-                }
+            // Move to a specified coordinate on the plane 
+            move_to: function(coordinate) {
+                this.left = coordinate.x;
+                this.top = coordinate.y;
+                this.updateLines();
             },
-            drag (event) {
-                event.preventDefault();
-                this.move(
-                    this.drag_data.start_x + (event.clientX - this.drag_data.mouse_x),
-                    this.drag_data.start_y + (event.clientY - this.drag_data.mouse_y)
-                    );
+            updateLines: function() {
+                
+            }
+        },
+        watch: {
+            scale: function (newScale, oldScale) {
+                let ds = newScale / oldScale;
+                this.left = this.left*ds + this.$props.relative.x*(1-ds);
+                this.top = this.top*ds + this.$props.relative.y*(1-ds);
+                this.updateLines();
             }
         },
         computed: {
-            x () {
-                return this.origin_x * this.$props.scale + this.$props.relative.x * (1 - this.$props.scale);
-            },
-            y () {
-                return this.origin_y * this.$props.scale + this.$props.relative.y * (1 - this.$props.scale);
+            // Rendered transformation (coordinates and scale) 
+            transformation () {
+                return  {
+                    // transform3d leverages GPU acceleration on some clients 
+                    transform: `translate3d(${this.left}px,${this.top}px, 0) scale(${this.$props.scale})`
+                }
             }
         }
     };

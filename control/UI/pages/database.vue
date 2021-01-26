@@ -34,9 +34,7 @@
 
 <template>
     <v-content>
-        <div>
             <component :is="graph_view"></component>
-        </div>
     </v-content>
 </template>
 <style scoped>

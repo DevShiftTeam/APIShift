@@ -140,6 +140,7 @@
             front_z_index: function(newValue) {
                 app.$refs.navigator.updateIndex(newValue + 1);
                 app.$refs.footer.updateIndex(newValue + 1);
+                window.handler.updateIndex(newValue + 1);
             }
         }
     }

@@ -22,14 +22,33 @@
     module.exports = {
         data() {
             return {
-                graph_view: null
+                current_page: 0,
+                sub_pages: [
+                    { title: "Database Connections", sub_title: "Manage database connections", url: "/database/database_list" },
+                    { title: "Data Model Editor", sub_title: "Create database schemas using a smart ORM", url: "/database/model_editor" }
+                ],
+                index: 10
             };
         },
+        beforeRouteUpdate (to, from, next) {
+            this.current_page = this.sub_pages.findIndex(p => p.url == to.path);
+            next();
+        },
         created() {
+            if(this.$route.path == '/database' || this.$route.path == '/database/') {
+                this.$router.push('/database/database_list');
+            }
+            window.handler = this;
             // Load necessary comonents
             APIShift.API.getMixin('orm/graph_element', true);
-            // Load graph view
-            this.graph_view = APIShift.API.getComponent("orm/graphview", true);
+            // Determine page
+            this.current_page = this.sub_pages.findIndex(p => p.url == this.$route.path);
+            if(this.current_page < 0) this.current_page = 0;
+        },
+        methods: {
+            updateIndex(new_index) {
+                this.index = new_index;
+            }
         }
     };
 </script>
@@ -40,13 +59,20 @@
             <v-card class="mx-auto" width="90%" min-height="75%" elevation-2>
                 <!-- Header -->
                 <v-app-bar>
-                    <v-toolbar-title>Data Model Drawer</v-toolbar-title>
+                    <v-menu offset-y :style="{ 'z-index' : index }">
+                        <template v-slot:activator="{ on }">
+                            <v-toolbar-title v-on="on"><v-btn>{{ sub_pages[current_page].title }}</v-btn></v-toolbar-title>
+                        </template>
+                        <v-list>
+                            <v-list-item v-for="(item, key) in sub_pages" :key="key" :to="item.url">{{ item.title }}</v-list-item>
+                        </v-list>
+                    </v-menu>
                     <v-spacer></v-spacer>
                 </v-app-bar>
 
                 <!-- Body -->
                 <div class="overflow-box">
-                    <component :is="graph_view"></component>
+                    <router-view></router-view>
                 </div>
             </v-card>
         </v-container>

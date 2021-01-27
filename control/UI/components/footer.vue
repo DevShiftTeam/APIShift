@@ -24,22 +24,13 @@
         data () {
             return {
                 drawer: null,
-                index: 10,
-                show_back_totop: false
+                index: 10
             }
         },
         created () {
             
         },
         methods: {
-            onScroll (e) {
-                if (typeof window === 'undefined') return
-                const top = window.pageYOffset ||   e.target.scrollTop || 0
-                this.show_back_totop = top > 20
-            },
-            toTop: function() {
-                app.$vuetify.goTo(0);
-            },
             updateIndex: function(new_index) {
                 this.index = new_index;
             }
@@ -52,15 +43,12 @@
     :style="{'z-index': index}">
     <v-fab-transition>
       <v-btn
-        v-scroll="onScroll"
-        v-show="show_back_totop"
         key="mdi-chevron-up"
         color="purple"
         fab
         dark
         bottom
         right
-        @click="toTop"
       >
         <v-icon>mdi-chevron-up</v-icon>
       </v-btn>

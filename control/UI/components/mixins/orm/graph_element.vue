@@ -32,8 +32,8 @@
                     x: 0,
                     y: 0
                 },
-                scale: 1,
                 type: 'graph_element',
+                index: 0,
                 lines: []
             }
         },
@@ -58,6 +58,8 @@
 
                 // Update drag function
                 graph_view.drag_handler = this.drag;
+                graph_view.front_z_index++;
+                this.$props.index = graph_view.front_z_index;
             },
             drag (event) {
                 this.position.x = event.clientX - this.mouse_relative_position.x - graph_view.graph_position.x - graph_view.camera.x;
@@ -79,7 +81,8 @@
             // Rendered transformation (coordinates and scale) 
             transformation () {
                 return  {
-                    transform: `translate(${this.position.x}px,${this.position.y}px) scale(${this.$props.scale})`
+                    transform: `translate(${this.position.x}px,${this.position.y}px) scale(${this.$props.scale})`,
+                    'z-index': this.$props.index
                 }
             }
         }

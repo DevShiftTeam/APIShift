@@ -35,6 +35,8 @@
                     x: 0,
                     y: 0
                 },
+                // Index of the most frontal element
+                front_z_index: 0,
                 scale: 1,
                 /* Drag & Drop functional data */
                 event_list: {},
@@ -62,9 +64,10 @@
 
             for(var x in [...Array(100).keys()]) {
                 this.items.push({
-                    is_relation: false, name: "w" + x
+                    is_relation: false, name: "w" + x, index: (Number(x) + 1)
                 })
             }
+            this.front_z_index = 102;
         },
         mounted () {
             this.$el.type = "graphview";
@@ -137,7 +140,8 @@
                 :relative="init_relative_camera"
                 :is_relation="item.is_relation"
                 :scale="scale"
-                :name="item.name">
+                :name="item.name"
+                :index="item.index">
                 
                 </component>
         </div>

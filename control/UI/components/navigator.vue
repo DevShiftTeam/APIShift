@@ -106,7 +106,15 @@
     <div>
         <v-app-bar app clipped-left>
             <v-app-bar-nav-icon @click.stop="drawer = (drawer + 1) % 3"></v-app-bar-nav-icon>
-            <v-toolbar-title>APIShift Control Panel</v-toolbar-title>
+            <v-toolbar-title>
+                <v-avatar tile style="height: auto; margin-right: 10px;">
+                    <img
+                        src="../images/apishift-logo.png"
+                        alt="APIShift"
+                    >
+                </v-avatar>
+                APIShift Control Panel
+            </v-toolbar-title>
             <v-btn class="lightbulb" icon large target="_blank" v-on:click="toggleDarkTheme()">
                 <v-icon v-if="isOnDarkMode()">fas fa-lightbulb</v-icon>
                 <v-icon v-else>fas fa-moon</v-icon>

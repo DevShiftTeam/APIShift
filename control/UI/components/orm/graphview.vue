@@ -78,16 +78,18 @@
         mounted () {
             this.$el.type = "graphview";
             this.$refs['graphview'] = this;
-            let rect = this.$el.getBoundingClientRect();
-            this.graph_position = {
-                x: rect.left,
-                y: rect.top
-            };
         },
         methods: {
             pointer_down(event) {
                 // Add event to event cache, determine interactive target 
                 this.event_list[event.eventId] = event;
+                
+                // Update graph position
+                let rect = this.$el.getBoundingClientRect();
+                this.graph_position = {
+                    x: rect.left,
+                    y: rect.top
+                };
 
                 // viewport panning / element movement 
                 if (this.event_list.length === 1 && event.ctrlKey) {
@@ -142,9 +144,9 @@
         <div id="graph_center"
             :style="{ 'top': camera.y + 'px', 'left': camera.x + 'px'}">
             <component
-                v-for="item in items"
+                v-for="(item, index) in items"
                 :is="item_comp"
-                :key="item.name"
+                :key="index"
                 :ref="item.name"
                 :relative="init_relative_camera"
                 :is_relation="item.is_relation"

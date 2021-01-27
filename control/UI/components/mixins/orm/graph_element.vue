@@ -30,7 +30,13 @@
                 },
                 type: 'graph_element',
                 index: 0,
-                lines: []
+                lines: [],
+                // This elements adds functionallity to drag events in needed
+                expanded_functions: {
+                    'drag_start': (event) => {},
+                    'drag': (event) => {},
+                    'drag_end': (event) => {}
+                }
             }
         },
         mounted () {
@@ -55,14 +61,23 @@
                 graph_view.drag_handler = this.drag;
                 graph_view.front_z_index++;
                 this.$props.index = graph_view.front_z_index;
+
+                // Call additional function if set
+                this.expanded_functions.drag_start(event);
             },
             drag (event) {
                 this.$props.position.x = this.init_position.x + event.clientX - graph_view.init_pointer.x;
                 this.$props.position.y = this.init_position.y + event.clientY - graph_view.init_pointer.y;
+
+                // Call additional function if set
+                this.expanded_functions.drag(event);
             },
             drag_end (event) {
                 // Reset drag function
                 graph_view.drag_handler = window.empty_function;
+
+                // Call additional function if set
+                this.expanded_functions.drag_end(event);
             }
         },
         watch: {

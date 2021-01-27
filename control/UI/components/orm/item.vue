@@ -19,6 +19,8 @@
      * @author Sapir Shemer
      */
 
+const graphviewVue=require("./graphview.vue");
+
     // This shit is made for scripting
     module.exports = {
         mixins: [APIShift.API.getMixin('orm/graph_element')],
@@ -29,41 +31,25 @@
         data () {
             return {
                 drawer: null,
-                item_rect: {},
-                drag_range: {
-                    x: 0,
-                    y: 0
-                },
-                init_relative_drag: {
-                    x: 0,
-                    y: 0
-                }
+                width: 0,
+                height: 0
             }
         },
         created () {
+            // We use the type to differentiate between objects
+            this.type = 'item';
         }, 
         mounted () {
             this.$el.ref = this.name;
+            let rect = this.$el.getBoundingClientRect();
+            this.width = rect.width;
+            this.height = rect.height;
         },
         methods: {
-            drag_start (event) {
-                // Get mouse coordinates relative to element
-                this.item_rect = this.$el.getBoundingClientRect();
-                this.init_relative_drag.x = event.clientX - this.item_rect.left;
-                this.init_relative_drag.y = event.clientY - this.item_rect.top;
-
-                // Set global drag function
-                graph_view.drag_handler = this.drag;
-            },
-            drag (event) {
-
-                this.drag_range.x = event.clientX - this.init_relative_drag.x - graph_view.graph_rect.left - graph_view.camera.x;
-                this.drag_range.y = event.clientY - this.init_relative_drag.y - graph_view.graph_rect.top - graph_view.camera.y;
-                this.move_to(this.drag_range);
-            },
-            drag_end (event) {
-                // Reset global drag function
-                graph_view.drag_handler = graph_view.pointer_move;
+            render_needed () {
+                for(let key in graph_view.$refs) {
+                    
+                }
             }
         }
     }

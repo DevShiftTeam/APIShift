@@ -24,10 +24,16 @@
     module.exports = {
         data() {
             return {
-                // Functional data 
-                left: 0,
-                top: 20,
+                position: {
+                    x: 0,
+                    y: 0
+                },
+                mouse_relative_position: {
+                    x: 0,
+                    y: 0
+                },
                 scale: 1,
+                type: 'graph_element',
                 lines: []
             }
         },
@@ -39,39 +45,41 @@
             name: String,
             scale: Number,
             // The point from which the scale is happening
-            relative: Object
+            relative: Object,
+            // Index - used for smart rendering
+            index: Number
         },
         methods: {
-            // Move by a specified vector on the plane 
-            move_by: function(vmove) {
-                this.left += vmove.x;
-                this.top += vmove.y;
-                this.updateLines();
+            drag_start (event) {
+                // Get mouse coordinates relative to element
+                let item_rect = this.$el.getBoundingClientRect();
+                this.mouse_relative_position.x = (event.clientX - item_rect.x) / this.$props.scale;
+                this.mouse_relative_position.y = (event.clientY - item_rect.y) / this.$props.scale;
+
+                // Update drag function
+                graph_view.drag_handler = this.drag;
             },
-            // Move to a specified coordinate on the plane 
-            move_to: function(coordinate) {
-                this.left = coordinate.x;
-                this.top = coordinate.y;
-                this.updateLines();
+            drag (event) {
+                this.position.x = event.clientX - this.mouse_relative_position.x - graph_view.graph_position.x - graph_view.camera.x;
+                this.position.y = event.clientY - this.mouse_relative_position.y - graph_view.graph_position.y - graph_view.camera.y;
             },
-            updateLines: function() {
-                
+            drag_end (event) {
+                // Reset drag function
+                graph_view.drag_handler = window.empty_function;
             }
         },
         watch: {
             scale: function (newScale, oldScale) {
                 let ds = newScale / oldScale;
-                this.left = this.left*ds + this.$props.relative.x*(1-ds);
-                this.top = this.top*ds + this.$props.relative.y*(1-ds);
-                this.updateLines();
+                this.position.x = this.position.x*ds + this.$props.relative.x*(1-ds);
+                this.position.y = this.position.y*ds + this.$props.relative.y*(1-ds);
             }
         },
         computed: {
             // Rendered transformation (coordinates and scale) 
             transformation () {
                 return  {
-                    // transform3d leverages GPU acceleration on some clients 
-                    transform: `translate3d(${this.left}px,${this.top}px, 0) scale(${this.$props.scale})`
+                    transform: `translate(${this.position.x}px,${this.position.y}px) scale(${this.$props.scale})`
                 }
             }
         }

@@ -19,6 +19,8 @@
      * @author Sapir Shemer
      */
 
+    window.empty_function = (event) => {};
+
     // This shit is made for scripting
     module.exports = {
         data () {
@@ -26,8 +28,8 @@
                 drawer: null,
                 item_comp: APIShift.API.getComponent('orm/item', true),
                 items: [
-                    { is_relation: false, name: "wait", z_index: 0 },
-                    { is_relation: false, name: "haha", z_index: 1 }
+                    { is_relation: false, name: "wait", index: 0 },
+                    { is_relation: false, name: "haha", index: 1 }
                 ],
                 relative: {
                     x: 0,
@@ -35,11 +37,15 @@
                 },
                 scale: 1,
                 /* Drag & Drop functional data */
-                event_list: [],
-                drag_handler: (event) => {},
-                mouse_pressing: false,
-                graph_rect: {},
-                // Defines the camera - when moving the whole graph
+                event_list: {},
+                // Holds the function which renders the dragging event
+                drag_handler: window.empty_function,
+                // Stores the current position of the graph on the screen
+                graph_position: {
+                    x: 0,
+                    y: 0
+                },
+                // Defines the camera origin relative to the initial 0,0 position
                 camera: {
                     x: 0,
                     y: 0
@@ -53,7 +59,6 @@
         created () {
             // Store this object with a global reference
             window.graph_view = this;
-            graph_view.drag_handler = graph_view.pointer_move;
 
             for(var x in [...Array(100).keys()]) {
                 this.items.push({
@@ -64,66 +69,42 @@
         mounted () {
             this.$el.type = "graphview";
             this.$refs['graphview'] = this;
-            this.graph_rect = this.$el.getBoundingClientRect();
+            let rect = this.$el.getBoundingClientRect();
+            this.graph_position = {
+                x: rect.left,
+                y: rect.top
+            };
         },
         methods: {
             pointer_down(event) {
                 // Add event to event cache, determine interactive target 
-                this.event_list.push(event);
+                this.event_list[event.eventId] = event;
 
                 // viewport panning / element movement 
                 if (this.event_list.length === 1 && event.ctrlKey) {
-                    this.remove_event(event);
+                    delete this.event_list[event.eventId];
                 }
 
-                this.init_relative_camera.x = event.clientX - this.graph_rect.left - this.camera.x;
-                this.init_relative_camera.y = event.clientY - this.graph_rect.top - this.camera.y;
-                this.mouse_pressing = true;
+                // Proceeds only if not dragging any other object
+                if(this.drag_handler != window.empty_function) return;
+
+                this.init_relative_camera.x = event.clientX - this.graph_position.x - this.camera.x;
+                this.init_relative_camera.y = event.clientY - this.graph_position.y - this.camera.y;
+                this.drag_handler = this.pointer_move;
             },
             pointer_move(event) {
-                if(!this.mouse_pressing) return;
-                
-                if (this.event_list.length === 1) {
-                    this.camera.x = event.clientX - this.graph_rect.left - this.init_relative_camera.x;
-                    this.camera.y = event.clientY - this.graph_rect.top - this.init_relative_camera.y;
-                }
-                if (this.event_list.length === 2) {
-                    // Scaling Logic, cooming soon //
-                        
-                }
-
-                this.update_event(event);
+                this.camera.x = event.clientX - this.graph_position.x - this.init_relative_camera.x;
+                this.camera.y = event.clientY - this.graph_position.y - this.init_relative_camera.y;
             },
             pointer_up(event) {
                 // Remove event from event cache
-                this.remove_event(event);
-                this.mouse_pressing = false;
-                graph_view.drag_handler = graph_view.pointer_move;
-
-                if (this.event_list.length < 2) {
-                    this.event_list = [];
-                }
-            },
-            // Every pointer having his own pointer ID, we can use it for multi-pointer events manipulations
-            remove_event(event) {
-                for (var i = 0; i < this.event_list.length; i++) {
-                    if (event.pointerId == this.event_list[i].pointerId) {
-                        this.event_list.splice(i, 1);
-                        break;
-                    }
-                }
-            },
-            update_event(event) {
-                for (var i = 0; i < this.event_list.length; i++) {
-                    if (event.pointerId == this.event_list[i].pointerId) {
-                        this.event_list[i] = event;
-                        break;
-                    }
-                }
+                delete this.event_list[event.eventId];
+                // Reset drag event to none
+                this.drag_handler = window.empty_function;
             },
             wheel (event) {
-                this.relative.x = event.clientX - this.graph_rect.left;
-                this.relative.y = event.clientY - this.graph_rect.top;
+                this.init_relative_camera.x = event.clientX - this.graph_position.x - this.camera.x;
+                this.init_relative_camera.y = event.clientY - this.graph_position.y - this.camera.y;
 
                 var delta = event.deltaY;
                 if (event.deltaMode > 0) delta *= 100;
@@ -141,29 +122,32 @@
 </script>
 
 <template ref="graphview">
-    <div id="graphview"
-        @wheel.prevent="wheel"
-        @pointermove="drag_handler"
-        @pointerdown="pointer_down"
-        @pointerup="pointer_up"
-        :style="{ 'padding-top': camera.y + 'px', 'padding-left': camera.x + 'px'}">
-        <component
-            v-for="item in items"
-            :is="item_comp"
-            :key="item.name"
-            :ref="item.name"
-            :relative="relative"
-            :is_relation="item.is_relation"
-            :scale="scale"
-            :name="item.name">
-            
-            </component>
+    <div id="graph_view"
+            @wheel.prevent="wheel"
+            @pointermove="drag_handler"
+            @pointerdown="pointer_down"
+            @pointerup="pointer_up">
+        <!-- The center element allow us to create a smart camera that positions the elements without needed to re-render for each element -->
+        <div id="graph_center"
+            :style="{ 'top': camera.y + 'px', 'left': camera.x + 'px'}">
+            <component
+                v-for="item in items"
+                :is="item_comp"
+                :key="item.name"
+                :ref="item.name"
+                :relative="init_relative_camera"
+                :is_relation="item.is_relation"
+                :scale="scale"
+                :name="item.name">
+                
+                </component>
+        </div>
     </div>
 </template>
 
 <style scoped>
 /* Please style this crap, with style */
-#graphview {
+#graph_view, #graph_center {
     position: relative;
     width: 100%;
     height: 100%;

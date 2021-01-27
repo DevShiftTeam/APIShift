@@ -44,7 +44,7 @@
     <v-fab-transition>
       <v-btn
         key="mdi-chevron-up"
-        color="green"
+        color="purple"
         fab
         dark
         bottom

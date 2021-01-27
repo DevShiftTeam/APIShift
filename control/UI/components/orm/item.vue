@@ -53,11 +53,11 @@ const graphviewVue=require("./graphview.vue");
 </script>
 
 <template>
-    <div class="item"
+    <div class="item" color="#8789ff"
         :style="transformation"
         @pointerdown.prevent="drag_start"
         @pointerup.prevent="drag_end">
-            <div class="item_type">{{ is_relation ? 'R' : 'I' }}</div>
+            <v-avatar left class="item_type darken-4" :class="is_relation ? 'purple' : 'blue'" >{{ is_relation ? 'R' : 'I' }}</v-avatar>
             <div style="display: inline;">{{ name }}</div>
     </div>
 </template>
@@ -65,8 +65,6 @@ const graphviewVue=require("./graphview.vue");
 <style scoped>
 /* Please style this crap, with style */
 .item_type {
-    border: solid white 1px;
-    border-radius: 100%;
     text-align: center;
     display: inline;
     padding-left: 7px;

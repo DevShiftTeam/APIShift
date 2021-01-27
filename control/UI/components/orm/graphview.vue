@@ -68,7 +68,7 @@
 
             for(var x in [...Array(200).keys()]) {
                 this.items.push({
-                    is_relation: false,
+                    is_relation: x % 2 == 0,
                     name: "w" + x,
                     index: (Number(x) + 1),
                     position: {

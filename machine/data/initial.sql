@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.21, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.19, for Win64 (x86_64)
 --
 -- Host: localhost    Database: apishift
 -- ------------------------------------------------------
--- Server version	8.0.21-0ubuntu0.20.04.4
+-- Server version	8.0.19
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -29,7 +29,7 @@ CREATE TABLE `admin_pages` (
   `icon` varchar(45) DEFAULT NULL,
   `parent` int DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -38,7 +38,7 @@ CREATE TABLE `admin_pages` (
 
 LOCK TABLES `admin_pages` WRITE;
 /*!40000 ALTER TABLE `admin_pages` DISABLE KEYS */;
-INSERT INTO `admin_pages` VALUES (1,'Database','database','fa fa-database',0),(2,'Session','session','fas fa-user',0),(3,'Logic','logic','fas fa-tasks',0),(4,'Access','access','fas fa-lock',0),(5,'Analysis','analysis','fas fa-chart-bar',0),(6,'Extensions','extensions','fas fa-microchip',0),(7,'Issues','issues','fa fa-ticket-alt',0),(8,'Settings','settings','fas fa-cog',0),(9,'Session Access','session',NULL,4),(10,'Controller Access','controllers',NULL,4),(11,'Database Access','database',NULL,4);
+INSERT INTO `admin_pages` VALUES (1,'Database','database','fa fa-database',0),(2,'Session','session','fas fa-user',0),(3,'Logic','logic','fas fa-tasks',0),(4,'Access','access','fas fa-lock',0),(5,'Analysis','analysis','fas fa-chart-bar',0),(6,'Extensions','extensions','fas fa-microchip',0),(7,'Issues','issues','fa fa-ticket-alt',0),(8,'Settings','settings','fas fa-cog',0),(9,'Session Access','session',NULL,4),(10,'Controller Access','controllers',NULL,4),(11,'Database Access','database',NULL,4),(12,'Data Model Editor','model_editor',NULL,1),(13,'Database Connection List','database_list',NULL,1);
 /*!40000 ALTER TABLE `admin_pages` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -714,4 +714,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-08-11 19:11:51
+-- Dump completed on 2021-01-27 17:15:21

@@ -28,8 +28,8 @@
                 drawer: null,
                 item_comp: APIShift.API.getComponent('orm/item', true),
                 items: [
-                    { is_relation: false, name: "wait", index: 0 },
-                    { is_relation: false, name: "haha", index: 1 }
+                    { is_relation: false, name: "wait", index: 0, position: { x: 0, y: 0 } },
+                    { is_relation: false, name: "haha", index: 1, position: { x: 0, y: 0 } }
                 ],
                 relative: {
                     x: 0,
@@ -64,10 +64,16 @@
 
             for(var x in [...Array(100).keys()]) {
                 this.items.push({
-                    is_relation: false, name: "w" + x, index: (Number(x) + 1)
+                    is_relation: false,
+                    name: "w" + x,
+                    index: (Number(x) + 1),
+                    position: {
+                        x: Math.floor(Math.random() * Math.floor(1000)),
+                        y: Math.floor(Math.random() * Math.floor(800))
+                    }
                 })
             }
-            this.front_z_index = 102;
+            this.front_z_index = this.items.length;
         },
         mounted () {
             this.$el.type = "graphview";
@@ -106,6 +112,9 @@
                 this.drag_handler = window.empty_function;
             },
             wheel (event) {
+                this.init_relative_camera.x = event.clientX - this.graph_position.x - this.camera.x;
+                this.init_relative_camera.y = event.clientY - this.graph_position.y - this.camera.y;
+
                 var delta = event.deltaY;
                 if (event.deltaMode > 0) delta *= 100;
 
@@ -141,7 +150,8 @@
                 :is_relation="item.is_relation"
                 :scale="scale"
                 :name="item.name"
-                :index="item.index">
+                :index="item.index"
+                :position="item.position">
                 
                 </component>
         </div>

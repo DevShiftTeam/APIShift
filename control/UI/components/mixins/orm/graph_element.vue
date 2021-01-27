@@ -24,10 +24,6 @@
     module.exports = {
         data() {
             return {
-                position: {
-                    x: 0,
-                    y: 0
-                },
                 mouse_relative_position: {
                     x: 0,
                     y: 0
@@ -44,6 +40,7 @@
         props: {
             name: String,
             scale: Number,
+            position: Object,
             // The point from which the scale is happening
             relative: Object,
             // Index - used for smart rendering
@@ -62,8 +59,8 @@
                 this.$props.index = graph_view.front_z_index;
             },
             drag (event) {
-                this.position.x = event.clientX - this.mouse_relative_position.x - graph_view.graph_position.x - graph_view.camera.x;
-                this.position.y = event.clientY - this.mouse_relative_position.y - graph_view.graph_position.y - graph_view.camera.y;
+                this.$props.position.x = event.clientX - this.mouse_relative_position.x - graph_view.graph_position.x - graph_view.camera.x;
+                this.$props.position.y = event.clientY - this.mouse_relative_position.y - graph_view.graph_position.y - graph_view.camera.y;
             },
             drag_end (event) {
                 // Reset drag function
@@ -73,15 +70,15 @@
         watch: {
             scale: function (newScale, oldScale) {
                 let ds = newScale / oldScale;
-                this.position.x = this.position.x*ds + this.$props.relative.x*(1-ds);
-                this.position.y = this.position.y*ds + this.$props.relative.y*(1-ds);
+                this.$props.position.x = this.$props.position.x*ds + this.$props.relative.x*(1-ds);
+                this.$props.position.y = this.$props.position.y*ds + this.$props.relative.y*(1-ds);
             }
         },
         computed: {
             // Rendered transformation (coordinates and scale) 
             transformation () {
                 return  {
-                    transform: `translate(${this.position.x}px,${this.position.y}px) scale(${this.$props.scale})`,
+                    transform: `translate(${this.$props.position.x}px,${this.$props.position.y}px) scale(${this.$props.scale})`,
                     'z-index': this.$props.index
                 }
             }

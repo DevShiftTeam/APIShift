@@ -47,9 +47,6 @@ const graphviewVue=require("./graphview.vue");
         },
         methods: {
             render_needed () {
-                for(let key in graph_view.$refs) {
-                    
-                }
             }
         }
     }

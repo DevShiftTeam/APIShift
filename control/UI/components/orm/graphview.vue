@@ -103,9 +103,6 @@
                 this.drag_handler = window.empty_function;
             },
             wheel (event) {
-                this.init_relative_camera.x = event.clientX - this.graph_position.x - this.camera.x;
-                this.init_relative_camera.y = event.clientY - this.graph_position.y - this.camera.y;
-
                 var delta = event.deltaY;
                 if (event.deltaMode > 0) delta *= 100;
 

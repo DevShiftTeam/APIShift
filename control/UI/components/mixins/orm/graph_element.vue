@@ -21,7 +21,7 @@
      */
 
 
-    module.exports = {
+    module.exports = window.element_mixin = {
         data() {
             return {
                 init_position: {

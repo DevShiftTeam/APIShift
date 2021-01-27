@@ -17,9 +17,11 @@
      * limitations under the License.
      * 
      * @author Sapir Shemer
+     * @author Ilan Dazanashvili
      */
 
 const graphviewVue=require("./graphview.vue");
+// const graphElement=require("../mixins/orm/graph_element");
 
     // This shit is made for scripting
     module.exports = {
@@ -46,6 +48,15 @@ const graphviewVue=require("./graphview.vue");
             this.height = rect.height;
         },
         methods: {
+            drag_start (event) {
+                element_mixin.methods.drag_start.call(this, event);
+            },
+            drag (event) {
+                element_mixin.methods.drag.call(this, event);
+            },
+            drag_end (event) {
+                element_mixin.methods.drag_end.call(this, event);
+            },
             render_needed () {
             }
         }

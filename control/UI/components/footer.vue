@@ -23,19 +23,45 @@
     module.exports = {
         data () {
             return {
-                drawer: null
+                drawer: null,
+                index: 10
             }
         },
         created () {
             
+        },
+        methods: {
+            updateIndex: function(new_index) {
+                this.index = new_index;
+            }
         }
     }
 </script>
 
 <template>
-<div></div>
+<div class="footer"
+    :style="{'z-index': index}">
+    <v-fab-transition>
+      <v-btn
+        key="mdi-chevron-up"
+        color="green"
+        fab
+        dark
+        bottom
+        right
+      >
+        <v-icon>mdi-chevron-up</v-icon>
+      </v-btn>
+    </v-fab-transition>
+</div>
 </template>
 
 <style scoped>
 /* Please style this crap, with style */
+.footer {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    padding: 5px;
+}
 </style>

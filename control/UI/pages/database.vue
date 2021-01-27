@@ -26,7 +26,9 @@
             };
         },
         created() {
+            // Load necessary comonents
             APIShift.API.getMixin('orm/graph_element', true);
+            // Load graph view
             this.graph_view = APIShift.API.getComponent("orm/graphview", true);
         }
     };
@@ -34,9 +36,20 @@
 
 <template>
     <v-content>
-        <div>
-            <component :is="graph_view"></component>
-        </div>
+        <v-container fluid fill-height>
+            <v-card class="mx-auto" width="90%" min-height="75%" elevation-2>
+                <!-- Header -->
+                <v-app-bar>
+                    <v-toolbar-title>Data Model Drawer</v-toolbar-title>
+                    <v-spacer></v-spacer>
+                </v-app-bar>
+
+                <!-- Body -->
+                <div class="overflow-box">
+                    <component :is="graph_view"></component>
+                </div>
+            </v-card>
+        </v-container>
     </v-content>
 </template>
 <style scoped>

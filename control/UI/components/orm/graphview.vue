@@ -19,39 +19,158 @@
      * @author Sapir Shemer
      */
 
+    window.empty_function = (event) => {};
+
     // This shit is made for scripting
     module.exports = {
         data () {
             return {
                 drawer: null,
                 item_comp: APIShift.API.getComponent('orm/item', true),
-                items: [ ],
+                items: [
+                    { is_relation: false, name: "wait", index: 0, position: { x: 0, y: 0 } },
+                    { is_relation: false, name: "haha", index: 1, position: { x: 0, y: 0 } }
+                ],
                 relative: {
                     x: 0,
                     y: 0
                 },
-                scale: 1
+                // Index of the most frontal element
+                front_z_index: 0,
+                scale: 1,
+                /* Drag & Drop functional data */
+                event_list: {},
+                // Holds the function which renders the dragging event
+                drag_handler: window.empty_function,
+                // Stores the current position of the graph on the screen
+                graph_position: {
+                    x: 0,
+                    y: 0
+                },
+                // Defines the camera origin relative to the initial 0,0 position
+                camera: {
+                    x: 0,
+                    y: 0
+                },
+                init_relative_camera: {
+                    x: 0,
+                    y: 0
+                }
             }
         },
         created () {
-            
+            // Store this object with a global reference
+            window.graph_view = this;
+
+            for(var x in [...Array(100).keys()]) {
+                this.items.push({
+                    is_relation: false,
+                    name: "w" + x,
+                    index: (Number(x) + 1),
+                    position: {
+                        x: Math.floor(Math.random() * Math.floor(1000)),
+                        y: Math.floor(Math.random() * Math.floor(800))
+                    }
+                })
+            }
+            this.front_z_index = this.items.length;
+        },
+        mounted () {
+            this.$el.type = "graphview";
+            this.$refs['graphview'] = this;
+        },
+        methods: {
+            pointer_down(event) {
+                // Add event to event cache, determine interactive target 
+                this.event_list[event.eventId] = event;
+                
+                // Update graph position
+                let rect = this.$el.getBoundingClientRect();
+                this.graph_position = {
+                    x: rect.left,
+                    y: rect.top
+                };
+
+                // viewport panning / element movement 
+                if (this.event_list.length === 1 && event.ctrlKey) {
+                    delete this.event_list[event.eventId];
+                }
+
+                // Proceeds only if not dragging any other object
+                if(this.drag_handler != window.empty_function) return;
+
+                this.init_relative_camera.x = event.clientX - this.graph_position.x - this.camera.x;
+                this.init_relative_camera.y = event.clientY - this.graph_position.y - this.camera.y;
+                this.drag_handler = this.pointer_move;
+            },
+            pointer_move(event) {
+                this.camera.x = event.clientX - this.graph_position.x - this.init_relative_camera.x;
+                this.camera.y = event.clientY - this.graph_position.y - this.init_relative_camera.y;
+            },
+            pointer_up(event) {
+                // Remove event from event cache
+                delete this.event_list[event.eventId];
+                // Reset drag event to none
+                this.drag_handler = window.empty_function;
+            },
+            wheel (event) {
+                this.init_relative_camera.x = event.clientX - this.graph_position.x - this.camera.x;
+                this.init_relative_camera.y = event.clientY - this.graph_position.y - this.camera.y;
+
+                var delta = event.deltaY;
+                if (event.deltaMode > 0) delta *= 100;
+
+                var sign = Math.sign(delta), speed = 1;
+                var deltaAdjustedSpeed = Math.min(0.25, Math.abs(speed * delta / 128));
+
+                graph_view.scale *= (1 - sign * deltaAdjustedSpeed);
+            },
+            yes() {
+                return 'yes';
+            }
+        },
+        watch: {
+            front_z_index: function(newValue) {
+                app.$refs.navigator.updateIndex(newValue + 1);
+                app.$refs.footer.updateIndex(newValue + 1);
+            }
         }
     }
 </script>
 
-<template>
-    <div>
-        <component
-            v-for="item in items"
-            :is="item_comp"
-            :key="item.name"
-            :relative="relative"
-            :is_relation="item.is_relation"
-            :scale="scale"
-            :name="item.name"></component>
+<template ref="graphview">
+    <div id="graph_view"
+            @wheel.prevent="wheel"
+            @pointermove.prevent="drag_handler"
+            @touchmove.prevent="() => {}"
+            @pointerdown="pointer_down"
+            @pointerup="pointer_up"
+            :style="{ 'overflow' : 'hidden' }">
+        <!-- The center element allow us to create a smart camera that positions the elements without needed to re-render for each element -->
+        <div id="graph_center"
+            :style="{ 'top': camera.y + 'px', 'left': camera.x + 'px'}">
+            <component
+                v-for="(item, index) in items"
+                :is="item_comp"
+                :key="index"
+                :ref="item.name"
+                :relative="init_relative_camera"
+                :is_relation="item.is_relation"
+                :scale="scale"
+                :name="item.name"
+                :index="item.index"
+                :position="item.position">
+                
+                </component>
+        </div>
     </div>
 </template>
 
 <style scoped>
 /* Please style this crap, with style */
+#graph_view, #graph_center {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
 </style>

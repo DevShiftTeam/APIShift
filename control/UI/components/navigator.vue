@@ -24,7 +24,8 @@
         data () {
             return {
                 drawer: 1,
-                pages: {}
+                pages: {},
+                index: 10
             }
         },
         created () {
@@ -43,6 +44,9 @@
             }
         },
         methods: {
+            updateIndex: function(new_index) {
+                this.index = new_index;
+            },
             updatePages: function () {
                 APIShift.API.request("Admin\\Control", "getPages", {}, function (response) {
                     if(response.status == APIShift.API.status_codes.SUCCESS) {
@@ -109,7 +113,7 @@
             </v-btn>
         </v-app-bar>
 
-        <v-navigation-drawer v-model="showNavBar" app clipped :mini-variant="drawer != 1">
+        <v-navigation-drawer v-model="showNavBar" app clipped :mini-variant="drawer != 1" :style="{'z-index': index}">
             <v-list dense>
                 <!-- Home option -->
                 <v-list-item link to="/main">

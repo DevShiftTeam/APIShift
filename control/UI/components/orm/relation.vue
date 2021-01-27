@@ -16,10 +16,8 @@
      * See the License for the specific language governing permissions and
      * limitations under the License.
      * 
-     * @author Sapir Shemer
+     * @author DevShift Team
      */
-
-const graphviewVue=require("./graphview.vue");
 
     // This shit is made for scripting
     module.exports = {
@@ -30,35 +28,33 @@ const graphviewVue=require("./graphview.vue");
         },
         data () {
             return {
-                drawer: null,
-                width: 0,
-                height: 0
+                drawer: null
             }
         },
         created () {
-            // We use the type to differentiate between objects
-            this.type = 'item';
-        }, 
-        mounted () {
-            this.$el.ref = this.name;
-            let rect = this.$el.getBoundingClientRect();
-            this.width = rect.width;
-            this.height = rect.height;
+            
         },
         methods: {
-            render_needed () {
+            drag_start () {
+                console.log('Drag Start');
+            },
+            drag (vmove) {
+                console.log(`Drag by ${vmove[0]}px,${vmove[1]}px `);
+            },
+            drag_end () {
+                
             }
         }
     }
 </script>
 
 <template>
-    <div class="item"
-        :style="transformation"
-        @pointerdown.prevent="drag_start"
-        @pointerup.prevent="drag_end">
-            <div class="item_type">{{ is_relation ? 'R' : 'I' }}</div>
-            <div style="display: inline;">{{ name }}</div>
+    <div draggable @dragstart="drag_start($event)" @drag="drag($event)" @dragend="drag($event)" class="item" :style="{
+        'margin-top': y + 'px',
+        'margin-left': x + 'px'
+    }">
+        <div class="item_type">{{ is_relation ? 'R' : 'I' }}</div>
+        <div style="display: inline;">{{ name }}</div>
     </div>
 </template>
 

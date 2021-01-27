@@ -17,50 +17,70 @@
      * limitations under the License.
      * 
      * @author Sapir Shemer
+     * @author Ilan Dazanashvili
      */
+
 
     module.exports = {
         data() {
             return {
-                // Original position
-                origin_x: 0,
-                origin_y: 0,
-                // Mouse and start position data while dragging
-                drag_data: null
+                mouse_relative_position: {
+                    x: 0,
+                    y: 0
+                },
+                type: 'graph_element',
+                index: 0,
+                lines: []
             }
         },
+        mounted () {
+            this.$el.type = 'graph_element';
+            this.$el.ref = this.$props.name;
+        },
         props: {
+            name: String,
             scale: Number,
+            position: Object,
             // The point from which the scale is happening
-            relative: Object
+            relative: Object,
+            // Index - used for smart rendering
+            index: Number
         },
         methods: {
-            move (x, y) {
-                this.origin_x = x > 0 ? x : 0;
-                this.origin_y = y > 0 ? y : 0;
-            },
             drag_start (event) {
-                this.drag_data = {
-                    mouse_x: event.clientX,
-                    mouse_y: event.clientY,
-                    start_x: this.origin_x,
-                    start_y: this.origin_y
-                }
+                // Get mouse coordinates relative to element
+                let item_rect = this.$el.getBoundingClientRect();
+                this.mouse_relative_position.x = (event.clientX - item_rect.x) / this.$props.scale;
+                this.mouse_relative_position.y = (event.clientY - item_rect.y) / this.$props.scale;
+
+                // Update drag function
+                graph_view.drag_handler = this.drag;
+                graph_view.front_z_index++;
+                this.$props.index = graph_view.front_z_index;
             },
             drag (event) {
-                event.preventDefault();
-                this.move(
-                    this.drag_data.start_x + (event.clientX - this.drag_data.mouse_x),
-                    this.drag_data.start_y + (event.clientY - this.drag_data.mouse_y)
-                    );
+                this.$props.position.x = event.clientX - this.mouse_relative_position.x - graph_view.graph_position.x - graph_view.camera.x;
+                this.$props.position.y = event.clientY - this.mouse_relative_position.y - graph_view.graph_position.y - graph_view.camera.y;
+            },
+            drag_end (event) {
+                // Reset drag function
+                graph_view.drag_handler = window.empty_function;
+            }
+        },
+        watch: {
+            scale: function (newScale, oldScale) {
+                let ds = newScale / oldScale;
+                this.$props.position.x = this.$props.position.x*ds + this.$props.relative.x*(1-ds);
+                this.$props.position.y = this.$props.position.y*ds + this.$props.relative.y*(1-ds);
             }
         },
         computed: {
-            x () {
-                return this.origin_x * this.$props.scale + this.$props.relative.x * (1 - this.$props.scale);
-            },
-            y () {
-                return this.origin_y * this.$props.scale + this.$props.relative.y * (1 - this.$props.scale);
+            // Rendered transformation (coordinates and scale) 
+            transformation () {
+                return  {
+                    transform: `translate(${this.$props.position.x}px,${this.$props.position.y}px) scale(${this.$props.scale})`,
+                    'z-index': this.$props.index
+                }
             }
         }
     };

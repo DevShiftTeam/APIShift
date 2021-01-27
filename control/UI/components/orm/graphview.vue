@@ -121,9 +121,11 @@
 <template ref="graphview">
     <div id="graph_view"
             @wheel.prevent="wheel"
-            @pointermove="drag_handler"
+            @pointermove.prevent="drag_handler"
+            @touchmove.prevent="() => {}"
             @pointerdown="pointer_down"
-            @pointerup="pointer_up">
+            @pointerup="pointer_up"
+            :style="{ 'overflow' : 'hidden' }">
         <!-- The center element allow us to create a smart camera that positions the elements without needed to re-render for each element -->
         <div id="graph_center"
             :style="{ 'top': camera.y + 'px', 'left': camera.x + 'px'}">

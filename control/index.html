@@ -36,19 +36,19 @@
         <div id="app">
             <v-app id="inspire">
                 <!-- Notifications -->
-                <component :is="app_notifications" :alerts="alerts"></component>
+                <component ref="notifications" :is="app_notifications" :alerts="alerts"></component>
 
                 <!-- Loader -->
-                <component :is="app_loader" v-if="loader.visible" :message="loader.message"></component>
+                <component ref="loader" :is="app_loader" v-if="loader.visible" :message="loader.message"></component>
 
                 <!-- Navigator -->
-                <component :is="app_navigator"></component>
+                <component ref="navigator" :is="app_navigator"></component>
 
                 <!-- Page Body -->
                 <router-view></router-view>
 
                 <!-- Footer -->
-                <component :is="app_footer"></component>
+                <component ref="footer" :is="app_footer"></component>
             </v-app>
         </div>
 

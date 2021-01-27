@@ -52,7 +52,11 @@
                     x: 0,
                     y: 0
                 },
-                init_relative_camera: {
+                init_camera: {
+                    x: 0,
+                    y: 0
+                },
+                init_pointer: {
                     x: 0,
                     y: 0
                 }
@@ -62,7 +66,7 @@
             // Store this object with a global reference
             window.graph_view = this;
 
-            for(var x in [...Array(100).keys()]) {
+            for(var x in [...Array(200).keys()]) {
                 this.items.push({
                     is_relation: false,
                     name: "w" + x,
@@ -91,6 +95,10 @@
                     y: rect.top
                 };
 
+                // Get initiale pointer coordinates
+                this.init_pointer.x = event.clientX;
+                this.init_pointer.y = event.clientY;
+
                 // viewport panning / element movement 
                 if (this.event_list.length === 1 && event.ctrlKey) {
                     delete this.event_list[event.eventId];
@@ -99,13 +107,12 @@
                 // Proceeds only if not dragging any other object
                 if(this.drag_handler != window.empty_function) return;
 
-                this.init_relative_camera.x = event.clientX - this.graph_position.x - this.camera.x;
-                this.init_relative_camera.y = event.clientY - this.graph_position.y - this.camera.y;
+                this.init_camera = Object.assign({}, this.camera);
                 this.drag_handler = this.pointer_move;
             },
             pointer_move(event) {
-                this.camera.x = event.clientX - this.graph_position.x - this.init_relative_camera.x;
-                this.camera.y = event.clientY - this.graph_position.y - this.init_relative_camera.y;
+                this.camera.x = this.init_camera.x + event.clientX - this.init_pointer.x;
+                this.camera.y = this.init_camera.y + event.clientY - this.init_pointer.y;
             },
             pointer_up(event) {
                 // Remove event from event cache
@@ -114,8 +121,8 @@
                 this.drag_handler = window.empty_function;
             },
             wheel (event) {
-                this.init_relative_camera.x = event.clientX - this.graph_position.x - this.camera.x;
-                this.init_relative_camera.y = event.clientY - this.graph_position.y - this.camera.y;
+                this.init_pointer.x = event.clientX - this.graph_position.x - this.camera.x;
+                this.init_pointer.y = event.clientY - this.graph_position.y - this.camera.y;
 
                 var delta = event.deltaY;
                 if (event.deltaMode > 0) delta *= 100;
@@ -154,7 +161,7 @@
                 :is="item_comp"
                 :key="index"
                 :ref="item.name"
-                :relative="init_relative_camera"
+                :relative="init_pointer"
                 :is_relation="item.is_relation"
                 :scale="scale"
                 :name="item.name"

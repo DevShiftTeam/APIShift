@@ -24,7 +24,7 @@
     module.exports = {
         data() {
             return {
-                mouse_relative_position: {
+                init_position: {
                     x: 0,
                     y: 0
                 },
@@ -48,10 +48,8 @@
         },
         methods: {
             drag_start (event) {
-                // Get mouse coordinates relative to element
-                let item_rect = this.$el.getBoundingClientRect();
-                this.mouse_relative_position.x = (event.clientX - item_rect.x) / this.$props.scale;
-                this.mouse_relative_position.y = (event.clientY - item_rect.y) / this.$props.scale;
+                // Get position when drag started
+                this.init_position = Object.assign({} ,this.$props.position);
 
                 // Update drag function
                 graph_view.drag_handler = this.drag;
@@ -59,8 +57,8 @@
                 this.$props.index = graph_view.front_z_index;
             },
             drag (event) {
-                this.$props.position.x = event.clientX - this.mouse_relative_position.x - graph_view.graph_position.x - graph_view.camera.x;
-                this.$props.position.y = event.clientY - this.mouse_relative_position.y - graph_view.graph_position.y - graph_view.camera.y;
+                this.$props.position.x = this.init_position.x + event.clientX - graph_view.init_pointer.x;
+                this.$props.position.y = this.init_position.y + event.clientY - graph_view.init_pointer.y;
             },
             drag_end (event) {
                 // Reset drag function

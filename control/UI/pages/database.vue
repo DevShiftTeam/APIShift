@@ -61,7 +61,13 @@
                 <v-app-bar>
                     <v-menu offset-y :style="{ 'z-index' : index }">
                         <template v-slot:activator="{ on }">
-                            <v-toolbar-title v-on="on"><v-btn>{{ sub_pages[current_page].title }}</v-btn></v-toolbar-title>
+                            <v-toolbar-title v-on="on">
+                                <v-btn>
+                                    {{ sub_pages[current_page].title }}
+                                    
+                                    <v-icon right>mdi-menu-down</v-icon>
+                                </v-btn>
+                            </v-toolbar-title>
                         </template>
                         <v-list>
                             <v-list-item v-for="(item, key) in sub_pages" :key="key" :to="item.url">{{ item.title }}</v-list-item>

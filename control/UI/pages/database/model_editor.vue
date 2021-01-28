@@ -39,7 +39,7 @@
                 front_z_index: 0,
                 scale: 1,
                 /* Drag & Drop functional data */
-                event_list: {},
+                tap_counter: 0,
                 // Holds the function which renders the dragging event
                 drag_handler: window.empty_function,
                 // Stores the current position of the graph on the screen
@@ -57,6 +57,14 @@
                     y: 0
                 },
                 init_pointer: {
+                    x: 0,
+                    y: 0
+                },
+                init_pointer_first: {
+                    x: 0,
+                    y: 0
+                },
+                init_pointer_second: {
                     x: 0,
                     y: 0
                 }
@@ -85,8 +93,8 @@
         },
         methods: {
             pointer_down(event) {
-                // Add event to event cache, determine interactive target 
-                this.event_list[event.eventId] = event;
+                // Add event to event cache, determine interactive target
+                this.tap_counter++;
                 
                 // Update graph position
                 let rect = this.$el.getBoundingClientRect();
@@ -94,29 +102,79 @@
                     x: rect.left,
                     y: rect.top
                 };
+                
+                // Handle mobile zooming
+                if(this.tap_counter === 2) {
+                    this.init_pointer_first = Object.assign({}, this.init_pointer);
+                    this.init_pointer_second.x = event.clientX;
+                    this.init_pointer_second.y = event.clientY;
+
+                    // Calculate center
+                    this.init_pointer.x = (this.init_pointer_first.x + this.init_pointer_second.x) / 2 - this.graph_position.x - this.camera.x;
+                    this.init_pointer.y = (this.init_pointer_first.y + this.init_pointer_second.y) / 2 - this.graph_position.y - this.camera.y;
+                    
+                    this.drag_handler = this.pointer_scale;
+                    return;
+                }
 
                 // Get initiale pointer coordinates
                 this.init_pointer.x = event.clientX;
                 this.init_pointer.y = event.clientY;
-
-                // viewport panning / element movement 
-                if (this.event_list.length === 1 && event.ctrlKey) {
-                    delete this.event_list[event.eventId];
-                }
+                this.init_camera = Object.assign({}, this.camera);
 
                 // Proceeds only if not dragging any other object
                 if(this.drag_handler != window.empty_function) return;
 
-                this.init_camera = Object.assign({}, this.camera);
                 this.drag_handler = this.pointer_move;
             },
             pointer_move(event) {
                 this.camera.x = this.init_camera.x + event.clientX - this.init_pointer.x;
                 this.camera.y = this.init_camera.y + event.clientY - this.init_pointer.y;
             },
+            pointer_scale (event) {
+                // Calculate previous distance vector
+                let prev_diff = {
+                    x: this.init_pointer_first.x - this.init_pointer_second.x,
+                    y: this.init_pointer_first.y - this.init_pointer_second.y
+                };
+
+                // Calculate new point
+                if(Math.abs(this.init_pointer_first.y - event.clientY) + Math.abs(this.init_pointer_first.x - event.clientX)
+                    < Math.abs(this.init_pointer_second.y - event.clientY) + Math.abs(this.init_pointer_second.x - event.clientX)) {
+                    this.init_pointer_first.x = event.clientX;
+                    this.init_pointer_first.y = event.clientY;
+                }
+                else {
+                    this.init_pointer_second.x = event.clientX;
+                    this.init_pointer_second.y = event.clientY;
+                }
+
+                // Calculate new distance vector
+                let new_diff = {
+                    x: this.init_pointer_first.x - this.init_pointer_second.x,
+                    y: this.init_pointer_first.y - this.init_pointer_second.y
+                };
+
+                // Update scale center
+                this.init_pointer.x -= - this.graph_position.x - this.camera.x;
+                this.init_pointer.y -= - this.graph_position.y - this.camera.y;
+                let temp = Object.assign({}, this.init_pointer);
+                this.init_pointer.x = (this.init_pointer_first.x + this.init_pointer_second.x) / 2;
+                this.init_pointer.y = (this.init_pointer_first.y + this.init_pointer_second.y) / 2;
+
+                // Move Camera
+                this.camera.x += this.init_pointer.x - temp.x;
+                this.camera.y += this.init_pointer.y - temp.y;
+
+                // Update scale
+                let delta_scale = Math.sqrt(prev_diff.x * prev_diff.x + prev_diff.y * prev_diff.y) /
+                    Math.sqrt(new_diff.x * new_diff.x + new_diff.y * new_diff.y);
+                this.init_pointer.x += - this.graph_position.x - this.camera.x;
+                this.init_pointer.y += - this.graph_position.y - this.camera.y;
+                graph_view.scale *= 1 / delta_scale;
+            },
             pointer_up(event) {
-                // Remove event from event cache
-                delete this.event_list[event.eventId];
+                this.tap_counter--;
                 // Reset drag event to none
                 this.drag_handler = window.empty_function;
             },

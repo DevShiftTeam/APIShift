@@ -190,7 +190,7 @@
                 graph_view.scale *= 1 / delta_scale;
             },
             pointer_up(event) {
-                this.tap_counter--;
+                this.tap_counter = 0;
                 // Reset drag event to none
                 this.drag_handler = window.empty_function;
             },

@@ -24,6 +24,10 @@
     module.exports = {
         data() {
             return {
+                // External data
+                left: 0,
+                top: 0,
+                // Internal data 
                 init_position: {
                     x: 0,
                     y: 0
@@ -40,8 +44,12 @@
             }
         },
         mounted () {
+            const graphview = this.$parent;
             this.$el.type = 'graph_element';
             this.$el.ref = this.$props.name;
+            this.$el.left = this.init_position.x;
+            this.$el.top = this.init_position.y;
+            graphview.$refs[this.$props.index] = this;
         },
         props: {
             name: String,
@@ -50,7 +58,8 @@
             // The point from which the scale is happening
             relative: Object,
             // Index - used for smart rendering
-            index: Number
+            index: Number,
+            // comp_id - Unique ID for on-screen components
         },
         methods: {
             drag_start (event) {
@@ -65,12 +74,14 @@
                 // Call additional function if set
                 this.expanded_functions.drag_start(event);
             },
-            drag (event) {
-                this.$props.position.x = this.init_position.x + event.clientX - graph_view.init_pointer.x;
-                this.$props.position.y = this.init_position.y + event.clientY - graph_view.init_pointer.y;
+            drag (event, offset = { x: 0, y: 0}) {
+                this.$props.position.x = this.init_position.x + event.clientX - graph_view.init_pointer.x + offset.x;
+                this.$props.position.y = this.init_position.y + event.clientY - graph_view.init_pointer.y + offset.y;
 
                 // Call additional function if set
                 this.expanded_functions.drag(event);
+
+                this.update_lines();
             },
             drag_end (event) {
                 // Reset drag function
@@ -78,6 +89,32 @@
 
                 // Call additional function if set
                 this.expanded_functions.drag_end(event);
+            },
+            update_lines () {
+                const graphview = this.$parent;
+                this.lines.forEach(line_uid => {
+                    let line_instance = graphview.$refs[line_uid];
+                    console.log(line_instance);
+                    line_instance.update();
+                });
+            },
+            add_line (line_uid) {
+                this.lines.push(line_uid);
+            },
+            remove_line (line_uid) {
+                const index = this.lines.indexOf(line_uid);
+                if (index > -1) {
+                    this.lines.splice(index, 1);
+                }
+            },
+            // Helper functions to move elements explicitly 
+            move_by (vec = { x: 0, y: 0 }) {
+                this.$props.position.x += vec.x;
+                this.$props.position.y += vec.y;
+            },
+            move_to (vert = { x: 0, y: 0 }) {
+                this.$props.position.x = vert.x;
+                this.$props.position.y = vert.y;
             }
         },
         watch: {
@@ -85,15 +122,30 @@
                 let ds = newScale / oldScale;
                 this.$props.position.x = this.$props.position.x*ds + this.$props.relative.x*(1-ds);
                 this.$props.position.y = this.$props.position.y*ds + this.$props.relative.y*(1-ds);
+            },
+            position: {
+                handler: function(position) {
+                    this.left = this.$props.position.x;
+                    this.top = this.$props.position.y;
+                },
+                deep: true
             }
+
         },
         computed: {
             // Rendered transformation (coordinates and scale) 
             transformation () {
                 return  {
                     transform: `translate(${this.$props.position.x}px,${this.$props.position.y}px) scale(${this.$props.scale})`,
-                    'z-index': this.$props.index
+                    'z-index': this.$props.index + 5
                 }
+            },
+            // Exspose position info conveniently for external usage 
+            x_pos () {
+                return this.$props.position.x;
+            },
+            y_pos () {
+                return this.$props.position.x;
             }
         }
     };

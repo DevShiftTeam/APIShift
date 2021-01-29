@@ -26,10 +26,22 @@
         data () {
             return {
                 drawer: null,
+                // Components 
                 item_comp: APIShift.API.getComponent('orm/item', true),
+                relation_comp: APIShift.API.getComponent('orm/relation', true),
+                enum_comp: APIShift.API.getComponent('orm/enum', true),
+                group_comp: APIShift.API.getComponent('orm/group', true),
+                type_comp: APIShift.API.getComponent('orm/enum_type', true),
+                line_comp: APIShift.API.getComponent('orm/line', true),
                 items: [
-                    { is_relation: false, name: "wait", index: 0, position: { x: 0, y: 0 } },
-                    { is_relation: false, name: "haha", index: 1, position: { x: 0, y: 0 } }
+                    { name: "wait", index: 0, position: { x: 0, y: 0 } },
+                    { name: "haha", index: 1, position: { x: 0, y: 0 } }
+                ],
+                relations: [
+                    { name: "wait", relate_from: 0, relate_to: 1, relate_type: 0, index: 2, position: { x: 0, y: 0 } }
+                ],
+                lines: [
+
                 ],
                 relative: {
                     x: 0,
@@ -74,25 +86,29 @@
             // Store this object with a global reference
             window.graph_view = this;
 
-            for(var x in [...Array(200).keys()]) {
-                this.items.push({
-                    is_relation: x % 2 == 0,
-                    name: "w" + x,
-                    index: (Number(x) + 1),
-                    position: {
-                        x: Math.floor(Math.random() * Math.floor(1000)),
-                        y: Math.floor(Math.random() * Math.floor(800))
-                    }
-                })
-            }
+            // for(var x in [...Array(200).keys()]) {
+            //     this.items.push({
+            //         name: "w" + x,
+            //         index: (Number(x) + 1),
+            //         position: {
+            //             x: Math.floor(Math.random() * Math.floor(1000)),
+            //             y: Math.floor(Math.random() * Math.floor(800))
+            //         }
+            //     })
+            // }
             this.front_z_index = this.items.length;
         },
         mounted () {
-            this.$el.type = "graphview";
-            this.$refs['graphview'] = this;
+            this['graphview'] = this;
+            console.log(this.$refs);
         },
         methods: {
+
+            /**
+             * User interactions
+             */
             pointer_down(event) {
+                console.log(this.$refs);
                 // Add event to event cache, determine interactive target
                 this.tap_counter++;
                 
@@ -190,6 +206,29 @@
 
                 graph_view.scale *= (1 - sign * deltaAdjustedSpeed);
             },
+            /**
+             * Control functions 
+             */
+            create_line ( from_index = 0, to_index = 0, options = { item_to_relation: false, relation_to_item: false, item_to_enum: false }) {
+                    const graphview     = this;    
+                    const line_uid = `${from_index}c${to_index}`;  
+                    let src_instance, dest_instance; 
+
+                    var loop_untill_ok = () => {
+                        src_instance  = graphview.$refs[from_index];
+                        dest_instance = graphview.$refs[to_index];
+
+                        if (!src_instance || !dest_instance) {
+                            requestAnimationFrame(loop_untill_ok);
+                        }
+                        else {
+                            src_instance.add_line(line_uid);
+                            dest_instance.add_line(line_uid);
+                            graphview.lines.push({from_index, to_index, options});
+                        }
+                    }
+                    loop_untill_ok();
+            },
             yes() {
                 return 'yes';
             }
@@ -199,6 +238,15 @@
                 app.$refs.navigator.updateIndex(newValue + 1);
                 app.$refs.footer.updateIndex(newValue + 1);
                 window.handler.updateIndex(newValue + 1);
+            }
+        },
+        computed: {
+            basic_items: function () {
+                console.log(this.items.filter( i => i.is_relation === false));
+                return this.items.filter( i => i.is_relation === false);
+            },
+            relation_items: function () {
+                return this.items.filter( i => i.is_relation === true);
             }
         }
     }
@@ -215,19 +263,42 @@
         <!-- The center element allow us to create a smart camera that positions the elements without needed to re-render for each element -->
         <div id="graph_center"
             :style="{ 'top': camera.y + 'px', 'left': camera.x + 'px'}">
-            <component
+                <component
                 v-for="(item, index) in items"
                 :is="item_comp"
                 :key="index"
-                :ref="item.name"
+                :ref="item.index"
                 :relative="init_pointer"
-                :is_relation="item.is_relation"
                 :scale="scale"
                 :name="item.name"
                 :index="item.index"
                 :position="item.position">
-                
                 </component>
+                <component
+                v-for="(item, index) in relations"
+                :is="relation_comp"
+                :key="index"
+                :ref="item.index"
+                :relative="init_pointer"
+                :relate_from="item.relate_from"
+                :relate_to="item.relate_to"
+                :relate_type="item.relate_type"
+                :scale="scale"
+                :name="item.name"
+                :index="item.index"
+                :position="item.position">
+                </component>
+                <component
+                v-for="(line, index) in lines"
+                :is="line_comp"
+                :key="index"
+                :ref="`${line.from_index}c${line.to_index}`" 
+                :from_index="line.from_index"
+                :to_index="line.to_index"
+                :relative="init_pointer"
+                :scale="scale">
+                </component>
+                
         </div>
     </div>
 </template>

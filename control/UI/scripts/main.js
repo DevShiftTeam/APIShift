@@ -57,7 +57,7 @@ window.app = new Vue({
         APIShift.Loader.load((resolve, reject) => {
             // Add loaded routes & pages
             app.$router.addRoutes(APIShift.admin_routes);
-
+            
             // Handle first load of page
             if(!APIShift.installed) {
                 app.apishift.setSubtitle("Installer");

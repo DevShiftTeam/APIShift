@@ -25,19 +25,28 @@ const graphviewVue=require("./graphview.vue");
     module.exports = {
         mixins: [APIShift.API.getMixin('orm/graph_element')],
         props: {
-            is_relation: Boolean,
-            name: String
         },
         data () {
             return {
                 drawer: null,
-                width: 0,
-                height: 0
             }
         },
         created () {
+            const $this = this;
             // We use the type to differentiate between objects
             this.type = 'item';
+            this.expanded_functions = { 
+                drag_start: function(event) {
+                    console.log($this);
+                }, 
+                drag: function(event) {
+                    console.log('item');
+                },
+                drag_end: function(event) {
+                    console.log('item');
+                }
+            };
+            console.log(this);
         }, 
         mounted () {
             this.$el.ref = this.name;
@@ -57,7 +66,7 @@ const graphviewVue=require("./graphview.vue");
         :style="transformation"
         @pointerdown.prevent="drag_start"
         @pointerup.prevent="drag_end">
-            <v-avatar left class="item_type darken-4" :class="is_relation ? 'purple' : 'blue'" >{{ is_relation ? 'R' : 'I' }}</v-avatar>
+            <v-avatar left class="item_type darken-4 blue">I</v-avatar>
             <div style="display: inline;">{{ name }}</div>
     </div>
 </template>

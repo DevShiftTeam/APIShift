@@ -16,8 +16,7 @@
      * See the License for the specific language governing permissions and
      * limitations under the License.
      * 
-     * @author Ilan Dazanashvili 
-     * @author DevShift Team
+     * @author Ilan Dazanashvili
      */
 
     // This shit is made for scripting
@@ -42,16 +41,16 @@
                     console.log($this);
                 }, 
                 drag: function(event) {
-                    console.log('item');
+                    console.log('relation');
                 },
                 drag_end: function(event) {
-                    console.log('item');
+                    console.log('relation');
                 }
             };
         }, 
         mounted () {
             const graphview = this.$parent;
-            this.$el.ref = this.index; // TODO: change to comp_id $prop field, this is only made for testing and playing around
+            this.$el.ref = this.index; // TODO: change to comp_id $prop field, mistakenly identified it as a form of component index
             
             // Draw relation lines
             graphview.create_line(this.$props.relate_from, this.index, { item_to_relation: true, relate_type: this.$props.relate_type });

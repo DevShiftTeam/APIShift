@@ -17,7 +17,6 @@
      * limitations under the License.
      * 
      * @author Ilan Dazanashvili
-     * @author DevShift Team
      */
 
 
@@ -65,6 +64,7 @@
                 let src_item = graphview.$refs[this.$props.from_index];
                 let dest_item = graphview.$refs[this.$props.to_index];
 
+                // Update on animation frame rate
                 requestAnimationFrame(() => {
                     self.p1x = src_item.left; self.p1y = src_item.top;
                     self.p2x = dest_item.left; self.p2y = dest_item.top;
@@ -78,6 +78,7 @@
             }
         },
         computed: {
+            // Just for testing 
             path_data () {
                 const bezierWeight = 0.675; // Amount to offset control points
                 const dx           = Math.abs(this.p1x - this.p2x) * bezierWeight;

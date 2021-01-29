@@ -74,7 +74,7 @@
             // Store this object with a global reference
             window.graph_view = this;
 
-            for(var x in [...Array(200).keys()]) {
+            for(var x in [...Array(100).keys()]) {
                 this.items.push({
                     is_relation: x % 2 == 0,
                     name: "w" + x,
@@ -174,7 +174,7 @@
                 graph_view.scale *= 1 / delta_scale;
             },
             pointer_up(event) {
-                this.tap_counter--;
+                this.tap_counter = 0;
                 // Reset drag event to none
                 this.drag_handler = window.empty_function;
             },

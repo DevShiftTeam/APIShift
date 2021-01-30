@@ -94,7 +94,6 @@
                 const graphview = this.$parent;
                 this.lines.forEach(line_uid => {
                     let line_instance = graphview.$refs[line_uid];
-                    console.log(line_instance);
                     line_instance.update();
                 });
             },
@@ -137,6 +136,7 @@
             transformation () {
                 return  {
                     transform: `translate(${this.$props.position.x}px,${this.$props.position.y}px) scale(${this.$props.scale})`,
+                    
                     'z-index': this.$props.index + 5
                 }
             },

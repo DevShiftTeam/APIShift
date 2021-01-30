@@ -37,13 +37,13 @@ const graphviewVue=require("./graphview.vue");
             this.type = 'item';
             this.expanded_functions = { 
                 drag_start: function(event) {
-                    console.log($this);
+                    // console.log($this);
                 }, 
                 drag: function(event) {
-                    console.log('item');
+                    // console.log('item');
                 },
                 drag_end: function(event) {
-                    console.log('item');
+                    // console.log('item');
                 }
             };
             console.log(this);

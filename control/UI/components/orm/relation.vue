@@ -38,13 +38,13 @@
             this.type = 'item';
             this.expanded_functions = { 
                 drag_start: function(event) {
-                    console.log($this);
+                    // console.log($this);
                 }, 
                 drag: function(event) {
-                    console.log('relation');
+                    // console.log('relation');
                 },
                 drag_end: function(event) {
-                    console.log('relation');
+                    // console.log('relation');
                 }
             };
         }, 

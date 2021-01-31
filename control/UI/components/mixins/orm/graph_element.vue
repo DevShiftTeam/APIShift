@@ -109,15 +109,7 @@
                 let ds = newScale / oldScale;
                 this.$props.position.x = this.$props.position.x*ds + this.$props.relative.x*(1-ds);
                 this.$props.position.y = this.$props.position.y*ds + this.$props.relative.y*(1-ds);
-            },
-            position: {
-                handler: function(position) {
-                    this.left = this.$props.position.x;
-                    this.top = this.$props.position.y;
-                },
-                deep: true
             }
-
         },
         computed: {
             // Rendered transformation (coordinates and scale) 

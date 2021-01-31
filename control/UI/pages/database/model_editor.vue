@@ -181,8 +181,8 @@
                 this.camera.y += this.init_pointer.y - temp.y;
 
                 // Update scale
-                let delta_scale = Math.sqrt(prev_diff.x * prev_diff.x + prev_diff.y * prev_diff.y) /
-                    Math.sqrt(new_diff.x * new_diff.x + new_diff.y * new_diff.y);
+                let delta_scale = Math.sqrt((prev_diff.x * prev_diff.x + prev_diff.y * prev_diff.y) /
+                    (new_diff.x * new_diff.x + new_diff.y * new_diff.y));
                 this.init_pointer.x += - this.graph_position.x - this.camera.x;
                 this.init_pointer.y += - this.graph_position.y - this.camera.y;
                 graph_view.scale *= 1 / delta_scale;

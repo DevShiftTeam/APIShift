@@ -210,21 +210,20 @@
              * Control functions 
              */
             create_line ( from_index = 0, to_index = 0, settings = { item_to_relation: false, relation_to_item: false, item_to_enum: false }) {
-                    const graphview     = this;    
                     const line_uid = `${from_index}c${to_index}`;  
                     let src_instance, dest_instance; 
 
                     var loop_untill_ok = () => {
-                        src_instance  = graphview.$refs[from_index];
-                        dest_instance = graphview.$refs[to_index];
+                        src_instance  = graph_view.$refs[from_index];
+                        dest_instance = graph_view.$refs[to_index];
 
                         if (!src_instance || !dest_instance) {
-                            requestAnimationFrame(loop_untill_ok);
+                            loop_untill_ok();
                         }
                         else {
                             src_instance.add_line(line_uid);
                             dest_instance.add_line(line_uid);
-                            graphview.lines.push({from_index, to_index, settings});
+                            graph_view.lines.push({from_index, to_index, settings});
                         }
                     }
                     loop_untill_ok();

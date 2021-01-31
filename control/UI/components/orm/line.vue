@@ -46,12 +46,10 @@
         },
         created () {
             this.uid = `${this.$props.from_index}c${this.$props.to_index}`;
-            console.log(this.camera);
         },
         mounted () {
-            const graphview = this.$parent;
             this.$el.ref = this.uid;
-            graphview.$refs[this.uid] = this;
+            graph_view.$refs[this.uid] = this;
             // this.$el.querySelector('path') ? this.querySelector('path').ref = this.uid : null;
             console.log(`New ${this.uid} line from ${this.$props.from_index} to ${this.$props.to_index}`);
         
@@ -62,11 +60,8 @@
         methods: {
             update() {  
                     const self = this;
-                    // Throttle line reposition on animation frame ~= 60 fps
-                    requestAnimationFrame(() => {
-                        const graphview = self.$parent;
-                        const src_item  = graphview.$refs[self.$props.from_index];
-                        const dest_item = graphview.$refs[self.$props.to_index];
+                        const src_item  = graph_view.$refs[self.$props.from_index];
+                        const dest_item = graph_view.$refs[self.$props.to_index];
 
                         // Positon line edges on the leftmost-uppermost corner of the elements
                         self.p1x = src_item.left  +  self.$props.camera.x   + (1-self.$props.scale)*src_item.$el.offsetWidth   / 2;
@@ -84,7 +79,6 @@
                             self.p1y += src_item.$el.offsetHeight      * self.$props.scale / 2;
                             self.p2y += src_item.$el.offsetHeight      * self.$props.scale / 2;                                       
                         }
-                    })
             },
             pointer_down() {
                 console.log('ipoasd');

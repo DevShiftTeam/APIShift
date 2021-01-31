@@ -49,12 +49,11 @@
             };
         }, 
         mounted () {
-            const graphview = this.$parent;
             this.$el.ref = this.index; // TODO: change to comp_id $prop field, mistakenly identified it as a form of component index
             
             // Draw relation lines
-            graphview.create_line(this.$props.relate_from, this.index, { item_to_relation: true, relate_type: this.$props.relate_type });
-            graphview.create_line(this.index, this.$props.relate_to, { relation_to_item: true, relate_type: this.$props.relate_type });
+            graph_view.create_line(this.$props.relate_from, this.index, { item_to_relation: true, relate_type: this.$props.relate_type });
+            graph_view.create_line(this.index, this.$props.relate_to, { relation_to_item: true, relate_type: this.$props.relate_type });
 
             // console.log('Relate from ' + this.$props.relate_from);
             console.log('Relation has mounted');

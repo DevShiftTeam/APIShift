@@ -17,6 +17,7 @@
      * limitations under the License.
      * 
      * @author Ilan Dazanashvili
+     * @contributor Sapir Shemer
      */
 
 
@@ -32,7 +33,6 @@
             to_index: Number,
             settings: Object, 
             // View data 
-            camera: Object,
             scale: Number,
         },
         data () {
@@ -52,33 +52,30 @@
             graph_view.$refs[this.uid] = this;
             // this.$el.querySelector('path') ? this.querySelector('path').ref = this.uid : null;
             console.log(`New ${this.uid} line from ${this.$props.from_index} to ${this.$props.to_index}`);
-        
-            
 
             this.update();
         },
         methods: {
             update() {  
-                    const self = this;
-                        const src_item  = graph_view.$refs[self.$props.from_index];
-                        const dest_item = graph_view.$refs[self.$props.to_index];
+                    const src_item  = graph_view.$refs[this.$props.from_index];
+                    const dest_item = graph_view.$refs[this.$props.to_index];
 
-                        // Positon line edges on the leftmost-uppermost corner of the elements
-                        self.p1x = src_item.left  +  self.$props.camera.x   + (1-self.$props.scale)*src_item.$el.offsetWidth   / 2;
-                        self.p1y = src_item.top   +  self.$props.camera.y   + (1-self.$props.scale)*src_item.$el.offsetHeight  / 2;
-                        self.p2x = dest_item.left +  self.$props.camera.x   + (1-self.$props.scale)*src_item.$el.offsetWidth   / 2;
-                        self.p2y = dest_item.top  +  self.$props.camera.y   + (1-self.$props.scale)*dest_item.$el.offsetHeight / 2;
+                    // Positon line edges on the leftmost-uppermost corner of the elements
+                    this.p1x = src_item.position.x  +  graph_view.camera.x   + (1-this.$props.scale)*src_item.$el.offsetWidth   / 2;
+                    this.p1y = src_item.position.y   +  graph_view.camera.y   + (1-this.$props.scale)*src_item.$el.offsetHeight  / 2;
+                    this.p2x = dest_item.position.x +  graph_view.camera.x   + (1-this.$props.scale)*src_item.$el.offsetWidth   / 2;
+                    this.p2y = dest_item.position.y  +  graph_view.camera.y   + (1-this.$props.scale)*dest_item.$el.offsetHeight / 2;
 
-                        // Position line edges properly according to line settings 
-                        if (self.$props.settings.item_to_enum) {
+                    // Position line edges properly according to line settings 
+                    if (this.$props.settings.item_to_enum) {
                             
-                        }
-                        if (self.$props.settings.item_to_relation || self.$props.settings.relation_to_item) {
-                            self.p1x += (src_item.$el.offsetWidth - 5) * self.$props.scale    ;
-                            self.p2x += 1                              * self.$props.scale    ;
-                            self.p1y += src_item.$el.offsetHeight      * self.$props.scale / 2;
-                            self.p2y += src_item.$el.offsetHeight      * self.$props.scale / 2;                                       
-                        }
+                    }
+                    if (this.$props.settings.item_to_relation || this.$props.settings.relation_to_item) {
+                        this.p1x += (src_item.$el.offsetWidth - 5) * this.$props.scale    ;
+                        this.p2x += 1                              * this.$props.scale    ;
+                        this.p1y += src_item.$el.offsetHeight      * this.$props.scale / 2;
+                        this.p2y += src_item.$el.offsetHeight      * this.$props.scale / 2;                                       
+                    }
             },
             pointer_down() {
                 console.log('ipoasd');

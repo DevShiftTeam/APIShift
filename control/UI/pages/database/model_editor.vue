@@ -99,8 +99,6 @@
             this.front_z_index = this.items.length;
         },
         mounted () {
-            this['graphview'] = this;
-            console.log(this.$refs);
         },
         methods: {
 
@@ -260,9 +258,8 @@
             @pointerup="pointer_up"
             :style="{ 'overflow' : 'hidden' }">
         <!-- The center element allow us to create a smart camera that positions the elements without needed to re-render for each element -->
-        <div id="graph_center"
-            :style="{ 'top': camera.y + 'px', 'left': camera.x + 'px'}">
-                <component
+        <div id="graph_center" :style="{ 'top': camera.y + 'px', 'left': camera.x + 'px'}">
+            <component
                 v-for="(item, index) in items"
                 :is="item_comp"
                 :key="index"
@@ -272,8 +269,8 @@
                 :name="item.name"
                 :index="item.index"
                 :position="item.position">
-                </component>
-                <component
+            </component>
+            <component
                 v-for="(item, index) in relations"
                 :is="relation_comp"
                 :key="index"
@@ -286,24 +283,24 @@
                 :name="item.name"
                 :index="item.index"
                 :position="item.position">
-                </component>
-                <svg id="svg_viewport" :style="{ 'top': -1 * camera.y + 'px', 'left': -1 * camera.x + 'px'}">
-                    <defs>
-                        <marker id="black-arrow" markerWidth="5" markerHeight="5" refX="0" refY="5"
-                        viewBox="0 0 10 10" orient="auto-start-reverse" style="opacity: 0.85">
-                            <path d="M 0 0 L 10 5 L 0 10 z" />
-                        </marker>
-                        <marker id="arrow" markerWidth="10" markerHeight="10" refX="10" refY="3" orient="auto" markerUnits="strokeWidth">
-                            <path d="M0,0 L0,6 L9,3 z" fill="rgba(255,0,0,0.9)" />
-                        </marker>
-                        <marker id="arrow1" viewBox="0 0 492.004 492.004" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-                            <path d="M382.678,226.804L163.73,7.86C158.666,2.792,151.906,0,144.698,0s-13.968,2.792-19.032,7.86l-16.124,16.12
-                            c-10.492,10.504-10.492,27.576,0,38.064L293.398,245.9l-184.06,184.06c-5.064,5.068-7.86,11.824-7.86,19.028
-                            c0,7.212,2.796,13.968,7.86,19.04l16.124,16.116c5.068,5.068,11.824,7.86,19.032,7.86s13.968-2.792,19.032-7.86L382.678,265
-                            c5.076-5.084,7.864-11.872,7.848-19.088C390.542,238.668,387.754,231.884,382.678,226.804z"/>
-                        </marker>
-                    </defs>
-                    <component
+            </component>
+            <svg id="svg_viewport" :style="{ 'top': -1 * camera.y + 'px', 'left': -1 * camera.x + 'px'}">
+                <defs>
+                    <marker id="black-arrow" markerWidth="5" markerHeight="5" refX="0" refY="5"
+                    viewBox="0 0 10 10" orient="auto-start-reverse" style="opacity: 0.85">
+                        <path d="M 0 0 L 10 5 L 0 10 z" />
+                    </marker>
+                    <marker id="arrow" markerWidth="10" markerHeight="10" refX="10" refY="3" orient="auto" markerUnits="strokeWidth">
+                        <path d="M0,0 L0,6 L9,3 z" fill="rgba(255,0,0,0.9)" />
+                    </marker>
+                    <marker id="arrow1" viewBox="0 0 492.004 492.004" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                        <path d="M382.678,226.804L163.73,7.86C158.666,2.792,151.906,0,144.698,0s-13.968,2.792-19.032,7.86l-16.124,16.12
+                        c-10.492,10.504-10.492,27.576,0,38.064L293.398,245.9l-184.06,184.06c-5.064,5.068-7.86,11.824-7.86,19.028
+                        c0,7.212,2.796,13.968,7.86,19.04l16.124,16.116c5.068,5.068,11.824,7.86,19.032,7.86s13.968-2.792,19.032-7.86L382.678,265
+                        c5.076-5.084,7.864-11.872,7.848-19.088C390.542,238.668,387.754,231.884,382.678,226.804z"/>
+                    </marker>
+                </defs>
+                <component
                     v-for="(line, index) in lines"
                     :is="line_comp"
                     :key="index"
@@ -311,11 +308,9 @@
                     :from_index="line.from_index"
                     :to_index="line.to_index"
                     :settings="line.settings"
-                    :camera="camera"
                     :scale="scale">
-                    </component>
-                </svg>
-                
+                </component>
+            </svg>
         </div>
     </div>
 </template>

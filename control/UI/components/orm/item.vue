@@ -19,8 +19,6 @@
      * @author Sapir Shemer
      */
 
-const graphviewVue=require("./graphview.vue");
-
     // This shit is made for scripting
     module.exports = {
         mixins: [APIShift.API.getMixin('orm/graph_element')],
@@ -32,21 +30,8 @@ const graphviewVue=require("./graphview.vue");
             }
         },
         created () {
-            const $this = this;
             // We use the type to differentiate between objects
             this.type = 'item';
-            this.expanded_functions = { 
-                drag_start: function(event) {
-                    // console.log($this);
-                }, 
-                drag: function(event) {
-                    // console.log('item');
-                },
-                drag_end: function(event) {
-                    // console.log('item');
-                }
-            };
-            console.log(this);
         }, 
         mounted () {
             this.$el.ref = this.name;

@@ -24,14 +24,6 @@
     module.exports = {
         data() {
             return {
-                // External data
-                left: 0,
-                top: 0,
-                // Internal data 
-                init_position: {
-                    x: 0,
-                    y: 0
-                },
                 type: 'graph_element',
                 index: 0,
                 lines: [],
@@ -44,12 +36,9 @@
             }
         },
         mounted () {
-            const graphview = this.$parent;
             this.$el.type = 'graph_element';
             this.$el.ref = this.$props.name;
-            this.$el.left = this.init_position.x;
-            this.$el.top = this.init_position.y;
-            graphview.$refs[this.$props.index] = this;
+            graph_view.$refs[this.$props.index] = this;
         },
         props: {
             name: String,
@@ -64,7 +53,7 @@
         methods: {
             drag_start (event) {
                 // Get position when drag started
-                this.init_position = Object.assign({} ,this.$props.position);
+                window.init_position = Object.assign({} ,this.$props.position);
 
                 // Update drag function
                 graph_view.drag_handler = this.drag;
@@ -75,8 +64,8 @@
                 this.expanded_functions.drag_start(event);
             },
             drag (event, offset = { x: 0, y: 0}) {
-                this.$props.position.x = this.init_position.x + event.clientX - graph_view.init_pointer.x + offset.x;
-                this.$props.position.y = this.init_position.y + event.clientY - graph_view.init_pointer.y + offset.y;
+                this.$props.position.x = window.init_position.x + event.clientX - graph_view.init_pointer.x + offset.x;
+                this.$props.position.y = window.init_position.y + event.clientY - graph_view.init_pointer.y + offset.y;
 
                 // Call additional function if set
                 this.expanded_functions.drag(event);
@@ -91,9 +80,8 @@
                 this.expanded_functions.drag_end(event);
             },
             update_lines () {
-                const graphview = this.$parent;
                 this.lines.forEach(line_uid => {
-                    let line_instance = graphview.$refs[line_uid];
+                    let line_instance = graph_view.$refs[line_uid];
                     line_instance.update();
                 });
             },

@@ -28,7 +28,6 @@
                 drawer: null,
                 // Components 
                 item_comp: APIShift.API.getComponent('orm/item', true),
-                relation_comp: APIShift.API.getComponent('orm/relation', true),
                 enum_comp: APIShift.API.getComponent('orm/enum', true),
                 group_comp: APIShift.API.getComponent('orm/group', true),
                 type_comp: APIShift.API.getComponent('orm/enum_type', true),

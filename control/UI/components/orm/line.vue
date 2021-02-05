@@ -48,8 +48,6 @@
         mounted () {
             this.$el.ref = this.uid;
             graph_view.$refs[this.uid] = this;
-            // this.$el.querySelector('path') ? this.querySelector('path').ref = this.uid : null;
-            console.log(`New ${this.uid} line from ${this.$props.from_index} to ${this.$props.to_index}`);
 
             this.update();
         },
@@ -69,8 +67,7 @@
                             
                     }
                     if (this.$props.settings.item_to_relation || this.$props.settings.relation_to_item) {
-                        this.p1x += (src_item.$el.offsetWidth - 5);
-                        this.p2x += 1;
+                        this.p1x += (src_item.$el.offsetWidth);
                         this.p1y += src_item.$el.offsetHeight / 2;
                         this.p2y += src_item.$el.offsetHeight / 2;                                       
                     }

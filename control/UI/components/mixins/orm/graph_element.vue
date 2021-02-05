@@ -42,10 +42,7 @@
         },
         props: {
             name: String,
-            scale: Number,
             position: Object,
-            // The point from which the scale is happening
-            relative: Object,
             // Index - used for smart rendering
             index: Number,
             // comp_id - Unique ID for on-screen components
@@ -63,9 +60,9 @@
                 // Call additional function if set
                 this.expanded_functions.drag_start(event);
             },
-            drag (event, offset = { x: 0, y: 0}) {
-                this.$props.position.x = window.init_position.x + event.clientX - graph_view.init_pointer.x + offset.x;
-                this.$props.position.y = window.init_position.y + event.clientY - graph_view.init_pointer.y + offset.y;
+            drag (event) {
+                this.$props.position.x = window.init_position.x + (event.clientX - window.init_pointer.x) / graph_view.scale;
+                this.$props.position.y = window.init_position.y + (event.clientY - window.init_pointer.y) / graph_view.scale;
 
                 // Call additional function if set
                 this.expanded_functions.drag(event);
@@ -93,30 +90,13 @@
                 if (index > -1) {
                     this.lines.splice(index, 1);
                 }
-            },
-            // Helper functions to move elements explicitly 
-            move_by (vec = { x: 0, y: 0 }) {
-                this.$props.position.x += vec.x;
-                this.$props.position.y += vec.y;
-            },
-            move_to (vert = { x: 0, y: 0 }) {
-                this.$props.position.x = vert.x;
-                this.$props.position.y = vert.y;
-            }
-        },
-        watch: {
-            scale: function (newScale, oldScale) {
-                let ds = newScale / oldScale;
-                this.$props.position.x = this.$props.position.x*ds + this.$props.relative.x*(1-ds);
-                this.$props.position.y = this.$props.position.y*ds + this.$props.relative.y*(1-ds);
             }
         },
         computed: {
             // Rendered transformation (coordinates and scale) 
             transformation () {
                 return  {
-                    transform: `translate(${this.$props.position.x}px,${this.$props.position.y}px) scale(${this.$props.scale})`,
-                    
+                    transform: `translate(${this.$props.position.x}px,${this.$props.position.y}px)`,
                     'z-index': this.$props.index + 5
                 }
             },

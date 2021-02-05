@@ -73,16 +73,6 @@
                 y: 0
             };
 
-            for(var x in [...Array(200).keys()]) {
-                this.items.push({
-                    name: "w" + x,
-                    index: (Number(x) + 1),
-                    position: {
-                        x: Math.floor(Math.random() * Math.floor(1000)),
-                        y: Math.floor(Math.random() * Math.floor(800))
-                    }
-                })
-            }
             this.front_z_index = this.items.length;
         },
         mounted () {

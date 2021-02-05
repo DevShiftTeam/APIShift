@@ -34,11 +34,13 @@
                 type_comp: APIShift.API.getComponent('orm/enum_type', true),
                 line_comp: APIShift.API.getComponent('orm/line', true),
                 items: [
-                    { name: "wait", index: 0, position: { x: 0, y: 0 } },
-                    { name: "haha", index: 1, position: { x: 0, y: 0 } }
-                ],
-                relations: [
-                    { name: "wait", relate_from: 0, relate_to: 1, relate_type: 0, index: 2, position: { x: 0, y: 0 } }
+                    { name: "wait", index: 0, position: { x: 0, y: 0 }, is_relation: false, data: {} },
+                    { name: "haha", index: 1, position: { x: 0, y: 0 }, is_relation: false, data: {} },
+                    { name: "rela", index: 2, position: { x: 0, y: 0 }, is_relation: true, data: {
+                        from: 0,
+                        to: 1,
+                        type: 0
+                    } }
                 ],
                 lines: [
 
@@ -249,23 +251,13 @@
             <component
                 v-for="(item, index) in items"
                 :is="item_comp"
+                :is_relation="item.is_relation"
                 :key="index"
-                :ref="item.index"
+                :ref="index"
                 :name="item.name"
-                :index="item.index"
-                :position="item.position">
-            </component>
-            <component
-                v-for="(item, index) in relations"
-                :is="relation_comp"
-                :key="index"
-                :ref="item.index"
-                :relate_from="item.relate_from"
-                :relate_to="item.relate_to"
-                :relate_type="item.relate_type"
-                :name="item.name"
-                :index="item.index"
-                :position="item.position">
+                :index="index"
+                :position="item.position"
+                :data="item.data">
             </component>
             <svg id="svg_viewport">
                 <defs>
@@ -290,8 +282,7 @@
                     :ref="`${line.from_index}c${line.to_index}`" 
                     :from_index="line.from_index"
                     :to_index="line.to_index"
-                    :settings="line.settings"
-                    :scale="scale">
+                    :settings="line.settings">
                 </component>
             </svg>
         </div>

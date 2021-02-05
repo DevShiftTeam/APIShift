@@ -23,6 +23,9 @@
     module.exports = {
         mixins: [APIShift.API.getMixin('orm/graph_element')],
         props: {
+            is_relation: Boolean,
+            data: Object,
+            name: String
         },
         data () {
             return {
@@ -31,13 +34,16 @@
         },
         created () {
             // We use the type to differentiate between objects
-            this.type = 'item';
+            this.type = this.$props.is_relation ? 'relation' : 'item';
         }, 
         mounted () {
-            this.$el.ref = this.name;
-            let rect = this.$el.getBoundingClientRect();
-            this.width = rect.width;
-            this.height = rect.height;
+            this.$el.ref = this.index;
+            if(this.$props.is_relation) {
+                // Draw relation lines
+                graph_view.create_line(this.$props.data.from, this.index, { item_to_relation: true, relate_type: this.$props.data.type });
+                graph_view.create_line(this.index, this.$props.data.to, { relation_to_item: true, relate_type: this.$props.data.type });
+            }
+
         },
         methods: {
             render_needed () {
@@ -51,7 +57,7 @@
         :style="transformation"
         @pointerdown.prevent="drag_start"
         @pointerup.prevent="drag_end">
-            <v-avatar left class="item_type darken-4 blue">I</v-avatar>
+            <v-avatar left class="item_type darken-4" :class="is_relation ? 'purple' : 'blue'">{{ is_relation ? 'R' : 'I'}}</v-avatar>
             <div style="display: inline;">{{ name }}</div>
     </div>
 </template>

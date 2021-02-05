@@ -33,30 +33,8 @@
             }
         },
         created () {
-            const $this = this;
-            // We use the type to differentiate between objects
-            this.type = 'item';
-            this.expanded_functions = { 
-                drag_start: function(event) {
-                    // console.log($this);
-                }, 
-                drag: function(event) {
-                    // console.log('relation');
-                },
-                drag_end: function(event) {
-                    // console.log('relation');
-                }
-            };
         }, 
         mounted () {
-            this.$el.ref = this.index; // TODO: change to comp_id $prop field, mistakenly identified it as a form of component index
-            
-            // Draw relation lines
-            graph_view.create_line(this.$props.relate_from, this.index, { item_to_relation: true, relate_type: this.$props.relate_type });
-            graph_view.create_line(this.index, this.$props.relate_to, { relation_to_item: true, relate_type: this.$props.relate_type });
-
-            // console.log('Relate from ' + this.$props.relate_from);
-            console.log('Relation has mounted');
         },
         methods: {
             render_needed () {

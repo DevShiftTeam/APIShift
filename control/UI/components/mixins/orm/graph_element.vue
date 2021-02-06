@@ -66,8 +66,6 @@
 
                 // Call additional function if set
                 this.expanded_functions.drag(event);
-
-                this.update_lines();
             },
             drag_end (event) {
                 // Reset drag function
@@ -75,21 +73,6 @@
 
                 // Call additional function if set
                 this.expanded_functions.drag_end(event);
-            },
-            update_lines () {
-                this.lines.forEach(line_uid => {
-                    let line_instance = graph_view.$refs[line_uid];
-                    line_instance.update();
-                });
-            },
-            add_line (line_uid) {
-                this.lines.push(line_uid);
-            },
-            remove_line (line_uid) {
-                const index = this.lines.indexOf(line_uid);
-                if (index > -1) {
-                    this.lines.splice(index, 1);
-                }
             }
         },
         computed: {
@@ -99,13 +82,6 @@
                     transform: `translate(${this.$props.position.x}px,${this.$props.position.y}px)`,
                     'z-index': this.$props.index + 5
                 }
-            },
-            // Exspose position info conveniently for external usage 
-            x_pos () {
-                return this.$props.position.x;
-            },
-            y_pos () {
-                return this.$props.position.x;
             }
         }
     };

@@ -204,9 +204,6 @@
 
                     let src_instance  = graph_view.$refs[from_index];
                     let dest_instance = graph_view.$refs[to_index];
-
-                    src_instance.add_line(line_uid);
-                    dest_instance.add_line(line_uid);
                     graph_view.lines.push({from_index, to_index, settings});
             },
             // Update graph position
@@ -224,14 +221,6 @@
                 app.$refs.navigator.updateIndex(newValue + 1);
                 app.$refs.footer.updateIndex(newValue + 1);
                 window.handler.updateIndex(newValue + 1);
-            }
-        },
-        computed: {
-            basic_items: function () {
-                return this.items.filter( i => i.is_relation === false);
-            },
-            relation_items: function () {
-                return this.items.filter( i => i.is_relation === true);
             }
         }
     }

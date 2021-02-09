@@ -71,8 +71,6 @@
 
                 // Call additional function if set
                 this.expanded_functions.drag(event);
-
-                this.update_lines();
             },
             drag_end (event) {
                 // Reset drag function
@@ -115,7 +113,7 @@
             transformation () {
                 return  {
                     transform: `translate(${this.$props.position.x}px,${this.$props.position.y}px)`,
-                    'z-index': this.z_index + 5
+                    'z-index': this.z_index + 5 // Base z-index for graph elements 
                 }
             },
             // Exspose position info conveniently for external usage 

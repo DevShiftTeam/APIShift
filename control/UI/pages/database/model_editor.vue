@@ -221,7 +221,7 @@
                     var line_uid, from_uid, to_uid;
                     var src_instance, dest_instance;
 
-                    // Build line unique id reference from params 
+                    // Build line unique id from params 
                     if ( settings.enum_to_item ) {
                         from_uid = `e${from_id}`;
                         to_uid   = `i${to_id}`;
@@ -236,20 +236,18 @@
                     line_uid = `${from_uid}-${to_uid}`;
                     if (graph_view.lines.find((l) => l.line_uid === line_uid)) return;
 
-                    // Passivly waiting to the renderation of src_instance & dest_instance for 2 sec at max
-                    // This method is not recursive, it uses requestsAnimationFrame to reschedule the function.   
-                    var schedule_start = new Date();
-                    var schedule_drawing = () => {
-                        src_instance  = graph_view.$refs[from_uid];
-                        dest_instance = graph_view.$refs[to_uid];
-                        src_instance.add_line(line_uid);
-                        dest_instance.add_line(line_uid);
-                        graph_view.lines.push({line_uid, from_uid, to_uid, settings});
-                    }
-                    schedule_drawing();
+                    // Add line to system 
+                    src_instance  = graph_view.$refs[from_uid];
+                    dest_instance = graph_view.$refs[to_uid];
+                    src_instance.add_line(line_uid);
+                    dest_instance.add_line(line_uid);
+                    graph_view.lines.push({line_uid, from_uid, to_uid, settings});
             },
             remove_line ( line_uid ) {
                 
+                    let src_instance  = graph_view.$refs[from_index];
+                    let dest_instance = graph_view.$refs[to_index];
+                    // graph_view.lines.push({from_index, to_index, settings});
             },
             // Update graph position
             update_graph_position() {
@@ -293,14 +291,6 @@
             },
             group_items: function(item_enums) {
                 
-            }
-        },
-        computed: {
-            basic_items: function () {
-                return this.items.filter( i => i.is_relation === false);
-            },
-            relation_items: function () {
-                return this.items.filter( i => i.is_relation === true);
             }
         }
     }

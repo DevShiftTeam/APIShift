@@ -28,9 +28,10 @@
      */
     module.exports = {
         props: {
+            uid: String,
             // Functional data
-            from_index: Number,
-            to_index: Number,
+            from_uid: Number,
+            to_uid: Number,
             settings: Object,
         },
         data () {
@@ -43,7 +44,7 @@
             }
         },
         created () {
-            this.uid = `${this.$props.from_index}c${this.$props.to_index}`;
+            this.uid = `${this.$props.from_uid}-${this.$props.to_uid}`;
         },
         mounted () {
             this.$el.ref = this.uid;
@@ -53,8 +54,8 @@
         },
         methods: {
             update() {  
-                    const src_item  = graph_view.$refs[this.$props.from_index];
-                    const dest_item = graph_view.$refs[this.$props.to_index];
+                    const src_item  = graph_view.$refs[this.$props.from_uid];
+                    const dest_item = graph_view.$refs[this.$props.to_uid];
 
                     // Positon line edges on the leftmost-uppermost corner of the elements
                     this.p1x = src_item.position.x;
@@ -63,24 +64,26 @@
                     this.p2y = dest_item.position.y;
 
                     // Position line edges properly according to line settings 
-                    if (this.$props.settings.item_to_enum) {
-                            
+                    if (this.$props.settings.enum_to_item) {
+                        this.p1x += src_item.$el.offsetWidth / 2;
+                        this.p1y += src_item.$el.offsetHeight / 2;
+                        this.p2x += dest_item.$el.offsetWidth / 2;                    
+                        this.p2y += dest_item.$el.offsetHeight / 2; 
                     }
-                    if (this.$props.settings.item_to_relation || this.$props.settings.relation_to_item) {
+                    else if (this.$props.settings.item_to_relation || this.$props.settings.relation_to_item) {
                         this.p1x += (src_item.$el.offsetWidth);
                         this.p1y += src_item.$el.offsetHeight / 2;
                         this.p2y += src_item.$el.offsetHeight / 2;                                       
                     }
             },
             pointer_down() {
-                console.log('ipoasd');
             }
         },
         computed: {
             // Just for testing 
             path_data () {
                 const bezierWeight = 0.675; // Amount to offset control points
-                const dx           =  Math.abs(this.p1x - this.p2x) * bezierWeight * !this.$props.settings.item_to_enum;
+                const dx           =  Math.abs(this.p1x - this.p2x) * bezierWeight * !this.$props.settings.enum_to_item;
                 const c1           = { x: this.p1x + dx, y: this.p1y };
                 const c2           = { x: this.p2x - dx, y: this.p2y };
 
@@ -93,7 +96,9 @@
 <template>
     <!-- <svg style="position:absolute; width:100%; height:100%" :style="svg_transform" @pointerdown="pointer_down"> -->
         <g>
-        <path @pointerdown="pointer_down" :style="{ 'stroke-width': `${5}`}"
+        <path @pointerdown="pointer_down" 
+            :style="{ 'stroke-width': `${settings.enum_to_item ? 4 : 4}`,
+                        'stroke-dasharray': `${settings.enum_to_item ? '11,5' : 'none'}`}"
             :d="path_data"
             >
         </path>

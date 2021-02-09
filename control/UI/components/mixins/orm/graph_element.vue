@@ -24,8 +24,9 @@
     module.exports = {
         data() {
             return {
+                uid: '',
                 type: 'graph_element',
-                index: 0,
+                z_index: 0,
                 lines: [],
                 // This elements adds functionallity to drag events in needed
                 expanded_functions: {
@@ -35,17 +36,21 @@
                 }
             }
         },
+        created () {
+            this.z_index = this.$props.index;
+        },
         mounted () {
+            graph_view.$refs[this.uid] = this;
+            this.$el.ref = this.uid;
             this.$el.type = 'graph_element';
-            this.$el.ref = this.$props.name;
-            graph_view.$refs[this.$props.index] = this;
         },
         props: {
             name: String,
             position: Object,
             // Index - used for smart rendering
             index: Number,
-            // comp_id - Unique ID for on-screen components
+            // uid - used for global component reference
+            uid: String,
         },
         methods: {
             drag_start (event) {
@@ -76,6 +81,16 @@
                 // Call additional function if set
                 this.expanded_functions.drag_end(event);
             },
+            move_to (xpos, ypos) {
+                this.$props.position.x = xpos;
+                this.$props.position.y = ypos;
+                this.update_lines();
+            },
+            move_by (dx, dy) {
+                this.$props.position.x += dx;
+                this.$props.position.y += dy;
+                this.update_lines();
+            },
             update_lines () {
                 this.lines.forEach(line_uid => {
                     let line_instance = graph_view.$refs[line_uid];
@@ -90,6 +105,9 @@
                 if (index > -1) {
                     this.lines.splice(index, 1);
                 }
+            },
+            setIndex (index) {
+                this.$props.index = index;
             }
         },
         computed: {
@@ -97,7 +115,7 @@
             transformation () {
                 return  {
                     transform: `translate(${this.$props.position.x}px,${this.$props.position.y}px)`,
-                    'z-index': this.$props.index + 5
+                    'z-index': this.z_index + 5
                 }
             },
             // Exspose position info conveniently for external usage 
@@ -105,7 +123,11 @@
                 return this.$props.position.x;
             },
             y_pos () {
-                return this.$props.position.x;
+                return this.$props.position.y;
+            },
+            // Expose computed immutable local components-scope id 
+            component_id () {
+                return parseInt(this.uid.substring(1));
             }
         }
     };

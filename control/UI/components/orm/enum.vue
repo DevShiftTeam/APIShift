@@ -22,21 +22,144 @@
     // This shit is made for scripting
     module.exports = {
         mixins: [APIShift.API.getMixin('orm/graph_element')],
+        props: {
+            name: String,
+            data: Object
+        },
         data () {
             return {
-                drawer: null
+                drawer: null,
+                enum_types: [],
+                height: 0,
+                width: 0
             }
         },
         created () {
+            const self = this;
+            this.expanded_functions.drag_start = (event) => {
+                self.update_types();
+                self.align_types();    
             
+            };
+            this.expanded_functions.drag = (event) => {
+                self.align_types();
+            };
+            this.expanded_functions.drag_end = (event) => {
+                const item_elements = [ ...graph_view.$el.querySelectorAll('.item'),
+                                        ...graph_view.$el.querySelectorAll('.relation')];
+
+                for (const item_el of item_elements) {
+                    if (graph_view.hittest(self.uid, item_el.ref)) {
+                        let item_instance = graph_view.$refs[item_el.ref];
+                        graph_view.item_enums.push({ enum_id: self.component_id, item_id: item_instance.component_id });                  
+                        break;
+                    }
+                }
+            };
+        }, 
+        mounted () {
+            const self = this;
+            // Align attached types to element
+            this.update_types();
+            this.align_types();
+    
+            for (let index = 0; index < graph_view.item_enums.length; index++) {
+                const item_enum = graph_view.item_enums[index];
+                if (item_enum.enum_id === this.component_id) {
+                    graph_view.create_line(item_enum.enum_id, item_enum.item_id, { enum_to_item: true });
+                }
+            }
+
+            this.$watch('height', this.on_rect_change);
+            this.$watch('width', this.on_rect_change);
+        },
+        methods: {
+            attach_type (type_id) {
+                this.enum_types = [];
+                for (const enum_type of graph_view.enum_types) {
+                    if (enum_type.id === type_id) {
+                        enum_type.enum_id = this.component_id;
+                    }
+                }
+                this.update_types();
+                this.align_types();
+            },
+            detach_type (type_id) {
+                this.enum_types = [];
+                for (const enum_type of graph_view.enum_types) {
+                    if (enum_type.id === type_id ) {
+                        enum_type.enum_id = null;
+                    }
+                }
+                this.update_types();
+                this.align_types();
+            },
+            align_types () {
+                const self = this;
+                var accumulated_offset = 0;
+                this.height = 0;
+                this.width = 0;
+                // Move attached types
+                for (const enum_type_id of this.enum_types) {
+                    const type_instance = graph_view.$refs['t'+enum_type_id];
+                    accumulated_offset += 40;
+                    self.width = Math.max(self.width, type_instance.$el.offsetWidth);
+                    self.height = accumulated_offset;
+                    type_instance.move_to(self.$props.position.x + 5 , self.$props.position.y + accumulated_offset);
+                    type_instance.index = self.index + 1;
+                }
+            },
+            update_types () {
+                this.enum_types = [];
+                for (const enum_type of graph_view.enum_types) {
+                    if (enum_type.enum_id === this.component_id) {
+                        this.enum_types.push(enum_type.id);
+                    }
+                }
+            },
+            on_rect_change () {
+                requestAnimationFrame(this.update_lines);
+            },
+            render_needed () {
+            }
+        },
+        watch: {
+
         }
     }
 </script>
 
 <template>
-<div></div>
+    <div class="enum" color="#8789ff"
+        :style="transformation"
+        @pointerdown.prevent="drag_start"
+        @pointerup.prevent="drag_end">
+            <v-avatar left class="enum_type darken-4 red" >E</v-avatar>
+            <div style="display: inline;">{{ uid }}</div>
+            <div class="enum_types" :style="{'height': `${height + 5}px`,'width': `${width}px`}"></div>
+    </div>
 </template>
 
 <style scoped>
 /* Please style this crap, with style */
+.enum_type {
+    text-align: center;
+    display: inline;
+    padding-left: 7px;
+    padding-right: 7px;
+}
+
+.enum {
+    border: solid white 1px;
+    border-radius: 10px;
+    padding: 5px;
+    display: inline-block;
+    position: absolute;
+    cursor: copy !important;
+    background: #8789ff;
+}
+
+.enum.highlight {
+
+}
 </style>

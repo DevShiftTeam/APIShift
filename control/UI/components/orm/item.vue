@@ -30,20 +30,34 @@
         data () {
             return {
                 drawer: null,
+                group_container: null
             }
         },
         created () {
+            const self = this;
+
             // We use the type to differentiate between objects
             this.type = this.$props.is_relation ? 'relation' : 'item';
+
+            this.expanded_functions.drag_start = (event) => {
+
+            };
+            this.expanded_functions.drag = (event) => {
+                if (self.group_container) {
+                    self.group_container.set_rect();
+                }
+            };
+            this.expanded_functions.drag_end = (event) => {
+
+            };
+
         }, 
         mounted () {
-            this.$el.ref = this.index;
             if(this.$props.is_relation) {
                 // Draw relation lines
-                graph_view.create_line(this.$props.data.from, this.index, { item_to_relation: true, relate_type: this.$props.data.type });
-                graph_view.create_line(this.index, this.$props.data.to, { relation_to_item: true, relate_type: this.$props.data.type });
+                graph_view.create_line(this.$props.data.from, this.component_id, { item_to_relation: true, relate_type: this.$props.data.type });
+                graph_view.create_line(this.component_id, this.$props.data.to, { relation_to_item: true, relate_type: this.$props.data.type });
             }
-
         },
         methods: {
             render_needed () {

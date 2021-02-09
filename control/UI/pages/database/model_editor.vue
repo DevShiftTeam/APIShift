@@ -30,16 +30,32 @@
                 item_comp: APIShift.API.getComponent('orm/item', true),
                 enum_comp: APIShift.API.getComponent('orm/enum', true),
                 group_comp: APIShift.API.getComponent('orm/group', true),
-                type_comp: APIShift.API.getComponent('orm/enum_type', true),
+                enum_type_comp: APIShift.API.getComponent('orm/enum_type', true),
                 line_comp: APIShift.API.getComponent('orm/line', true),
                 items: [
-                    { name: "wait", index: 0, position: { x: 0, y: 0 }, is_relation: false, data: {} },
-                    { name: "haha", index: 1, position: { x: 0, y: 0 }, is_relation: false, data: {} },
-                    { name: "rela", index: 2, position: { x: 0, y: 0 }, is_relation: true, data: {
-                        from: 0,
-                        to: 1,
+                    { name: "wait", id: 1,index: 0, position: { x: 20, y: 0 }, is_relation: false, data: {} },
+                    { name: "haha", id: 2, index: 1, position: { x: 400, y: 0 }, is_relation: false, data: {} },
+                    { name: "rela", id: 3, index: 2, position: { x: 120, y: 50 }, is_relation: true, data: {
+                        from: 1,
+                        to: 2,
                         type: 0
                     } }
+                ],  
+                item_enums: [{ enum_id: 1, item_id: 2}],
+                enums: [
+                    { name: "Enum", id: 1, index: 4, position: { x: 50, y: 100 }}
+                ],
+                enum_types: [
+                    { name: 'Type', id: 1, index: 5, position: { x: 100, y: 100 }, enum_id: 1 },
+                    { name: 'Type', id: 2, index: 6, position: { x: 200, y: 100 }, enum_id: null }
+                ],
+                group_items: [
+                    {group_id: 1, item_id: 1}, 
+                    {group_id: 1, item_id: 2},
+                    {group_id: 1, item_id: 3} 
+                ],
+                groups: [
+                    { name: 'Group', id: 1, index: 7, position: {x: 0, y: 0} }
                 ],
                 lines: [
 
@@ -77,7 +93,9 @@
             this.front_z_index = this.items.length;
         },
         mounted () {
+
         },
+
         methods: {
 
             /**
@@ -199,15 +217,39 @@
             /**
              * Control functions 
              */
-            create_line ( from_index = 0, to_index = 0, settings = { item_to_relation: false, relation_to_item: false, item_to_enum: false }) {
-                    const line_uid = `${from_index}c${to_index}`;
+            create_line ( from_id = 0, to_id = 0, settings = { item_to_relation: false, relation_to_item: false, enum_to_item: false }) {
+                    var line_uid, from_uid, to_uid;
+                    var src_instance, dest_instance;
 
-                    let src_instance  = graph_view.$refs[from_index];
-                    let dest_instance = graph_view.$refs[to_index];
+                    // Build line unique id reference from params 
+                    if ( settings.enum_to_item ) {
+                        from_uid = `e${from_id}`;
+                        to_uid   = `i${to_id}`;
+                    } 
+                    else if (settings.item_to_relation || settings.relation_to_item) {
+                        from_uid = `i${from_id}`;
+                        to_uid   = `i${to_id}`;
+                    } 
+                    else return;
 
-                    src_instance.add_line(line_uid);
-                    dest_instance.add_line(line_uid);
-                    graph_view.lines.push({from_index, to_index, settings});
+                    // Line already in list 
+                    line_uid = `${from_uid}-${to_uid}`;
+                    if (graph_view.lines.find((l) => l.line_uid === line_uid)) return;
+
+                    // Passivly waiting to the renderation of src_instance & dest_instance for 2 sec at max
+                    // This method is not recursive, it uses requestsAnimationFrame to reschedule the function.   
+                    var schedule_start = new Date();
+                    var schedule_drawing = () => {
+                        src_instance  = graph_view.$refs[from_uid];
+                        dest_instance = graph_view.$refs[to_uid];
+                        src_instance.add_line(line_uid);
+                        dest_instance.add_line(line_uid);
+                        graph_view.lines.push({line_uid, from_uid, to_uid, settings});
+                    }
+                    schedule_drawing();
+            },
+            remove_line ( line_uid ) {
+                
             },
             // Update graph position
             update_graph_position() {
@@ -217,6 +259,26 @@
                     x: rect.x,
                     y: rect.y
                 };
+            },
+
+            /**
+             * Test whether 2 graph elements are hitting each other
+             * @param {String} uid_1, @param {String} uid_1
+             * @returns {Boolean} 
+             */
+            hittest: function(uid_1, uid_2){
+                const comp_1 = graph_view.$refs[uid_1];
+                const comp_2 = graph_view.$refs[uid_2];
+
+                if (!comp_1 || !comp_2) return;
+
+                var rect1 = comp_1.$el.getBoundingClientRect();
+                var rect2 = comp_2.$el.getBoundingClientRect();
+
+                var xOverlap = Math.max(0, Math.min(rect1.right , rect2.right) - Math.max(rect1.left, rect2.left));
+                var yOverlap = Math.max(0, Math.min(rect1.bottom, rect2.bottom) - Math.max(rect1.top, rect2.top));
+
+                return  (xOverlap * yOverlap) > 0 ;
             }
         },
         watch: {
@@ -224,6 +286,13 @@
                 app.$refs.navigator.updateIndex(newValue + 1);
                 app.$refs.footer.updateIndex(newValue + 1);
                 window.handler.updateIndex(newValue + 1);
+            },
+            item_enums: function(item_enums) {
+                let new_connection = item_enums.slice(-1).pop();
+                graph_view.create_line(new_connection.enum_id, new_connection.item_id, {enum_to_item: true});
+            },
+            group_items: function(item_enums) {
+                
             }
         },
         computed: {
@@ -252,11 +321,39 @@
                 :is="item_comp"
                 :is_relation="item.is_relation"
                 :key="index"
-                :ref="index"
+                :uid="'i'+item.id"
                 :name="item.name"
-                :index="index"
+                :index="item.index"
                 :position="item.position"
                 :data="item.data">
+            </component>
+            <component
+                v-for="(enum_type, index) in enum_types"
+                :is="enum_type_comp"
+                :key="index"
+                :uid="'t'+enum_type.id"
+                :name="enum_type.name"
+                :index="enum_type.index"
+                :position="enum_type.position">
+            </component>
+            <component
+                v-for="(enum_c, index) in enums"
+                :is="enum_comp"
+                :key="index"
+                :uid="'e'+enum_c.id"
+                :name="enum_c.name"
+                :index="enum_c.index"
+                :position="enum_c.position"
+                :data="enum_c.data">
+            </component>
+            <component
+                v-for="(group, index) in groups"
+                :is="group_comp"
+                :key="index"
+                :uid="'g'+group.id"
+                :name="group.name"
+                :index="group.index"
+                :position="group.position">
             </component>
             <svg id="svg_viewport">
                 <defs>
@@ -278,9 +375,9 @@
                     v-for="(line, index) in lines"
                     :is="line_comp"
                     :key="index"
-                    :ref="`${line.from_index}c${line.to_index}`" 
-                    :from_index="line.from_index"
-                    :to_index="line.to_index"
+                    :uid="line.line_uid" 
+                    :from_uid="line.from_uid"
+                    :to_uid="line.to_uid"
                     :settings="line.settings">
                 </component>
             </svg>

@@ -34,13 +34,6 @@
             }
         },
         created () {
-            for (const group_item of graph_view.group_items) {
-                if (group_item.group_id === this.component_id) {
-                    this.item_refs.push('i'+group_item.item_id);
-                    graph_view.$refs['i'+group_item.item_id].group_container = this;
-                }
-            }
-
             const self = this;
             this.expanded_functions.drag_start = (event) => {
                 this.z_index = 1;
@@ -59,6 +52,12 @@
             };
         },
         mounted () {
+            for (const group_item of graph_view.group_items) {
+                if (group_item.group_id === this.component_id) {
+                    this.item_refs.push('i'+group_item.item_id);
+                    graph_view.$refs['i'+group_item.item_id].group_container = this;
+                }
+            }
             this.set_rect();
         },
         methods: {

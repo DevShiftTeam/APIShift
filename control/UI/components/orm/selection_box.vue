@@ -43,7 +43,6 @@
         },
         methods: {
             start_select (event) {
-                this.initial_event = event;
                 graph_view.drag_handler = this.on_select;
                 // this.leftbound = window.init_pointer.x - this.graph_rect.x;
                 // this.topbound = window.init_pointer.y - this.graph_rect.y

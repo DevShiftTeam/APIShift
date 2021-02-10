@@ -55,7 +55,7 @@
                 for (const enum_el of enum_elements) {
                     if (graph_view.hittest(self.uid, enum_el.ref)) {
                         let enum_instance = graph_view.$refs[enum_el.ref];
-                        enum_instance.attach_type(id);    
+                        enum_instance.attach_type(id);  
                         break;
                     }
                 }

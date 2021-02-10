@@ -32,6 +32,7 @@
                 group_comp: APIShift.API.getComponent('orm/group', true),
                 enum_type_comp: APIShift.API.getComponent('orm/enum_type', true),
                 line_comp: APIShift.API.getComponent('orm/line', true),
+                selection_comp: APIShift.API.getComponent('orm/selection_box', true),
                 items: [
                     { name: "wait", id: 1,index: 0, position: { x: 20, y: 0 }, is_relation: false, data: {} },
                     { name: "haha", id: 2, index: 1, position: { x: 400, y: 0 }, is_relation: false, data: {} },
@@ -79,7 +80,12 @@
                 init_camera: {
                     x: 0,
                     y: 0
-                }
+                },
+                selection_box: {
+                    position: { x: 0, y: 0 },
+                    data: { width: 0, height: 0 }
+                },
+                cursor_state: 'default'
             }
         },
         created () {
@@ -130,7 +136,12 @@
                     y: event.clientY
                 };
                 this.init_camera = Object.assign({}, this.camera);
+            
+                console.log(init_pointer);
 
+                if (this.cursor_state === 'select') {
+                    graph_view.$refs['s_box'].start_select(event);
+                }
                 // Proceeds only if not dragging any other object
                 if(this.drag_handler != window.empty_function) return;
 
@@ -186,6 +197,10 @@
             },
             pointer_up(event) {
                 this.tap_counter = 0;
+
+                if (this.cursor_state === 'select') {
+                    graph_view.$refs['s_box'].end_select();
+                }
                 // Reset drag event to none
                 this.drag_handler = window.empty_function;
             },
@@ -291,6 +306,20 @@
             },
             group_items: function(item_enums) {
                 
+            },
+            cursor_state: function (state) {
+                if ( state === 'default') {
+                    this.$el.style.cursor = 'auto';
+                }
+                if ( state === 'delete') {
+                    this.$el.style.cursor = 'not-allowed';
+                }
+                if ( state === 'create') {
+                    this.$el.style.cursor = 'copy';
+                }
+                if ( state === 'select') {
+                    this.$el.style.cursor = 'se-resize';
+                }
             }
         }
     }
@@ -345,7 +374,7 @@
                 :index="group.index"
                 :position="group.position">
             </component>
-            <svg id="svg_viewport">
+            <svg id="svg_viewport" ref="gv_lines">
                 <defs>
                     <marker id="black-arrow" markerWidth="5" markerHeight="5" refX="0" refY="5"
                     viewBox="0 0 10 10" orient="auto-start-reverse" style="opacity: 0.85">
@@ -372,6 +401,12 @@
                 </component>
             </svg>
         </div>
+        <div ref="gv_menu" id="gv_menu">
+            
+        </div>
+        <component ref="s_box"
+            :is="selection_comp">
+        </component>
     </div>
 </template>
 

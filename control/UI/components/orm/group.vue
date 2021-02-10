@@ -61,6 +61,15 @@
             this.set_rect();
         },
         methods: {
+            pointer_move (event) {
+                const eventBuilder = new CustomEvent('pointermove', { 
+                    clientX: event.clientX, 
+                    clientY: event.clientY,
+                    // bubbles: true,
+                    cancelable: true
+                });
+                graph_view.$refs['gv_lines'].dispatchEvent(eventBuilder); 
+            },
             set_rect() {
                 this.leftbound = Number.MAX_SAFE_INTEGER;
                 this.topbound  = Number.MAX_SAFE_INTEGER;
@@ -93,6 +102,7 @@
     <div class="group" color="#8789ff"
         :style="transformation"
         @pointerdown.prevent="drag_start"
+        @pointermove.prevent="pointer_move"
         @pointerup.prevent="drag_end"
         >
         
@@ -107,12 +117,6 @@
         :style="{'height': `${Math.abs(topbound-bottombound)}px`, 'width': `${Math.abs(leftbound-rightbound)}px`}">
 
         </div>
-        <!-- <div class="border-left line" style="rotate(0)"   :style="{'height':container_height, 'top': -container_height}">
-            
-        </div> -->
-        <!-- <div class="border-top    line" style="rotate(90)"  :style="{'height':container_height}></div> -->
-        <!-- <div class="border-right  line" style="rotate(180)" :style="{'height':container_height}"></div> -->
-        <!-- <div class="border-bottom line" style="rotate(270)" ></div> -->
     </div>
 </template>
 
@@ -141,6 +145,8 @@
     background: #8789ff;
     border-bottom-left-radius: 9px;
     border-bottom-right-radius: 9px;
+    padding-right: 5px;
+    padding-left: 5px;
 }
 .group_container {
     pointer-events: none;

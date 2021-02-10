@@ -30,7 +30,8 @@
         data () {
             return {
                 drawer: null,
-                group_container: null
+                group_container: null,
+                selected: false
             }
         },
         created () {
@@ -67,7 +68,7 @@
 </script>
 
 <template>
-    <div class="item" color="#8789ff"
+    <div class="item" :class="{selected }" color="#8789ff"
         :style="transformation"
         @pointerdown.prevent="drag_start"
         @pointerup.prevent="drag_end">

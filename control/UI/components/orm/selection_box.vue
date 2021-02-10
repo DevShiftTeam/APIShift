@@ -30,7 +30,6 @@
                 topbound: 0,
                 width: 0,
                 height: 0,
-                initial_event: null,
                 graph_rect: { x: 0, y: 0 } 
             }
         },
@@ -60,11 +59,9 @@
                 });
             },
             end_select () {
-                this.initial_event = null;
                 graph_view.cursor_state = 'default';
             },
             set_rect(event) {
-                console.log(event.clientX - this.graph_rect.x , event.clientY - this.graph_rect.y);
                 this.width = Math.abs(this.initial_event.x - event.clientX);
                 this.height = Math.abs(this.initial_event.y - event.clientY);
                 this.leftbound = event.clientX >= this.initial_event.x ? this.initial_event.x : event.clientX;

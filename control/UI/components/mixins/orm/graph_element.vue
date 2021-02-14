@@ -33,7 +33,9 @@
                     'drag_start': (event) => {},
                     'drag': (event) => {},
                     'drag_end': (event) => {}
-                }
+                },
+                last_event: null,
+                is_dragging: false
             }
         },
         created () {
@@ -54,6 +56,10 @@
         },
         methods: {
             drag_start (event) {
+                const self = this;
+
+                graph_view.update_graph_position();
+
                 // Get position when drag started
                 window.init_position = Object.assign({} ,this.$props.position);
 
@@ -61,23 +67,58 @@
                 graph_view.drag_handler = this.drag;
                 graph_view.front_z_index++;
                 this.$props.index = graph_view.front_z_index;
+                this.last_event = event;
+                this.is_dragging = false;
+
+                // Start graph view scroll manager and pass handler 
+                graph_view.scroll_manager.start(this.on_scroll, 20);
 
                 // Call additional function if set
                 this.expanded_functions.drag_start(event);
             },
             drag (event) {
-                this.$props.position.x = window.init_position.x + (event.clientX - window.init_pointer.x) / graph_view.scale;
-                this.$props.position.y = window.init_position.y + (event.clientY - window.init_pointer.y) / graph_view.scale;
+                let dx = (event.clientX - this.last_event.clientX) / graph_view.scale;
+                let dy = (event.clientY - this.last_event.clientY) / graph_view.scale;
+
+                this.move_by(dx, dy);
 
                 // Call additional function if set
                 this.expanded_functions.drag(event);
+                this.last_event = event;
+                this.is_dragging = true;
             },
             drag_end (event) {
+                graph_view.scroll_manager.stop();
+
                 // Reset drag function
                 graph_view.drag_handler = window.empty_function;
+                this.is_dragging = false;
 
                 // Call additional function if set
                 this.expanded_functions.drag_end(event);
+            },
+            on_scroll () {
+                if (!this.is_dragging) return;
+
+                let mouse = { x: this.last_event.pageX - window.graph_position.x, y: this.last_event.pageY - window.graph_position.y };
+                if (mouse.x < 20) {
+                    this.move_by(-5 / graph_view.scale, 0);
+                    graph_view.pan_by(5 , 0);
+                }
+                if (mouse.x > graph_view.init_rect.width - 20 ) {
+                    this.move_by(5 / graph_view.scale , 0);
+                    graph_view.pan_by(-5 , 0);
+                }
+                if (mouse.y < 20) {
+                    this.move_by(0, -5 / graph_view.scale);
+                    graph_view.pan_by(0, 5 );
+                }
+                if (mouse.y > graph_view.init_rect.height - 20 ) {
+                    this.move_by(0, 5 / graph_view.scale);
+                    graph_view.pan_by(0, -5 );
+                }
+
+                this.expanded_functions.drag(this.last_event);
             },
             move_to (xpos, ypos) {
                 this.$props.position.x = xpos;

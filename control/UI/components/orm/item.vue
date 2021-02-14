@@ -68,7 +68,7 @@
 </script>
 
 <template>
-    <div class="item" :class="{selected }" color="#8789ff"
+    <div class="item" :class="{ selected }" color="#8789ff"
         :style="transformation"
         @pointerdown.prevent="drag_start"
         @pointerup.prevent="drag_end">
@@ -94,5 +94,11 @@
     position: absolute;
     cursor: copy !important;
     background: #8789ff;
+    outline: 1px solid transparent; /* Fix chrome wierd trace bug */
+}
+
+.item.selected {
+    border: dashed white 2px;
+    padding: 4px;
 }
 </style>

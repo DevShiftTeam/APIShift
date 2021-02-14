@@ -26,56 +26,106 @@
         },
         data () {
             return {
-                leftbound: 0,
-                topbound: 0,
+                leftbound: -Number.MAX_SAFE_INTEGER,
+                topbound: -Number.MAX_SAFE_INTEGER,
                 width: 0,
                 height: 0,
-                graph_rect: { x: 0, y: 0 } 
+                ds: { x: 0, y: 0 },
+                // rect: {x1: 0, p},
+                mouse_start: { x: 0, y: 0 },
+                last_event: null,
+                graph_position: { x: 0, y: 0 }
             }
         },
         created () {
         },
         mounted () {
-            graph_view.$refs['s_box'] = this;
-            let rect = graph_view.$el.getBoundingClientRect();
-            this.graph_rect.x = rect.x; 
-            this.graph_rect.y = rect.y;
+
         },
         methods: {
             start_select (event) {
-                graph_view.drag_handler = this.on_select;
-                // this.leftbound = window.init_pointer.x - this.graph_rect.x;
-                // this.topbound = window.init_pointer.y - this.graph_rect.y
-                // this.width = 50;
-                // this.height = 50;
+                this.init_pointer = Object.assign({}, { x: event.clientX, y: event.clientY }); 
+                this.graph_position = Object.assign({}, { x: graph_position.x, y: graph_position.y }); 
+
+                // Set graph view drag handler
+                graph_view.drag_handler = this.on_select; 
+                
+                // Start graph view scroll manager and pass handler 
+                graph_view.scroll_manager.start(this.on_scroll, 20);
+
+                this.last_event = event;
             },
             on_select (event) {
                 this.set_rect(event);
                 graph_view.items.forEach(item => {
                     if (graph_view.hittest('s_box', 'i' + item.id)) {
                         graph_view.$refs['i' + item.id].selected = true;
+                    } else {
+                        graph_view.$refs['i' + item.id].selected = false;
                     }
                 });
+                this.last_event = event;
             },
             end_select () {
+                this.leftbound = -Number.MAX_SAFE_INTEGER;
+                this.topbound = -Number.MAX_SAFE_INTEGER;
                 graph_view.cursor_state = 'default';
+
+                // Stop scroll handler
+                graph_view.scroll_manager.stop();
+            },
+            on_scroll () {
+                if (this.leftbound === this.topbound) return;
+
+                let mouse = { x: this.last_event.pageX - window.graph_position.x, y: this.last_event.pageY - window.graph_position.y };
+
+                if (mouse.x < 20) {
+                    this.ds.x += 5;
+                    graph_view.pan_by(5 , 0);
+                }
+                if (mouse.x > graph_view.init_rect.width - 20 ) {
+                    this.ds.x += -5;
+                    graph_view.pan_by(-5 , 0);
+                }
+                if (mouse.y < 20) {
+                    this.ds.y += 5;
+                    graph_view.pan_by(0, 5);
+                }
+                if (mouse.y > graph_view.init_rect.height - 20 ) {
+                    this.ds.y += -5;
+                    graph_view.pan_by(0, -5 );
+                }
+                this.set_rect(this.last_event);
             },
             set_rect(event) {
-                this.width = Math.abs(this.initial_event.x - event.clientX);
-                this.height = Math.abs(this.initial_event.y - event.clientY);
-                this.leftbound = event.clientX >= this.initial_event.x ? this.initial_event.x : event.clientX;
-                this.topbound = event.clientY >= this.initial_event.y ? this.initial_event.y : event.clientY;
+                this.width  = Math.abs(event.clientX - this.ds.x - this.init_pointer.x);
+                this.height = Math.abs(event.clientY - this.ds.y - this.init_pointer.y);
+
+                let calcLeft, calcTop;
+                if (event.clientX > this.init_pointer.x + this.ds.x) {
+                    calcLeft = this.init_pointer.x - graph_position.x + this.ds.x;
+                } else {
+                    calcLeft = this.init_pointer.x - graph_position.x + this.ds.x - this.width; 
+                };
+
+                if (event.clientY > this.init_pointer.y + this.ds.y) {
+                    calcTop = this.init_pointer.y - graph_position.y + this.ds.y;
+                } else {
+                    calcTop = this.init_pointer.y - graph_position.y + this.ds.y - this.height; 
+                }
+
+                this.leftbound = calcLeft;
+                this.topbound = calcTop;
             }
         }, 
         computed: {
             transformation () {
                 return {
-                    top: `${this.topbound - this.graph_rect.x}px`,
-                    left:  `${this.topbound - this.graph_rect.y}px`,
-                    height:`${this.height}px`,
-                    width:`${this.width}px`,
+                    top: `${this.topbound}px`,
+                    left:  `${this.leftbound}px`,
+                    height:`${Math.abs(this.height)}px`,
+                    width:`${Math.abs(this.width)}px`,
                     'z-index':  1000
-
                 }
             }
         },
@@ -94,11 +144,8 @@
 
 .s_box {
     position: absolute;
-    left: 50px;
-    top: 50px;
-    width: 50px;
-    height: 50px;
     transform-origin: 0 0;
-    background: red;
+    border: dotted white 1px;
+    background: rgba(255,255,255,0.1);
 }
 </style>

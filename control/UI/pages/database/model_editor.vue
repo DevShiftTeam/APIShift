@@ -17,7 +17,10 @@
      * limitations under the License.
      * 
      * @author Sapir Shemer
+     * @contributor Ilan Dazanashvili
      */
+
+const loginVue=require("../login.vue");
 
     window.empty_function = (event) => {};
 
@@ -85,6 +88,26 @@
                     position: { x: 0, y: 0 },
                     data: { width: 0, height: 0 }
                 },
+                scroll_manager: {
+                    id: null,
+                    interval: 20,
+                    params: [],
+                    cb: window.empty_function,
+                    start: function(cb, interval) {
+                        if (this.is_running) this.stop();
+                        if (cb) this.cb = cb;
+                        if (interval) this.iv = interval;
+                        this.id = window.setInterval(this.cb, this.interval);
+                    },
+                    stop: function() {
+                        clearInterval(this.id);
+                        this.id = null;
+                    },
+                    is_running: function () {
+                        return this.id; 
+                    }
+                },
+                init_rect: {x:0, y:0},
                 cursor_state: 'default'
             }
         },
@@ -99,15 +122,16 @@
             this.front_z_index = this.items.length;
         },
         mounted () {
-
+            this.init_rect = this.$el.getBoundingClientRect();
+            this.update_graph_position();
         },
-
         methods: {
-
             /**
              * User interactions
              */
             pointer_down(event) {
+                document.addEventListener('pointerup', this.pointer_up);
+
                 // Add event to event cache, determine interactive target
                 this.tap_counter++;
                 
@@ -137,8 +161,6 @@
                 };
                 this.init_camera = Object.assign({}, this.camera);
             
-                console.log(init_pointer);
-
                 if (this.cursor_state === 'select') {
                     graph_view.$refs['s_box'].start_select(event);
                 }
@@ -196,6 +218,8 @@
                 window.temp_pointer = Object.assign({}, window.init_pointer);
             },
             pointer_up(event) {
+                document.removeEventListener('pointerup', this.pointer_up);
+
                 this.tap_counter = 0;
 
                 if (this.cursor_state === 'select') {
@@ -203,6 +227,8 @@
                 }
                 // Reset drag event to none
                 this.drag_handler = window.empty_function;
+
+                this.scroll_manager.stop();
             },
             wheel (event) {
                 // Update graph position
@@ -228,6 +254,10 @@
                 // Move camera to fit mouse as scaling center
                 this.camera.x += (window.init_pointer.x - mid.x) * (1 - change);
                 this.camera.y += (window.init_pointer.y - mid.y) * (1 - change);
+            },
+            pan_by (dx, dy) {
+                this.camera.x += dx;
+                this.camera.y += dy;
             },
             /**
              * Control functions 
@@ -404,9 +434,9 @@
         <div ref="gv_menu" id="gv_menu">
             
         </div>
-        <component ref="s_box"
-            :is="selection_comp">
-        </component>
+            <component ref="s_box" 
+                :is="selection_comp">
+            </component>
     </div>
 </template>
 

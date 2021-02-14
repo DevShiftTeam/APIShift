@@ -133,11 +133,12 @@
 .group {
     border: solid white 1px;
     border-radius: 10px;
-    /* padding: 5px; */
     display: flex;
     flex-direction: column-reverse;
     position: absolute;
     cursor: copy !important;
+    box-shadow: 50px 50px 50px rgba(255, 242, 94, 0);
+
 }
 
 .group_info {

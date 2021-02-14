@@ -31,8 +31,6 @@
                 width: 0,
                 height: 0,
                 ds: { x: 0, y: 0 },
-                // rect: {x1: 0, p},
-                mouse_start: { x: 0, y: 0 },
                 last_event: null,
                 graph_position: { x: 0, y: 0 }
             }
@@ -45,7 +43,7 @@
         methods: {
             start_select (event) {
                 this.init_pointer = Object.assign({}, { x: event.clientX, y: event.clientY }); 
-                this.graph_position = Object.assign({}, { x: graph_position.x, y: graph_position.y }); 
+                this.graph_position = Object.assign({}, window.graph_position); 
 
                 // Set graph view drag handler
                 graph_view.drag_handler = this.on_select; 

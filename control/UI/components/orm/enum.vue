@@ -157,6 +157,7 @@
     position: absolute;
     cursor: copy !important;
     background: #8789ff;
+    box-shadow: 50px 50px 50px rgba(255, 242, 94, 0); /* Removing weird trace on chrome */
 }
 
 .enum.highlight {

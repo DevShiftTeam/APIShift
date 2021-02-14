@@ -137,8 +137,7 @@
     flex-direction: column-reverse;
     position: absolute;
     cursor: copy !important;
-    box-shadow: 50px 50px 50px rgba(255, 242, 94, 0);
-
+    box-shadow: 50px 50px 50px rgba(255, 242, 94, 0); /* Removing weird trace on chrome */
 }
 
 .group_info {

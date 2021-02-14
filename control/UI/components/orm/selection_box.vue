@@ -69,6 +69,7 @@
             end_select () {
                 this.leftbound = -Number.MAX_SAFE_INTEGER;
                 this.topbound = -Number.MAX_SAFE_INTEGER;
+                this.ds = Object.assign({}, {x: 0, y: 0});
                 graph_view.cursor_state = 'default';
 
                 // Stop scroll handler
@@ -93,7 +94,7 @@
                 }
                 if (mouse.y > graph_view.init_rect.height - 20 ) {
                     this.ds.y += -5;
-                    graph_view.pan_by(0, -5 );
+                    graph_view.pan_by(0, -5);
                 }
                 this.set_rect(this.last_event);
             },
@@ -123,8 +124,8 @@
                 return {
                     top: `${this.topbound}px`,
                     left:  `${this.leftbound}px`,
-                    height:`${Math.abs(this.height)}px`,
-                    width:`${Math.abs(this.width)}px`,
+                    height:`${this.height}px`,
+                    width:`${this.width}px`,
                     'z-index':  1000
                 }
             }

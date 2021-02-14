@@ -94,7 +94,7 @@
     position: absolute;
     cursor: copy !important;
     background: #8789ff;
-    outline: 1px solid transparent; /* Fix chrome wierd trace bug */
+    box-shadow: 50px 50px 50px rgba(255, 242, 94, 0); /* Removing weird trace on chrome */
 }
 
 .item.selected {

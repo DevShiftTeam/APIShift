@@ -292,6 +292,7 @@ const loginVue=require("../login.vue");
                 
                     let src_instance  = graph_view.$refs[from_index];
                     let dest_instance = graph_view.$refs[to_index];
+                    
                     // graph_view.lines.push({from_index, to_index, settings});
             },
             // Update graph position
@@ -338,16 +339,16 @@ const loginVue=require("../login.vue");
                 
             },
             cursor_state: function (state) {
-                if ( state === 'default') {
+                if ( state.type === 'default') {
                     this.$el.style.cursor = 'auto';
                 }
-                if ( state === 'delete') {
+                if ( state.type === 'delete') {
                     this.$el.style.cursor = 'not-allowed';
                 }
-                if ( state === 'create') {
+                if ( state.type === 'create') {
                     this.$el.style.cursor = 'copy';
                 }
-                if ( state === 'select') {
+                if ( state.type === 'select') {
                     this.$el.style.cursor = 'se-resize';
                 }
             }

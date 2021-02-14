@@ -42,7 +42,7 @@
         },
         methods: {
             start_select (event) {
-                this.init_pointer = Object.assign({}, { x: event.clientX, y: event.clientY }); 
+                this.init_pointer   = Object.assign({}, { x: event.clientX, y: event.clientY }); 
                 this.graph_position = Object.assign({}, window.graph_position); 
 
                 // Set graph view drag handler
@@ -66,7 +66,7 @@
             },
             end_select () {
                 this.leftbound = -Number.MAX_SAFE_INTEGER;
-                this.topbound = -Number.MAX_SAFE_INTEGER;
+                this.topbound  = -Number.MAX_SAFE_INTEGER;
                 this.ds = Object.assign({}, {x: 0, y: 0});
                 graph_view.cursor_state = 'default';
 
@@ -77,14 +77,13 @@
                 if (this.leftbound === this.topbound) return;
 
                 let mouse = { x: this.last_event.pageX - window.graph_position.x, y: this.last_event.pageY - window.graph_position.y };
-
                 if (mouse.x < 20) {
                     this.ds.x += 5;
-                    graph_view.pan_by(5 , 0);
+                    graph_view.pan_by(5, 0);
                 }
                 if (mouse.x > graph_view.init_rect.width - 20 ) {
                     this.ds.x += -5;
-                    graph_view.pan_by(-5 , 0);
+                    graph_view.pan_by(-5, 0);
                 }
                 if (mouse.y < 20) {
                     this.ds.y += 5;
@@ -114,7 +113,7 @@
                 }
 
                 this.leftbound = calcLeft;
-                this.topbound = calcTop;
+                this.topbound  = calcTop;
             }
         }, 
         computed: {

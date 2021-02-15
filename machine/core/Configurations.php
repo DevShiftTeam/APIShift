@@ -28,16 +28,16 @@ class Configurations {
     /**
      * When true system acts as though itshould be installed, false otehrwise
      */
-    const INSTALLED = false;
+    const INSTALLED = true;
 
     /**
      * Database login info
      */
     const DB_HOST = "127.0.0.1";
     const DB_PORT = 3306;
-    const DB_USER = "";
+    const DB_USER = "root";
     const DB_PASS = "";
-    const DB_NAME = "";
+    const DB_NAME = "apishift";
     const DB_TYPE = "MySQL";
 
     /**
@@ -48,7 +48,7 @@ class Configurations {
     /**
      * Cache system configurations
      */
-    const CACHE_TYPE = CacheManager::APCU;
+    const CACHE_TYPE = CacheManager::NO_CACHE;
     const CACHE_HOST = "127.0.0.1";
     const CACHE_PORT = 6379;
     const CACHE_PASS = "";

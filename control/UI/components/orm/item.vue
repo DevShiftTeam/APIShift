@@ -24,57 +24,55 @@
         mixins: [APIShift.API.getMixin('orm/graph_element')],
         props: {
             is_relation: Boolean,
+            data: Object,
             name: String
         },
         data () {
             return {
                 drawer: null,
-                item_rect: {},
-                drag_range: {
-                    x: 0,
-                    y: 0
-                },
-                init_relative_drag: {
-                    x: 0,
-                    y: 0
-                }
+                group_container: null,
+                selected: false
             }
         },
         created () {
+            const self = this;
+
+            // We use the type to differentiate between objects
+            this.type = this.$props.is_relation ? 'relation' : 'item';
+
+            this.expanded_functions.drag_start = (event) => {
+
+            };
+            this.expanded_functions.drag = (event) => {
+                if (self.group_container) {
+                    self.group_container.set_rect();
+                }
+            };
+            this.expanded_functions.drag_end = (event) => {
+
+            };
+
         }, 
         mounted () {
-            this.$el.ref = this.name;
+            if(this.$props.is_relation) {
+                // Draw relation lines
+                graph_view.create_line(this.$props.data.from, this.component_id, { item_to_relation: true, relate_type: this.$props.data.type });
+                graph_view.create_line(this.component_id, this.$props.data.to, { relation_to_item: true, relate_type: this.$props.data.type });
+            }
         },
         methods: {
-            drag_start (event) {
-                // Get mouse coordinates relative to element
-                this.item_rect = this.$el.getBoundingClientRect();
-                this.init_relative_drag.x = event.clientX - this.item_rect.left;
-                this.init_relative_drag.y = event.clientY - this.item_rect.top;
-
-                // Set global drag function
-                graph_view.drag_handler = this.drag;
-            },
-            drag (event) {
-
-                this.drag_range.x = event.clientX - this.init_relative_drag.x - graph_view.graph_rect.left - graph_view.camera.x;
-                this.drag_range.y = event.clientY - this.init_relative_drag.y - graph_view.graph_rect.top - graph_view.camera.y;
-                this.move_to(this.drag_range);
-            },
-            drag_end (event) {
-                // Reset global drag function
-                graph_view.drag_handler = graph_view.pointer_move;
+            render_needed () {
             }
         }
     }
 </script>
 
 <template>
-    <div class="item"
+    <div class="item" :class="{ selected , ghost_mode }" color="#8789ff"
         :style="transformation"
         @pointerdown.prevent="drag_start"
         @pointerup.prevent="drag_end">
-            <div class="item_type">{{ is_relation ? 'R' : 'I' }}</div>
+            <v-avatar left class="item_type darken-4" :class="is_relation ? 'purple' : 'blue'">{{ is_relation ? 'R' : 'I'}}</v-avatar>
             <div style="display: inline;">{{ name }}</div>
     </div>
 </template>
@@ -82,8 +80,6 @@
 <style scoped>
 /* Please style this crap, with style */
 .item_type {
-    border: solid white 1px;
-    border-radius: 100%;
     text-align: center;
     display: inline;
     padding-left: 7px;
@@ -98,5 +94,14 @@
     position: absolute;
     cursor: copy !important;
     background: #8789ff;
+    box-shadow: 50px 50px 50px rgba(255, 242, 94, 0); /* Removing weird trace on chrome */
+}
+
+.item.selected {
+    border: dashed white 2px;
+    padding: 4px;
+}
+.type.ghost_mode {
+    opacity: 0.7;
 }
 </style>

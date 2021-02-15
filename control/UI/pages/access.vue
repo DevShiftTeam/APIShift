@@ -58,7 +58,13 @@
                 <v-app-bar>
                     <v-menu offset-y>
                         <template v-slot:activator="{ on }">
-                            <v-toolbar-title v-on="on"><v-btn>{{ getPageTitle() }}</v-btn></v-toolbar-title>
+                            <v-toolbar-title v-on="on">
+                                <v-btn>
+                                    {{ getPageTitle() }}
+                                    
+                                    <v-icon right>mdi-menu-down</v-icon>
+                                </v-btn>
+                            </v-toolbar-title>
                         </template>
                         <v-list>
                             <v-list-item to="/access">Main Page</v-list-item>

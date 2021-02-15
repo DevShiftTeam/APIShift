@@ -38,8 +38,12 @@ class DataManager {
     private static function uploadEntryToCacheAndRuntime($id) {
         if(!isset(self::$runtime_entries[$id])) {
             self::$runtime_entries[$id] = CacheManager::getFromTable('data_entries', $id);
-            self::$runtime_sources[self::$runtime_entries[$id]['source']]
-                = CacheManager::getFromTable('data_sources', self::$runtime_entries[$id]['source']);
+
+            // Add source if there is one and not present in run-time
+            if(self::$runtime_entries[$id]['source'] != 0 && !isset(self::$runtime_sources[self::$runtime_entries[$id]['source']])) {
+                self::$runtime_sources[self::$runtime_entries[$id]['source']]
+                    = CacheManager::getFromTable('data_sources', self::$runtime_entries[$id]['source']);
+            }
         }
     }
 
@@ -52,9 +56,11 @@ class DataManager {
 
     public static function setEntryValue($id, $value) {
         self::uploadEntryToCacheAndRuntime($id);
+
         // Keeping a reference for ease
         $entry = &self::$runtime_entries[$id];
         $source = &self::$runtime_sources[$entry['source']];
+
         // Handle base on type
         switch($entry['type']) {
             case 1: // Array key
@@ -64,12 +70,14 @@ class DataManager {
                     Status::message(Status::ERROR, "Couldn't find array " . $source['name']);
                 else ${$source['name']}[$entry['name']] = $value;
                 break;
+
             case 2: // Variable
                 if(isset($GLOBALS[$entry['name']])) $GLOBALS[$entry['name']] = $value;
                 else if(!isset(${$entry['name']}))
                     Status::message(Status::ERROR, "Couldn't find variable " . $entry['name']);
                 else ${$entry['name']} = $value;
                 break;
+
             case 3: // Constant
                 $entry['name'] = $value;
                 break;

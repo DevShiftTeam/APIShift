@@ -24,7 +24,8 @@
         data () {
             return {
                 drawer: 1,
-                pages: {}
+                pages: {},
+                index: 10
             }
         },
         created () {
@@ -43,6 +44,9 @@
             }
         },
         methods: {
+            updateIndex: function(new_index) {
+                this.index = new_index;
+            },
             updatePages: function () {
                 APIShift.API.request("Admin\\Control", "getPages", {}, function (response) {
                     if(response.status == APIShift.API.status_codes.SUCCESS) {
@@ -102,14 +106,22 @@
     <div>
         <v-app-bar app clipped-left>
             <v-app-bar-nav-icon @click.stop="drawer = (drawer + 1) % 3"></v-app-bar-nav-icon>
-            <v-toolbar-title>APIShift Control Panel</v-toolbar-title>
+            <v-toolbar-title>
+                <v-avatar tile style="height: auto; margin-right: 10px;">
+                    <img
+                        src="../images/apishift-logo.png"
+                        alt="APIShift"
+                    >
+                </v-avatar>
+                APIShift Control Panel
+            </v-toolbar-title>
             <v-btn class="lightbulb" icon large target="_blank" v-on:click="toggleDarkTheme()">
                 <v-icon v-if="isOnDarkMode()">fas fa-lightbulb</v-icon>
                 <v-icon v-else>fas fa-moon</v-icon>
             </v-btn>
         </v-app-bar>
 
-        <v-navigation-drawer v-model="showNavBar" app clipped :mini-variant="drawer != 1">
+        <v-navigation-drawer v-model="showNavBar" app clipped :mini-variant="drawer != 1" :style="{'z-index': index}">
             <v-list dense>
                 <!-- Home option -->
                 <v-list-item link to="/main">

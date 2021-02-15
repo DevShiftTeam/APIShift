@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+    <meta charset="utf-8"/>
+    <title>Documentation</title>
+    <meta name="author" content=""/>
+    <meta name="description" content=""/>
+
+    <link href="../css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/prism.css" rel="stylesheet" media="all"/>
+    <link href="../css/template.css" rel="stylesheet" media="all"/>
+    
+    <!--[if lt IE 9]>
+    <script src="../js/html5.js"></script>
+    <![endif]-->
+    <script src="../js/jquery-1.11.0.min.js"></script>
+    <script src="../js/ui/1.10.4/jquery-ui.min.js"></script>
+    <script src="../js/bootstrap.min.js"></script>
+    <script src="../js/jquery.smooth-scroll.js"></script>
+    <script src="../js/prism.min.js"></script>
+    <!-- TODO: Add http://jscrollpane.kelvinluck.com/ to style the scrollbars for browsers not using webkit-->
+    <script type="text/javascript">
+    function loadExternalCodeSnippets() {
+        Array.prototype.slice.call(document.querySelectorAll('pre[data-src]')).forEach(function (pre) {
+            var src = pre.getAttribute('data-src').replace( /\\/g, '/');
+            var extension = (src.match(/\.(\w+)$/) || [, ''])[1];
+            var language = 'php';
+
+            var code = document.createElement('code');
+            code.className = 'language-' + language;
+
+            pre.textContent = '';
+
+            code.textContent = 'Loading…';
+
+            pre.appendChild(code);
+
+            var xhr = new XMLHttpRequest();
+
+            xhr.open('GET', src, true);
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4) {
+
+                    if (xhr.status < 400 && xhr.responseText) {
+                        code.textContent = xhr.responseText;
+
+                        Prism.highlightElement(code);
+                    }
+                    else if (xhr.status >= 400) {
+                        code.textContent = '✖ Error ' + xhr.status + ' while fetching file: ' + xhr.statusText;
+                    }
+                    else {
+                        code.textContent = '✖ Error: File does not exist, is empty or trying to view from localhost';
+                    }
+                }
+            };
+
+            xhr.send(null);
+        });
+    }
+
+    $(document).ready(function(){
+        loadExternalCodeSnippets();
+    });
+    $('#source-view').on('shown', function () {
+        loadExternalCodeSnippets();
+    })
+</script>
+
+    <link rel="shortcut icon" href="../images/favicon.ico"/>
+    <link rel="apple-touch-icon" href="../images/apple-touch-icon.png"/>
+    <link rel="apple-touch-icon" sizes="72x72" href="../images/apple-touch-icon-72x72.png"/>
+    <link rel="apple-touch-icon" sizes="114x114" href="../images/apple-touch-icon-114x114.png"/>
+</head>
+<body>
+
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container">
+            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                <i class="icon-ellipsis-vertical"></i>
+            </a>
+            <a class="brand" href="../index.html">Documentation</a>
+
+            <div class="nav-collapse">
+                <ul class="nav pull-right">
+                                        <li class="dropdown">
+                        <a href="../index.html" class="dropdown-toggle" data-toggle="dropdown">
+                            API Documentation <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                                                        <li><a href="../namespaces/apishift.html"><abbr title="\APIShift">APIShift</abbr></a></li>
+                                                    </ul>
+                    </li>
+                                        <li class="dropdown" id="charts-menu">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            Charts <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="../graphs/class.html">
+                                    <i class="icon-list-alt"></i>&#160;Class hierarchy diagram
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="dropdown" id="reports-menu">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            Reports <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="../reports/errors.html">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <i class="icon-list-alt"></i>&#160;Errors <span class="label label-info pull-right">0</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="../reports/markers.html">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <i class="icon-list-alt"></i>&#160;Markers <span class="label label-info pull-right">0</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="../reports/deprecated.html">
+                                                                                                            <i class="icon-list-alt"></i>&#160;Deprecated <span class="label label-info pull-right">0</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!--<div class="go_to_top">-->
+    <!--<a href="#___" style="color: inherit">Back to top&#160;&#160;<i class="icon-upload icon-white"></i></a>-->
+    <!--</div>-->
+</div>
+
+<div id="___" class="container-fluid">
+        <section class="row-fluid">
+        <div class="span2 sidebar">
+                                <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle " data-toggle="collapse" data-target="#namespace-1035085074"></a>
+                                <a href="../namespaces/default.html" style="margin-left: 30px; padding-left: 0">\</a>
+            </div>
+            <div id="namespace-1035085074" class="accordion-body collapse in">
+                <div class="accordion-inner">
+
+                                                    <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1525638204"></a>
+                                <a href="../namespaces/apishift.html" style="margin-left: 30px; padding-left: 0">APIShift</a>
+            </div>
+            <div id="namespace-1525638204" class="accordion-body collapse ">
+                <div class="accordion-inner">
+
+                                                    <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1033748997"></a>
+                                <a href="../namespaces/apishift-controllers.html" style="margin-left: 30px; padding-left: 0">Controllers</a>
+            </div>
+            <div id="namespace-1033748997" class="accordion-body collapse ">
+                <div class="accordion-inner">
+
+                                                    <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-455732300"></a>
+                                <a href="../namespaces/apishift-controllers-admin.html" style="margin-left: 30px; padding-left: 0">Admin</a>
+            </div>
+            <div id="namespace-455732300" class="accordion-body collapse ">
+                <div class="accordion-inner">
+
+                                                    <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1262391982"></a>
+                                <a href="../namespaces/apishift-controllers-admin-access.html" style="margin-left: 30px; padding-left: 0">Access</a>
+            </div>
+            <div id="namespace-1262391982" class="accordion-body collapse ">
+                <div class="accordion-inner">
+
+                    
+                    <ul>
+                                                                                                    <li class="class"><a href="../classes/APIShift-Controllers-Admin-Access-Controller.html"><abbr title="\APIShift\Controllers\Admin\Access\Controller">Controller</abbr></a></li>
+                                                    <li class="class"><a href="../classes/APIShift-Controllers-Admin-Access-Database.html"><abbr title="\APIShift\Controllers\Admin\Access\Database">Database</abbr></a></li>
+                                                    <li class="class"><a href="../classes/APIShift-Controllers-Admin-Access-Main.html"><abbr title="\APIShift\Controllers\Admin\Access\Main">Main</abbr></a></li>
+                                                    <li class="class"><a href="../classes/APIShift-Controllers-Admin-Access-Session.html"><abbr title="\APIShift\Controllers\Admin\Access\Session">Session</abbr></a></li>
+                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                                                    <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-937480305"></a>
+                                <a href="../namespaces/apishift-controllers-admin-session.html" style="margin-left: 30px; padding-left: 0">Session</a>
+            </div>
+            <div id="namespace-937480305" class="accordion-body collapse ">
+                <div class="accordion-inner">
+
+                    
+                    <ul>
+                                                                                                    <li class="class"><a href="../classes/APIShift-Controllers-Admin-Session-Main.html"><abbr title="\APIShift\Controllers\Admin\Session\Main">Main</abbr></a></li>
+                                                    <li class="class"><a href="../classes/APIShift-Controllers-Admin-Session-Structure.html"><abbr title="\APIShift\Controllers\Admin\Session\Structure">Structure</abbr></a></li>
+                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                    
+                    <ul>
+                                                                                                    <li class="class"><a href="../classes/APIShift-Controllers-Admin-Control.html"><abbr title="\APIShift\Controllers\Admin\Control">Control</abbr></a></li>
+                                                    <li class="class"><a href="../classes/APIShift-Controllers-Admin-Data.html"><abbr title="\APIShift\Controllers\Admin\Data">Data</abbr></a></li>
+                                                    <li class="class"><a href="../classes/APIShift-Controllers-Admin-Settings.html"><abbr title="\APIShift\Controllers\Admin\Settings">Settings</abbr></a></li>
+                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                                                    <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-492911546"></a>
+                                <a href="../namespaces/apishift-controllers-main.html" style="margin-left: 30px; padding-left: 0">Main</a>
+            </div>
+            <div id="namespace-492911546" class="accordion-body collapse ">
+                <div class="accordion-inner">
+
+                    
+                    <ul>
+                                                                                                    <li class="class"><a href="../classes/APIShift-Controllers-Main-Installer.html"><abbr title="\APIShift\Controllers\Main\Installer">Installer</abbr></a></li>
+                                                    <li class="class"><a href="../classes/APIShift-Controllers-Main-KeepAlive.html"><abbr title="\APIShift\Controllers\Main\KeepAlive">KeepAlive</abbr></a></li>
+                                                    <li class="class"><a href="../classes/APIShift-Controllers-Main-SessionState.html"><abbr title="\APIShift\Controllers\Main\SessionState">SessionState</abbr></a></li>
+                                                    <li class="class"><a href="../classes/APIShift-Controllers-Main-Status.html"><abbr title="\APIShift\Controllers\Main\Status">Status</abbr></a></li>
+                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                    
+                    <ul>
+                                                                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                                                    <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-2033043022"></a>
+                                <a href="../namespaces/apishift-core.html" style="margin-left: 30px; padding-left: 0">Core</a>
+            </div>
+            <div id="namespace-2033043022" class="accordion-body collapse ">
+                <div class="accordion-inner">
+
+                    
+                    <ul>
+                                                                                                    <li class="class"><a href="../classes/APIShift-Core-Authorizer.html"><abbr title="\APIShift\Core\Authorizer">Authorizer</abbr></a></li>
+                                                    <li class="class"><a href="../classes/APIShift-Core-Autoloader.html"><abbr title="\APIShift\Core\Autoloader">Autoloader</abbr></a></li>
+                                                    <li class="class"><a href="../classes/APIShift-Core-CacheManager.html"><abbr title="\APIShift\Core\CacheManager">CacheManager</abbr></a></li>
+                                                    <li class="class"><a href="../classes/APIShift-Core-Configurations.html"><abbr title="\APIShift\Core\Configurations">Configurations</abbr></a></li>
+                                                    <li class="class"><a href="../classes/APIShift-Core-DatabaseManager.html"><abbr title="\APIShift\Core\DatabaseManager">DatabaseManager</abbr></a></li>
+                                                    <li class="class"><a href="../classes/APIShift-Core-DataManager.html"><abbr title="\APIShift\Core\DataManager">DataManager</abbr></a></li>
+                                                    <li class="class"><a href="../classes/APIShift-Core-DataModelManager.html"><abbr title="\APIShift\Core\DataModelManager">DataModelManager</abbr></a></li>
+                                                    <li class="class"><a href="../classes/APIShift-Core-Item.html"><abbr title="\APIShift\Core\Item">Item</abbr></a></li>
+                                                    <li class="class"><a href="../classes/APIShift-Core-Process.html"><abbr title="\APIShift\Core\Process">Process</abbr></a></li>
+                                                    <li class="class"><a href="../classes/APIShift-Core-SessionState.html"><abbr title="\APIShift\Core\SessionState">SessionState</abbr></a></li>
+                                                    <li class="class"><a href="../classes/APIShift-Core-Status.html"><abbr title="\APIShift\Core\Status">Status</abbr></a></li>
+                                                    <li class="class"><a href="../classes/APIShift-Core-Task.html"><abbr title="\APIShift\Core\Task">Task</abbr></a></li>
+                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                                                    <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-25684361"></a>
+                                <a href="../namespaces/apishift-models.html" style="margin-left: 30px; padding-left: 0">Models</a>
+            </div>
+            <div id="namespace-25684361" class="accordion-body collapse ">
+                <div class="accordion-inner">
+
+                                                    <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1533666489"></a>
+                                <a href="../namespaces/apishift-models-main.html" style="margin-left: 30px; padding-left: 0">Main</a>
+            </div>
+            <div id="namespace-1533666489" class="accordion-body collapse ">
+                <div class="accordion-inner">
+
+                    
+                    <ul>
+                                                                                                    <li class="class"><a href="../classes/APIShift-Models-Main-Extensions.html"><abbr title="\APIShift\Models\Main\Extensions">Extensions</abbr></a></li>
+                                                    <li class="class"><a href="../classes/APIShift-Models-Main-Helper.html"><abbr title="\APIShift\Models\Main\Helper">Helper</abbr></a></li>
+                                                    <li class="class"><a href="../classes/APIShift-Models-Main-Installer.html"><abbr title="\APIShift\Models\Main\Installer">Installer</abbr></a></li>
+                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                    
+                    <ul>
+                                                                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                    
+                    <ul>
+                                                                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                    
+                    <ul>
+                                                                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        </div>
+    </section>
+    <section class="row-fluid">
+        <div class="span10 offset2">
+            <div class="row-fluid">
+                <div class="span8 content class">
+                    <nav>
+                                                <a href="../namespaces/apishift-core.html"><abbr title="\APIShift\Core">Core</abbr></a> <i class="icon-level-up"></i>
+                                            </nav>
+                    
+                    <h1><small>\APIShift\Core</small>DatabaseManager</h1>
+                    <p><em>Interface which holds and manages PDO instances</em></p>
+                    
+                    
+                                        
+                    <section id="summary">
+                        <h2>Summary</h2>
+                        <section class="row-fluid heading">
+                            <section class="span4">
+                                <a href="#methods">Methods</a>
+                            </section>
+                            <section class="span4">
+                                <a href="#properties">Properties</a>
+                            </section>
+                            <section class="span4">
+                                <a href="#constants">Constants</a>
+                            </section>
+                        </section>
+                        <section class="row-fluid public">
+                            <section class="span4">
+                                                                    <a href="../classes/APIShift-Core-DatabaseManager.html#method_loadDefaults" class="">loadDefaults()</a><br />
+                                                                    <a href="../classes/APIShift-Core-DatabaseManager.html#method_addConnection" class="">addConnection()</a><br />
+                                                                    <a href="../classes/APIShift-Core-DatabaseManager.html#method_startConnection" class="">startConnection()</a><br />
+                                                                    <a href="../classes/APIShift-Core-DatabaseManager.html#method_getInstance" class="">getInstance()</a><br />
+                                                                    <a href="../classes/APIShift-Core-DatabaseManager.html#method_closeConnection" class="">closeConnection()</a><br />
+                                                                    <a href="../classes/APIShift-Core-DatabaseManager.html#method_deleteConnection" class="">deleteConnection()</a><br />
+                                                                    <a href="../classes/APIShift-Core-DatabaseManager.html#method_fetchInto" class="">fetchInto()</a><br />
+                                                                    <a href="../classes/APIShift-Core-DatabaseManager.html#method_query" class="">query()</a><br />
+                                                            </section>
+                            <section class="span4">
+                                                                    <em>No public properties found</em>
+                                                            </section>
+                            <section class="span4">
+                                                                    <em>No constants found</em>
+                                                            </section>
+                        </section>
+                        <section class="row-fluid protected">
+                            <section class="span4">
+                                                                    <em>No protected methods found</em>
+                                                            </section>
+                            <section class="span4">
+                                                                    <em>No protected properties found</em>
+                                                            </section>
+                            <section class="span4">
+                                <em>N/A</em>
+                            </section>
+                        </section>
+                        <section class="row-fluid private">
+                            <section class="span4">
+                                                                    <em>No private methods found</em>
+                                                            </section>
+                            <section class="span4">
+                                                                    <a href="../classes/APIShift-Core-DatabaseManager.html#property_connections" class="">$connections</a><br />
+                                                                    <a href="../classes/APIShift-Core-DatabaseManager.html#property_connections_metadata" class="">$connections_metadata</a><br />
+                                                            </section>
+                            <section class="span4">
+                                <em>N/A</em>
+                            </section>
+                        </section>
+                    </section>
+                </div>
+                <aside class="span4 detailsbar">
+                                        
+                    
+                    <dl>
+                        <dt>File</dt>
+                            <dd><a href="../files/machine-core-databasemanager.html"><div class="path-wrapper">machine/core/DatabaseManager.php</div></a></dd>
+                                                <dt>Package</dt>
+                            <dd><div class="namespace-wrapper">Default</div></dd>
+                                                <dt>Class hierarchy</dt>
+                            <dd class="hierarchy">
+                                                                                                                                                                    <div class="namespace-wrapper">\APIShift\Core\DatabaseManager</div>
+                            </dd>
+
+                        
+                        
+                        
+                                                
+                                                                        </dl>
+                    <h2>Tags</h2>
+                    <table class="table table-condensed">
+                                            <tr><td colspan="2"><em>None found</em></td></tr>
+                                        </table>
+                </aside>
+            </div>
+
+                        
+                                    <a id="properties" name="properties"></a>
+            <div class="row-fluid">
+                <div class="span8 content class">
+                    <h2>Properties</h2>
+                </div>
+                <aside class="span4 detailsbar"></aside>
+            </div>
+
+                                                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="property_connections" name="property_connections" class="anchor"></a>
+            <article class="property">
+                <h3 class="private ">$connections</h3>
+                <pre class="signature">$connections</pre>
+                <p><em>Array of all connections created by the API</em></p>
+                
+
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                        <dl>
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="property_connections_metadata" name="property_connections_metadata" class="anchor"></a>
+            <article class="property">
+                <h3 class="private ">$connections_metadata</h3>
+                <pre class="signature">$connections_metadata</pre>
+                <p><em>Metadata of every connection at run-time</em></p>
+                
+
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                        <dl>
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                            
+                                    <a id="methods" name="methods"></a>
+            <div class="row-fluid">
+                <div class="span8 content class"><h2>Methods</h2></div>
+                <aside class="span4 detailsbar"></aside>
+            </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_loadDefaults" name="method_loadDefaults" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">loadDefaults()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">loadDefaults(bool  <span class="argument">$refresh = false</span>) : mixed</pre>
+                <p><em>Load all main connection and all connections in cache (load them if not present)</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>bool</td>
+                                <td>$refresh </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    mixed
+                                            &mdash; 
+                                    
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                            <span class="label label-info">static</span>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="../classes/APIShift-Core-DatabaseManager.html"><div class="path-wrapper">\APIShift\Core\DatabaseManager</div></a></dd>
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_addConnection" name="method_addConnection" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">addConnection()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">addConnection(string  <span class="argument">$connection_name</span>, string  <span class="argument">$db_host = null</span>, string  <span class="argument">$db_user = null</span>, string  <span class="argument">$db_pass = null</span>, int  <span class="argument">$db_port = null</span>, string  <span class="argument">$db_name = null</span>) : void</pre>
+                <p><em>Add the data of the connection to the metadatalist</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>string</td>
+                                <td>$connection_name </td>
+                                <td><p>Key of the connection object</p>
+</td>
+                            </tr>
+                                                    <tr>
+                                <td>string</td>
+                                <td>$db_host </td>
+                                <td><p>Hostname of DB</p>
+</td>
+                            </tr>
+                                                    <tr>
+                                <td>string</td>
+                                <td>$db_user </td>
+                                <td><p>Username of DB</p>
+</td>
+                            </tr>
+                                                    <tr>
+                                <td>string</td>
+                                <td>$db_pass </td>
+                                <td><p>Password of DB</p>
+</td>
+                            </tr>
+                                                    <tr>
+                                <td>int</td>
+                                <td>$db_port </td>
+                                <td><p>Port of DB</p>
+</td>
+                            </tr>
+                                                    <tr>
+                                <td>string</td>
+                                <td>$db_name </td>
+                                <td><p>DB name in server</p>
+</td>
+                            </tr>
+                                            </table>
+                
+                
+                
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                            <span class="label label-info">static</span>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="../classes/APIShift-Core-DatabaseManager.html"><div class="path-wrapper">\APIShift\Core\DatabaseManager</div></a></dd>
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_startConnection" name="method_startConnection" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">startConnection()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">startConnection(string  <span class="argument">$connection_name</span>, string  <span class="argument">$db_host = null</span>, string  <span class="argument">$db_user = null</span>, string  <span class="argument">$db_pass = null</span>, int  <span class="argument">$db_port = null</span>, string  <span class="argument">$db_name = null</span>, bool  <span class="argument">$exit_on_error = true</span>) : void</pre>
+                <p><em>Start the connection and add ID name</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>string</td>
+                                <td>$connection_name </td>
+                                <td><p>Key of the connection object</p>
+</td>
+                            </tr>
+                                                    <tr>
+                                <td>string</td>
+                                <td>$db_host </td>
+                                <td><p>Hostname of DB</p>
+</td>
+                            </tr>
+                                                    <tr>
+                                <td>string</td>
+                                <td>$db_user </td>
+                                <td><p>Username of DB</p>
+</td>
+                            </tr>
+                                                    <tr>
+                                <td>string</td>
+                                <td>$db_pass </td>
+                                <td><p>Password of DB</p>
+</td>
+                            </tr>
+                                                    <tr>
+                                <td>int</td>
+                                <td>$db_port </td>
+                                <td><p>Port of DB</p>
+</td>
+                            </tr>
+                                                    <tr>
+                                <td>string</td>
+                                <td>$db_name </td>
+                                <td><p>DB name in server</p>
+</td>
+                            </tr>
+                                                    <tr>
+                                <td>bool</td>
+                                <td>$exit_on_error </td>
+                                <td><p>Set to false to not exit</p>
+</td>
+                            </tr>
+                                            </table>
+                
+                
+                
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                            <span class="label label-info">static</span>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="../classes/APIShift-Core-DatabaseManager.html"><div class="path-wrapper">\APIShift\Core\DatabaseManager</div></a></dd>
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_getInstance" name="method_getInstance" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">getInstance()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">getInstance(string  <span class="argument">$connectionName</span>) : \PDO</pre>
+                <p><em>Return PDO instance of connection</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>string</td>
+                                <td>$connectionName </td>
+                                <td><p>Name of the connection</p>
+</td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    \PDO
+                                            &mdash; <p>Instance of connection</p>
+
+                                    
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                            <span class="label label-info">static</span>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="../classes/APIShift-Core-DatabaseManager.html"><div class="path-wrapper">\APIShift\Core\DatabaseManager</div></a></dd>
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_closeConnection" name="method_closeConnection" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">closeConnection()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">closeConnection(string  <span class="argument">$connectionName</span>) : void</pre>
+                <p><em>Close a connection</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>string</td>
+                                <td>$connectionName </td>
+                                <td><p>Name of the connection</p>
+</td>
+                            </tr>
+                                            </table>
+                
+                
+                
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                            <span class="label label-info">static</span>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="../classes/APIShift-Core-DatabaseManager.html"><div class="path-wrapper">\APIShift\Core\DatabaseManager</div></a></dd>
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_deleteConnection" name="method_deleteConnection" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">deleteConnection()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">deleteConnection(string  <span class="argument">$connection_name</span>) : void</pre>
+                <p><em>Closes a connection and removes its metadata</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>string</td>
+                                <td>$connection_name </td>
+                                <td><p>Name of the connection</p>
+</td>
+                            </tr>
+                                            </table>
+                
+                
+                
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                            <span class="label label-info">static</span>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="../classes/APIShift-Core-DatabaseManager.html"><div class="path-wrapper">\APIShift\Core\DatabaseManager</div></a></dd>
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_fetchInto" name="method_fetchInto" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">fetchInto()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">fetchInto(string  <span class="argument">$connectionName</span>, array  <span class="argument">$collector</span>, string  <span class="argument">$query</span>, array  <span class="argument">$data = array()</span>, string|null  <span class="argument">$column = null</span>, bool  <span class="argument">$single_row = true</span>) : void|false</pre>
+                <p><em>Fetch data into said variable
+Order keys by desired column</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>string</td>
+                                <td>$connectionName </td>
+                                <td><p>name of the connection</p>
+</td>
+                            </tr>
+                                                    <tr>
+                                <td>array</td>
+                                <td>$collector </td>
+                                <td><p>query to run</p>
+</td>
+                            </tr>
+                                                    <tr>
+                                <td>string</td>
+                                <td>$query </td>
+                                <td><p>query to run</p>
+</td>
+                            </tr>
+                                                    <tr>
+                                <td>array</td>
+                                <td>$data </td>
+                                <td><p>Parameters to pass when parsing query</p>
+</td>
+                            </tr>
+                                                    <tr>
+                                <td>string|null</td>
+                                <td>$column </td>
+                                <td><p>Comlumn to order as key</p>
+</td>
+                            </tr>
+                                                    <tr>
+                                <td>bool</td>
+                                <td>$single_row </td>
+                                <td><p>Store as a single row or as a collection of rows</p>
+</td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    void|false
+                                            &mdash; <p>Returns false on failure</p>
+
+                                    
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                            <span class="label label-info">static</span>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="../classes/APIShift-Core-DatabaseManager.html"><div class="path-wrapper">\APIShift\Core\DatabaseManager</div></a></dd>
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_query" name="method_query" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">query()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">query(string  <span class="argument">$connectionName</span>, string  <span class="argument">$query</span>, array  <span class="argument">$data = array()</span>) : bool|\PDOStatement</pre>
+                <p><em>Run a query</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>string</td>
+                                <td>$connectionName </td>
+                                <td><p>Name of the connection</p>
+</td>
+                            </tr>
+                                                    <tr>
+                                <td>string</td>
+                                <td>$query </td>
+                                <td><p>Query to run</p>
+</td>
+                            </tr>
+                                                    <tr>
+                                <td>array</td>
+                                <td>$data </td>
+                                <td><p>Parameters to pass when parsing query</p>
+</td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    bool|\PDOStatement
+                                            &mdash; <p>Returns FALSE on failure and PDOStatement on success</p>
+
+                                    
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                            <span class="label label-info">static</span>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="../classes/APIShift-Core-DatabaseManager.html"><div class="path-wrapper">\APIShift\Core\DatabaseManager</div></a></dd>
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                                                    </div>
+    </section>
+
+    <div id="source-view" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="source-view-label" aria-hidden="true">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3 id="source-view-label">DatabaseManager.php</h3>
+        </div>
+        <div class="modal-body">
+            <pre data-src="../files/machine/core/DatabaseManager.php.txt" class="language-php line-numbers"></pre>
+        </div>
+    </div>
+
+    <footer class="row-fluid">
+        <section class="span10 offset2">
+            <section class="row-fluid">
+                <section class="span10 offset1">
+                    <section class="row-fluid footer-sections">
+                        <section class="span4">
+                                                        <h1><i class="icon-code"></i></h1>
+                            <div>
+                                <ul>
+                                                                            <li><a href="../namespaces/apishift.html"><abbr title="\APIShift">APIShift</abbr></a></li>
+                                                                    </ul>
+                            </div>
+                        </section>
+                        <section class="span4">
+                                                        <h1><i class="icon-bar-chart"></i></h1>
+                            <div>
+                                <ul>
+                                    <li><a href="../graphs/class.html">Class Hierarchy Diagram</a></li>
+                                </ul>
+                            </div>
+                        </section>
+                        <section class="span4">
+                                                        <h1><i class="icon-pushpin"></i></h1>
+                            <div>
+                                <ul>
+                                    <li><a href="../reports/errors.html">Errors</a></li>
+                                    <li><a href="../reports/markers.html">Markers</a></li>
+                                </ul>
+                            </div>
+                        </section>
+                    </section>
+                </section>
+            </section>
+            <section class="row-fluid">
+                <section class="span10 offset1">
+                    <hr />
+                    Documentation is powered by <a href="https://www.phpdoc.org/">phpDocumentor </a> and authored
+                    on January 20th, 2021 at 16:20.
+                </section>
+            </section>
+        </section>
+    </footer>
+</div>
+
+</body>
+</html>

@@ -28,14 +28,23 @@ use APIShift\Core\Status;
  * This controller returns run-time data about the system
  */
 class Data {
+    /**
+     * Returns to the client the data residing in the "data_entires" table
+     */
     public static function getEntriesMetadata() {
         Status::message(Status::SUCCESS, CacheManager::get('data_entries'));
     }
     
+    /**
+     * Returns to the client the data residing in the "data_sources" table
+     */
     public static function getSourcesMetadata() {
         Status::message(Status::SUCCESS, CacheManager::get('data_sources'));
     }
 
+    /**
+     * Returns to the client the 'data_entries', 'data_sources' and 'input_values' tables.
+     */
     public static function getMetadata() {
         Status::message(Status::SUCCESS, [
             "entries" => CacheManager::get('data_entries'),

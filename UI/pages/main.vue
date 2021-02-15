@@ -2,7 +2,7 @@
     // This shit is made for scripting
     module.exports = {
         vuetify: new Vuetify({
-            theme: { dark: true }
+            theme: { dark: false }
         }),
         data () {
             return {
@@ -10,14 +10,18 @@
             }
         },
         created () {
-            
+            app.apishift.setSubtitle("Welcome!");
         }
     }
 </script>
 
 <template>
     <v-app class="main">
-        <h1>asdfsdf</h1>
+        <h1>Welcome! :)</h1>
+        <hr />
+        <p>
+            Go to <a href="/control">Control Panel</a> to start working with the system
+        </p>
     </v-app>
 </template>
 

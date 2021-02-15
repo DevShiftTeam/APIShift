@@ -31,6 +31,10 @@ class DatabaseManager {
      * Array of all connections created by the API
      */
     private static $connections = array();
+
+    /**
+     * Metadata of every connection at run-time
+     */
     private static $connections_metadata = [
         "main" => [
             "host" => Configurations::DB_HOST,
@@ -98,7 +102,8 @@ class DatabaseManager {
      * 
      * @return void
      */
-    public static function startConnection($connection_name, $db_host = null, $db_user = null, $db_pass = null, $db_port = null, $db_name = null, $exit_on_error = true) {
+    public static function startConnection($connection_name, $db_host = null, $db_user = null, $db_pass = null, $db_port = null,
+                                            $db_name = null, $exit_on_error = true) {
         // Check if connection already exists is queue
         if(isset(self::$connections[$connection_name]) && (self::$connections[$connection_name] instanceof PDO)) return;
         try {
@@ -111,8 +116,12 @@ class DatabaseManager {
             if($db_port === null) $db_port = self::$connections_metadata[$connection_name]['port'];
 
             // Connect to specific DB if specified
-            if($db_name != null) self::$connections[$connection_name] = new PDO("mysql:host={$db_host};dbname={$db_name};port={$db_port}", $db_user, $db_pass);
-            else self::$connections[$connection_name] = new PDO("mysql:host={$db_host};port={$db_port}", $db_user, $db_pass);
+            if($db_name != null)
+                self::$connections[$connection_name] = 
+                    new PDO("mysql:host={$db_host};dbname={$db_name};port={$db_port}", $db_user, $db_pass);
+            else
+                self::$connections[$connection_name] = 
+                    new PDO("mysql:host={$db_host};port={$db_port}", $db_user, $db_pass);
 
             // Avoid possible SQL injections
             self::$connections[$connection_name]->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
@@ -120,7 +129,7 @@ class DatabaseManager {
             self::closeConnection($connection_name);
             Status::message(
                 Status::DB_CONNECTION_FAILED,
-                "Couldn't create `" . $connection_name . "` db connection ",
+                "Couldn't create `" . $connection_name . "` db connection",
                 $exit_on_error
             );
         }
@@ -129,9 +138,9 @@ class DatabaseManager {
     /**
      * Return PDO instance of connection
      * 
-     * @param $connectionName Name of the connection
+     * @param string $connectionName Name of the connection
      * 
-     * @return PDO Instance of connection
+     * @return \PDO Instance of connection
      */
     public static function getInstance(string $connectionName)
     {
@@ -141,7 +150,8 @@ class DatabaseManager {
 
     /**
      * Close a connection
-     * @param $connectionName Name of the connection
+     * 
+     * @param string $connectionName Name of the connection
      * 
      * @return void
      */
@@ -168,7 +178,7 @@ class DatabaseManager {
      * Order keys by desired column
      * 
      * @param string $connectionName name of the connection
-     * @param array& $collector query to run
+     * @param array &$collector query to run
      * @param string $query query to run
      * @param array $data Parameters to pass when parsing query
      * @param string|null $column Comlumn to order as key
@@ -216,7 +226,7 @@ class DatabaseManager {
      * @param string $query Query to run
      * @param array $data Parameters to pass when parsing query
      * 
-     * @return bool|PDOStatement Returns FALSE on failure and PDOStatement on success
+     * @return bool|\PDOStatement Returns FALSE on failure and PDOStatement on success
      */
     public static function query($connectionName, $query, $data = array()) {
         if(self::$connections[$connectionName] == null) {

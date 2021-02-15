@@ -21,7 +21,10 @@
 
  namespace APIShift\Core;
 
- /**
+use APIShift\Controllers\Admin\Data;
+use DateTime;
+
+/**
   * Manages cache data on your command, sir!
   */
  class CacheManager {
@@ -56,23 +59,34 @@
     private static function initialize() {
         switch(Configurations::CACHE_TYPE) {
             case self::APCU:
-                if(!extension_loaded("apcu")) Status::message(Status::ERROR, "Please install/enable APCu or configure to use another system (Redis/Memcached)");
+                if(!extension_loaded("apcu"))
+                    Status::message(Status::ERROR, "Please install/enable APCu or configure to use another system (Redis/Memcached)");
                 break;
+
             case self::MEMCACHED:
-                if(!extension_loaded("memcached")) Status::message(Status::ERROR, "Please install/enable Memcached or configure to use another system (APCu/Redis)");
+                if(!extension_loaded("memcached"))
+                    Status::message(Status::ERROR, "Please install/enable Memcached or configure to use another system (APCu/Redis)");
                 self::$cache_connection = new \Memcached('_');
                 $result = self::$cache_connection->addServer(Configurations::CACHE_HOST, Configurations::CACHE_PORT);
                 if(!$result) Status::message("Memcached: Couldn't start connection with cache host, please check host name/port");
-            break;
+                break;
+
             case self::REDIS:
-                if(!extension_loaded("redis")) Status::message(Status::ERROR, "Please install/enable Redis or configure to use another system (APCu/Memcached)");
+                if(!extension_loaded("redis"))
+                    Status::message(Status::ERROR, "Please install/enable Redis or configure to use another system (APCu/Memcached)");
                 self::$cache_connection = new \Redis();
                 $result = self::$cache_connection->connect(Configurations::CACHE_HOST, Configurations::CACHE_PORT);
                 if(!$result) Status::message("Redis: Couldn't start connection with cache host, please check host name/port");
                 $result = self::$cache_connection->auth(Configurations::CACHE_PASS);
                 if(!$result) Status::message("Redis: Couldn't authenticate credentials with cache system");
-            break;
-            case self::NO_CACHE: break; // Do nothing if no cache system is available
+                break;
+
+            case self::NO_CACHE:
+                // Start session
+                if(session_status() == PHP_SESSION_NONE) session_start();            
+                // If cache not available, use session as a caching mechanism
+                if(!isset($_SESSION['in_session_cache'])) $_SESSION['in_session_cache'] = [];
+                break;
             default:
                 Status::message(Status::ERROR, "Unrecognized cache system, please check your configurations");
         }
@@ -114,13 +128,18 @@
      */
     public static function exists($key) {
         switch(Configurations::CACHE_TYPE) {
-            case self::APCU: return \apcu_exists($key) !== false;
+            case self::APCU:
+                return \apcu_exists($key) !== false;
+
             case self::MEMCACHED:
                 return self::$cache_connection->get($key) !== false;
-                break;
+                
             case self::REDIS:
                 return self::$cache_connection->exists($key) != 0;
-                break;
+                
+            case self::NO_CACHE:
+                return isset($_SESSION['in_session_cache'][$key]);
+
             default:
                 Status::message(Status::ERROR, "Unrecognized cache system, please check your configurations");
         }
@@ -136,15 +155,28 @@
      */
     public static function get($key) {
         switch(Configurations::CACHE_TYPE) {
-            case self::APCU: return \apcu_fetch($key);
+            case self::APCU:
+                return \apcu_fetch($key);
+
             case self::MEMCACHED:
                 return self::$cache_connection->get($key);
-                break;
+                
             case self::REDIS:
                 $value = self::$cache_connection->get($key);
                 if(strpos($value, '{') !== false) $value = json_decode($value);
                 return $value;
-                break;
+                
+            case self::NO_CACHE:
+                // Handle timing
+                if($_SESSION['in_session_cache'][$key][1] != 0
+                    && $_SESSION['in_session_cache'][$key][1] > (new DateTime())->getTimestamp())
+                {
+                    unset($_SESSION['in_session_cache'][$key]);
+                    return false;
+                }
+                return isset($_SESSION['in_session_cache'][$key]) ?
+                    $_SESSION['in_session_cache'][$key][0] : false;
+
             default:
                 Status::message(Status::ERROR, "Unrecognized cache system, please check your configurations");
         }
@@ -164,12 +196,26 @@
             case self::APCU:
                 \apcu_store($key, $value, $ttl);
                 break;
+
             case self::MEMCACHED:
                 self::$cache_connection->set($key, $value, $ttl);
                 break;
+
             case self::REDIS:
                 if(gettype($value) != 'array') self::$cache_connection->set($key, $value, ['EX' => $ttl]);
                 else self::$cache_connection->set($key, json_encode($value), ['EX' => $ttl]);
+                break;
+
+            case self::NO_CACHE:
+                /*
+                 * NOTICE: ordered as 2 elements -
+                 * The first is the value.
+                 * The second is the end time.
+                 */
+                $_SESSION['in_session_cache'][$key] = [
+                    $value,
+                    $ttl == 0 ? 0 : (new DateTime())->getTimestamp() + $ttl
+                ];
                 break;
             default:
                 Status::message(Status::ERROR, "Unrecognized cache system, please check your configurations");

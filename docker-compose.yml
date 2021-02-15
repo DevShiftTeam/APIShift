@@ -1,0 +1,46 @@
+version: "3.7"
+networks:
+  default:
+    driver: bridge
+services:
+  db:
+    container_name: mysql_web
+    hostname: apishift.local
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 123qwe@@
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: 123qwe@@
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: pma_web
+    links:
+      - db
+    environment:
+      PMA_HOST: mysql_web
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    restart: always
+    ports:
+      - 8081:80
+  php:
+    build: .
+    image: apishift.ubuntu.docker:latest
+    container_name: php_web
+    depends_on:
+      - db
+    working_dir: /var/www/
+    volumes:
+      - ./:/var/www/
+      - ./php.ini:/usr/local/etc/php/php.ini
+    extra_hosts:
+      - "apishift.local:127.0.0.1"
+    hostname: apishift.local
+    domainname: local
+    ports:
+      - 80:80
+      - 443:443

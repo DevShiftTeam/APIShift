@@ -49,7 +49,7 @@
                     case 'add-enum-type':
                         graph_view.cursor_state = {type: "create", data: 'add-enum-type'};
                         break;
-                    case 'select':
+                    case 'add-group':
                         graph_view.cursor_state = {type: "select"};
                         break;
                     default:
@@ -58,40 +58,52 @@
             }
         },
         computed: {
-            // Just for testing 
-            path_data () {
-                this.update();
 
-                const bezierWeight = 0.675; // Amount to offset control points
-                const dx           =  Math.abs(this.from_position.x - this.to_position.x) * bezierWeight * !this.$props.settings.enum_to_item;
-                const c1           = { x: this.from_position.x + dx, y: this.from_position.y };
-                const c2           = { x: this.to_position.x - dx, y: this.to_position.y };
-
-                return `M ${this.from_position.x} ${this.from_position.y} C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${this.to_position.x} ${this.to_position.y}`;
-            },
         }
     }
 </script>
 
 <template>
-        <g>
-        <path @pointerdown="pointer_down" 
-            :style="{ 'stroke-width': `${settings.enum_to_item ? 4 : 4}`,
-                        'stroke-dasharray': `${settings.enum_to_item ? '11,5' : 'none'}`}"
-            :d="path_data"
-            >
-        </path>
-        <!-- <polygon points="0 0, 10 3.5, 0 7" /> -->
-        </g>
+    <div id="sidemenu">
+        <div class="action" @click="action_creator('add-item')">
+            ITEM
+        </div>
+        <div class="action" @click="action_creator('add-relation')">
+            RELATION
+        </div>
+        <div class="action" @click="action_creator('delete-element')">
+            DELETE
+        </div>
+        <div class="action" @click="action_creator('add-enum')">
+            ENUM
+        </div>
+        <div class="action" @click="action_creator('add-enum-type')">
+            ENUM TYPE
+        </div>
+        <div class="action" @click="action_creator('add-group')">
+            GROUP
+        </div>
+    </div>
 </template>
 
 <style scoped>
 /* Please style this crap, with style */    
-    path {
-        fill: none;
-        stroke: dodgerblue;
-        stroke-width: 6;
+    /* Change this. */
+    #sidemenu {
+        position: absolute;
+        min-width: 50px;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        background: white;
+        display: flex;
+        flex-direction: column;
+    }
+    .action {
+        background: black;
+        padding: 5px;
+        margin: 5px;
+        text-align: center;
         cursor: pointer;
     }
-    
 </style>

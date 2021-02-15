@@ -36,6 +36,7 @@ const loginVue=require("../login.vue");
                 enum_type_comp: APIShift.API.getComponent('orm/enum_type', true),
                 line_comp: APIShift.API.getComponent('orm/line', true),
                 selection_comp: APIShift.API.getComponent('orm/selection_box', true),
+                sidemenu_comp: APIShift.API.getComponent('orm/sidemenu', true),
                 items: [
                     { name: "wait", id: 1,index: 0, position: { x: 20, y: 0 }, is_relation: false, data: {} },
                     { name: "haha", id: 2, index: 1, position: { x: 400, y: 0 }, is_relation: false, data: {} },
@@ -161,7 +162,7 @@ const loginVue=require("../login.vue");
                 };
                 this.init_camera = Object.assign({}, this.camera);
             
-                if (this.cursor_state === 'select') {
+                if (this.cursor_state.type === 'select') {
                     graph_view.$refs['s_box'].start_select(event);
                 }
                 // Proceeds only if not dragging any other object
@@ -222,7 +223,7 @@ const loginVue=require("../login.vue");
 
                 this.tap_counter = 0;
 
-                if (this.cursor_state === 'select') {
+                if (this.cursor_state.type === 'select') {
                     graph_view.$refs['s_box'].end_select();
                 }
                 // Reset drag event to none
@@ -435,9 +436,12 @@ const loginVue=require("../login.vue");
         <div ref="gv_menu" id="gv_menu">
             
         </div>
-            <component ref="s_box" 
-                :is="selection_comp">
-            </component>
+        <component ref="s_box" 
+            :is="selection_comp">
+        </component>
+        <component ref="sidemenu" 
+            :is="sidemenu_comp">
+        </component>
     </div>
 </template>
 

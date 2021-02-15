@@ -68,7 +68,7 @@
                 this.leftbound = -Number.MAX_SAFE_INTEGER;
                 this.topbound  = -Number.MAX_SAFE_INTEGER;
                 this.ds = Object.assign({}, {x: 0, y: 0});
-                graph_view.cursor_state = 'default';
+                graph_view.cursor_state = Object.assign({}, {type: 'default'});
 
                 // Stop scroll handler
                 graph_view.scroll_manager.stop();

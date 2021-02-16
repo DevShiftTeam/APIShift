@@ -30,16 +30,17 @@
             return {
                 drawer: null,
                 enum_types: [],
-                height: 0,
-                width: 0
+                start_pos: {x: 0, y: 0},
+                container_height: 0,
+                container_width: 0
             }
         },
         created () {
             const self = this;
             this.expanded_functions.drag_start = (event) => {
+                self.start_pos = Object.assign({},self.$props.position);
                 self.update_types();
                 self.align_types();    
-            
             };
             this.expanded_functions.drag = (event) => {
                 self.align_types();
@@ -50,19 +51,30 @@
 
                 for (const item_el of item_elements) {
                     if (graph_view.hittest(self.uid, item_el.ref)) {
+                        // Create enum_item connection
                         let item_instance = graph_view.$refs[item_el.ref];
-                        graph_view.item_enums.push({ enum_id: self.component_id, item_id: item_instance.component_id });                  
+                        graph_view.item_enums.push({ enum_id: self.component_id, item_id: item_instance.component_id }); 
+                        graph_view.create_line(self.component_id, item_instance.component_id, {enum_to_item: true});   
+                        
+                        // Move to back origin place 
+                        self.$props.position.x = self.start_pos.x;
+                        self.$props.position.y = self.start_pos.y;
+                        self.update_types();
+                        self.align_types();    
                         break;
                     }
                 }
+
             };
         }, 
         mounted () {
             const self = this;
+
+            this.z_index = 10;
             // Align attached types to element
             this.update_types();
             this.align_types();
-    
+
             for (let index = 0; index < graph_view.item_enums.length; index++) {
                 const item_enum = graph_view.item_enums[index];
                 if (item_enum.enum_id === this.component_id) {
@@ -70,8 +82,8 @@
                 }
             }
 
-            this.$watch('height', this.on_rect_change);
-            this.$watch('width', this.on_rect_change);
+            this.$watch('container_height', this.on_rect_change);
+            this.$watch('container_width', this.on_rect_change);
         },
         methods: {
             attach_type (type_id) {
@@ -97,25 +109,30 @@
             align_types () {
                 const self = this;
                 var accumulated_offset = 0;
-                this.height = 0;
-                this.width = 0;
+                this.container_height = 0;
+                this.container_width = 0;
                 // Move attached types
                 for (const enum_type_id of this.enum_types) {
                     const type_instance = graph_view.$refs['t'+enum_type_id];
                     accumulated_offset += 40;
-                    self.width = Math.max(self.width, type_instance.$el.offsetWidth);
-                    self.height = accumulated_offset;
+                    self.container_width = Math.max(self.container_width, type_instance.$el.offsetWidth);
+                    self.container_height = accumulated_offset;
                     type_instance.move_to(self.$props.position.x + 5 , self.$props.position.y + accumulated_offset);
                     type_instance.index = self.index + 1;
                 }
             },
             update_types () {
+                let self = this;
                 this.enum_types = [];
                 for (const enum_type of graph_view.enum_types) {
                     if (enum_type.enum_id === this.component_id) {
                         this.enum_types.push(enum_type.id);
                     }
                 }
+                
+            },
+            on_delete() {
+                
             },
             on_rect_change () {
                 requestAnimationFrame(this.update_lines);
@@ -136,7 +153,7 @@
         @pointerup.prevent="drag_end">
             <v-avatar left class="enum_type darken-4 red" >E</v-avatar>
             <div style="display: inline;">{{ uid }}</div>
-            <div class="enum_types" :style="{'height': `${height + 5}px`,'width': `${width}px`}"></div>
+            <div class="enum_types" :style="{'height': `${container_height + 5}px`,'width': `${container_width}px`}"></div>
     </div>
 </template>
 

@@ -24,10 +24,10 @@
     module.exports = {
         data() {
             return {
-                uid: '',
                 type: 'graph_element',
                 z_index: 0,
-                lines: [],
+                height: 0,
+                width: 0,
                 // This elements adds functionallity to drag events in needed
                 expanded_functions: {
                     'drag_start': (event) => {},
@@ -43,9 +43,13 @@
             this.z_index = this.$props.index;
         },
         mounted () {
-            graph_view.$refs[this.uid] = this;
             this.$el.ref = this.uid;
             this.$el.type = 'graph_element';
+            graph_view.$refs[this.uid] = this;
+
+            let rect = this.$el.getBoundingClientRect();
+            this.width = rect.width;
+            this.height = rect.height;
         },
         props: {
             name: String,
@@ -64,6 +68,12 @@
                 // Get position when drag started
                 window.init_position = Object.assign({} ,this.$props.position);
 
+                // Delete element on delete state
+                if (graph_view.cursor_state.type === 'delete') {
+                    this.on_delete();
+                    return;
+                }
+
                 // Update drag function
                 graph_view.drag_handler = this.drag;
                 graph_view.front_z_index++;
@@ -71,11 +81,12 @@
                 this.last_event = event;
                 this.is_dragging = false;
 
-                // Start graph view scroll manager and pass handler 
-                graph_view.scroll_manager.start(this.on_scroll, 20);
-
                 // Call additional function if set
                 this.expanded_functions.drag_start(event);
+
+
+                // Start graph view scroll manager and pass handler 
+                graph_view.scroll_manager.start(this.on_scroll, 20);
             },
             drag (event) {
                 let dx = (event.clientX - this.last_event.clientX) / graph_view.scale;
@@ -121,33 +132,24 @@
 
                 this.expanded_functions.drag(this.last_event);
             },
-            move_to (xpos, ypos) {
-                this.$props.position.x = xpos;
-                this.$props.position.y = ypos;
-                this.update_lines();
-            },
             move_by (dx, dy) {
                 this.$props.position.x += dx;
                 this.$props.position.y += dy;
-                this.update_lines();
             },
+            get_lines () {
+                return graph_view.lines.filter((line) => line.from_uid === this.uid || line.to_uid === this.uid);
+            },
+            // Update lines explicitilly 
             update_lines () {
-                this.lines.forEach(line_uid => {
-                    let line_instance = graph_view.$refs[line_uid];
-                    line_instance.update();
+                this.get_lines().forEach(line => {
+                    graph_view.$refs[line.line_uid].update();
                 });
-            },
-            add_line (line_uid) {
-                this.lines.push(line_uid);
-            },
-            remove_line (line_uid) {
-                const index = this.lines.indexOf(line_uid);
-                if (index > -1) {
-                    this.lines.splice(index, 1);
-                }
-            },
+            }, 
             setIndex (index) {
                 this.$props.index = index;
+            },
+            on_delete () {
+                // Do Nothing
             }
         },
         computed: {

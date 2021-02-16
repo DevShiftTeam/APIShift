@@ -79,7 +79,7 @@
             <v-btn style="min-width:0;width:56px;" tile @click.stop="showSideMenu = !showSideMenu;"><v-icon>fas fa-wrench</v-icon></v-btn>
             <v-navigation-drawer class="gv_nav_drawer" v-model="showSideMenu" mini-variant :style="{'z-index': 9999}">
                 <v-list dense>
-                    <v-list-item link v-for="action in actions" :key="action.name">
+                    <v-list-item link v-for="action in actions" :key="action.name" @click="action_creator(action.name)">
                         <v-tooltip top>
                             <template #activator="{ on }">
                                 <v-list-item-action v-on="on">

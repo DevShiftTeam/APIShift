@@ -1,8 +1,0 @@
-Run the following command to build the custom apache docker image:
-docker build . -t apishift.ubuntu.docker
-
-Run this command to Start the containers
-docker-compose up
-
-Run this command to Stop the containers
-docker-compose down

@@ -62,6 +62,7 @@ const loginVue=require("../login.vue");
                 groups: [
                     { name: 'Group', id: 1, index: 7, position: {x: 0, y: 0} }
                 ],
+                points: [], 
                 lines: [
 
                 ],
@@ -108,8 +109,9 @@ const loginVue=require("../login.vue");
                         return this.id; 
                     }
                 },
+                void_point: { x: -Number.MAX_SAFE_INTEGER, y: -Number.MAX_SAFE_INTEGER },  
                 init_rect: {x:0, y:0},
-                cursor_state: 'default'
+                cursor_state: {type: "default"}
             }
         },
         created () {
@@ -125,6 +127,11 @@ const loginVue=require("../login.vue");
         mounted () {
             this.init_rect = this.$el.getBoundingClientRect();
             this.update_graph_position();
+
+            window.addEventListener('keydown', this.key_down);
+        },
+        beforeDestroy () {
+            window.removeEventListener('keydown', this.key_down);
         },
         methods: {
             /**
@@ -162,9 +169,25 @@ const loginVue=require("../login.vue");
                 };
                 this.init_camera = Object.assign({}, this.camera);
             
-                if (this.cursor_state.type === 'select') {
+                let cursor_state = Object.assign({}, this.cursor_state);
+                if (cursor_state.type === 'select') {
                     graph_view.$refs['s_box'].start_select(event);
                 }
+                if (cursor_state.type === 'create') {
+                    // Determine pointer position in respect to graph transformation
+                    let center_rect = document.getElementById('graph_center').getBoundingClientRect();
+                    let mouse = {x: window.init_pointer.x - graph_position.x, y: window.init_pointer.y - graph_position.y };
+                    let differential = {x: center_rect.x - graph_position.x, y: center_rect.y - graph_position.y};
+                    let t_mouse = { x: (mouse.x-differential.x) / this.scale, y: (mouse.y - differential.y) / this.scale};
+
+                    if (cursor_state.data === 'add-enum') {
+                        graph_view.create_element_on_runtime('enum', {position: t_mouse});
+                    }
+                    if (cursor_state.data === 'add-enum-type') {
+                        graph_view.create_element_on_runtime('enum-type', {position: t_mouse});
+                    }
+                }
+
                 // Proceeds only if not dragging any other object
                 if(this.drag_handler != window.empty_function) return;
 
@@ -211,7 +234,13 @@ const loginVue=require("../login.vue");
                 // Update scale
                 let change = 1 / (Math.sqrt((prev_diff.x * prev_diff.x + prev_diff.y * prev_diff.y) /
                     (new_diff.x * new_diff.x + new_diff.y * new_diff.y)));
-                this.scale *= change;
+                let new_scale = this.scale * change;
+        
+                // Keep the scale on bound
+                if (new_scale < 0.2 || new_scale > 2 ) {
+                    return;
+                }
+                this.scale = new_scale;
 
                 // Move Camera
                 this.camera.x += (window.init_pointer.x - mid.x) * (1 - change) + window.init_pointer.x - window.temp_pointer.x;
@@ -226,6 +255,8 @@ const loginVue=require("../login.vue");
                 if (this.cursor_state.type === 'select') {
                     graph_view.$refs['s_box'].end_select();
                 }
+
+                this.cursor_state = Object.assign({}, {type: 'default'});
                 // Reset drag event to none
                 this.drag_handler = window.empty_function;
 
@@ -250,11 +281,22 @@ const loginVue=require("../login.vue");
                 var sign = Math.sign(delta), speed = 1;
                 var deltaAdjustedSpeed = Math.min(0.25, Math.abs(speed * delta / 128));
                 let change = (1 - sign * deltaAdjustedSpeed);
-                this.scale *= change;
+                let new_scale = this.scale * change;
+                
+                // Keep the scale on bound
+                if (new_scale < 0.2 || new_scale > 2 ) {
+                    return;
+                }
+                this.scale = new_scale;
                 
                 // Move camera to fit mouse as scaling center
                 this.camera.x += (window.init_pointer.x - mid.x) * (1 - change);
                 this.camera.y += (window.init_pointer.y - mid.y) * (1 - change);
+            },
+            key_down (event){
+                if (event.code === 'KeyG') {
+                    graph_view.create_element_on_runtime('group', {name: 'Group', position: {x: 0, y: 0}})
+                }                
             },
             pan_by (dx, dy) {
                 this.camera.x += dx;
@@ -283,18 +325,42 @@ const loginVue=require("../login.vue");
                     if (graph_view.lines.find((l) => l.line_uid === line_uid)) return;
 
                     // Add line to system 
-                    src_instance  = graph_view.$refs[from_uid];
-                    dest_instance = graph_view.$refs[to_uid];
-                    src_instance.add_line(line_uid);
-                    dest_instance.add_line(line_uid);
                     graph_view.lines.push({line_uid, from_uid, to_uid, settings});
             },
-            remove_line ( line_uid ) {
+            delete_line ( line_uid ) {  
+                    // Queue deletion to next frame execution due to potential race conditions
+                    setTimeout(() => graph_view.lines = graph_view.lines.filter((line) => line.line_uid !== line_uid),0);
+            },
+            create_element_on_runtime (type, properties = {}) { 
+                const common = { name: properties.name, 
+                                index: graph_view.front_z_index, 
+                                position: properties.position, 
+                                data: properties.data };
                 
-                    let src_instance  = graph_view.$refs[from_index];
-                    let dest_instance = graph_view.$refs[to_index];
-                    
-                    // graph_view.lines.push({from_index, to_index, settings});
+                if (type === 'item') {
+                    let item_id = Math.max(...graph_view.items.map(i => i.id),0) + 1;
+                    graph_view.items.push({...common, ...{id: item_id} ,data: properties.data });
+                }
+                if (type === 'enum') {
+                    let enum_id = Math.max(...graph_view.enums.map(e => e.id),0) + 1;
+                    graph_view.enums.push({...common, ...{id: enum_id}});
+                }
+                if (type === 'enum-type') {
+                    let enum_type_id = Math.max(...graph_view.enum_types.map(t => t.id),0) + 1;
+                    graph_view.enum_types.push({...common,...{id: enum_type_id}, enum_id: null});
+                }
+                if (type === 'group') {
+                    let group_id = Math.max(...graph_view.groups.map(g => g.id),0) + 1;
+
+                    this.items.forEach(item => {
+                        let item_instance = graph_view.$refs[`i${item.id}`];
+                        if (item_instance.selected) {
+                            graph_view.group_items.push({item_id: item.id, group_id: group_id});
+                            item_instance.selected = !item_instance.selected;
+                        }
+                    });
+                    graph_view.groups.push({...common, ...{id: group_id}});
+                }
             },
             // Update graph position
             update_graph_position() {
@@ -305,7 +371,6 @@ const loginVue=require("../login.vue");
                     y: rect.y
                 };
             },
-
             /**
              * Test whether 2 graph elements are hitting each other
              * @param {String} uid_1, @param {String} uid_1
@@ -333,24 +398,31 @@ const loginVue=require("../login.vue");
                 window.handler.updateIndex(newValue + 1);
             },
             item_enums: function(item_enums) {
-                let new_connection = item_enums.slice(-1).pop();
-                graph_view.create_line(new_connection.enum_id, new_connection.item_id, {enum_to_item: true});
+                // let new_connection = item_enums.slice(-1).pop();
+                // graph_view.create_line(new_connection.enum_id, new_connection.item_id, {enum_to_item: true});
             },
             group_items: function(item_enums) {
                 
             },
             cursor_state: function (state) {
+                document.body.classList.add('reset-all-cursors');
+                this.$el.classList.remove('cursor_default');
+                this.$el.classList.remove('cursor_delete');
+                this.$el.classList.remove('cursor_create');
+                this.$el.classList.remove('cursor_select');
+
                 if ( state.type === 'default') {
-                    this.$el.style.cursor = 'auto';
+                    this.$el.classList.add('cursor_default');
+                    document.body.classList.remove('reset-all-cursors');
                 }
                 if ( state.type === 'delete') {
-                    this.$el.style.cursor = 'not-allowed';
+                    this.$el.classList.add('cursor_delete');
                 }
                 if ( state.type === 'create') {
-                    this.$el.style.cursor = 'copy';
+                    this.$el.classList.add('cursor_create');
                 }
                 if ( state.type === 'select') {
-                    this.$el.style.cursor = 'se-resize';
+                    this.$el.classList.add('cursor_select');
                 }
             }
         }
@@ -364,7 +436,11 @@ const loginVue=require("../login.vue");
             @touchmove.prevent="() => {}"
             @pointerdown="pointer_down"
             @pointerup="pointer_up"
+            @pointercancel="pointer_up"
             :style="{ 'overflow' : 'hidden' }">
+        <component ref="sidemenu" 
+            :is="sidemenu_comp">
+        </component>
         <!-- The center element allow us to create a smart camera that positions the elements without needed to re-render for each element -->
         <div ref="gv_center" id="graph_center" :style="{ 'transform': 'translate(' + camera.x + 'px, ' + camera.y + 'px) scale(' + scale + ')'}">
             <component
@@ -439,14 +515,13 @@ const loginVue=require("../login.vue");
         <component ref="s_box" 
             :is="selection_comp">
         </component>
-        <component ref="sidemenu" 
-            :is="sidemenu_comp">
-        </component>
     </div>
 </template>
 
 <style scoped>
 /* Please style this crap, with style */
+
+/* Disables all cursor overrides when body has this class. */
 #graph_view, #graph_center {
     position: relative;
     width: 100%;
@@ -459,4 +534,18 @@ const loginVue=require("../login.vue");
     width: 100%;
     overflow: visible;
 }
+
+#graph_view.cursor_delete {
+    cursor: not-allowed !important;
+}
+#graph_view.cursor_select {
+    cursor: se-resize !important;
+}
+#graph_view.cursor_create {
+    cursor: copy !important;
+}
+#graph_view.cursor_default {
+    cursor: inherit !important;
+}
+
 </style>

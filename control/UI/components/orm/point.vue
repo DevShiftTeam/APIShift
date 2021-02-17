@@ -16,7 +16,7 @@
      * See the License for the specific language governing permissions and
      * limitations under the License.
      * 
-     * @author Sapir Shemer
+     * @author Ilan Dazanasvhili
      */
     
     // This shit is made for scripting
@@ -32,10 +32,11 @@
         },
         created () {
             const self = this;
-            var id = this.component_id, parent_enum;
+            var id = parseInt(this.uid.substring(1));
             this.expanded_functions.drag_start = (event) => {
                 let enum_id = graph_view.enum_types.find(e => {return e.id === id});
-                if(enum_id) parent_enum = graph_view.$refs['e'+enum_id.enum_id];
+                const parent_enum = graph_view.$refs['e'+enum_id.enum_id];
+
                 if (parent_enum) {
                     parent_enum.detach_type(id); 
                 }
@@ -61,52 +62,27 @@
             };
         }, 
         mounted () {
-            this.z_index = 11;
+
         },
         methods: {
             render_needed () {
             },
-            on_delete() {
-                let id = this.component_id, parent_enum;
-                
-                // Detach enum from element 
-                let enum_id = graph_view.enum_types.find(e => {return e.id === id});
-                if(enum_id) parent_enum = graph_view.$refs['e'+enum_id.enum_id];
-                if (parent_enum) {
-                    parent_enum.detach_type(id); 
-                }
-
-                // Finnaly remove element from screen
-                graph_view.enum_types = graph_view.enum_types.filter((enum_type) => enum_type.id !== id);
-            },
-            move_to (xpos, ypos) {
-                this.$props.position.x = xpos;
-                this.$props.position.y = ypos;
-            }
         }
     }
 </script>
 
 <template>
-    <div class="type" color="#8789ff" :class="{ ghost_mode }"
+    <div class="point" color="#8789ff"
         :style="transformation" 
         @pointerdown.prevent="drag_start"
         @pointerup.prevent="drag_end">
-            <v-avatar left class="type_type darken-4 grey">T</v-avatar>
-            <div style="display: inline;">{{ uid }}</div>
     </div>
 </template>
 
 <style scoped>
 /* Please style this crap, with style */
-.type_type {
-    text-align: center;
-    display: inline;
-    padding-left: 7px;
-    padding-right: 7px;
-}
 
-.type {
+.point {
     border: solid white 1px;
     border-radius: 10px;
     padding: 5px;
@@ -115,9 +91,6 @@
     cursor: copy ;
     background: #8789ff;
     box-shadow: 50px 50px 50px rgba(255, 242, 94, 0); /* Removing weird trace on chrome */
-}
-.type.ghost_mode {
-    opacity: 0.7;
 }
 
 </style>

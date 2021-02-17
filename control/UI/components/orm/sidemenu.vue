@@ -24,6 +24,14 @@
         },
         data () {
             return {
+                drawer: 0,
+                showSideMenu: false,
+                actions: [ {name: 'add-item', icon: 'fa fa-plus', text: "Add Item"},
+                 {name: 'add-relation', icon: 'fa fa-arrow-right', text: "Add Relation"},
+                 {name: 'delete-element', icon: 'far fa-trash-alt', text: "Delete Tool"},
+                 {name:'add-enum', icon: 'fas fa-cubes', text: "Add Enum"}, 
+                 {name:'add-enum-type', icon: 'fas fa-cube', text: "Add Enum Type"},
+                 {name:'add-group', icon: 'fa-object-group', text: "Add Group"}]
             }
         },
         created () {
@@ -55,35 +63,42 @@
                     default:
                         break;
                 }
-            }
-        },
-        computed: {
 
+                this.showSideMenu = false;
+            },
+            toggleDarkTheme: function() {
+                window.app.$vuetify.theme.dark = !(window.app.$vuetify.theme.dark);
+            },
+            isOnDarkMode () {
+                return window.app.$vuetify.theme.dark;
+            }
         }
     }
 </script>
 
 <template>
-    <div id="sidemenu">
-        <div class="action" @click="action_creator('add-item')">
-            ITEM
+        <div class="gv_side_menu">
+            <v-btn style="min-width:0;width:56px;" tile @click.stop="showSideMenu = !showSideMenu;"><v-icon>fas fa-wrench</v-icon></v-btn>
+            <v-navigation-drawer class="gv_nav_drawer" v-model="showSideMenu" mini-variant :style="{'z-index': 9999}">
+                <v-list dense>
+                    <v-list-item link v-for="action in actions" :key="action.name" @click="action_creator(action.name)">
+                        <v-tooltip top>
+                            <template #activator="{ on }">
+                                <v-list-item-action v-on="on">
+                                        <v-icon>{{ action.icon }}</v-icon>
+                                    </v-list-item-action>
+                                    <v-list-item-content>
+                                        <v-list-item-title>
+                                            {{ action.name }}
+                                        </v-list-item-title>
+                                    </v-list-item-content>
+                                </v-list-item>
+                            </template>
+                            <span>{{action.text}}</span>
+                        </v-tooltip>
+                </v-list>
+            </v-navigation-drawer>
         </div>
-        <div class="action" @click="action_creator('add-relation')">
-            RELATION
-        </div>
-        <div class="action" @click="action_creator('delete-element')">
-            DELETE
-        </div>
-        <div class="action" @click="action_creator('add-enum')">
-            ENUM
-        </div>
-        <div class="action" @click="action_creator('add-enum-type')">
-            ENUM TYPE
-        </div>
-        <div class="action" @click="action_creator('add-group')">
-            GROUP
-        </div>
-    </div>
 </template>
 
 <style scoped>
@@ -105,5 +120,12 @@
         margin: 5px;
         text-align: center;
         cursor: pointer;
+    }
+
+    .gv_side_menu {
+        position: absolute;
+        width: fit-content;
+        height: 100%;
+        z-index: 10000;
     }
 </style>

@@ -24,6 +24,7 @@
         mixins: [APIShift.API.getMixin('orm/graph_element')],
         data () {
             return {
+                uid: 'g',
                 container_height: 0,
                 container_width: 0,
                 leftbound: Number.MAX_SAFE_INTEGER,
@@ -52,12 +53,7 @@
             };
         },
         mounted () {
-            for (const group_item of graph_view.group_items) {
-                if (group_item.group_id === this.component_id) {
-                    this.item_refs.push('i'+group_item.item_id);
-                    graph_view.$refs['i'+group_item.item_id].group_container = this;
-                }
-            }
+            this.update_items();
             this.set_rect();
         },
         methods: {
@@ -70,6 +66,16 @@
                 });
                 graph_view.$refs['gv_lines'].dispatchEvent(eventBuilder); 
             },
+            update_items () {
+                this.item_refs = [];
+                for (const group_item of graph_view.group_items) {
+                    if (group_item.group_id === this.component_id) {
+                        this.item_refs.push('i'+group_item.item_id);
+                        graph_view.$refs['i'+group_item.item_id].group_container = this;
+                    }
+                }
+                if(this.item_refs.length <= 1) this.on_delete();
+            }, 
             set_rect() {
                 this.leftbound = Number.MAX_SAFE_INTEGER;
                 this.topbound  = Number.MAX_SAFE_INTEGER;
@@ -85,6 +91,19 @@
                 }
                 this.$props.position.x = this.leftbound;
                 this.$props.position.y = this.topbound;
+            },
+            on_delete () {
+                // Delete element from the graph
+                let id = this.component_id;
+                graph_view.group_items = graph_view.group_items.filter((group_item) => {
+                    if (group_item.group_id !== id) {
+                        return true;
+                    } else {
+                        graph_view.$refs['i'+group_item.item_id].group_container = null;
+                    }
+                    
+                });
+                graph_view.groups = graph_view.groups.filter((group) => group.id !== id);
             }
         }, 
         computed: {
@@ -109,7 +128,7 @@
         <div class="group_info"
         :style="{'min-width': `${Math.abs(leftbound-rightbound) + 1}px`}">
 
-            <v-avatar left class="group_type darken-4 green">I</v-avatar>
+            <v-avatar left class="group_type darken-4 green">G</v-avatar>
             <div style="display: inline;">{{ name }}</div>
         </div>
         
@@ -136,7 +155,7 @@
     display: flex;
     flex-direction: column-reverse;
     position: absolute;
-    cursor: copy !important;
+    cursor: copy ;
     box-shadow: 50px 50px 50px rgba(255, 242, 94, 0); /* Removing weird trace on chrome */
 }
 

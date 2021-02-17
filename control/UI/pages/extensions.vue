@@ -21,11 +21,11 @@
 </script>
 
 <template>
-    <v-content>
+    <v-main>
         <v-container fluid fill-height>
             <h1>Comming Soon! :)</h1>
         </v-container>
-    </v-content>
+    </v-main>
 </template>
 <style scoped>
 

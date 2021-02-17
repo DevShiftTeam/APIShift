@@ -54,7 +54,7 @@
 </script>
 
 <template>
-    <v-content>
+    <v-main>
         <v-container fluid fill-height>
             <v-card class="mx-auto" width="90%" min-height="75%" elevation-2>
                 <!-- Header -->
@@ -82,7 +82,7 @@
                 </div>
             </v-card>
         </v-container>
-    </v-content>
+    </v-main>
 </template>
 <style scoped>
 

@@ -21,7 +21,6 @@
 
  namespace APIShift\Core;
 
-use APIShift\Controllers\Admin\Data;
 use DateTime;
 
 /**
@@ -59,7 +58,7 @@ use DateTime;
     private static function initialize() {
         switch(Configurations::CACHE_TYPE) {
             case self::APCU:
-                if(!extension_loaded("apcu"))
+                if(!function_exists("apcu_exists"))
                     Status::message(Status::ERROR, "Please install/enable APCu or configure to use another system (Redis/Memcached)");
                 break;
 
@@ -119,6 +118,8 @@ use DateTime;
         self::getTable('request_authorization', $refresh);
         self::getTable('inputs', $refresh);
         self::getTable('input_values', $refresh, 0, 'id', false);
+        CacheManager::getTable('databases', $refresh, 0, 'name', false);
+        DatabaseManager::$connections_metadata = CacheManager::get('databases'); // Get all databases
     }
 
     /**

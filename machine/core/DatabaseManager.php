@@ -35,7 +35,7 @@ class DatabaseManager {
     /**
      * Metadata of every connection at run-time
      */
-    private static $connections_metadata = [
+    public static $connections_metadata = [
         "main" => [
             "host" => Configurations::DB_HOST,
             "user" => Configurations::DB_USER,
@@ -51,8 +51,6 @@ class DatabaseManager {
     public static function loadDefaults(bool $refresh = false) {
         // Start main connection and retrieve all other databases data
         self::startConnection("main");
-        CacheManager::getTable('databases', $refresh, 0, 'name', false);
-        self::$connections_metadata = CacheManager::get('databases'); // Get all databases
     }
 
     /**

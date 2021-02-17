@@ -21,7 +21,6 @@
 
  namespace APIShift\Core;
 
-use APIShift\Controllers\Admin\Data;
 use DateTime;
 
 /**
@@ -119,6 +118,8 @@ use DateTime;
         self::getTable('request_authorization', $refresh);
         self::getTable('inputs', $refresh);
         self::getTable('input_values', $refresh, 0, 'id', false);
+        CacheManager::getTable('databases', $refresh, 0, 'name', false);
+        DatabaseManager::$connections_metadata = CacheManager::get('databases'); // Get all databases
     }
 
     /**

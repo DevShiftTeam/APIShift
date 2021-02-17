@@ -24,55 +24,133 @@
     module.exports = {
         data() {
             return {
+                uid: '',
                 type: 'graph_element',
-                index: 0,
-                lines: [],
+                z_index: 0,
+                height: 0,
+                width: 0,
                 // This elements adds functionallity to drag events in needed
                 expanded_functions: {
                     'drag_start': (event) => {},
                     'drag': (event) => {},
                     'drag_end': (event) => {}
-                }
+                },
+                last_event: null,
+                is_dragging: false,
+                ghost_mode: false
             }
         },
+        created () {
+            this.z_index = this.$props.index;
+        },
         mounted () {
+            this.$el.ref = this.uid;
             this.$el.type = 'graph_element';
-            this.$el.ref = this.$props.name;
-            graph_view.$refs[this.$props.index] = this;
+            graph_view.$refs[this.uid] = this;
+
+            let rect = this.$el.getBoundingClientRect();
+            this.width = rect.width;
+            this.height = rect.height;
         },
         props: {
             name: String,
             position: Object,
             // Index - used for smart rendering
             index: Number,
-            // comp_id - Unique ID for on-screen components
+            // uid - used for global component reference
+            uid: String,
         },
         methods: {
             drag_start (event) {
+                const self = this;
+
+                graph_view.update_graph_position();
+
                 // Get position when drag started
                 window.init_position = Object.assign({} ,this.$props.position);
+
+                // Delete element on delete state
+                if (graph_view.cursor_state.type === 'delete') {
+                    this.on_delete();
+                    return;
+                }
 
                 // Update drag function
                 graph_view.drag_handler = this.drag;
                 graph_view.front_z_index++;
                 this.$props.index = graph_view.front_z_index;
+                this.last_event = event;
+                this.is_dragging = false;
 
                 // Call additional function if set
                 this.expanded_functions.drag_start(event);
+
+
+                // Start graph view scroll manager and pass handler 
+                graph_view.scroll_manager.start(this.on_scroll, 20);
             },
             drag (event) {
-                this.$props.position.x = window.init_position.x + (event.clientX - window.init_pointer.x) / graph_view.scale;
-                this.$props.position.y = window.init_position.y + (event.clientY - window.init_pointer.y) / graph_view.scale;
+                let dx = (event.clientX - this.last_event.clientX) / graph_view.scale;
+                let dy = (event.clientY - this.last_event.clientY) / graph_view.scale;
+
+                this.move_by(dx, dy);
 
                 // Call additional function if set
                 this.expanded_functions.drag(event);
+                this.last_event = event;
+                this.is_dragging = true;
             },
             drag_end (event) {
+                graph_view.scroll_manager.stop();
+
                 // Reset drag function
                 graph_view.drag_handler = window.empty_function;
+                this.is_dragging = false;
 
                 // Call additional function if set
                 this.expanded_functions.drag_end(event);
+            },
+            on_scroll () {
+                if (!this.is_dragging) return;
+
+                let mouse = { x: this.last_event.pageX - window.graph_position.x, y: this.last_event.pageY - window.graph_position.y };
+                if (mouse.x < 20) {
+                    this.move_by(-5 / graph_view.scale, 0);
+                    graph_view.pan_by(5 , 0);
+                }
+                if (mouse.x > graph_view.init_rect.width - 20 ) {
+                    this.move_by(5 / graph_view.scale , 0);
+                    graph_view.pan_by(-5 , 0);
+                }
+                if (mouse.y < 20) {
+                    this.move_by(0, -5 / graph_view.scale);
+                    graph_view.pan_by(0, 5 );
+                }
+                if (mouse.y > graph_view.init_rect.height - 20 ) {
+                    this.move_by(0, 5 / graph_view.scale);
+                    graph_view.pan_by(0, -5 );
+                }
+
+                this.expanded_functions.drag(this.last_event);
+            },
+            move_by (dx, dy) {
+                this.$props.position.x += dx;
+                this.$props.position.y += dy;
+            },
+            get_lines () {
+                return graph_view.lines.filter((line) => line.from_uid === this.uid || line.to_uid === this.uid);
+            },
+            // Update lines explicitilly 
+            update_lines () {
+                this.get_lines().forEach(line => {
+                    graph_view.$refs[line.line_uid].update();
+                });
+            }, 
+            setIndex (index) {
+                this.$props.index = index;
+            },
+            on_delete () {
+                // Do Nothing
             }
         },
         computed: {
@@ -80,8 +158,19 @@
             transformation () {
                 return  {
                     transform: `translate(${this.$props.position.x}px,${this.$props.position.y}px)`,
-                    'z-index': this.$props.index + 5
+                    'z-index': this.z_index + 5 // Base z-index for graph elements 
                 }
+            },
+            // Exspose position info conveniently for external usage 
+            x_pos () {
+                return this.$props.position.x;
+            },
+            y_pos () {
+                return this.$props.position.y;
+            },
+            // Expose computed immutable local components-scope id 
+            component_id () {
+                return parseInt(this.uid.substring(1));
             }
         }
     };

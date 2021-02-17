@@ -28,9 +28,10 @@
      */
     module.exports = {
         props: {
+            uid: String,
             // Functional data
-            from_index: Number,
-            to_index: Number,
+            from_uid: Number,
+            to_uid: Number,
             settings: Object,
         },
         data () {
@@ -47,7 +48,7 @@
             }
         },
         created () {
-            this.uid = `${this.$props.from_index}c${this.$props.to_index}`;
+            this.uid = `${this.$props.from_uid}-${this.$props.to_uid}`;
         },
         mounted () {
             this.$el.ref = this.uid;
@@ -55,16 +56,19 @@
         },
         methods: {
             update() {  
-                    const src_item  = graph_view.$refs[this.$props.from_index];
-                    const dest_item = graph_view.$refs[this.$props.to_index];
+                    const src_item  = graph_view.$refs[this.$props.from_uid];
+                    const dest_item = graph_view.$refs[this.$props.to_uid];
 
                     // Positon line edges on the leftmost-uppermost corner of the elements
                     this.from_position = Object.assign({}, src_item.position);
                     this.to_position = Object.assign({}, dest_item.position);
 
                     // Position line edges properly according to line settings 
-                    if (this.$props.settings.item_to_enum) {
-                            
+                    if (this.$props.settings.enum_to_item) {
+                        this.from_position.x += src_item.$el.offsetWidth / 2;
+                        this.from_position.y += src_item.$el.offsetHeight / 2;
+                        this.to_position.x += dest_item.$el.offsetWidth / 2;                    
+                        this.to_position.y += dest_item.$el.offsetHeight / 2; 
                     }
                     if (this.$props.settings.item_to_relation || this.$props.settings.relation_to_item) {
                         this.from_position.x += (src_item.$el.offsetWidth);
@@ -73,7 +77,6 @@
                     }
             },
             pointer_down() {
-                console.log('ipoasd');
             }
         },
         computed: {
@@ -82,7 +85,7 @@
                 this.update();
 
                 const bezierWeight = 0.675; // Amount to offset control points
-                const dx           =  Math.abs(this.from_position.x - this.to_position.x) * bezierWeight * !this.$props.settings.item_to_enum;
+                const dx           =  Math.abs(this.from_position.x - this.to_position.x) * bezierWeight * !this.$props.settings.enum_to_item;
                 const c1           = { x: this.from_position.x + dx, y: this.from_position.y };
                 const c2           = { x: this.to_position.x - dx, y: this.to_position.y };
 
@@ -94,11 +97,14 @@
 
 <template>
         <g>
-            <path @pointerdown="pointer_down" :style="{ 'stroke-width': `5`}" :d="path_data">
-            </path>
-            <polygon id="relation" points="0 0, 10 3.5, 0 7" /> 
-        </g>
+        <path @pointerdown="pointer_down" 
+            :style="{ 'stroke-width': `${settings.enum_to_item ? 4 : 4}`,
+                        'stroke-dasharray': `${settings.enum_to_item ? '11,5' : 'none'}`}"
+            :d="path_data"
+            >
+        </path>
         <!-- <polygon points="0 0, 10 3.5, 0 7" /> -->
+        </g>
 </template>
 
 <style scoped>

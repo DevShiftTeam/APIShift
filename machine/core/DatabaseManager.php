@@ -48,7 +48,7 @@ class DatabaseManager {
     /**
      * Load all main connection and all connections in cache (load them if not present)
      */
-    public static function loadDefaults(bool $refresh = false) {
+    public static function loadDefaults() {
         // Start main connection and retrieve all other databases data
         self::startConnection("main");
     }

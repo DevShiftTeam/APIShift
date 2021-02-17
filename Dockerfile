@@ -20,13 +20,18 @@ RUN docker-php-ext-install pdo pdo_mysql mysqli
 RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/default.key -out /etc/ssl/certs/default.pem -subj "/C=IL/ST=TelAviv/L=Raanana/O=Security/OU=Development/CN=bodokhp@gmail.com"
 RUN docker-php-ext-install mysqli
 
+RUN sudo apt-get install php7.4-apcu -y
+
+# RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
+
 # RUN apt install -y ssl-cert
 
 RUN a2enmod ssl
 # RUN a2ensite default-ssl.conf
 
+RUN echo ""
 
-COPY / /var/www/
+# COPY / /var/www/
 COPY ./conf/default.conf /etc/apache2/sites-available
 COPY ./conf/default-ssl.conf /etc/apache2/sites-available
 

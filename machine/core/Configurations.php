@@ -33,11 +33,11 @@ class Configurations {
     /**
      * Database login info
      */
-    const DB_HOST = "localhost";
+    const DB_HOST = "mysql_web";
     const DB_PORT = 3306;
     const DB_USER = "root";
-    const DB_PASS = "";
-    const DB_NAME = "apishift";
+    const DB_PASS = "123qwe@@";
+    const DB_NAME = "apishiftdocker";
     const DB_TYPE = "MySQL";
 
     /**

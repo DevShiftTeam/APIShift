@@ -444,10 +444,10 @@ const loginVue=require("../login.vue");
         <!-- The center element allow us to create a smart camera that positions the elements without needed to re-render for each element -->
         <div ref="gv_center" id="graph_center" :style="{ 'transform': 'translate(' + camera.x + 'px, ' + camera.y + 'px) scale(' + scale + ')'}">
             <component
-                v-for="(item, index) in items"
+                v-for="(item) in items"
                 :is="item_comp"
                 :is_relation="item.is_relation"
-                :key="index"
+                :key="'i'+item.id"
                 :uid="'i'+item.id"
                 :name="item.name"
                 :index="item.index"
@@ -455,18 +455,18 @@ const loginVue=require("../login.vue");
                 :data="item.data">
             </component>
             <component
-                v-for="(enum_type, index) in enum_types"
+                v-for="(enum_type) in enum_types"
                 :is="enum_type_comp"
-                :key="index"
+                :key="'t'+enum_type.id"
                 :uid="'t'+enum_type.id"
                 :name="enum_type.name"
                 :index="enum_type.index"
                 :position="enum_type.position">
             </component>
             <component
-                v-for="(enum_c, index) in enums"
+                v-for="(enum_c) in enums"
                 :is="enum_comp"
-                :key="index"
+                :key="'e'+enum_c.id"
                 :uid="'e'+enum_c.id"
                 :name="enum_c.name"
                 :index="enum_c.index"
@@ -474,9 +474,9 @@ const loginVue=require("../login.vue");
                 :data="enum_c.data">
             </component>
             <component
-                v-for="(group, index) in groups"
+                v-for="(group) in groups"
                 :is="group_comp"
-                :key="index"
+                :key="'g'+group.id"
                 :uid="'g'+group.id"
                 :name="group.name"
                 :index="group.index"

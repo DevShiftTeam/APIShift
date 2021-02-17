@@ -24,6 +24,10 @@ html { overflow-y: auto }
     height: 65vh;
 }
 
+body.reset-all-cursors * {
+    cursor: inherit !important;
+}
+
 /* Scrollbar styles */
 .vb > .vb-dragger {
     z-index: 5;

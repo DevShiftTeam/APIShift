@@ -33,7 +33,9 @@ If you want, you can use your own tools, dependencies and modifications, the arc
   - [About](#about)
     - [Meet Our Team](#meet-our-team)
   - [Installation](#installation)
-    - [Requirements](#requirements)
+    - [On Local Machine](#on-local-machine)
+      - [Requirements](#requirements)
+  - [Using Docker](#using-docker)
   - [Understanding the system](#understanding-the-system)
   - [Usage](#usage)
     - [Requests (API)](#requests-api)
@@ -52,15 +54,26 @@ Released under the Apache-2.0 license.
  * [Eran Bodokh](https://github.com/Bodokh) as the Front-End lead.
 
 ## Installation
+### On Local Machine
 Clone the repository, upload it to your server, and then just visit the server through the web - the system will automatically redirect you to the installation page and will install the configurations and database by the data that you provide during installation.
 
 Notice that the [configurations file](machine/core/Configurations.php) should be writable (in linux: `sudo chmod 666 machine/core/Configurations.php` should solve this), otherwise installation will return a permission denied error. If the DB schema provided doesn't exist, then the installer will attempt to create the schema, if so, then make sure the DB user provided has the right access to do so, otherwise you can create the schema yourself.
 
-### Requirements
+#### Requirements
  * Web server
  * PHP7+
  * APCu or Redis or Memcached enabled on your PHP engine
  * MySQL
+  
+## Using Docker
+Run the following command to build the custom apache docker image:
+```docker build . -t apishift.ubuntu.docker```
+
+Run this command to Start the containers
+```docker-compose up```
+
+Run this command to Stop the containers
+```docker-compose down```
 
 ## Understanding the system
 One of our goals is to provide users access to a full ecosystem of information about the system. Everything from tutorials, documentation and the code design and flow of the system. The purpose of releasing these documents is to help people understand the system fully. 

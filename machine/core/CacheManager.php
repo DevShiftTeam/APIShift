@@ -58,7 +58,7 @@ use DateTime;
     private static function initialize() {
         switch(Configurations::CACHE_TYPE) {
             case self::APCU:
-                if(!function_exists("apcu_exists"))
+                if(!extension_loaded("apcu"))
                     Status::message(Status::ERROR, "Please install/enable APCu or configure to use another system (Redis/Memcached)");
                 break;
 

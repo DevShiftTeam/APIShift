@@ -28,16 +28,16 @@ class Configurations {
     /**
      * When true system acts as though itshould be installed, false otehrwise
      */
-    const INSTALLED = true;
+    const INSTALLED = false;
 
     /**
      * Database login info
      */
-    const DB_HOST = "localhost";
+    const DB_HOST = "127.0.0.1";
     const DB_PORT = 3306;
-    const DB_USER = "root";
+    const DB_USER = "";
     const DB_PASS = "";
-    const DB_NAME = "apishift";
+    const DB_NAME = "";
     const DB_TYPE = "MySQL";
 
     /**

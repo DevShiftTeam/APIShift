@@ -54,12 +54,19 @@
                     "Class",
                     "Instance"
                 ],
-                key_names: []
+                key_names: [],
+                // Installers personal loader
+                loader: {
+                    visible: false,
+                    message: "",
+                    processes: 0
+                },
             }
         },
         created() {
             window.handler = this;
             this.updateSessionStates();
+            APIShift.Loader.changeLoader("session", this.loader);
         },
         methods: {
             /**
@@ -306,6 +313,15 @@
                         <span v-if="adding_state">Discard new session state</span>
                         <span v-else>Add new session state</span>
                     </v-tooltip>
+                    
+                            <v-progress-linear
+                                :active="loader.visible"
+                                :indeterminate="loader.visible"
+                                :dismissible="loader.dismissible !== undefined && loader.dismissible"
+                                absolute
+                                bottom
+                                color="deep-purple lighten-3"
+                            ></v-progress-linear>
                 </v-app-bar>
 
                 <!-- Body -->

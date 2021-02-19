@@ -310,7 +310,7 @@ const loginVue=require("../login.vue");
                     let contained_elements = [];
                     this.items.forEach(item => {
                         let item_instance = graph_view.$refs[`i${item.id}`];
-                        if (item_instance.selected && item_instance.in_group === false) {
+                        if (item_instance.selected && item_instance.group_owner === false) {
                             contained_elements.push({ type: 'i', id: item.id });
                             item_instance.selected = false;
                         }

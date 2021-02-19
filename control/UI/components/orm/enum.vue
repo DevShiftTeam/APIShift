@@ -33,7 +33,7 @@
                 start_pos: {x: 0, y: 0},
                 container_height: 0,
                 container_width: 0,
-                type_rects: []
+                type_addrs: []
             }
         },
         created () {
@@ -86,8 +86,8 @@
             });
 
             // Watch for width & height changes
-            this.$watch('container_height', this.on_rect_change);
-            this.$watch('container_width', this.on_rect_change);
+            // this.$watch('container_height', this.on_rect_change);
+            // this.$watch('container_width', this.on_rect_change);
 
             // General z_index for Enum's
             this.z_index = 10;
@@ -110,18 +110,18 @@
                 this.container_width = 0;
 
                 // Move attached types
-                for (const type_rect of this.type_rects) {
+                for (const type_addr of this.type_addrs) {
                     accumulated_offset += 40;
-                    self.container_width = Math.max(self.container_width, type_rect.width);
+                    self.container_width = Math.max(self.container_width, type_addr.rect.width);
                     self.container_height = accumulated_offset;
-                    type_rect.x = self.x_pos + 5,
-                    type_rect.y = self.y_pos + accumulated_offset;
+                    type_addr.rect.x = self.x_pos + 5,
+                    type_addr.rect.y = self.y_pos + accumulated_offset;
                 }
             },
             set_types () {
-                this.type_rects = [];
+                this.type_addrs = [];
                 for (const type_obj of this.$props.data.types) {
-                    this.type_rects.push(graph_view.enum_types.find((type) => type.id === type_obj.id)?.rect);
+                    this.type_addrs.push(graph_view.enum_types.find((type) => type.id === type_obj.id));
                 }
             },
             on_delete() {
@@ -131,13 +131,11 @@
                 this.get_lines().forEach(line => {
                     graph_view.delete_line(line.line_uid);
                 });
-                graph_view.item_enums = graph_view.item_enums.filter((item_enum) => item_enum.enum_id !== id);
 
                 // Detach connected types 
-                for (const enum_type of graph_view.enum_types) {
-                    if (enum_type.enum_id === this.component_id) {
-                        this.detach_type(enum_type.id, true);
-                    }
+                for (const type_addr of this.type_addrs) {
+                    this.remove_type(type_addr.id);
+                    type_addr.data.enum_id = null;
                 }
 
                 // Finnaly remove element from screen

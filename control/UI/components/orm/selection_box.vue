@@ -57,7 +57,7 @@
                 this.set_rect(event);
                 graph_view.items.forEach(item => {
                     if (graph_view.hittest('s_box', 'i' + item.id)) {
-                        if (!graph_view.$refs['i' + item.id].in_group) graph_view.$refs['i' + item.id].selected = true;
+                        if (!graph_view.$refs['i' + item.id].group_owner) graph_view.$refs['i' + item.id].selected = true;
                     } else {
                         graph_view.$refs['i' + item.id].selected = false;
                     }

@@ -41,7 +41,6 @@
 
             this.expanded_functions.drag_start = (event) => {
                 start_pos = Object.assign({},this.$props.rect);
-                console.log(start_pos);
                 this.set_types();
                 this.align_types();    
             };
@@ -59,7 +58,6 @@
                         // Element already connected 
                         if (this.$props.data.connected.find ((element) => element.id === item_instance.component_id)) return;
 
-                        console.log('asdsa');
                         // Create enum - item connection
                         this.$props.data.connected.push({ type: 'i', id: item_instance.component_id}); 
                         graph_view.create_line({type: 'e', id: this.component_id}, { type: 'i', id: item_instance.component_id}, {enum_to_item: true});   
@@ -78,7 +76,7 @@
             let id = this.component_id;
             let type = this.component_type;
 
-            // Align attached types to element
+            // Align enum types to element
             this.set_types();
             this.align_types();
 
@@ -101,9 +99,7 @@
                 this.align_types();
             },
             remove_type (type_id) {
-                console.log(this.$props.data.types, type_id);
                 this.$props.data.types = this.$props.data.types.filter((type) => type.id !== type_id);
-                console.log(this.$props.data.types, type_id);
                 this.set_types();
                 this.align_types();
             },
@@ -129,7 +125,6 @@
                 }
             },
             on_delete() {
-                console.log(this.component_id);
                 let id = this.component_id;
 
                 // Detach connected Items 

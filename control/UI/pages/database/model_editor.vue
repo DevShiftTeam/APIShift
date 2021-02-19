@@ -192,10 +192,10 @@ const loginVue=require("../login.vue");
                     let t_mouse = { x: (mouse.x-differential.x) / this.scale, y: (mouse.y - differential.y) / this.scale};
 
                     if (cursor_state.data === 'add-enum') {
-                        graph_view.create_element_on_runtime('enum', {position: t_mouse});
+                        graph_view.create_element_on_runtime('enum', {data: {connected: [], types: []} ,rect: {...t_mouse, width: 0, height: 0}});
                     }
                     if (cursor_state.data === 'add-enum-type') {
-                        graph_view.create_element_on_runtime('enum-type', {position: t_mouse});
+                        graph_view.create_element_on_runtime('enum-type', {rect: {...t_mouse, width: 0, height: 0}});
                     }
                 }
 
@@ -362,7 +362,7 @@ const loginVue=require("../login.vue");
                 }
                 if (type === 'enum') {
                     let enum_id = Math.max(...graph_view.enums.map(e => e.id),0) + 1;
-                    graph_view.enums.push({...common, enum_id});
+                    graph_view.enums.push({...common, id: enum_id});
                 }
                 if (type === 'enum-type') {
                     let enum_type_id = Math.max(...graph_view.enum_types.map(t => t.id),0) + 1;

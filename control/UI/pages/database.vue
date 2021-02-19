@@ -56,7 +56,7 @@
 <template>
     <v-main>
         <v-container fluid fill-height>
-            <v-card class="mx-auto" width="90%" min-height="75%" elevation-2>
+            <v-card class="mx-auto" width="100%" min-height="75%" elevation-2>
                 <!-- Header -->
                 <v-app-bar>
                     <v-menu offset-y :style="{ 'z-index' : index }">

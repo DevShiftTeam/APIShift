@@ -270,6 +270,6 @@
 </template>
 <style scoped>
 .ca_table {
-    width: 90%;
+    width: 100%;
 }
 </style>

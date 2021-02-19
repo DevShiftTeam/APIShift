@@ -60,15 +60,15 @@ class APIShift {
         });
 
         // Load statuses
-        APIShift.API.request("Main\\Status", "getAllStatuses", {}, function (response) {
+        APIShift.API.request("Main\\Status", "getAllStatuses", {}, function(response) {
             switch (response.status) {
                 case APIShift.API.status_codes.ERROR:
                     APIShift.API.notify("Error: " + response.data, "error");
                     break;
                 case APIShift.API.status_codes.SUCCESS:
-                    for(let status in response.data)
+                    for (let status in response.data)
                         APIShift.API.status_codes[response.data[status].name] = 4 + response.data[status].id;
-                        APIShift.load_components = true;
+                    APIShift.load_components = true;
                     break;
                 case APIShift.API.status_codes.NOT_INSTALLED:
                     // Redirect user to admin page if system is not installed
@@ -91,12 +91,12 @@ class APIShift {
         // Check admin mode & installation
         APIShift.Loader.load((resolve, reject) => {
             // Preceding code is only for the CP
-            if(!APIShift.admin_mode) {
+            if (!APIShift.admin_mode) {
                 resolve(2); // Jump 2 stage forward
             }
 
             // Installation check
-            if(!APIShift.installed) {
+            if (!APIShift.installed) {
                 resolve(2); // Jump 2 stage forward
             }
 
@@ -115,16 +115,16 @@ class APIShift {
 
             resolve(0);
         });
-        
+
         // Check that session state allows to proceed
         let is_session_admin = false;
-        APIShift.API.request("Main\\SessionState", "getCurrentSessionState", {}, function (response) {
-            if(response.status == APIShift.API.status_codes.SUCCESS) is_session_admin = response.data == 1;
+        APIShift.API.request("Main\\SessionState", "getCurrentSessionState", {}, function(response) {
+            if (response.status == APIShift.API.status_codes.SUCCESS) is_session_admin = response.data == 1;
             else APIShift.API.notify(APIShift.API.getStatusName(response.status) + ": " + response.data, "error");
         }, true);
 
         APIShift.Loader.load((resolve, reject) => {
-            if(is_session_admin) {
+            if (is_session_admin) {
                 APIShift.load_components = true;
                 APIShift.logged_in = true;
             } else {
@@ -146,8 +146,8 @@ class APIShift {
      */
     isSessionState(state_id) {
         let result = false;
-        APIShift.API.request("Main\\SessionState", "getCurrentSessionState", {}, function (response) {
-            if(response.status == 1) result = response.data == state_id;
+        APIShift.API.request("Main\\SessionState", "getCurrentSessionState", {}, function(response) {
+            if (response.status == 1) result = response.data == state_id;
             else APIShift.API.notify(APIShift.API.getStatusName(response.status) + ": " + response.data, "error");
         }, true);
         return result;
@@ -188,11 +188,10 @@ class Loader {
      * @param {Object} new_loader The loader variable to track, in the format of { visible: Boolean, message: String }
      */
     addLoader(name, new_loader = {}) {
-        if(this.loader_manager[name] === undefined && new_loader == null) return;
-        else if(this.loader_manager[name] === undefined) {
+        if (this.loader_manager[name] === undefined && new_loader == null) return;
+        else if (this.loader_manager[name] === undefined) {
             let current = this.loaderExists(new_loader);
-            if(current !== false)
-            {
+            if (current !== false) {
                 Object.defineProperty(this.loader_manager, current, Object.getOwnPropertyDescriptor(this.loader_manager, name));
                 delete this.loader_manager[current];
             } else {
@@ -200,12 +199,10 @@ class Loader {
                 this.loader_manager[name] = new_loader;
                 this.loader_manager[name].processes = 0;
                 this.loader_manager[name].promise = null;
-                if(this.loader_manager[name].visible === undefined) this.loader_manager[name].visible = false;
-                if(this.loader_manager[name].message === undefined) this.loader_manager[name].message = "";
+                if (this.loader_manager[name].visible === undefined) this.loader_manager[name].visible = false;
+                if (this.loader_manager[name].message === undefined) this.loader_manager[name].message = "";
             }
-        }
-        else if(this.loader_manager[name] !== new_loader && new_loader != null)
-        {
+        } else if (this.loader_manager[name] !== new_loader && new_loader != null) {
             // Close previous loader
             this.loader_manager[name].visible = false;
             // Change loader
@@ -220,8 +217,8 @@ class Loader {
      * @returns {String/Boolean} False or the key of the existing loader
      */
     loaderExists(loader = {}) {
-        for(let key in this.loader_manager) {
-            if(this.loader_manager[key] === loader) return key;
+        for (let key in this.loader_manager) {
+            if (this.loader_manager[key] === loader) return key;
         }
         return false;
     }
@@ -238,15 +235,15 @@ class Loader {
      * Show the loader in view
      */
     show(loader_name = this.current_loader) {
-        if(!this.loader_manager[loader_name].visible) this.loader_manager[loader_name].visible = true;
+        if (!this.loader_manager[loader_name].visible) this.loader_manager[loader_name].visible = true;
     }
 
     /**
      * Remove loader from view
      */
     close(loader_name = this.current_loader) {
-        if(this.loader_manager[loader_name].processes > 0) this.loader_manager[loader_name].processes--;
-        if(this.loader_manager[loader_name].processes == 0 && this.loader_manager[loader_name].visible) this.loader_manager[loader_name].visible = false;
+        if (this.loader_manager[loader_name].processes > 0) this.loader_manager[loader_name].processes--;
+        if (this.loader_manager[loader_name].processes == 0 && this.loader_manager[loader_name].visible) this.loader_manager[loader_name].visible = false;
     }
 
     /**
@@ -260,44 +257,40 @@ class Loader {
         let promiseHolder;
 
         // Integrate with promise chain in loader if not as chain
-        if(chain)
-        {
+        if (chain) {
             promiseHolder = this.loader_manager[loader_name].promise;
             // Create a new promise if all processes finished
-            if(promiseHolder == null || this.loader_manager[loader_name].processes == 0)
-            {
-                promiseHolder = new Promise(function (resolutionFunc) {
+            if (promiseHolder == null || this.loader_manager[loader_name].processes == 0) {
+                promiseHolder = new Promise(function(resolutionFunc) {
                     APIShift.Loader.show(loader_name);
                     resolutionFunc(0);
                 });
-            }
-            else {
+            } else {
                 promiseHolder.then((value) => {
                     APIShift.Loader.show(loader_name);
                     return value;
                 });
             }
             this.loader_manager[loader_name].processes++;
-        }
-        else {
-            promiseHolder = new Promise(function (resolutionFunc) { resolutionFunc(0); });
+        } else {
+            promiseHolder = new Promise(function(resolutionFunc) { resolutionFunc(0); });
         }
 
         // Run user requested function
         let endResult = promiseHolder.then((value) => {
             // Skip processses
-            if(value != 0 && value !== undefined && value != null) {
+            if (value != 0 && value !== undefined && value != null) {
                 APIShift.Loader.loader_manager[loader_name].processes--;
                 return --value;
             }
             return new Promise(handlerMethod);
-        }).then(function (value) {
+        }).then(function(value) {
             // When done close loader
             if (chain) APIShift.Loader.close(loader_name);
             return value;
         });
 
-        if(chain) this.loader_manager[loader_name].promise = endResult;
+        if (chain) this.loader_manager[loader_name].promise = endResult;
         return endResult;
     }
 
@@ -359,9 +352,9 @@ class APIHandler {
      */
     startUpdate(interval = 5000) {
         // Continue only if update loop is not running
-        if(this.update_function_running !== false) return;
+        if (this.update_function_running !== false) return;
         this.update_function_running = setInterval(() => {
-            for(let key in APIShift.API.update_function) {
+            for (let key in APIShift.API.update_function) {
                 APIShift.API.update_function[key]();
             }
         }, interval);
@@ -407,8 +400,8 @@ class APIHandler {
      * @param {int} status_code 
      */
     getStatusName(status_code) {
-        for(let StatusName in this.status_codes)
-            if(this.status_codes[StatusName] == status_code) return StatusName;
+        for (let StatusName in this.status_codes)
+            if (this.status_codes[StatusName] == status_code) return StatusName;
         return "STATUS_CODE_NOT_FOUND";
     }
 
@@ -421,7 +414,7 @@ class APIHandler {
      * @param {function} HandlerMethod Function to handle the response or error
      * @param {boolean} chain Open loader until request finishes
      */
-    request(controller, method, attached_data = {}, handlerMethod = function (response) {}, chain = true) {
+    request(controller, method, attached_data = {}, handlerMethod = function(response) {}, chain = true) {
         // Define request function without running it
         return APIShift.Loader.load((resolve, reject) => {
             $.ajax({
@@ -429,18 +422,18 @@ class APIHandler {
                 url: APIShift.server + "/machine/API.php?c=" + controller + "&m=" + method,
                 data: attached_data,
                 dataType: "json",
-                success: function (response) {
-                    if(response.status == APIShift.API.status_codes.NO_AUTH && APIShift.admin_mode
-                        && APIShift.logged_in && window.nav_holder !== undefined) nav_holder.logout();
+                success: function(response) {
+                    if (response.status == APIShift.API.status_codes.NO_AUTH && APIShift.admin_mode &&
+                        APIShift.logged_in && window.nav_holder !== undefined) nav_holder.logout();
                     handlerMethod(response);
                 },
-                error: function () {
+                error: function() {
                     handlerMethod({
                         status: 0,
                         data: "Request couldn't be complete"
                     });
                 },
-                complete: function () {
+                complete: function() {
                     resolve(0);
                 }
             });
@@ -472,7 +465,7 @@ class APIHandler {
         });
 
         // Close alert after timeout
-        setTimeout(function (message) {
+        setTimeout(function(message) {
             for (let alert in app.alerts) {
                 if (app.alerts[alert].content == message) {
                     app.alerts[alert].show = false;
@@ -493,7 +486,7 @@ class APIHandler {
      * @param {boolean} init Set true to retrieve element if not exists
      */
     getPage(page_name, init = false) {
-        if(init && APIShift.pages[page_name] === undefined) APIShift.pages[page_name] = httpVueLoader(this.getUIFolder() + "/pages/" + page_name + ".vue");
+        if (init && APIShift.pages[page_name] === undefined) APIShift.pages[page_name] = httpVueLoader(this.getUIFolder() + "/pages/" + page_name + ".vue");
         return APIShift.pages[page_name];
     }
 
@@ -503,7 +496,7 @@ class APIHandler {
      * @param {boolean} init Set true to retrieve element if not exists
      */
     getComponent(component_name, init = false) {
-        if(init && APIShift.components[component_name] === undefined) APIShift.components[component_name] = httpVueLoader(this.getUIFolder() + "/components/" + component_name + ".vue");
+        if (init && APIShift.components[component_name] === undefined) APIShift.components[component_name] = httpVueLoader(this.getUIFolder() + "/components/" + component_name + ".vue");
         return APIShift.components[component_name];
     }
 
@@ -513,7 +506,7 @@ class APIHandler {
      * @param {boolean} init Set true to retrieve element if not exists
      */
     getMixin(mixin_name, init = false) {
-        if(init && APIShift.mixins[mixin_name] === undefined) {
+        if (init && APIShift.mixins[mixin_name] === undefined) {
             // Load mixin as object
             return httpVueLoader.getObject(this.getUIFolder() + "/components/mixins/" + mixin_name + ".vue")().then(function(obj) {
                 APIShift.mixins[mixin_name] = obj;

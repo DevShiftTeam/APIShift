@@ -296,9 +296,9 @@
 </script>
 
 <template>
-    <v-content>
+    <v-main>
         <v-container class="session-display" fluid fill-height>
-            <v-card class="mx-auto" width="90%" min-height="75%" elevation-2>
+            <v-card class="mx-auto" width="100%" min-height="75%" elevation-2>
                 <!-- Header -->
                 <v-app-bar>
                     <v-toolbar-title><v-btn @click="setParentView(0)">Manage Sessions</v-btn> <v-btn text v-for="(item, key) in parents_array" :key="key" @click="setParentView(item.id)">> {{ item.name }}</v-btn></v-toolbar-title>
@@ -446,7 +446,7 @@
                                     <v-card-actions>
                                         <v-dialog v-model="edit_state_structure" max-width="1000px">
                                             <template v-slot:activator="{ on }">
-                                                <v-btn v-on="on" text color="blue accent-4" width="100%" @click="structure_in_edit = key;">
+                                                <v-btn v-on="on" text color="primary" width="100%" @click="structure_in_edit = key;">
                                                     Edit Structure
                                                 </v-btn>
                                             </template>
@@ -527,7 +527,7 @@
                                                 </v-card-actions>
                                             </v-card>
                                         </v-dialog>
-                                        <v-btn text color="purple accent-4" width="100%" @click="setParentView(key)">
+                                        <v-btn text color="primary" width="100%" @click="setParentView(key)">
                                             View Children
                                         </v-btn>
                                     </v-card-actions>
@@ -538,7 +538,7 @@
                 </div>
             </v-card>
         </v-container>
-    </v-content>
+    </v-main>
 </template>
 <style scoped>
 

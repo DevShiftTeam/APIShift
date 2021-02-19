@@ -51,7 +51,7 @@
 </script>
 
 <template>
-    <v-content>
+    <v-main>
         <v-container fluid fill-height>
             <v-card v-if="is_main_page" class="mx-auto" width="90%" min-height="75%" elevation-2>
                 <!-- Header -->
@@ -94,7 +94,7 @@
             </v-card>
             <router-view v-else></router-view>
         </v-container>
-    </v-content>
+    </v-main>
 </template>
 <style scoped>
 .page-card {

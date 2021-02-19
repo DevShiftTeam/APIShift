@@ -39,16 +39,16 @@
 </script>
 
 <template>
-    <v-app class="loader">
-        <v-content>
+    <div class="loader">
+        <v-main>
             <v-container fluid fill-height>
                 <v-layout align-center justify-center>
                         <v-progress-circular :size="70" :width="7" color="blue-grey lighten-5" indeterminate></v-progress-circular>
                         <h3>{{ message }}</h3>
                 </v-layout>
             </v-container>
-        </v-content>
-    </v-app>
+        </v-main>
+    </div>
 </template>
 
 <style scoped>
@@ -62,5 +62,11 @@
     position: fixed;
     z-index: 100;
     width: 100%;
+    bottom: 0;
+    /* left: 0; */
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 </style>

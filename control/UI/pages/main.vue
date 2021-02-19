@@ -53,7 +53,7 @@
 </script>
 
 <template>
-    <v-content>
+    <v-main>
         <v-container class="main_container" fluid>
             <v-card class="mx-auto" width="50%" color="light-blue lighten-1"><v-toolbar-title class="version_header">Version 1.0</v-toolbar-title></v-card>
             <v-card class="mx-auto" width="80%" tile>
@@ -73,7 +73,7 @@
                 </v-list>
             </v-card>
         </v-container>
-    </v-content>
+    </v-main>
 </template>
 <style scoped>
 .version_header {

@@ -18,7 +18,17 @@
  * @author Sapir Shemer
  */
 
-html { overflow-y: auto }
+html {
+    overflow-y: auto
+}
+
+:root {
+    box-shadow: 0 8px 10px -5px rgba(121, var(--ev-g), 207, .2), 0 16px 24px 2px rgba(121, var(--ev-g), 207, .14), 0 6px 30px 5px rgba(121, var(--ev-g), 207, .12)!important;
+    --ev-g: 86;
+    --shadow-1: 0 8px 10px -5px rgba(121, var(--ev-g), 207, .2);
+    --shadow-2: 0 8px 10px -5px rgba(121, var(--ev-g), 207, .2);
+    --shadow-3: 0 8px 10px -5px rgba(121, var(--ev-g), 207, .2);
+}
 
 .overflow-box {
     height: 65vh;
@@ -28,8 +38,10 @@ body.reset-all-cursors * {
     cursor: inherit !important;
 }
 
+
 /* Scrollbar styles */
-.vb > .vb-dragger {
+
+.vb>.vb-dragger {
     z-index: 5;
     width: 12px;
     right: 0;
@@ -43,53 +55,103 @@ body.reset-all-cursors * {
     padding: 0;
 }
 
-.vb > .vb-dragger > .vb-dragger-styler {
+.vb>.vb-dragger>.vb-dragger-styler {
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
-    -webkit-transform: rotate3d(0,0,0,0);
-    transform: rotate3d(0,0,0,0);
-    -webkit-transition:
-        background-color 100ms ease-out,
-        margin 100ms ease-out,
-        height 100ms ease-out;
-    transition:
-        background-color 100ms ease-out,
-        margin 100ms ease-out,
-        height 100ms ease-out;
+    -webkit-transform: rotate3d(0, 0, 0, 0);
+    transform: rotate3d(0, 0, 0, 0);
+    -webkit-transition: background-color 100ms ease-out, margin 100ms ease-out, height 100ms ease-out;
+    transition: background-color 100ms ease-out, margin 100ms ease-out, height 100ms ease-out;
     margin: 5px 5px 5px 0;
     border-radius: 20px;
     height: calc(100% - 10px);
     display: block;
 }
 
-.vb > .vb-dragger:hover > .vb-dragger-styler {
+.vb>.vb-dragger:hover>.vb-dragger-styler {
     margin: 0px;
     height: 100%;
 }
 
-.vb .vb-dragging > .vb-dragger > .vb-dragger-styler {
+.vb .vb-dragging>.vb-dragger>.vb-dragger-styler {
     margin: 0px;
     height: 100%;
 }
+
 
 /* Light Theme Bar */
-.theme--light .vb > .vb-dragger > .vb-dragger-styler { background-color: rgba(0, 0, 0,.1) }
-.theme--light .vb.vb-scrolling-phantom > .vb-dragger > .vb-dragger-styler { background-color: rgba(0, 0, 0,.3) }
-.theme--light .vb > .vb-dragger:hover > .vb-dragger-styler { background-color: rgba(0, 0, 0,.5) }
-.theme--light .vb .vb-dragging > .vb-dragger > .vb-dragger-styler { background-color: rgba(0, 0, 0,.5) }
-.theme--light .vb .vb-dragging-phantom > .vb-dragger > .vb-dragger-styler { background-color: rgba(0, 0, 0,.5) }
+
+.theme--light .vb>.vb-dragger>.vb-dragger-styler {
+    background-color: rgba(0, 0, 0, .1)
+}
+
+.theme--light .vb.vb-scrolling-phantom>.vb-dragger>.vb-dragger-styler {
+    background-color: rgba(0, 0, 0, .3)
+}
+
+.theme--light .vb>.vb-dragger:hover>.vb-dragger-styler {
+    background-color: rgba(0, 0, 0, .5)
+}
+
+.theme--light .vb .vb-dragging>.vb-dragger>.vb-dragger-styler {
+    background-color: rgba(0, 0, 0, .5)
+}
+
+.theme--light .vb .vb-dragging-phantom>.vb-dragger>.vb-dragger-styler {
+    background-color: rgba(0, 0, 0, .5)
+}
+
+
 /* Dark Theme Bar */
-.theme--dark .vb > .vb-dragger > .vb-dragger-styler { background-color: rgba(126,87,194,.1) }
-.theme--dark .vb.vb-scrolling-phantom > .vb-dragger > .vb-dragger-styler { background-color: rgba(126,87,194,.3) }
-.theme--dark .vb > .vb-dragger:hover > .vb-dragger-styler { background-color: rgba(126,87,194,.5) }
-.theme--dark .vb .vb-dragging > .vb-dragger > .vb-dragger-styler { background-color: rgba(126,87,194,.5) }
-.theme--dark .vb .vb-dragging-phantom > .vb-dragger > .vb-dragger-styler { background-color: rgba(126,87,194,.5) }
+
+.theme--dark .vb>.vb-dragger>.vb-dragger-styler {
+    background-color: rgba(126, var(--ev-g), 194, .1)
+}
+
+.theme--dark .vb.vb-scrolling-phantom>.vb-dragger>.vb-dragger-styler {
+    background-color: rgba(126, var(--ev-g), 194, .3)
+}
+
+.theme--dark .vb>.vb-dragger:hover>.vb-dragger-styler {
+    background-color: rgba(126, var(--ev-g), 194, .5)
+}
+
+.theme--dark .vb .vb-dragging>.vb-dragger>.vb-dragger-styler {
+    background-color: rgba(126, var(--ev-g), 194, .5)
+}
+
+.theme--dark .vb .vb-dragging-phantom>.vb-dragger>.vb-dragger-styler {
+    background-color: rgba(126, var(--ev-g), 194, .5)
+}
+
 
 /* Dark Theme Shadow Box */
-.theme--dark.elevation-24 { box-shadow: 0 11px 15px -7px rgba(121, 78, 207,.2),0 24px 38px 3px rgba(121, 78, 207,.14),0 9px 46px 8px rgba(121, 78, 207,.12)!important; }
-.theme--dark.elevation-16 { box-shadow: 0 8px 10px -5px rgba(121, 78, 207, 0.2),0 16px 24px 2px rgba(121, 78, 207,.14),0 6px 30px 5px rgba(121, 78, 207,.12)!important }
-.theme--dark.elevation-4 { box-shadow: 0 2px 4px -1px rgba(121, 78, 207,.2),0 4px 5px 0 rgba(121, 78, 207,.14),0 1px 10px 0 rgba(121, 78, 207,.12)!important }
-.theme--dark.elevation-2 { box-shadow: 0 3px 1px -2px rgba(121, 78, 207,.2),0 2px 2px 0 rgba(121, 78, 207,.14),0 1px 5px 0 rgba(121, 78, 207,.12)!important }
+
+
+/* 
+.theme--dark.elevation-24 {
+    box-shadow: 0 11px 15px -7px rgba(121, var(--ev-g), 207, .2), 0 24px 38px 3px rgba(121, var(--ev-g), 207, .14), 0 9px 46px 8px rgba(121, var(--ev-g), 207, .12)!important;
+}
+
+.theme--dark.elevation-16 {
+    box-shadow: 0 8px 10px -5px rgba(121, var(--ev-g), 207, .2), 0 16px 24px 2px rgba(121, var(--ev-g), 207, .14), 0 6px 30px 5px rgba(121, var(--ev-g), 207, .12)!important
+}
+
+.theme--dark.elevation-4 {
+    box-shadow: 0 2px 4px -1px rgba(121, var(--ev-g), 207, .2), 0 4px 5px 0 rgba(121, var(--ev-g), 207, .14), 0 1px 10px 0 rgba(121, var(--ev-g), 207, .12)!important
+}
+
+.theme--dark.elevation-2 {
+    box-shadow: 0 3px 1px -2px rgba(121, var(--ev-g), 207, .2), 0 2px 2px 0 rgba(121, var(--ev-g), 207, .14), 0 1px 5px 0 rgba(121, var(--ev-g), 207, .12)!important
+} */
+
+
 /* TODO: Add all elevations of vuetify with dark theme, or theme of choice (Can be done through JS) */
-.v-toolbar.theme--dark { box-shadow: 0 2px 4px 1px rgba(49,27,146,.2), 0 4px 5px 0 rgba(49,27,146,.14), 0 1px 10px 0 rgba(49,27,146,.12) }
-.v-card.theme--dark { box-shadow: 0 3px 1px -2px rgba(49,27,146,.2), 0 2px 2px 0 rgba(49,27,146,.14), 0 1px 5px 0 rgba(49,27,146,.12) }
+
+.v-toolbar.theme--dark {
+    box-shadow: 0 2px 4px 1px rgba(49, var(--ev-g), 146, .2), 0 4px 5px 0 rgba(49, var(--ev-g), 146, .14), 0 1px 10px 0 rgba(49, var(--ev-g), 146, .12)
+}
+
+.v-card.theme--dark {
+    box-shadow: 0 3px 1px -2px rgba(49, var(--ev-g), 146, .2), 0 2px 2px 0 rgba(49, var(--ev-g), 146, .14), 0 1px 5px 0 rgba(49, var(--ev-g), 146, .12)
+}

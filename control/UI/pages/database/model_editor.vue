@@ -192,10 +192,18 @@ const loginVue=require("../login.vue");
                     let t_mouse = { x: (mouse.x-differential.x) / this.scale, y: (mouse.y - differential.y) / this.scale};
 
                     if (cursor_state.data === 'add-enum') {
-                        graph_view.create_element_on_runtime('enum', {data: {connected: [], types: []} ,rect: {...t_mouse, width: 0, height: 0}});
+                        graph_view.create_element_on_runtime('enum', 
+                        {
+                            data: { connected: [], types: []},
+                            rect: {...t_mouse, width: 0, height: 0}
+                        });
                     }
                     if (cursor_state.data === 'add-enum-type') {
-                        graph_view.create_element_on_runtime('enum-type', {rect: {...t_mouse, width: 0, height: 0}});
+                        graph_view.create_element_on_runtime('enum-type', 
+                        { 
+                            data: {enum_id: null},
+                            rect: {...t_mouse, width: 0, height: 0}
+                        });
                     }
                 }
 
@@ -310,18 +318,20 @@ const loginVue=require("../login.vue");
                     let contained_elements = [];
                     this.items.forEach(item => {
                         let item_instance = graph_view.$refs[`i${item.id}`];
-                        if (item_instance.selected && item_instance.group_owner === false) {
+                        if (item_instance.selected && item_instance.group_owner === null) {
                             contained_elements.push({ type: 'i', id: item.id });
                             item_instance.selected = false;
                         }
+                        console.log(item_instance.group_owner);
                     });
-                    // this.groups.forEach(group => {
-                    //     let group_instance = graph_view.$refs[`g${group.id}`];
-                    //     if (group_instance.selected) {
-                    //         contained_elements.push({ type: 'g', id: group.id });
-                    //         group_instance.selected = false;
-                    //     }
-                    // });
+                    console.log(contained_elements);
+                    this.groups.forEach(group => {
+                        let group_instance = graph_view.$refs[`g${group.id}`];
+                        if (group_instance.selected) {
+                            contained_elements.push({ type: 'g', id: group.id });
+                            group_instance.selected = false;
+                        }
+                    });
                     graph_view.create_element_on_runtime('group', {name: 'Group', rect: {x: 0, y: 0, height: 0, width: 0}, data: {contained_elements}})
                 }                
             },
@@ -366,6 +376,7 @@ const loginVue=require("../login.vue");
                 }
                 if (type === 'enum-type') {
                     let enum_type_id = Math.max(...graph_view.enum_types.map(t => t.id),0) + 1;
+                    console.log();
                     graph_view.enum_types.push({...common, id: enum_type_id});
                 }
                 if (type === 'group') {
@@ -408,13 +419,6 @@ const loginVue=require("../login.vue");
                 app.$refs.navigator.updateIndex(newValue + 1);
                 app.$refs.footer.updateIndex(newValue + 1);
                 window.handler.updateIndex(newValue + 1);
-            },
-            item_enums: function(item_enums) {
-                // let new_connection = item_enums.slice(-1).pop();
-                // graph_view.create_line(new_connection.enum_id, new_connection.item_id, {enum_to_item: true});
-            },
-            group_items: function(item_enums) {
-                
             },
             cursor_state: function (state) {
                 document.body.classList.add('reset-all-cursors');

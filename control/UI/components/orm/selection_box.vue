@@ -62,6 +62,13 @@
                         graph_view.$refs['i' + item.id].selected = false;
                     }
                 });
+                graph_view.groups.forEach(group => {
+                    if (graph_view.hittest('s_box', 'g' + group.id)) {
+                        if (!graph_view.$refs['g' + group.id].group_owner) graph_view.$refs['g' + group.id].selected = true;
+                    } else {
+                        graph_view.$refs['g' + group.id].selected = false;
+                    }
+                });
                 this.last_event = event;
             },
             end_select () {

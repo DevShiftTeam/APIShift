@@ -26,24 +26,17 @@
             return {
                 base_height: 0,
                 base_width: 0,
-                item_rects: [],
+                selected: false,
+                inner_elements: [] // Represents contained element objects
             }
         },
         created () {
             const self = this;
-            let offsets = [];
             this.expanded_functions.drag_start = (event) => {
-                for (let index = 0; index < this.item_rects.length; index++) {
-                    offsets[index] = { x: this.item_rects[index].x - this.x_pos, y: this.item_rects[index].y - this.y_pos};
-                }
-                this.z_index = 1;
+
             };
             this.expanded_functions.drag = (event) => {
-                for (let index = 0; index < this.item_rects.length; index++) {
-                    let rect_addr = this.item_rects[index];
-                    rect_addr.x = this.x_pos + offsets[index].x;
-                    rect_addr.y = this.y_pos + offsets[index].y;
-                }
+
             };
             this.expanded_functions.drag_end = (event) => {
 
@@ -60,26 +53,26 @@
             this.set_rect();
             
             // Watch for changes 
-            this.$watch('item_rects', this.set_rect, {deep: true});
+            this.$watch('inner_elements', this.set_rect, {deep: true});
         },
         methods: {
             set_elements () {
-                this.item_rects = [];
+                this.inner_elements = [];
                 // Set inner elements rect's and watch them later on using vue reactivity 
-                this.$props.data.contained_elements.forEach((element) => { 
-                    let rect_addr = element.type === 'i' ? graph_view.items.find((item) => item.id === element.id).rect : graph_view.groups.find((group) => group.id === element.id).rect;
-                    this.item_rects.push(rect_addr);
+                this.$props.data.contained_elements.forEach((element) => {
+                    if (element.type === 'i') this.inner_elements.push(graph_view.items.find((item) => item.id === element.id));
+                    if (element.type === 'g') this.inner_elements.push(graph_view.groups.find((group) => group.id === element.id));
                 });
 
                 // Delete groups of less than 1 elements 
-                if(this.item_rects.length <= 1) this.on_delete();
+                // if(this.inner_elements.length <= 1) this.on_delete();
             }, 
             set_rect () {
                 // Determine bounds 
-                let min_x = Math.min(...this.item_rects.map((rect) => rect.x));
-                let min_y = Math.min(...this.item_rects.map((rect) => rect.y));
-                let max_x = Math.max(...this.item_rects.map((rect) => rect.x + rect.width));
-                let max_y = Math.max(...this.item_rects.map((rect) => rect.y + rect.height));
+                let min_x = Math.min(...this.inner_elements.map((element) => element.rect.x));
+                let min_y = Math.min(...this.inner_elements.map((element) => element.rect.y));
+                let max_x = Math.max(...this.inner_elements.map((element) => element.rect.x + element.rect.width));
+                let max_y = Math.max(...this.inner_elements.map((element) => element.rect.y + element.rect.height));
 
 
                 // Update rect data 
@@ -87,6 +80,12 @@
                 this.$props.rect.y = min_y;
                 this.$props.rect.width = max_x - min_x + this.base_width;
                 this.$props.rect.height = max_y - min_y + this.base_height;
+            },
+            move_by (dx, dy) {
+                this.$props.data.contained_elements.forEach((element) => {
+                    let uid = element.type + element.id;
+                    graph_view.$refs[uid].move_by(dx, dy);
+                });
             },
             on_delete () {
                 let id = this.component_id;
@@ -108,7 +107,7 @@
 
 <template>
     <div class="group" color="#8789ff"
-        :style="transformation"
+        :style="transformation" :class="{ selected }"
         @pointerdown.prevent="drag_start"
         @pointerup.prevent="drag_end"
         >
@@ -158,7 +157,9 @@
     opacity: 0;
 }
 
-
+.group.selected {
+    outline: dashed white 2px;
+}
 
 .group.highlight {
 

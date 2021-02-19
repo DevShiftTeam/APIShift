@@ -93,15 +93,15 @@
             this.z_index = 10;
         },
         methods: {
-            add_type (type_id) {
+            add_type (type_id, to_align = true) {
                 this.$props.data.types.push({id: type_id});
                 this.set_types();
-                this.align_types();
+                if(to_align) this.align_types();
             },
-            remove_type (type_id) {
+            remove_type (type_id, to_align = true) {
                 this.$props.data.types = this.$props.data.types.filter((type) => type.id !== type_id);
                 this.set_types();
-                this.align_types();
+                if(to_align) this.align_types();
             },
             align_types () {
                 const self = this;
@@ -134,7 +134,7 @@
 
                 // Detach connected types 
                 for (const type_addr of this.type_addrs) {
-                    this.remove_type(type_addr.id);
+                    this.remove_type(type_addr.id, false);
                     type_addr.data.enum_id = null;
                 }
 

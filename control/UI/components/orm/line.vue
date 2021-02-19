@@ -30,20 +30,24 @@
         props: {
             uid: String,
             // Functional data
-            from_uid: Number,
-            to_uid: Number,
+            src_info: Object,
+            dest_info: Object,
             settings: Object,
         },
         data () {
             return {
                 uid: '',
-                from_position: {
+                src_rect: {
                     x: 0,
-                    y: 0
+                    y: 0,
+                    width: 0,
+                    height: 0
                 },
-                to_position: {
+                dest_rect: {
                     x: 0,
-                    y: 0
+                    y: 0,
+                    width: 0,
+                    height: 0
                 }
             }
         },
@@ -53,28 +57,56 @@
         mounted () {
             this.$el.ref = this.uid;
             graph_view.$refs[this.uid] = this;
+
+            // Get coresponding source rect from graph_view by source info  
+            if (this.$props.src_info.type === 'i') {
+                this.src_rect = graph_view.items.find((item) => item.id === this.$props.src_info.id).rect
+            }
+            if (this.$props.src_info.type === 'e') {
+                this.src_rect = graph_view.enums.find((item) => item.id === this.$props.src_info.id).rect
+            }
+            if (this.$props.src_info.type === 't') {
+                this.src_rect = graph_view.enum_types.find((item) => item.id === this.$props.src_info.id).rect
+            } 
+            if (this.$props.src_info.type === 'g') {
+                this.src_rect = graph_view.groups.find((item) => item.id === this.$props.src_info.id).rect
+            } 
+
+            // Get coresponding dest rect from graph_view by dest info  
+            if (this.$props.dest_info.type === 'i') {
+                this.dest_rect = graph_view.items.find((item) => item.id === this.$props.dest_info.id).rect
+            }
+            if (this.$props.dest_info.type === 'e') {
+                this.dest_rect = graph_view.enums.find((item) => item.id === this.$props.dest_info.id).rect
+            }
+            if (this.$props.dest_info.type === 't') {
+                this.dest_rect = graph_view.enum_types.find((item) => item.id === this.$props.dest_info.id).rect
+            } 
+            if (this.$props.dest_info.type === 'g') {
+                this.dest_rect = graph_view.groups.find((item) => item.id === this.$props.dest_info.id).rect
+            } 
         },
         methods: {
             update() {  
-                    const src_item  = graph_view.$refs[this.$props.from_uid];
-                    const dest_item = graph_view.$refs[this.$props.to_uid];
+                    // const src_item  = graph_view.$refs[this.$props.from_uid];
+                    // const dest_item = graph_view.$refs[this.$props.to_uid];
 
-                    // Positon line edges on the leftmost-uppermost corner of the elements
-                    this.from_position = Object.assign({}, src_item.position);
-                    this.to_position = Object.assign({}, dest_item.position);
+                    // // Positon line edges on the leftmost-uppermost corner of the elements
+                    // this.from_position = Object.assign({}, src_item.rect);
+                    // this.to_position = Object.assign({}, dest_item.rect);
 
-                    // Position line edges properly according to line settings 
-                    if (this.$props.settings.enum_to_item) {
-                        this.from_position.x += src_item.$el.offsetWidth / 2;
-                        this.from_position.y += src_item.$el.offsetHeight / 2;
-                        this.to_position.x += dest_item.$el.offsetWidth / 2;                    
-                        this.to_position.y += dest_item.$el.offsetHeight / 2; 
-                    }
-                    if (this.$props.settings.item_to_relation || this.$props.settings.relation_to_item) {
-                        this.from_position.x += (src_item.$el.offsetWidth);
-                        this.from_position.y += src_item.$el.offsetHeight / 2;
-                        this.to_position.y += src_item.$el.offsetHeight / 2;
-                    }
+                    // // Position line edges properly according to line settings 
+                    // if (this.$props.settings.enum_to_item) {
+                    //     this.from_position.x += src_item.$el.offsetWidth / 2;
+                    //     this.from_position.y += src_item.$el.offsetHeight / 2;
+                    //     this.to_position.x += dest_item.$el.offsetWidth / 2;                    
+                    //     this.to_position.y += dest_item.$el.offsetHeight / 2; 
+                    // }
+                    // if (this.$props.settings.item_to_relation || this.$props.settings.relation_to_item) {
+                    //     this.from_position.x += (src_item.$el.offsetWidth);
+                    //     this.from_position.y += src_item.$el.offsetHeight / 2;
+                    //     this.to_position.y += src_item.$el.offsetHeight / 2;
+                    // }
             },
             pointer_down() {
             }
@@ -82,14 +114,27 @@
         computed: {
             // Just for testing 
             path_data () {
-                this.update();
-
                 const bezierWeight = 0.675; // Amount to offset control points
-                const dx           =  Math.abs(this.from_position.x - this.to_position.x) * bezierWeight * !this.$props.settings.enum_to_item;
-                const c1           = { x: this.from_position.x + dx, y: this.from_position.y };
-                const c2           = { x: this.to_position.x - dx, y: this.to_position.y };
+                let src_offset = { x: 0, y: 0 }, dest_offset = { x: 0, y: 0 };
+                
+                // Position line edges properly according to line settings 
+                if (this.$props.settings.enum_to_item) {
+                    src_offset = { x: this.src_rect.width / 2, y: this.src_rect.height / 2 };
+                    dest_offset = { x: this.dest_rect.width / 2, y: this.dest_rect.height / 2 };
+                }
+                if (this.$props.settings.item_to_relation || this.$props.settings.relation_to_item) {
+                    src_offset = { x: this.src_rect.width, y: this.src_rect.height / 2 };
+                    dest_offset = { x: 0, y: this.dest_rect.height / 2 };
+                }
+                
+                let calc_from  = { x: this.src_rect.x + src_offset.x, y: this.src_rect.y + src_offset.y };
+                let calc_to = { x: this.dest_rect.x + dest_offset.x, y: this.dest_rect.y + dest_offset.y };
+                
+                const dx           =  Math.abs(calc_from.x - calc_to.x) * bezierWeight * !this.$props.settings.enum_to_item;
+                const c1           = { x: calc_from.x + dx, y: calc_from.y };
+                const c2           = { x: calc_to.x - dx, y: calc_to.y };
 
-                return `M ${this.from_position.x} ${this.from_position.y} C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${this.to_position.x} ${this.to_position.y}`;
+                return `M ${calc_from.x} ${calc_from.y} C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${calc_to.x} ${calc_to.y}`;
             },
         }
     }

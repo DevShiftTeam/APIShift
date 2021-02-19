@@ -31,30 +31,27 @@
             }
         },
         created () {
-            const self = this;
-            var id = this.component_id, parent_enum;
+            var id = this.component_id;
+
+            // If contained in enum, remove from enum and null the corresponding data 
             this.expanded_functions.drag_start = (event) => {
-                let enum_id = graph_view.enum_types.find(e => {return e.id === id});
-                if(enum_id) parent_enum = graph_view.$refs['e'+enum_id.enum_id];
-                if (parent_enum) {
-                    parent_enum.detach_type(id); 
+                if(this.$props.data.enum_id) {
+                    graph_view.$refs['e'+this.enum_parent.id].remove_type(id);
+                    this.$props.data.enum_id = null;
                 }
             };
             this.expanded_functions.drag = (event) => {
-                const enum_elements = graph_view.$el.querySelectorAll('.enum');
-                for (const enum_el of enum_elements) {
-                    // TODO: Hightlight enum
-                    // if (graph_view.hittest(self.uid, enum_el.ref)) {
-                    // }
-                }
+
             };
+
+            // If hits Enum element, add it to Enum
             this.expanded_functions.drag_end = (event) => {
                 const enum_elements = graph_view.$el.querySelectorAll('.enum');
-
                 for (const enum_el of enum_elements) {
-                    if (graph_view.hittest(self.uid, enum_el.ref)) {
-                        let enum_instance = graph_view.$refs[enum_el.ref];
-                        enum_instance.attach_type(id);  
+                    let enum_instance = graph_view.$refs[enum_el.ref];
+                    if (graph_view.hittest('t' + id, enum_instance.uid) && !this.$props.data.enum_id) {
+                        enum_instance.add_type(id);
+                        this.$props.data.enum_id = enum_instance.component_id;
                         break;
                     }
                 }
@@ -68,13 +65,11 @@
             },
             on_delete() {
                 let id = this.component_id, parent_enum;
+
+                this.expanded_functions.drag_start();
+                // Detach type from enum 
+                let enum_type = graph_view.enum_types.find(e => {return e.id === id});
                 
-                // Detach enum from element 
-                let enum_id = graph_view.enum_types.find(e => {return e.id === id});
-                if(enum_id) parent_enum = graph_view.$refs['e'+enum_id.enum_id];
-                if (parent_enum) {
-                    parent_enum.detach_type(id); 
-                }
 
                 // Finnaly remove element from screen
                 graph_view.enum_types = graph_view.enum_types.filter((enum_type) => enum_type.id !== id);
@@ -82,6 +77,12 @@
             move_to (xpos, ypos) {
                 this.$props.position.x = xpos;
                 this.$props.position.y = ypos;
+            }
+        },
+        computed: {
+            enum_parent () {
+                var enum_id = this.$props.data.enum_id;
+                return graph_view.enums.find((enum_) => enum_.id === enum_id);
             }
         }
     }

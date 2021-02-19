@@ -57,8 +57,9 @@
         mounted () {
             // Draw relation lines
             if(this.$props.is_relation) {
-                graph_view.create_line(this.$props.data.from, this.component_id, { item_to_relation: true, relate_type: this.$props.data.type });
-                graph_view.create_line(this.component_id, this.$props.data.to, { relation_to_item: true, relate_type: this.$props.data.type });
+                let self_data = { type: 'i', id: this.component_id }
+                graph_view.create_line(this.$props.data.from, self_data, { item_to_relation: true, relate_type: this.$props.data.type });
+                graph_view.create_line(self_data, this.$props.data.to, { relation_to_item: true, relate_type: this.$props.data.type });
             }
         },
         methods: {
@@ -87,13 +88,15 @@
                 graph_view.item_enums = graph_view.item_enums.filter((item_enum) => item_enum.item_id !== id);
 
                 // Remove element from group and recalculate group boundries if exists
-                if (!this.group_container) return;
+                if (!this.in_group) return;
                 graph_view.group_items = graph_view.group_items.filter((group_item) => group_item.item_id !== id);
                 this.group_container.update_items();
                 this.group_container.set_rect();
             },
             render_needed () {
             }
+        },
+        computed: {
         }
     }
 </script>

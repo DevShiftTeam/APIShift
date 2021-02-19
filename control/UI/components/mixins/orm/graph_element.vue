@@ -42,19 +42,20 @@
         },
         created () {
             this.z_index = this.$props.index;
+            graph_view.$refs[this.uid] = this;
         },
         mounted () {
             this.$el.ref = this.uid;
             this.$el.type = 'graph_element';
-            graph_view.$refs[this.uid] = this;
 
-            let rect = this.$el.getBoundingClientRect();
-            this.width = rect.width;
-            this.height = rect.height;
+            this.rect.width  = this.$el.offsetWidth;
+            this.rect.height = this.$el.offsetHeight;
+            this.z_index = 5;
         },
         props: {
             name: String,
-            position: Object,
+            rect: Object,
+            data: Object,
             // Index - used for smart rendering
             index: Number,
             // uid - used for global component reference
@@ -67,7 +68,7 @@
                 graph_view.update_graph_position();
 
                 // Get position when drag started
-                window.init_position = Object.assign({} ,this.$props.position);
+                window.init_position = Object.assign({} ,this.$props.rect);
 
                 // Delete element on delete state
                 if (graph_view.cursor_state.type === 'delete') {
@@ -134,8 +135,8 @@
                 this.expanded_functions.drag(this.last_event);
             },
             move_by (dx, dy) {
-                this.$props.position.x += dx;
-                this.$props.position.y += dy;
+                this.$props.rect.x += dx;
+                this.$props.rect.y += dy;
             },
             get_lines () {
                 return graph_view.lines.filter((line) => line.from_uid === this.uid || line.to_uid === this.uid);
@@ -157,20 +158,35 @@
             // Rendered transformation (coordinates and scale) 
             transformation () {
                 return  {
-                    transform: `translate(${this.$props.position.x}px,${this.$props.position.y}px)`,
+                    transform: `translate(${this.$props.rect.x}px,${this.$props.rect.y}px)`,
                     'z-index': this.z_index + 5 // Base z-index for graph elements 
                 }
             },
             // Exspose position info conveniently for external usage 
             x_pos () {
-                return this.$props.position.x;
+                return this.$props.rect.x;
             },
             y_pos () {
-                return this.$props.position.y;
+                return this.$props.rect.y;
             },
             // Expose computed immutable local components-scope id 
             component_id () {
                 return parseInt(this.uid.substring(1));
+            },
+            component_type () {
+                return this.uid[0];
+            },
+            in_group () {
+                var id = this.component_id;
+                var type = this.component_type;
+
+                let in_group = false;
+                graph_view.groups.forEach((group) =>  {
+                    if (group.data.contained_elements.find((element) => element.id === id && element.type === type)) {
+                        in_group = true;
+                    }
+                });
+                return in_group;
             }
         }
     };

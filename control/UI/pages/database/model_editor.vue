@@ -38,29 +38,40 @@ const loginVue=require("../login.vue");
                 selection_comp: APIShift.API.getComponent('orm/selection_box', true),
                 sidemenu_comp: APIShift.API.getComponent('orm/sidemenu', true),
                 items: [
-                    { name: "wait", id: 1,index: 0, position: { x: 20, y: 0 }, is_relation: false, data: {} },
-                    { name: "haha", id: 2, index: 1, position: { x: 400, y: 0 }, is_relation: false, data: {} },
-                    { name: "rela", id: 3, index: 2, position: { x: 120, y: 50 }, is_relation: true, data: {
-                        from: 1,
-                        to: 2,
+                    { name: "wait", id: 1, rect: { x: 20, y: 0, width: 0, height: 0 }, is_relation: false, data: {} },
+                    { name: "haha", id: 2, rect: { x: 220, y: 200, width: 0, height: 0}, is_relation: false, data: {} },
+                    { name: "rela", id: 3, rect: { x: 120, y: 50 , width: 0, height: 0}, is_relation: true, data: {
+                        from: { id: 1, type: 'i' },
+                        to: { id: 2, type: 'i' },
                         type: 0
                     } }
                 ],  
-                item_enums: [{ enum_id: 1, item_id: 2}],
                 enums: [
-                    { name: "Enum", id: 1, index: 4, position: { x: 50, y: 100 }}
+                    { name: "Enum", id: 1, rect: { x: 50, y: 100, width: 0, height: 0},
+                        data: {
+                            types: [
+                                {id: 1}
+                            ],
+                            connected: [
+                                { type: 'i', id: 1 }
+                            ]
+                    }}
                 ],
                 enum_types: [
-                    { name: 'Type', id: 1, index: 5, position: { x: 100, y: 100 }, enum_id: 1 },
-                    { name: 'Type', id: 2, index: 6, position: { x: 200, y: 100 }, enum_id: null }
-                ],
-                group_items: [
-                    {group_id: 1, item_id: 1}, 
-                    {group_id: 1, item_id: 2},
-                    {group_id: 1, item_id: 3} 
+                    { name: 'Type', id: 1, rect: {  x: 100, y: 100, width: 0, height: 0}, data: { enum_id: 1 }},
+                    { name: 'Type', id: 2, rect: {  x: 200, y: 100, width: 0, height: 0}, data: { enum_id: null }}
                 ],
                 groups: [
-                    { name: 'Group', id: 1, index: 7, position: {x: 0, y: 0} }
+                    { 
+                        name: 'Group', id: 1, rect: { x: 0, y: 0, width: 0, height: 0},
+                        data: { 
+                            contained_elements: [
+                                {type: 'i', id: 1}, 
+                                {type: 'i', id: 2}, 
+                                {type: 'i', id: 3}
+                            ]
+                        }
+                    }
                 ],
                 points: [], 
                 lines: [
@@ -295,7 +306,23 @@ const loginVue=require("../login.vue");
             },
             key_down (event){
                 if (event.code === 'KeyG') {
-                    graph_view.create_element_on_runtime('group', {name: 'Group', position: {x: 0, y: 0}})
+                    // Determine contained elements
+                    let contained_elements = [];
+                    this.items.forEach(item => {
+                        let item_instance = graph_view.$refs[`i${item.id}`];
+                        if (item_instance.selected && item_instance.in_group === false) {
+                            contained_elements.push({ type: 'i', id: item.id });
+                            item_instance.selected = false;
+                        }
+                    });
+                    // this.groups.forEach(group => {
+                    //     let group_instance = graph_view.$refs[`g${group.id}`];
+                    //     if (group_instance.selected) {
+                    //         contained_elements.push({ type: 'g', id: group.id });
+                    //         group_instance.selected = false;
+                    //     }
+                    // });
+                    graph_view.create_element_on_runtime('group', {name: 'Group', rect: {x: 0, y: 0, height: 0, width: 0}, data: {contained_elements}})
                 }                
             },
             pan_by (dx, dy) {
@@ -305,27 +332,19 @@ const loginVue=require("../login.vue");
             /**
              * Control functions 
              */
-            create_line ( from_id = 0, to_id = 0, settings = { item_to_relation: false, relation_to_item: false, enum_to_item: false }) {
+            create_line ( src_info = { type: '', from_id: 0}, dest_info = {type: '', to_id: 0}, settings = {  }) {
                     var line_uid, from_uid, to_uid;
-                    var src_instance, dest_instance;
 
-                    // Build line unique id from params 
-                    if ( settings.enum_to_item ) {
-                        from_uid = `e${from_id}`;
-                        to_uid   = `i${to_id}`;
-                    } 
-                    else if (settings.item_to_relation || settings.relation_to_item) {
-                        from_uid = `i${from_id}`;
-                        to_uid   = `i${to_id}`;
-                    } 
-                    else return;
+                    // String concatination 
+                    from_uid  = src_info.type + src_info.id;
+                    to_uid = dest_info.type + dest_info.id;
 
                     // Line already in list 
                     line_uid = `${from_uid}-${to_uid}`;
                     if (graph_view.lines.find((l) => l.line_uid === line_uid)) return;
 
                     // Add line to system 
-                    graph_view.lines.push({line_uid, from_uid, to_uid, settings});
+                    graph_view.lines.push({line_uid, src_info, dest_info, settings});
             },
             delete_line ( line_uid ) {  
                     // Queue deletion to next frame execution due to potential race conditions
@@ -334,32 +353,25 @@ const loginVue=require("../login.vue");
             create_element_on_runtime (type, properties = {}) { 
                 const common = { name: properties.name, 
                                 index: graph_view.front_z_index, 
-                                position: properties.position, 
+                                rect: { ...properties.rect }, 
                                 data: properties.data };
                 
                 if (type === 'item') {
                     let item_id = Math.max(...graph_view.items.map(i => i.id),0) + 1;
-                    graph_view.items.push({...common, ...{id: item_id} ,data: properties.data });
+                    graph_view.items.push({...common, id: item_id});
                 }
                 if (type === 'enum') {
                     let enum_id = Math.max(...graph_view.enums.map(e => e.id),0) + 1;
-                    graph_view.enums.push({...common, ...{id: enum_id}});
+                    graph_view.enums.push({...common, enum_id});
                 }
                 if (type === 'enum-type') {
                     let enum_type_id = Math.max(...graph_view.enum_types.map(t => t.id),0) + 1;
-                    graph_view.enum_types.push({...common,...{id: enum_type_id}, enum_id: null});
+                    graph_view.enum_types.push({...common, id: enum_type_id});
                 }
                 if (type === 'group') {
                     let group_id = Math.max(...graph_view.groups.map(g => g.id),0) + 1;
-
-                    this.items.forEach(item => {
-                        let item_instance = graph_view.$refs[`i${item.id}`];
-                        if (item_instance.selected) {
-                            graph_view.group_items.push({item_id: item.id, group_id: group_id});
-                            item_instance.selected = !item_instance.selected;
-                        }
-                    });
-                    graph_view.groups.push({...common, ...{id: group_id}});
+                    
+                    graph_view.groups.push({...common, id: group_id });
                 }
             },
             // Update graph position
@@ -451,9 +463,9 @@ const loginVue=require("../login.vue");
                 :uid="'i'+item.id"
                 :name="item.name"
                 :index="item.index"
-                :position="item.position"
+                :rect="item.rect"
                 :data="item.data">
-            </component>
+            </component> 
             <component
                 v-for="(enum_type) in enum_types"
                 :is="enum_type_comp"
@@ -461,7 +473,8 @@ const loginVue=require("../login.vue");
                 :uid="'t'+enum_type.id"
                 :name="enum_type.name"
                 :index="enum_type.index"
-                :position="enum_type.position">
+                :rect="enum_type.rect"
+                :data="enum_type.data">
             </component>
             <component
                 v-for="(enum_c) in enums"
@@ -470,9 +483,9 @@ const loginVue=require("../login.vue");
                 :uid="'e'+enum_c.id"
                 :name="enum_c.name"
                 :index="enum_c.index"
-                :position="enum_c.position"
+                :rect="enum_c.rect"
                 :data="enum_c.data">
-            </component>
+            </component> 
             <component
                 v-for="(group) in groups"
                 :is="group_comp"
@@ -480,7 +493,8 @@ const loginVue=require("../login.vue");
                 :uid="'g'+group.id"
                 :name="group.name"
                 :index="group.index"
-                :position="group.position">
+                :rect="group.rect"
+                :data="group.data">
             </component>
             <svg id="svg_viewport" ref="gv_lines">
                 <defs>
@@ -499,14 +513,14 @@ const loginVue=require("../login.vue");
                     </marker>
                 </defs>
                 <component
-                    v-for="(line, index) in lines"
+                    v-for="(line) in lines"
                     :is="line_comp"
-                    :key="index"
+                    :key="line.line_uid"
                     :uid="line.line_uid" 
-                    :from_uid="line.from_uid"
-                    :to_uid="line.to_uid"
+                    :src_info="line.src_info"
+                    :dest_info="line.dest_info"
                     :settings="line.settings">
-                </component>
+                </component> 
             </svg>
         </div>
         <div ref="gv_menu" id="gv_menu">

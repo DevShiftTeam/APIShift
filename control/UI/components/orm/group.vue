@@ -24,92 +24,81 @@
         mixins: [APIShift.API.getMixin('orm/graph_element')],
         data () {
             return {
-                uid: 'g',
-                container_height: 0,
-                container_width: 0,
-                leftbound: Number.MAX_SAFE_INTEGER,
-                topbound: Number.MAX_SAFE_INTEGER, 
-                rightbound: -Number.MAX_SAFE_INTEGER,
-                bottombound: -Number.MAX_SAFE_INTEGER,
-                item_refs: []
+                base_height: 0,
+                base_width: 0,
+                item_rects: [],
             }
         },
         created () {
             const self = this;
+            let offsets = [];
             this.expanded_functions.drag_start = (event) => {
+                for (let index = 0; index < this.item_rects.length; index++) {
+                    offsets[index] = { x: this.item_rects[index].x - this.x_pos, y: this.item_rects[index].y - this.y_pos};
+                }
                 this.z_index = 1;
-                self.set_rect();
             };
             this.expanded_functions.drag = (event) => {
-                for (const item_ref of this.item_refs) {
-                    const item_instance = graph_view.$refs[item_ref];
-                    var delta = { x: self.x_pos - self.leftbound, y: self.y_pos - self.topbound };
-                    item_instance.move_by(delta.x, delta.y);
+                for (let index = 0; index < this.item_rects.length; index++) {
+                    let rect_addr = this.item_rects[index];
+                    rect_addr.x = this.x_pos + offsets[index].x;
+                    rect_addr.y = this.y_pos + offsets[index].y;
                 }
-                self.set_rect();
             };
             this.expanded_functions.drag_end = (event) => {
 
             };
         },
         mounted () {
-            this.update_items();
+            // Determine initial rect pre bounding setup
+            let rect = this.$el.getBoundingClientRect();
+            this.base_height = rect.height;
+            this.base_width = rect.width;
+
+            // Determine new calculated rect & bounds 
+            this.set_elements();
             this.set_rect();
+            
+            // Watch for changes 
+            this.$watch('item_rects', this.set_rect, {deep: true});
         },
         methods: {
-            pointer_move (event) {
-                const eventBuilder = new CustomEvent('pointermove', { 
-                    clientX: event.clientX, 
-                    clientY: event.clientY,
-                    // bubbles: true,
-                    cancelable: true
+            set_elements () {
+                this.item_rects = [];
+                // Set inner elements rect's and watch them later on using vue reactivity 
+                this.$props.data.contained_elements.forEach((element) => { 
+                    let rect_addr = element.type === 'i' ? graph_view.items.find((item) => item.id === element.id).rect : graph_view.groups.find((group) => group.id === element.id).rect;
+                    this.item_rects.push(rect_addr);
                 });
-                graph_view.$refs['gv_lines'].dispatchEvent(eventBuilder); 
-            },
-            update_items () {
-                this.item_refs = [];
-                for (const group_item of graph_view.group_items) {
-                    if (group_item.group_id === this.component_id) {
-                        this.item_refs.push('i'+group_item.item_id);
-                        graph_view.$refs['i'+group_item.item_id].group_container = this;
-                    }
-                }
-                if(this.item_refs.length <= 1) this.on_delete();
+
+                // Delete groups of less than 1 elements 
+                if(this.item_rects.length <= 1) this.on_delete();
             }, 
-            set_rect() {
-                this.leftbound = Number.MAX_SAFE_INTEGER;
-                this.topbound  = Number.MAX_SAFE_INTEGER;
-                this.rightbound = -Number.MAX_SAFE_INTEGER;
-                this.bottombound =  -Number.MAX_SAFE_INTEGER;
-                for (const item_ref of this.item_refs) {
-                    const item_instance  = graph_view.$refs[item_ref];
-                    this.leftbound   =  Math.min(item_instance.x_pos, this.leftbound);
-                    this.bottombound =  Math.max(item_instance.y_pos + item_instance.$el.offsetHeight , this.bottombound);
-                    this.rightbound  =  Math.max(item_instance.x_pos + item_instance.$el.offsetWidth, this.rightbound);
-                    this.topbound    =  Math.min(item_instance.y_pos, this.topbound);
-                    item_instance.z_index = this.z_index + 1;
-                }
-                this.$props.position.x = this.leftbound;
-                this.$props.position.y = this.topbound;
+            set_rect () {
+                // Determine bounds 
+                let min_x = Math.min(...this.item_rects.map((rect) => rect.x));
+                let min_y = Math.min(...this.item_rects.map((rect) => rect.y));
+                let max_x = Math.max(...this.item_rects.map((rect) => rect.x + rect.width));
+                let max_y = Math.max(...this.item_rects.map((rect) => rect.y + rect.height));
+
+
+                // Update rect data 
+                this.$props.rect.x = min_x;
+                this.$props.rect.y = min_y;
+                this.$props.rect.width = max_x - min_x + this.base_width;
+                this.$props.rect.height = max_y - min_y + this.base_height;
             },
             on_delete () {
-                // Delete element from the graph
                 let id = this.component_id;
-                graph_view.group_items = graph_view.group_items.filter((group_item) => {
-                    if (group_item.group_id !== id) {
-                        return true;
-                    } else {
-                        graph_view.$refs['i'+group_item.item_id].group_container = null;
-                    }
-                    
-                });
+
+                // Delete element from the graph
                 graph_view.groups = graph_view.groups.filter((group) => group.id !== id);
-            }
+            },
         }, 
         computed: {
             transformation () {
                 return {
-                    transform: `translate(${this.$props.position.x}px,${this.$props.position.y}px)`,
+                    transform: `translate(${this.$props.rect.x}px,${this.$props.rect.y}px)`,
                     'z-index': 1
                 }
             }
@@ -121,19 +110,16 @@
     <div class="group" color="#8789ff"
         :style="transformation"
         @pointerdown.prevent="drag_start"
-        @pointermove.prevent="pointer_move"
         @pointerup.prevent="drag_end"
         >
         
-        <div class="group_info"
-        :style="{'min-width': `${Math.abs(leftbound-rightbound) + 1}px`}">
-
+        <div class="group_info">
             <v-avatar left class="group_type darken-4 green">G</v-avatar>
             <div style="display: inline;">{{ name }}</div>
         </div>
         
         <div class="group_container" 
-        :style="{'height': `${Math.abs(topbound-bottombound)}px`, 'width': `${Math.abs(leftbound-rightbound)}px`}">
+        :style="{'height': `${rect.height - base_height }px`, 'width': `${rect.width - base_width}px`}">
 
         </div>
     </div>

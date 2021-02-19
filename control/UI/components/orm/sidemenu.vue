@@ -27,11 +27,11 @@
                 drawer: 0,
                 showSideMenu: false,
                 actions: [ {name: 'add-item', icon: 'fa fa-plus', text: "Add Item"},
-                 {name: 'add-relation', icon: 'fa fa-arrow-right', text: "Add Relation"},
-                 {name: 'delete-element', icon: 'far fa-trash-alt', text: "Delete Tool"},
-                 {name:'add-enum', icon: 'fas fa-cubes', text: "Add Enum"}, 
-                 {name:'add-enum-type', icon: 'fas fa-cube', text: "Add Enum Type"},
-                 {name:'add-group', icon: 'fa-object-group', text: "Add Group"}]
+                    {name: 'add-relation', icon: 'fa fa-arrow-right', text: "Add Relation"},
+                    {name: 'delete-element', icon: 'far fa-trash-alt', text: "Delete Tool"},
+                    {name:'add-enum', icon: 'fas fa-cubes', text: "Add Enum"}, 
+                    {name:'add-enum-type', icon: 'fas fa-cube', text: "Add Enum Type"},
+                    {name:'add-group', icon: 'fa-object-group', text: "Add Group"}]
             }
         },
         created () {

@@ -81,6 +81,9 @@
                 this.$props.rect.width = max_x - min_x + this.base_width;
                 this.$props.rect.height = max_y - min_y + this.base_height;
             },
+            on_context () {
+                
+            },
             move_by (dx, dy) {
                 this.$props.data.contained_elements.forEach((element) => {
                     let uid = element.type + element.id;
@@ -109,6 +112,7 @@
     <div class="group" color="#8789ff"
         :style="transformation" :class="{ selected }"
         @pointerdown.prevent="drag_start"
+        @contextmenu.prevent="on_context"
         @pointerup.prevent="drag_end"
         >
         

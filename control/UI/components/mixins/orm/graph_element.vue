@@ -134,6 +134,10 @@
 
                 this.expanded_functions.drag(this.last_event);
             },
+            on_context (event) {
+                event.preventDefault();
+                console.log(event);
+            },
             move_by (dx, dy) {
                 this.$props.rect.x += dx;
                 this.$props.rect.y += dy;

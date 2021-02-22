@@ -157,6 +157,7 @@
     <div class="enum" color="#8789ff" :class="{ ghost_mode }"
         :style="transformation"
         @pointerdown.prevent="drag_start"
+        @contextmenu.prevent="on_context"
         @pointerup.prevent="drag_end">
             <v-avatar left class="enum_type darken-4 red" >E</v-avatar>
             <div style="display: inline;">{{ uid }}</div>

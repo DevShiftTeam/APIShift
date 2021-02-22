@@ -104,6 +104,7 @@
     <div class="item" :class="{ selected , ghost_mode }" color="#8789ff"
         :style="transformation"
         @pointerdown.prevent="drag_start"
+        @contextmenu.prevent="on_context"
         @pointerup.prevent="drag_end">
             <v-avatar left class="item_type darken-4" :class="is_relation ? 'purple' : 'blue'">{{ is_relation ? 'R' : 'I'}}</v-avatar>
             <div style="display: inline;">{{ component_id }}</div>

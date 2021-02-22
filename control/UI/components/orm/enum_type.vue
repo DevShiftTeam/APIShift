@@ -63,6 +63,9 @@
         methods: {
             render_needed () {
             },
+            on_context() {
+
+            },
             on_delete() {
                 let id = this.component_id, parent_enum;
 
@@ -92,6 +95,7 @@
     <div class="type" color="#8789ff" :class="{ ghost_mode }"
         :style="transformation" 
         @pointerdown.prevent="drag_start"
+        @contextmenu.prevent="on_context"
         @pointerup.prevent="drag_end">
             <v-avatar left class="type_type darken-4 grey">T</v-avatar>
             <div style="display: inline;">{{ uid }}</div>

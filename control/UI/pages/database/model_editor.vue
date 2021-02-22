@@ -120,6 +120,7 @@ const loginVue=require("../login.vue");
                         return this.id; 
                     }
                 },
+                relation_factory: {relate_from , relate_to, relation_type},
                 void_point: { x: -Number.MAX_SAFE_INTEGER, y: -Number.MAX_SAFE_INTEGER },  
                 init_rect: {x:0, y:0},
                 cursor_state: {type: "default"}
@@ -359,6 +360,32 @@ const loginVue=require("../login.vue");
             delete_line ( line_uid ) {  
                     // Queue deletion to next frame execution due to potential race conditions
                     setTimeout(() => graph_view.lines = graph_view.lines.filter((line) => line.line_uid !== line_uid),0);
+            },
+            relation_builder ( relate_from = {}, relate_to = {}, relate_type) {
+                if (Object.keys(relate_from) !== 0) {
+                    this.relation_factory['from'] = relate_from;
+                }
+                if (Object.keys(relate_to) !== 0) {
+                    this.relation_factory['to'] = relate_to;
+                }
+                if (relate_type) {
+                    this.relation_factory['type'] = relate_type;
+                }
+                
+                // All properties are set 
+                if (Object.values(this.relation_factory).every((v) => v)) {
+                    let from = { type: this.relation_factory.from.type , id: this.relation_factory.from.id };
+                    let to = { type: this.relation_factory.from.type , id: this.relation_factory.from.id };
+                    let type = this.relation_factory.type;
+                    let rect = {
+                        x: (this.relation_factory.from.rect.x + this.relation_factory.from.rect.x) / 2,
+                        y: (this.relation_factory.from.rect.y + this.relation_factory.from.rect.y) / 2,
+                        width: 0,
+                        height: 0 
+                    };
+                    
+                    this.create_element_on_runtime('item', { name: 'relation', rect, data: {from, to, type}});
+                } else this.cursor_state = Object.assign({}, { state: 'create'})
             },
             create_element_on_runtime (type, properties = {}) { 
                 const common = { name: properties.name, 

@@ -120,7 +120,7 @@ const loginVue=require("../login.vue");
                         return this.id; 
                     }
                 },
-                relation_factory: {relate_from , relate_to, relation_type},
+                relation_factory: {relate_from : 0, relate_to : 0, relation_type : 0},
                 void_point: { x: -Number.MAX_SAFE_INTEGER, y: -Number.MAX_SAFE_INTEGER },  
                 init_rect: {x:0, y:0},
                 cursor_state: {type: "default"}

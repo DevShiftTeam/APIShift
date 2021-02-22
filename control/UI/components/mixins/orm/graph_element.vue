@@ -134,12 +134,17 @@
 
                 this.expanded_functions.drag(this.last_event);
             },
+            on_context (event) {
+                event.preventDefault();
+                console.log(event);
+            },
             move_by (dx, dy) {
                 this.$props.rect.x += dx;
                 this.$props.rect.y += dy;
             },
             get_lines () {
-                return graph_view.lines.filter((line) => line.from_uid === this.uid || line.to_uid === this.uid);
+                return graph_view.lines.filter((line) => (line.src_info.id === this.component_id & line.src_info.type === this.component_type ) 
+                                                || (line.dest_info.id === this.component_id & line.dest_info.type === this.component_type ) );
             },
             // Update lines explicitilly 
             update_lines () {
@@ -176,17 +181,17 @@
             component_type () {
                 return this.uid[0];
             },
-            in_group () {
+            group_owner () {
                 var id = this.component_id;
                 var type = this.component_type;
 
-                let in_group = false;
+                let group_owner = null;
                 graph_view.groups.forEach((group) =>  {
                     if (group.data.contained_elements.find((element) => element.id === id && element.type === type)) {
-                        in_group = true;
+                        group_owner = group;
                     }
                 });
-                return in_group;
+                return group_owner;
             }
         }
     };

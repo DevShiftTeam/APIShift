@@ -66,8 +66,8 @@
             on_delete() {
                 // Delete lines from the graph & connected relations recursivly
                 this.get_lines().forEach(line => {
-                    let to_instance = graph_view.$refs[line.to_uid];
-                    let from_instance = graph_view.$refs[line.from_uid];
+                    let to_instance = graph_view.$refs[line.dest_info.type + line.dest_info.id];
+                    let from_instance = graph_view.$refs[line.src_info.type + line.src_info.id];
                     
                     graph_view.delete_line(line.line_uid);
 
@@ -84,14 +84,13 @@
                 let id = this.component_id;
                 graph_view.items = graph_view.items.filter((item) => item.id !== id);
 
-                // Delete element connections from enum's 
-                graph_view.item_enums = graph_view.item_enums.filter((item_enum) => item_enum.item_id !== id);
-
                 // Remove element from group and recalculate group boundries if exists
-                if (!this.in_group) return;
-                graph_view.group_items = graph_view.group_items.filter((group_item) => group_item.item_id !== id);
-                this.group_container.update_items();
-                this.group_container.set_rect();
+                if (this.group_owner) {
+                    let group_instance = graph_view.$refs['g' + this.group_owner.id];
+                    this.group_owner.data.contained_elements = this.group_owner.data.contained_elements.filter((element) => element.id !== id);
+                    group_instance.set_elements();
+                    group_instance.set_rect();
+                }
             },
             render_needed () {
             }
@@ -105,6 +104,7 @@
     <div class="item" :class="{ selected , ghost_mode }" color="#8789ff"
         :style="transformation"
         @pointerdown.prevent="drag_start"
+        @contextmenu.prevent="on_context"
         @pointerup.prevent="drag_end">
             <v-avatar left class="item_type darken-4" :class="is_relation ? 'purple' : 'blue'">{{ is_relation ? 'R' : 'I'}}</v-avatar>
             <div style="display: inline;">{{ component_id }}</div>

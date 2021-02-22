@@ -37,25 +37,25 @@
                                 label: "Admin Password", name: "password", icon: "lock", type: "password", data: "",
                                 regex: "^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{8,})", format: "At least 8 characters, with numbers and characters"
                             },
-                            { label: "Repeat Password", name: "repeat_password", icon: "fas fa-redo", type: "password", data: "" }
+                            { label: "Repeat Password", name: "repeat_password", icon: "mdi-repeat", type: "password", data: "" }
                         ]
                     },
                     {
                         name: "Database configurations",
                         fields: [
-                            {label: "DB Host", name: "db_host", icon: "fas fa-database", type: "text", data: "127.0.0.1" },
-                            {label: "DB Post", name: "db_port", icon: "fas fa-cloud", type: "number", data: 3306 },
-                            {label: "DB User", name: "db_user", icon: "person", type: "text", data: "root" },
-                            {label: "DB Name", name: "db_name", icon: "fa fa-id-card", type: "text", data: "" },
-                            { label: "DB Password", name: "db_pass", icon: "lock", type: "password", data: "", can_empty: true }
+                            {label: "DB Host", name: "db_host", icon: "mdi-server", type: "text", data: "127.0.0.1" },
+                            {label: "DB Post", name: "db_port", icon: "mdi-cloud", type: "number", data: 3306 },
+                            {label: "DB User", name: "db_user", icon: "mdi-account", type: "text", data: "root" },
+                            {label: "DB Name", name: "db_name", icon: "mdi-database", type: "text", data: "" },
+                            { label: "DB Password", name: "db_pass", icon: "mdi-lock", type: "password", data: "", can_empty: true }
                         ]
                     },
                     {
                         name: "Cache Configurations",
                         fields: [
-                            {label: "Cache Host", name: "cc_host", icon: "fas fa-database", type: "text", data: "127.0.0.1", values: [1, 2] },
-                            {label: "Cache Port", name: "cc_port", icon: "fas fa-cloud", type: "text", data: 6379, values: [1, 2] },
-                            {label: "Cache Pass", name: "cc_pass", icon: "lock", type: "password", data: "", values: [1] }
+                            {label: "Cache Host", name: "cc_host", icon: "mdi-database", type: "text", data: "127.0.0.1", values: [1, 2] },
+                            {label: "Cache Port", name: "cc_port", icon: "mdi-cloud", type: "text", data: 6379, values: [1, 2] },
+                            {label: "Cache Pass", name: "cc_pass", icon: "mdi-lock", type: "password", data: "", values: [1] }
                         ],
                         selector: { label: "Cache System", name: "cc_system", items: [ 
                                 { text: "No Cache", value: 3 },
@@ -67,9 +67,9 @@
                     {
                         name: "Site data",
                         fields: [
-                            {label: "Site Title", name: "site_name", icon: "fas fa-globe", type: "text", data: "" },
-                            {label: "Site Description", name: "site_desc", icon: "fas fa-paragraph", type: "text", data: "" },
-                            {label: "Site Keys", name: "site_keys", icon: "fas fa-key", type: "text", data: "" }
+                            {label: "Site Title", name: "site_name", icon: "mdi-web", type: "text", data: "" },
+                            {label: "Site Description", name: "site_desc", icon: "mdi-form-textboxt", type: "text", data: "" },
+                            {label: "Site Keys", name: "site_keys", icon: "mdi-key-variant", type: "text", data: "" }
                         ]
                     }
                 ],
@@ -242,11 +242,11 @@
 </script>
 
 <template>
-    <v-main>
+    <v-main class="center-screen">
         <v-container fluid fill-height>
             <v-layout align-center justify-center>
-                <v-flex xs12 sm8 md4>
-                    <v-card class="elevation-12">
+                <div>
+                    <v-card min-width="400px" min-height="300px" class="elevation-12">
                         <v-toolbar>
                             <v-toolbar-title>Install System > {{ steps[current_step].name }}</v-toolbar-title>
                             <v-spacer></v-spacer>
@@ -254,7 +254,7 @@
                             <v-tooltip bottom>
                             <template v-slot:activator="{ on }">
                                 <v-btn class="lightbulb" v-on="on" icon large target="_blank" v-on:click="toggleDarkTheme()">
-                                    <v-icon v-if="app.$vuetify.theme.dark">fas fa-lightbulb</v-icon>
+                                    <v-icon v-if="app.$vuetify.theme.dark">mdi-lightbulb</v-icon>
                                     <v-icon v-else>fas fa-moon</v-icon>
                                 </v-btn>
                             </template>
@@ -264,7 +264,7 @@
                             <v-tooltip v-if="current_step != 0" bottom>
                             <template v-slot:activator="{ on }">
                                 <v-btn class="prev_step" v-on="on" icon large target="_blank" v-on:click="prevStep()">
-                                <v-icon>fas fa-backward</v-icon>
+                                <v-icon>mdi-chevron-left</v-icon>
                                 </v-btn>
                             </template>
                             <span>Previous Step</span>
@@ -273,7 +273,7 @@
                             <v-tooltip v-if="current_step != steps.length - 1" bottom>
                             <template v-slot:activator="{ on }">
                                 <v-btn class="next_step" v-on="on" icon large target="_blank" v-on:click="nextStep()">
-                                <v-icon>fas fa-forward</v-icon>
+                                <v-icon>mdi-chevron-right</v-icon>
                                 </v-btn>
                             </template>
                             <span>Next Step</span>
@@ -286,7 +286,7 @@
                                 :dismissible="loader.dismissible !== undefined && loader.dismissible"
                                 absolute
                                 bottom
-                                color="deep-purple lighten-3"
+                                color="primary"
                             ></v-progress-linear>
                         </v-toolbar>
 
@@ -311,10 +311,10 @@
 
                         <v-card-actions v-if="isDataFilled()">
                             <v-spacer></v-spacer>
-                            <v-btn text color="purple accent-4" v-on:click="installSystem()">Submit</v-btn>
+                            <v-btn text color="primary accent-4" v-on:click="installSystem()">Submit</v-btn>
                         </v-card-actions>
                     </v-card>
-                </v-flex>
+                </div>
             </v-layout>
         </v-container>
     </v-main>
@@ -327,5 +327,13 @@
 }
 .prev_step {
     margin-right: 0px !important;
+}
+.center-screen{
+        padding: 0px;
+    display: flex;
+    height: 100%;
+    width: 100%;
+    align-self: center;
+    justify-content: center;
 }
 </style>

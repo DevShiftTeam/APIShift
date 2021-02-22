@@ -25,17 +25,17 @@
                 item: 3,
                 items: [
                     {
-                        icon: 'fas fa-user',
+                        icon: 'mdi-account',
                         title: 'Manage Sessions',
                         subtitle: 'Create session structures and hierarchy as you desire easily'
                     },
                     {
-                        icon: 'fa fa-database',
+                        icon: 'mdi-database',
                         title: 'Manage Database Structure & Objects',
                         subtitle: 'Create Item & Relations between to define application\'s data'
                     },
                     {
-                        icon: 'fas fa-lock',
+                        icon: 'mdi-lock',
                         title: 'Manage Access To Controllers & Data',
                         subtitle: 'Define which functions and data a user can access'
                     }

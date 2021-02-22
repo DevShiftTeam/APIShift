@@ -320,7 +320,7 @@
                                 :dismissible="loader.dismissible !== undefined && loader.dismissible"
                                 absolute
                                 bottom
-                                color="deep-purple lighten-3"
+                                color="primary"
                             ></v-progress-linear>
                 </v-app-bar>
 

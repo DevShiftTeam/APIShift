@@ -98,7 +98,7 @@
         @contextmenu.prevent="on_context"
         @pointerup.prevent="drag_end">
             <v-avatar left class="type_type darken-4 grey">T</v-avatar>
-            <div style="display: inline;">{{ uid }}</div>
+            <div style="display: inline;">{{ name }}</div>
     </div>
 </template>
 

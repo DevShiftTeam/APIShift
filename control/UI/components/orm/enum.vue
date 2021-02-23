@@ -160,7 +160,7 @@
         @contextmenu.prevent="on_context"
         @pointerup.prevent="drag_end">
             <v-avatar left class="enum_type darken-4 red" >E</v-avatar>
-            <div style="display: inline;">{{ uid }}</div>
+            <div style="display: inline;">{{ name }}</div>
             <div class="enum_types" :style="{'height': `${container_height + 5}px`,'width': `${container_width}px`}"></div>
     </div>
 </template>

@@ -29,7 +29,7 @@ const loginVue=require("../login.vue");
         data () {
             return {
                 drawer: null,
-                // Components 
+                // Components
                 item_comp: APIShift.API.getComponent('orm/item', true),
                 enum_comp: APIShift.API.getComponent('orm/enum', true),
                 group_comp: APIShift.API.getComponent('orm/group', true),
@@ -40,11 +40,13 @@ const loginVue=require("../login.vue");
                 items: [
                     { name: "wait", id: 1, rect: { x: 20, y: 0, width: 0, height: 0 }, is_relation: false, data: {} },
                     { name: "haha", id: 2, rect: { x: 220, y: 200, width: 0, height: 0}, is_relation: false, data: {} },
-                    { name: "rela", id: 3, rect: { x: 120, y: 50 , width: 0, height: 0}, is_relation: true, data: {
-                        from: { id: 1, type: 'i' },
-                        to: { id: 2, type: 'i' },
-                        type: 0
-                    } }
+                    { name: "rela", id: 3, rect: { x: 120, y: 50 , width: 0, height: 0}, is_relation: true,
+                        data: {
+                            from: { id: 1, type: 'i' },
+                            to: { id: 2, type: 'i' },
+                            type: 0
+                        }
+                    }
                 ],  
                 enums: [
                     { name: "Enum", id: 1, rect: { x: 50, y: 100, width: 0, height: 0},

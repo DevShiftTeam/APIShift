@@ -99,7 +99,7 @@
             updateSessionStates: function() {
                 // Get all sessions
                 APIShift.API.request("Admin\\Session\\Main", "getAllSessionStates", {}, function(response) {
-                    if(response.status == true) handler.states_collection = Object.assign({}, response.data);
+                    if(response.status == APIShift.API.status_codes.SUCCESS) handler.states_collection = Object.assign({}, response.data);
                     else APIShift.API.notify(response.data, 'error');
                 });
 

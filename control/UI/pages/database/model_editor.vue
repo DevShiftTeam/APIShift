@@ -36,7 +36,7 @@ const loginVue=require("../login.vue");
                 enum_type_comp: APIShift.API.getComponent('orm/enum_type', true),
                 line_comp: APIShift.API.getComponent('orm/line', true),
                 selection_comp: APIShift.API.getComponent('orm/selection_box', true),
-                sidemenu_comp: APIShift.API.getComponent('orm/sidemenu', true),
+                side_menu_comp: APIShift.API.getComponent('orm/side_menu', true),
                 items: [
                     { name: "wait", id: 1, rect: { x: 20, y: 0, width: 0, height: 0 }, is_relation: false, data: {} },
                     { name: "haha", id: 2, rect: { x: 220, y: 200, width: 0, height: 0}, is_relation: false, data: {} },
@@ -481,8 +481,7 @@ const loginVue=require("../login.vue");
             @pointerup="pointer_up"
             @pointercancel="pointer_up"
             :style="{ 'overflow' : 'hidden' }">
-        <component ref="sidemenu" 
-            :is="sidemenu_comp">
+        <component ref="side_menu" :is="side_menu_comp">
         </component>
         <!-- The center element allow us to create a smart camera that positions the elements without needed to re-render for each element -->
         <div ref="gv_center" id="graph_center" :style="{ 'transform': 'translate(' + camera.x + 'px, ' + camera.y + 'px) scale(' + scale + ')'}">

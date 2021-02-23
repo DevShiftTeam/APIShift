@@ -37,13 +37,21 @@
         },
         created () {
             const self = this;
-
-            // We use the type to differentiate between objects
-            this.type = this.$props.is_relation ? 'relation' : 'item';
+            let id = this.component_id;
+            let type = this.component_type;
+            let item_info = { id, type };
             
             this.expanded_functions.drag_start = (event) => {
 
+                    if (graph_view.cursor_state.type === 'create' && graph_view.cursor_state.data === 'add-relation') {
+                        if (!graph_view.relation_factory.from) {
+                            graph_view.relation_builder(item_info, null, 1);
+                        } else if (!graph_view.relation_factory.to) {
+                            graph_view.relation_builder(null, item_info, 1);
+                        }        
+                    }
             };
+
             this.expanded_functions.drag = (event) => {
                 if (self.group_container) {
                     self.group_container.set_rect();
@@ -56,7 +64,7 @@
         }, 
         mounted () {
             // Draw relation lines
-            if(this.$props.is_relation) {
+            if(this.is_relation) {
                 let self_data = { type: 'i', id: this.component_id }
                 graph_view.create_line(this.$props.data.from, self_data, { item_to_relation: true, relate_type: this.$props.data.type });
                 graph_view.create_line(self_data, this.$props.data.to, { relation_to_item: true, relate_type: this.$props.data.type });
@@ -96,6 +104,9 @@
             }
         },
         computed: {
+            is_relation () {
+                return this.$props.data.is_relation;
+            }
         }
     }
 </script>

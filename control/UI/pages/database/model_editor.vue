@@ -38,9 +38,10 @@ const loginVue=require("../login.vue");
                 selection_comp: APIShift.API.getComponent('orm/selection_box', true),
                 sidemenu_comp: APIShift.API.getComponent('orm/sidemenu', true),
                 items: [
-                    { name: "wait", id: 1, rect: { x: 20, y: 0, width: 0, height: 0 }, is_relation: false, data: {} },
-                    { name: "haha", id: 2, rect: { x: 220, y: 200, width: 0, height: 0}, is_relation: false, data: {} },
-                    { name: "rela", id: 3, rect: { x: 120, y: 50 , width: 0, height: 0}, is_relation: true, data: {
+                    { name: "wait", id: 1, rect: { x: 20, y: 0, width: 0, height: 0 }, data: { is_relation: false } },
+                    { name: "haha", id: 2, rect: { x: 220, y: 200, width: 0, height: 0}, data: { is_relation: false } },
+                    { name: "rela", id: 3, rect: { x: 120, y: 50 , width: 0, height: 0}, data: {
+                        is_relation: true,
                         from: { id: 1, type: 'i' },
                         to: { id: 2, type: 'i' },
                         type: 0
@@ -120,7 +121,7 @@ const loginVue=require("../login.vue");
                         return this.id; 
                     }
                 },
-                relation_factory: {relate_from : 0, relate_to : 0, relation_type : 0},
+                relation_factory: {from : 0, to : 0, type : 0},
                 void_point: { x: -Number.MAX_SAFE_INTEGER, y: -Number.MAX_SAFE_INTEGER },  
                 init_rect: {x:0, y:0},
                 cursor_state: {type: "default"}
@@ -276,7 +277,7 @@ const loginVue=require("../login.vue");
                     graph_view.$refs['s_box'].end_select();
                 }
 
-                this.cursor_state = Object.assign({}, {type: 'default'});
+                if(this.cursor_state.data !== 'add-relation') this.cursor_state = Object.assign({}, {type: 'default'});
                 // Reset drag event to none
                 this.drag_handler = window.empty_function;
 
@@ -323,9 +324,7 @@ const loginVue=require("../login.vue");
                             contained_elements.push({ type: 'i', id: item.id });
                             item_instance.selected = false;
                         }
-                        console.log(item_instance.group_owner);
                     });
-                    console.log(contained_elements);
                     this.groups.forEach(group => {
                         let group_instance = graph_view.$refs[`g${group.id}`];
                         if (group_instance.selected) {
@@ -362,10 +361,10 @@ const loginVue=require("../login.vue");
                     setTimeout(() => graph_view.lines = graph_view.lines.filter((line) => line.line_uid !== line_uid),0);
             },
             relation_builder ( relate_from = {}, relate_to = {}, relate_type) {
-                if (Object.keys(relate_from) !== 0) {
-                    this.relation_factory['from'] = relate_from;
+                if (relate_from && Object.keys(relate_from) !== 0) {
+                    this.relation_factory['from'] = relate_from;    
                 }
-                if (Object.keys(relate_to) !== 0) {
+                if (relate_to && Object.keys(relate_to) !== 0) {
                     this.relation_factory['to'] = relate_to;
                 }
                 if (relate_type) {
@@ -375,17 +374,26 @@ const loginVue=require("../login.vue");
                 // All properties are set 
                 if (Object.values(this.relation_factory).every((v) => v)) {
                     let from = { type: this.relation_factory.from.type , id: this.relation_factory.from.id };
-                    let to = { type: this.relation_factory.from.type , id: this.relation_factory.from.id };
+                    let to = { type: this.relation_factory.to.type , id: this.relation_factory.to.id };
                     let type = this.relation_factory.type;
+
+                    let element_from = this.get_element_by_info(from);
+                    let element_to = this.get_element_by_info(to);
+
                     let rect = {
-                        x: (this.relation_factory.from.rect.x + this.relation_factory.from.rect.x) / 2,
-                        y: (this.relation_factory.from.rect.y + this.relation_factory.from.rect.y) / 2,
+                        x: (element_from.rect.x + element_to.rect.x) / 2,
+                        y: (element_from.rect.y + element_to.rect.y) / 2,
                         width: 0,
                         height: 0 
                     };
-                    
-                    this.create_element_on_runtime('item', { name: 'relation', rect, data: {from, to, type}});
-                } else this.cursor_state = Object.assign({}, { state: 'create'})
+
+                    // Reset factory and create new relation element
+                    this.relation_factory = {from: 0,to: 0,type: 0};
+                    this.cursor_state = Object.assign({}, { type: 'default' });
+                    this.create_element_on_runtime('item', { name: 'relation', rect , data: {is_relation: true,from, to, type}});
+
+                } else this.cursor_state = Object.assign({}, { type: 'create', data: 'add-relation'});
+                
             },
             create_element_on_runtime (type, properties = {}) { 
                 const common = { name: properties.name, 
@@ -403,7 +411,6 @@ const loginVue=require("../login.vue");
                 }
                 if (type === 'enum-type') {
                     let enum_type_id = Math.max(...graph_view.enum_types.map(t => t.id),0) + 1;
-                    console.log();
                     graph_view.enum_types.push({...common, id: enum_type_id});
                 }
                 if (type === 'group') {
@@ -439,6 +446,28 @@ const loginVue=require("../login.vue");
                 var yOverlap = Math.max(0, Math.min(rect1.bottom, rect2.bottom) - Math.max(rect1.top, rect2.top));
 
                 return  (xOverlap * yOverlap) > 0 ;
+            },
+            
+            // Info is represented as {id,type} object, this function gets an Info object and translates it to the matching graph element
+            get_element_by_info (info) {
+                let element;
+                switch (info.type) {
+                    case 'i':
+                        element = graph_view.items.find((i) => i.id === info.id);
+                        break;
+                    case 'e':
+                        element = graph_view.enums.find((e) => e.id === info.id);
+                        break;
+                    case 't':
+                        element = graph_view.types.find((t) => t.id === info.id);
+                        break;
+                    case 'g':
+                        element = graph_view.groups.find((g) => g.id === info.id);
+                        break;
+                    default:
+                        break;
+                }
+                return element;
             }
         },
         watch: {
@@ -447,26 +476,29 @@ const loginVue=require("../login.vue");
                 app.$refs.footer.updateIndex(newValue + 1);
                 window.handler.updateIndex(newValue + 1);
             },
-            cursor_state: function (state) {
-                document.body.classList.add('reset-all-cursors');
-                this.$el.classList.remove('cursor_default');
-                this.$el.classList.remove('cursor_delete');
-                this.$el.classList.remove('cursor_create');
-                this.$el.classList.remove('cursor_select');
+            cursor_state: {
+                handler: function (state) {
+                    document.body.classList.add('reset-all-cursors');
+                    this.$el.classList.remove('cursor_default');
+                    this.$el.classList.remove('cursor_delete');
+                    this.$el.classList.remove('cursor_create');
+                    this.$el.classList.remove('cursor_select');
 
-                if ( state.type === 'default') {
-                    this.$el.classList.add('cursor_default');
-                    document.body.classList.remove('reset-all-cursors');
-                }
-                if ( state.type === 'delete') {
-                    this.$el.classList.add('cursor_delete');
-                }
-                if ( state.type === 'create') {
-                    this.$el.classList.add('cursor_create');
-                }
-                if ( state.type === 'select') {
-                    this.$el.classList.add('cursor_select');
-                }
+                    if ( state.type === 'default') {
+                        this.$el.classList.add('cursor_default');
+                        document.body.classList.remove('reset-all-cursors');
+                    }
+                    if ( state.type === 'delete') {
+                        this.$el.classList.add('cursor_delete');
+                    }
+                    if ( state.type === 'create') {
+                        this.$el.classList.add('cursor_create');
+                    }
+                    if ( state.type === 'select') {
+                        this.$el.classList.add('cursor_select');
+                    }
+                },
+                deep: true
             }
         }
     }
@@ -489,7 +521,6 @@ const loginVue=require("../login.vue");
             <component
                 v-for="(item) in items"
                 :is="item_comp"
-                :is_relation="item.is_relation"
                 :key="'i'+item.id"
                 :uid="'i'+item.id"
                 :name="item.name"

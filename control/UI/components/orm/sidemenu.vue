@@ -26,9 +26,9 @@
             return {
                 drawer: 0,
                 showSideMenu: false,
-                actions: [ {name: 'add-item', icon: 'fa fa-plus', text: "Add Item"},
-                    {name: 'add-relation', icon: 'fa fa-arrow-right', text: "Add Relation"},
-                    {name: 'delete-element', icon: 'far fa-trash-alt', text: "Delete Tool"},
+                actions: [ {name: 'add-item', icon: 'mdi-plus', text: "Add Item"},
+                    {name: 'add-relation', icon: 'mdi-arrow-right', text: "Add Relation"},
+                    {name: 'delete-element', icon: 'mdi-delete-outline', text: "Delete Tool"},
                     {name:'add-enum', icon: 'fas fa-cubes', text: "Add Enum"}, 
                     {name:'add-enum-type', icon: 'fas fa-cube', text: "Add Enum Type"},
                     {name:'add-group', icon: 'fa-object-group', text: "Add Group"}]
@@ -79,7 +79,8 @@
 
 <template>
         <div class="gv_side_menu">
-            <v-btn style="min-width:0;width:56px;" tile @click.stop="showSideMenu = !showSideMenu;"><v-icon>fas fa-wrench</v-icon></v-btn>
+            <v-btn height="50px" style="min-width:0;width:56px;" v-bind:class="{ 'active-border' : showSideMenu }"
+              tile @click.stop="showSideMenu = !showSideMenu;"><v-icon>fas fa-wrench</v-icon></v-btn>
             <v-navigation-drawer class="gv_nav_drawer" v-model="showSideMenu" mini-variant :style="{'z-index': 9999}">
                 <v-list dense>
                     <v-list-item link v-for="action in actions" :key="action.name" @click="action_creator(action.name)">
@@ -105,6 +106,9 @@
 <style scoped>
 /* Please style this crap, with style */    
     /* Change this. */
+    .active-border{
+        border-right: 1px solid #4e4e4e;
+    }
     #sidemenu {
         position: absolute;
         min-width: 50px;

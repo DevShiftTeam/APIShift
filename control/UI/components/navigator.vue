@@ -157,8 +157,8 @@ module.exports = {
         target="_blank"
         v-on:click="toggleDarkTheme()"
       >
-        <v-icon v-if="isOnDarkMode()">fas fa-lightbulb</v-icon>
-        <v-icon v-else>fas fa-moon</v-icon>
+        <v-icon v-if="isOnDarkMode()">mdi-lightbulb</v-icon>
+        <v-icon v-else>mdi-moon-waxing-crescent</v-icon>
       </v-btn>
     </v-app-bar>
 
@@ -201,7 +201,7 @@ module.exports = {
         <v-divider class="my-2"></v-divider>
         <v-list-item link @click="logout()">
           <v-list-item-action>
-            <v-icon>fas fa-power-off</v-icon>
+            <v-icon>mdi-power</v-icon>
           </v-list-item-action>
           <v-list-item-content>
             <v-list-item-title> Logout </v-list-item-title>

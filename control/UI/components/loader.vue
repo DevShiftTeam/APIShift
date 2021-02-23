@@ -43,7 +43,7 @@
         <v-main>
             <v-container fluid fill-height>
                 <v-layout align-center justify-center>
-                        <v-progress-circular :size="70" :width="7" color="blue-grey lighten-5" indeterminate></v-progress-circular>
+                        <v-progress-circular :size="70" :width="7" color="primary" indeterminate></v-progress-circular>
                         <h3>{{ message }}</h3>
                 </v-layout>
             </v-container>

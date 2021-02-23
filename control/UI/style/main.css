@@ -51,10 +51,6 @@ body.reset-all-cursors * {
     width: auto;
 }
 
-.v-card__actions>.v-btn.v-btn {
-    padding: 0;
-}
-
 .vb>.vb-dragger>.vb-dragger-styler {
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;

@@ -38,7 +38,7 @@ CREATE TABLE `admin_pages` (
 
 LOCK TABLES `admin_pages` WRITE;
 /*!40000 ALTER TABLE `admin_pages` DISABLE KEYS */;
-INSERT INTO `admin_pages` VALUES (1,'Database','database','fa fa-database',0),(2,'Session','session','fas fa-user',0),(3,'Logic','logic','fas fa-tasks',0),(4,'Access','access','fas fa-lock',0),(5,'Analysis','analysis','fas fa-chart-bar',0),(6,'Extensions','extensions','fas fa-microchip',0),(7,'Issues','issues','fa fa-ticket-alt',0),(8,'Settings','settings','fas fa-cog',0),(9,'Session Access','session',NULL,4),(10,'Controller Access','controllers',NULL,4),(11,'Database Access','database',NULL,4),(12,'Data Model Editor','model_editor',NULL,1),(13,'Database Connection List','database_list',NULL,1);
+INSERT INTO `admin_pages` VALUES (1,'Database','database','mdi-database',0),(2,'Session','session','mdi-account',0),(3,'Logic','logic','mdi-graph',0),(4,'Access','access','mdi-lock',0),(5,'Analysis','analysis','mdi-chart-bar',0),(6,'Extensions','extensions','mdi-memory',0),(7,'Issues','issues','fa fa-ticket-alt',0),(8,'Settings','settings','mdi-cog-outline',0),(9,'Session Access','session',NULL,4),(10,'Controller Access','controllers',NULL,4),(11,'Database Access','database',NULL,4),(12,'Data Model Editor','model_editor',NULL,1),(13,'Database Connection List','database_list',NULL,1);
 /*!40000 ALTER TABLE `admin_pages` ENABLE KEYS */;
 UNLOCK TABLES;
 

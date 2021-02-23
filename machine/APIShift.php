@@ -9,6 +9,8 @@
 
 /**
  * If the request mode wasn't set beforehand then assume we work using PHP mode
+ * true = http api request
+ * false = hardcoded
  */
 if(!isset($REQUEST_MODE)) $GLOBALS['REQUEST_MODE'] = false;
 

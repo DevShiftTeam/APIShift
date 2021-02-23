@@ -103,7 +103,7 @@ class Authorizer {
      */
     public static function authorizeByState($state = null) {
         if($state == null) $state = SessionState::getStateID("ADMIN_STATE"); // Get admin state ID by default
-        if(SessionState::getSessionState() != $state) Status::message(Status::ERROR, "Unauthorized request");
+        if(SessionState::getSessionState() != $state) Status::message(Status::ERROR, "Unauthorized state for this request");
     }
 
     /**

@@ -72,6 +72,10 @@ class Task {
      * @return boolean Whether matching (TRUE) or not (FALSE)
      */
     private static function isDirectiveMatching($directive, $str) {
+        // Normalize data
+        $directive = strtolower($directive);
+        $str = strtolower($str);
+        
         // Check if matches directly
         if($directive == $str || $directive == '*') return true;
         

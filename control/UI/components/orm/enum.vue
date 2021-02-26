@@ -59,6 +59,7 @@
 
                         // Create enum - item connection
                         this.$props.data.connected.push(element_info); 
+                        graph_view.create_line(this.component_info, element_info, {enum_to_item: element_info.type === 'i', enum_to_group: element_info.type === 'g'});
 
                         // Move to back origin place 
                         this.$props.rect.x = start_pos.x;
@@ -142,15 +143,6 @@
             '$props.data.types': function() {
                 this.types = null;
                 this.align_types();
-            },
-            '$props.data.connected': function(after, before) {
-                console.log(after, before);
-                if (after.length >= before.length) {
-                    let element_info = after.pop(); 
-                    graph_view.create_line(this.component_info,  element_info, {enum_to_item: element_info.type === 'i' , enum_to_group: element_info.type === 'g'});   
-                } else {
-                    
-                }
             }
         }
     }

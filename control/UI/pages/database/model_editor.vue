@@ -36,7 +36,7 @@ const loginVue=require("../login.vue");
                 enum_type_comp: APIShift.API.getComponent('orm/enum_type', true),
                 line_comp: APIShift.API.getComponent('orm/line', true),
                 selection_comp: APIShift.API.getComponent('orm/selection_box', true),
-                sidemenu_comp: APIShift.API.getComponent('orm/side_menu', true),
+                side_menu_comp: APIShift.API.getComponent('orm/side_menu', true),
                 items: [
                     { name: "wait", id: 1, rect: { x: 20, y: 0, width: 0, height: 0 }, data: { is_relation: false } },
                     { name: "haha", id: 2, rect: { x: 220, y: 200, width: 0, height: 0}, data: { is_relation: false } },

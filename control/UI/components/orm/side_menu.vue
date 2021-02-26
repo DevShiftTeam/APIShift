@@ -41,7 +41,6 @@
         },
         methods: {
             action_creator(action_name) {
-                console.log(action_name);
                 switch (action_name) {
                     case 'add-item':
                         graph_view.$refs['item_builder'].build('item');

@@ -36,7 +36,7 @@ const loginVue=require("../login.vue");
                 enum_type_comp: APIShift.API.getComponent('orm/enum_type', true),
                 line_comp: APIShift.API.getComponent('orm/line', true),
                 selection_comp: APIShift.API.getComponent('orm/selection_box', true),
-                sidemenu_comp: APIShift.API.getComponent('orm/sidemenu', true),
+                sidemenu_comp: APIShift.API.getComponent('orm/side_menu', true),
                 items: [
                     { name: "wait", id: 1, rect: { x: 20, y: 0, width: 0, height: 0 }, data: { is_relation: false } },
                     { name: "haha", id: 2, rect: { x: 220, y: 200, width: 0, height: 0}, data: { is_relation: false } },
@@ -75,6 +75,7 @@ const loginVue=require("../login.vue");
                     }
                 ],
                 points: [], 
+                lookup_table: { 'i': [], 't': [], 'e': [], 'g': []},
                 lines: [
 
                 ],
@@ -99,8 +100,9 @@ const loginVue=require("../login.vue");
                     y: 0
                 },
                 selection_box: {
-                    position: { x: 0, y: 0 },
-                    data: { width: 0, height: 0 }
+                    rect: {
+                        x: 0, y: 0, width: 0, height: 0
+                    }
                 },
                 scroll_manager: {
                     id: null,
@@ -121,6 +123,7 @@ const loginVue=require("../login.vue");
                         return this.id; 
                     }
                 },
+                yes: null,
                 relation_factory: {from : 0, to : 0, type : 0},
                 void_point: { x: -Number.MAX_SAFE_INTEGER, y: -Number.MAX_SAFE_INTEGER },  
                 init_rect: {x:0, y:0},
@@ -189,8 +192,8 @@ const loginVue=require("../login.vue");
                 if (cursor_state.type === 'create') {
                     // Determine pointer position in respect to graph transformation
                     let center_rect = document.getElementById('graph_center').getBoundingClientRect();
-                    let mouse = {x: window.init_pointer.x - graph_position.x, y: window.init_pointer.y - graph_position.y };
-                    let differential = {x: center_rect.x - graph_position.x, y: center_rect.y - graph_position.y};
+                    let mouse = { x: window.init_pointer.x - graph_position.x, y: window.init_pointer.y - graph_position.y };
+                    let differential = { x: center_rect.x - graph_position.x, y: center_rect.y - graph_position.y};
                     let t_mouse = { x: (mouse.x-differential.x) / this.scale, y: (mouse.y - differential.y) / this.scale};
 
                     if (cursor_state.data === 'add-enum') {
@@ -253,8 +256,10 @@ const loginVue=require("../login.vue");
                 };
 
                 // Update scale
-                let change = 1 / (Math.sqrt((prev_diff.x * prev_diff.x + prev_diff.y * prev_diff.y) /
-                    (new_diff.x * new_diff.x + new_diff.y * new_diff.y)));
+                let change = Math.sqrt(
+                        (new_diff.x * new_diff.x + new_diff.y * new_diff.y) / 
+                        (prev_diff.x * prev_diff.x + prev_diff.y * prev_diff.y) 
+                    );
                 let new_scale = this.scale * change;
         
                 // Keep the scale on bound
@@ -320,7 +325,7 @@ const loginVue=require("../login.vue");
                     let contained_elements = [];
                     this.items.forEach(item => {
                         let item_instance = graph_view.$refs[`i${item.id}`];
-                        if (item_instance.selected && item_instance.group_owner === null) {
+                        if (item_instance.selected && item_instance.get_group() === null) {
                             contained_elements.push({ type: 'i', id: item.id });
                             item_instance.selected = false;
                         }
@@ -335,7 +340,7 @@ const loginVue=require("../login.vue");
                     graph_view.create_element_on_runtime('group', {name: 'Group', rect: {x: 0, y: 0, height: 0, width: 0}, data: {contained_elements}})
                 }                
             },
-            pan_by (dx, dy) {
+            move_camera_by (dx, dy) {
                 this.camera.x += dx;
                 this.camera.y += dy;
             },
@@ -356,9 +361,18 @@ const loginVue=require("../login.vue");
                     // Add line to system 
                     graph_view.lines.push({line_uid, src_info, dest_info, settings});
             },
-            delete_line ( line_uid ) {  
+            delete_line ( src_info = { type: '', from_id: 0}, dest_info = {type: '', to_id: 0} ) {  
+                    var line_uid, from_uid, to_uid;
+
+                    // String concatination 
+                    from_uid  = src_info.type + src_info.id;
+                    to_uid = dest_info.type + dest_info.id;
+
+                    // Line already in list 
+                    line_uid = `${from_uid}-${to_uid}`;
+
                     // Queue deletion to next frame execution due to potential race conditions
-                    setTimeout(() => graph_view.lines = graph_view.lines.filter((line) => line.line_uid !== line_uid),0);
+                    setTimeout(() => graph_view.lines = graph_view.lines.filter((line) =>  line.line_uid !== line_uid),0);
             },
             relation_builder ( relate_from = {}, relate_to = {}, relate_type) {
                 if (relate_from && Object.keys(relate_from) !== 0) {
@@ -395,6 +409,11 @@ const loginVue=require("../login.vue");
                 } else this.cursor_state = Object.assign({}, { type: 'create', data: 'add-relation'});
                 
             },
+            /**
+             * Create new element on screen according to params.
+             * @param {String} type The type to show
+             * @param {Object} properties Unique element properties to set
+             */
             create_element_on_runtime (type, properties = {}) { 
                 const common = { name: properties.name, 
                                 index: graph_view.front_z_index, 
@@ -415,7 +434,6 @@ const loginVue=require("../login.vue");
                 }
                 if (type === 'group') {
                     let group_id = Math.max(...graph_view.groups.map(g => g.id),0) + 1;
-                    
                     graph_view.groups.push({...common, id: group_id });
                 }
             },
@@ -423,52 +441,90 @@ const loginVue=require("../login.vue");
             update_graph_position() {
                 let rect = this.$el.getBoundingClientRect();
                 // Stores the current position of the graph on the screen
-                window.graph_position = {
-                    x: rect.x,
-                    y: rect.y
-                };
+                window.graph_position = { x: rect.x,
+                y: rect.y,
+                width: rect.width,
+                height: rect.height 
+                }
             },
             /**
-             * Test whether 2 graph elements are hitting each other
-             * @param {String} uid_1, @param {String} uid_1
+             * Test whether 2 graph elements hit each other on the graph.
+             * @param {Info} info_1, @param {Info} info_2
              * @returns {Boolean} 
              */
-            hittest: function(uid_1, uid_2){
-                const comp_1 = graph_view.$refs[uid_1];
-                const comp_2 = graph_view.$refs[uid_2];
+            hittest: function(info_1, info_2){
 
-                if (!comp_1 || !comp_2) return;
+                let element1 = this.get_element_by_info(info_1);
+                let element2 = this.get_element_by_info(info_2);
+                
+                if (!element1 || !element2) return null;
 
-                var rect1 = comp_1.$el.getBoundingClientRect();
-                var rect2 = comp_2.$el.getBoundingClientRect();
+                var rect1 = element1.rect;
+                var rect2 = element2.rect;
 
-                var xOverlap = Math.max(0, Math.min(rect1.right , rect2.right) - Math.max(rect1.left, rect2.left));
-                var yOverlap = Math.max(0, Math.min(rect1.bottom, rect2.bottom) - Math.max(rect1.top, rect2.top));
-
-                return  (xOverlap * yOverlap) > 0 ;
+                return !(
+                    ((rect1.y + rect1.height) < (rect2.y)) ||
+                    (rect1.y > (rect2.y + rect2.height)) ||
+                    ((rect1.x + rect1.width) < rect2.x) ||
+                    (rect1.x > (rect2.x + rect2.width))
+                );
             },
-            
-            // Info is represented as {id,type} object, this function gets an Info object and translates it to the matching graph element
-            get_element_by_info (info) {
-                let element;
-                switch (info.type) {
-                    case 'i':
-                        element = graph_view.items.find((i) => i.id === info.id);
-                        break;
-                    case 'e':
-                        element = graph_view.enums.find((e) => e.id === info.id);
-                        break;
-                    case 't':
-                        element = graph_view.types.find((t) => t.id === info.id);
-                        break;
-                    case 'g':
-                        element = graph_view.groups.find((g) => g.id === info.id);
-                        break;
-                    default:
-                        break;
+            /**
+             * Function that gets Info about an element and calucaltes its absolute position relative to the graph.
+             * @param {Info} info
+             * @returns {Rect} 
+             */
+            // TODO: Calculate rect mathematically
+            inverse_transformation (info) { 
+                let revert_rect = {
+                    x: 0,
+                    y: 0,
+                    width: 0,
+                    height: 0,
                 }
-                return element;
+
+                const instance = this.$refs[info.type + info.id];
+                if (instance) {
+                    const el_rect = instance.$el.getBoundingClientRect();
+                    revert_rect = {
+                        x: el_rect.x - window.graph_position.x,
+                        y: el_rect.y - window.graph_position.y,
+                        width: el_rect.width,
+                        height: el_rect.height,
+                    }
+                }
+                return revert_rect;
+            },
+            /**
+             * Function that gets element's Info and returns the corresponding Element.
+             * The function uses simple caching mechanism for faster Element lookup (O(1) instead of 0(n)).
+             * @param {Info} info
+             * @returns {Element} 
+             */
+            get_element_by_info (info) {
+                if(!this.lookup_table[info.type][info.id]) {
+                    switch (info.type) {
+                        case 'i':
+                            this.lookup_table['i'][info.id] = graph_view.items.find((i) => i.id === info.id);
+                            break;
+                        case 'e':
+                            this.lookup_table['e'][info.id] = graph_view.enums.find((e) => e.id === info.id);
+                            break;
+                        case 't':
+                            this.lookup_table['t'][info.id] = graph_view.enum_types.find((t) => t.id === info.id);
+                            break;
+                        case 'g':
+                            this.lookup_table['g'][info.id] = graph_view.groups.find((g) => g.id === info.id);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                return this.lookup_table[info.type][info.id];
             }
+        },
+        computed: {
+
         },
         watch: {
             front_z_index: function(newValue) {
@@ -589,7 +645,9 @@ const loginVue=require("../login.vue");
             
         </div>
         <component ref="s_box" 
-            :is="selection_comp">
+            :is="selection_comp"
+            :uid="'s0'"
+            :rect="selection_box.rect">
         </component>
     </div>
 </template>
@@ -611,6 +669,16 @@ const loginVue=require("../login.vue");
     overflow: visible;
 }
 
+.shadow {
+    border: solid white 1px;
+    display: inline-block;
+    position: absolute;
+    cursor: copy ;
+    height: 50px;
+    width: 50px;
+    background: #8789ff;
+    box-shadow: 50px 50px 50px rgba(255, 242, 94, 0); /* Removing weird trace on chrome */
+}
 #graph_view.cursor_delete {
     cursor: not-allowed !important;
 }

@@ -30,15 +30,13 @@
                 drawer: null,
             }
         },
-        created () {
+        created () {   
             var id = this.component_id;
+            var component_info = this.component_info;
 
             // If contained in enum, remove from enum and null the corresponding data 
             this.expanded_functions.drag_start = (event) => {
-                if(this.$props.data.enum_id) {
-                    graph_view.$refs['e'+this.enum_parent.id].remove_type(id);
-                    this.$props.data.enum_id = null;
-                }
+                this.remove_from_enum();
             };
             this.expanded_functions.drag = (event) => {
 
@@ -46,13 +44,13 @@
 
             // If hits Enum element, add it to Enum
             this.expanded_functions.drag_end = (event) => {
-                const enum_elements = graph_view.$el.querySelectorAll('.enum');
-                for (const enum_el of enum_elements) {
-                    let enum_instance = graph_view.$refs[enum_el.ref];
-                    if (graph_view.hittest('t' + id, enum_instance.uid) && !this.$props.data.enum_id) {
-                        enum_instance.add_type(id);
-                        this.$props.data.enum_id = enum_instance.component_id;
-                        break;
+                const hitting_enum = graph_view.enums.find(e => graph_view.hittest({type:'e', id: e.id}, component_info));
+                // Enum element has been hitted
+                if (hitting_enum) {
+                    // Type is not contained - add it to enum
+                    if (!hitting_enum.data.types.find(t => t.id === id)) {
+                        hitting_enum.data.types.push({ id });
+                        this.$props.data.enum_id = hitting_enum.id;
                     }
                 }
             };
@@ -66,16 +64,24 @@
             on_context() {
 
             },
+            remove_from_enum () {
+                let id = this.component_id;
+                if(this.$props.data.enum_id) {
+                    let enum_info = {type: 'e', id: this.$props.data.enum_id};
+                    let element_enum = graph_view.get_element_by_info(enum_info);
+                    element_enum.data.types = element_enum.data.types.filter(t => t.id !== id);
+                    this.$props.data.enum_id = null;
+                }
+            },
             on_delete() {
-                let id = this.component_id, parent_enum;
+                let id = this.component_id;
 
-                this.expanded_functions.drag_start();
                 // Detach type from enum 
-                let enum_type = graph_view.enum_types.find(e => {return e.id === id});
+                if(this.$props.data.enum_id) this.remove_from_enum();
                 
-
-                // Finnaly remove element from screen
+                // Finally remove element from screen
                 graph_view.enum_types = graph_view.enum_types.filter((enum_type) => enum_type.id !== id);
+                delete graph_view.lookup_table['t'][id];
             },
             move_to (xpos, ypos) {
                 this.$props.position.x = xpos;
@@ -98,7 +104,7 @@
         @contextmenu.prevent="on_context"
         @pointerup.prevent="drag_end">
             <v-avatar left class="type_type darken-4 grey">T</v-avatar>
-            <div style="display: inline;">{{ uid }}</div>
+            <div style="display: inline;">{{ name }}</div>
     </div>
 </template>
 

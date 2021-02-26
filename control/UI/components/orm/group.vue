@@ -52,6 +52,11 @@
             this.set_elements();
             this.set_rect();
             
+            let group_info = this.get_group();
+            if (group_info) {
+                console.log();
+                this.z_index = graph_view.$refs[group_info.type + group_info.id] - 1;
+            }
             // Watch for changes 
             this.$watch('inner_elements', this.set_rect, {deep: true});
         },
@@ -61,11 +66,16 @@
                 // Set inner elements rect's and watch them later on using vue reactivity 
                 this.$props.data.contained_elements.forEach((element) => {
                     if (element.type === 'i') this.inner_elements.push(graph_view.items.find((item) => item.id === element.id));
-                    if (element.type === 'g') this.inner_elements.push(graph_view.groups.find((group) => group.id === element.id));
+                    if (element.type === 'g') 
+                    {
+                        this.inner_elements.push(graph_view.groups.find((group) => group.id === element.id));
+                        console.log(graph_view.$refs['g' + element.id]);
+                        graph_view.$refs['g' + element.id].z_index = 1000;
+                    }
                 });
 
                 // Delete groups of less than 1 elements 
-                // if(this.inner_elements.length <= 1) this.on_delete();
+                if(this.inner_elements.length <= 1) this.on_delete();
             }, 
             set_rect () {
                 // Determine bounds 
@@ -78,7 +88,7 @@
                 // Update rect data 
                 this.$props.rect.x = min_x;
                 this.$props.rect.y = min_y;
-                this.$props.rect.width = max_x - min_x + this.base_width;
+                this.$props.rect.width = max_x - min_x;
                 this.$props.rect.height = max_y - min_y + this.base_height;
             },
             on_context () {
@@ -90,13 +100,36 @@
                     graph_view.$refs[uid].move_by(dx, dy);
                 });
             },
+            get_enums () {
+                if (!this.enums) this.enums = graph_view.enums.filter(e => e.data.connected.find(connected => connected.type + connected.id === this.uid));
+                return this.enums;
+            },
             on_delete () {
                 let id = this.component_id;
 
+
+                // Delete lines from the graph & connected relations recursivly
+                this.get_lines().forEach(line => {
+                    graph_view.delete_line(line.src_info, line.dest_info);
+                });
+                
+                // Remove item connection from enum
+                this.get_enums().forEach(e => {    
+                        e.data.connected = e.data.connected.filter( connected => connected.type + connected.id !== this.uid);
+                    }
+                );
+
                 // Delete element from the graph
                 graph_view.groups = graph_view.groups.filter((group) => group.id !== id);
+                delete graph_view.lookup_table['g'][id];
             },
         }, 
+        watch: {
+            '$props.data.contained_elements': function() {
+                this.set_elements();
+                this.set_rect();
+            }
+        },
         computed: {
             transformation () {
                 return {
@@ -122,7 +155,7 @@
         </div>
         
         <div class="group_container" 
-        :style="{'height': `${rect.height - base_height }px`, 'width': `${rect.width - base_width}px`}">
+        :style="{'height': `${rect.height - base_height }px`, 'width': `${rect.width}px`}">
 
         </div>
     </div>

@@ -32,6 +32,7 @@
                 uid: 'i',
                 drawer: null,
                 group_container: null,
+                connected_enums: null,
                 selected: false
             }
         },
@@ -41,6 +42,7 @@
             let type = this.component_type;
             let item_info = { id, type };
             
+            console.log(this.get_enums());
             this.expanded_functions.drag_start = (event) => {
 
                     if (graph_view.cursor_state.type === 'create' && graph_view.cursor_state.data === 'add-relation') {
@@ -71,13 +73,17 @@
             }
         },
         methods: {
+            get_enums () {
+                if (!this.enums) this.enums = graph_view.enums.filter(e => e.data.connected.find(connected => connected.type + connected.id === this.uid));
+                return this.enums;
+            },
             on_delete() {
                 // Delete lines from the graph & connected relations recursivly
                 this.get_lines().forEach(line => {
                     let to_instance = graph_view.$refs[line.dest_info.type + line.dest_info.id];
                     let from_instance = graph_view.$refs[line.src_info.type + line.src_info.id];
                     
-                    graph_view.delete_line(line.line_uid);
+                    graph_view.delete_line(line.src_info, line.dest_info);
 
                     if (line.settings.item_to_relation && !this.is_relation) {
                         let relation = to_instance;
@@ -88,16 +94,21 @@
                     }
                 });
 
+                // Remove item connection from enum
+                this.get_enums().forEach(e => {    
+                        e.data.connected = e.data.connected.filter( connected => connected.type + connected.id !== this.uid);
+                    }
+                );
+                
                 // Delete element from the graph
                 let id = this.component_id;
                 graph_view.items = graph_view.items.filter((item) => item.id !== id);
+                delete graph_view.lookup_table['i'][id];
 
                 // Remove element from group and recalculate group boundries if exists
-                if (this.group_owner) {
-                    let group_instance = graph_view.$refs['g' + this.group_owner.id];
-                    this.group_owner.data.contained_elements = this.group_owner.data.contained_elements.filter((element) => element.id !== id);
-                    group_instance.set_elements();
-                    group_instance.set_rect();
+                if (this.get_group()) {
+                    let group_instance = graph_view.$refs['g' + this.get_group().id];
+                    this.get_group().data.contained_elements = this.get_group().data.contained_elements.filter((element) => element.id !== id);
                 }
             },
             render_needed () {
@@ -118,7 +129,7 @@
         @contextmenu.prevent="on_context"
         @pointerup.prevent="drag_end">
             <v-avatar left class="item_type darken-4" :class="is_relation ? 'purple' : 'blue'">{{ is_relation ? 'R' : 'I'}}</v-avatar>
-            <div style="display: inline;">{{ component_id }}</div>
+            <div style="display: inline;">{{ name }}</div>
     </div>
 </template>
 

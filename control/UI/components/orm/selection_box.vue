@@ -26,10 +26,13 @@
         },
         data () {
             return {
-                leftbound: -Number.MAX_SAFE_INTEGER,
-                topbound: -Number.MAX_SAFE_INTEGER,
-                width: 0,
-                height: 0,
+                rect: {
+                    x:  -Number.MAX_SAFE_INTEGER,
+                    y:  -Number.MAX_SAFE_INTEGER,
+                    width: 0,
+                    height: 0
+                },
+                selectables: null, // Should be represented as {Info, Rect}
                 ds: { x: 0, y: 0 },
                 last_event: null,
                 graph_position: { x: 0, y: 0 }
@@ -55,81 +58,108 @@
             },
             on_select (event) {
                 this.set_rect(event);
-                graph_view.items.forEach(item => {
-                    if (graph_view.hittest('s_box', 'i' + item.id)) {
-                        if (!graph_view.$refs['i' + item.id].group_owner) graph_view.$refs['i' + item.id].selected = true;
+
+                let cmp_rects = function(rect1, rect2){
+                    return !(
+                        ((rect1.y + rect1.height) < (rect2.y)) ||
+                        (rect1.y > (rect2.y + rect2.height)) ||
+                        ((rect1.x + rect1.width) < rect2.x) ||
+                        (rect1.x > (rect2.x + rect2.width))
+                    );
+                }
+
+
+                this.get_selectables().forEach(({info, rect}) => {
+                    if (cmp_rects(this.rect, rect)) {
+                        if (!graph_view.$refs[info.type+info.id].get_group()) graph_view.$refs[info.type+info.id].selected = true;
                     } else {
-                        graph_view.$refs['i' + item.id].selected = false;
+                        graph_view.$refs[info.type+info.id].selected = false;
                     }
                 });
-                graph_view.groups.forEach(group => {
-                    if (graph_view.hittest('s_box', 'g' + group.id)) {
-                        if (!graph_view.$refs['g' + group.id].group_owner) graph_view.$refs['g' + group.id].selected = true;
-                    } else {
-                        graph_view.$refs['g' + group.id].selected = false;
-                    }
-                });
+
                 this.last_event = event;
             },
             end_select () {
-                this.leftbound = -Number.MAX_SAFE_INTEGER;
-                this.topbound  = -Number.MAX_SAFE_INTEGER;
+                this.rect.x = -Number.MAX_SAFE_INTEGER;
+                this.rect.y  = -Number.MAX_SAFE_INTEGER;
                 this.ds = Object.assign({}, {x: 0, y: 0});
                 graph_view.cursor_state = Object.assign({}, {type: 'default'});
 
                 // Stop scroll handler
                 graph_view.scroll_manager.stop();
+
+                this.selectables = null;
             },
-            on_scroll () {
-                if (this.leftbound === this.topbound) return;
+            on_scroll () { 
+                // If drag hasnt occured yet - no change in position
+                if (this.rect.x === this.rect.y) return;
+
 
                 let mouse = { x: this.last_event.pageX - window.graph_position.x, y: this.last_event.pageY - window.graph_position.y };
                 if (mouse.x < 20) {
                     this.ds.x += 5;
-                    graph_view.pan_by(5, 0);
+                    graph_view.move_camera_by(5, 0);
                 }
                 if (mouse.x > graph_view.init_rect.width - 20 ) {
                     this.ds.x += -5;
-                    graph_view.pan_by(-5, 0);
+                    graph_view.move_camera_by(-5, 0);
                 }
                 if (mouse.y < 20) {
                     this.ds.y += 5;
-                    graph_view.pan_by(0, 5);
+                    graph_view.move_camera_by(0, 5);
                 }
                 if (mouse.y > graph_view.init_rect.height - 20 ) {
                     this.ds.y += -5;
-                    graph_view.pan_by(0, -5);
+                    graph_view.move_camera_by(0, -5);
                 }
                 this.set_rect(this.last_event);
             },
             set_rect(event) {
-                this.width  = Math.abs(event.clientX - this.ds.x - this.init_pointer.x);
-                this.height = Math.abs(event.clientY - this.ds.y - this.init_pointer.y);
+                this.rect.width  = Math.abs(event.clientX - this.ds.x - this.init_pointer.x);
+                this.rect.height = Math.abs(event.clientY - this.ds.y - this.init_pointer.y);
 
                 let calcLeft, calcTop;
                 if (event.clientX > this.init_pointer.x + this.ds.x) {
                     calcLeft = this.init_pointer.x - graph_position.x + this.ds.x;
                 } else {
-                    calcLeft = this.init_pointer.x - graph_position.x + this.ds.x - this.width; 
+                    calcLeft = this.init_pointer.x - graph_position.x + this.ds.x - this.rect.width; 
                 };
 
                 if (event.clientY > this.init_pointer.y + this.ds.y) {
                     calcTop = this.init_pointer.y - graph_position.y + this.ds.y;
                 } else {
-                    calcTop = this.init_pointer.y - graph_position.y + this.ds.y - this.height; 
+                    calcTop = this.init_pointer.y - graph_position.y + this.ds.y - this.rect.height; 
                 }
 
-                this.leftbound = calcLeft;
-                this.topbound  = calcTop;
+                this.rect.x = calcLeft;
+                this.rect.y = calcTop;
+            },
+
+            get_selectables () {
+                if(!this.selectables) {
+                    const items = graph_view.items.map(item => {
+                        let info = {type: 'i', id: item.id};
+                        let rect = graph_view.inverse_transformation(info);
+                        return {info,rect};
+                    });
+                    const groups = graph_view.groups.map(item => {
+                        let info = {type: 'g', id: item.id};
+                        let rect = graph_view.inverse_transformation(info);
+                        return {info,rect};
+                    });
+
+                    this.selectables = [...items, ...groups];
+                }
+                return this.selectables;
             }
         }, 
         computed: {
             transformation () {
                 return {
-                    top: `${this.topbound}px`,
-                    left:  `${this.leftbound}px`,
-                    height:`${this.height}px`,
-                    width:`${this.width}px`,
+                    top: `${this.rect.y}px`,
+                    left:  `${this.rect.x}px`,
+                    height:`${this.rect.height}px`,
+                    width:`${this.rect.width}px`,
                     'z-index':  1000
                 }
             }

@@ -37,104 +37,175 @@
         data () {
             return {
                 uid: '',
-                src_rect: {
-                    x: 0,
-                    y: 0,
-                    width: 0,
-                    height: 0
-                },
-                dest_rect: {
-                    x: 0,
-                    y: 0,
-                    width: 0,
-                    height: 0
-                }
+                // Elements objects (for reactivity)
+                src_element: {},
+                dest_element: {},
+                // Line edges
+                src_point: {x: 0, y: 0},
+                dest_point: {x: 0, y: 0}
             }
         },
         created () {
-            this.uid = `${this.$props.from_uid}-${this.$props.to_uid}`;
+            this.uid = `${this.$props.src_info.type + this.$props.src_info.id}-${this.$props.dest_info.type + this.$props.dest_info.id}`;
+            this.src_element = graph_view.get_element_by_info(this.$props.src_info);
+            this.dest_element = graph_view.get_element_by_info(this.$props.dest_info);
         },
         mounted () {
             this.$el.ref = this.uid;
             graph_view.$refs[this.uid] = this;
-
-            // Get coresponding source rect from graph_view by source info  
-            if (this.$props.src_info.type === 'i') {
-                this.src_rect = graph_view.items.find((item) => item.id === this.$props.src_info.id).rect
-            }
-            if (this.$props.src_info.type === 'e') {
-                this.src_rect = graph_view.enums.find((item) => item.id === this.$props.src_info.id).rect
-            }
-            if (this.$props.src_info.type === 't') {
-                this.src_rect = graph_view.enum_types.find((item) => item.id === this.$props.src_info.id).rect
-            } 
-            if (this.$props.src_info.type === 'g') {
-                this.src_rect = graph_view.groups.find((item) => item.id === this.$props.src_info.id).rect
-            } 
-
-            // Get coresponding dest rect from graph_view by dest info  
-            if (this.$props.dest_info.type === 'i') {
-                this.dest_rect = graph_view.items.find((item) => item.id === this.$props.dest_info.id).rect
-            }
-            if (this.$props.dest_info.type === 'e') {
-                this.dest_rect = graph_view.enums.find((item) => item.id === this.$props.dest_info.id).rect
-            }
-            if (this.$props.dest_info.type === 't') {
-                this.dest_rect = graph_view.enum_types.find((item) => item.id === this.$props.dest_info.id).rect
-            } 
-            if (this.$props.dest_info.type === 'g') {
-                this.dest_rect = graph_view.groups.find((item) => item.id === this.$props.dest_info.id).rect
-            } 
         },
         methods: {
             update() {  
-                    // const src_item  = graph_view.$refs[this.$props.from_uid];
-                    // const dest_item = graph_view.$refs[this.$props.to_uid];
+                    let src_rect = this.src_element.rect;
+                    let dest_rect = this.dest_element.rect;
 
-                    // // Positon line edges on the leftmost-uppermost corner of the elements
-                    // this.from_position = Object.assign({}, src_item.rect);
-                    // this.to_position = Object.assign({}, dest_item.rect);
+                    if (this.$props.settings.enum_to_item) {
+                        this.src_point = {
+                            x: src_rect.x + src_rect.width / 2,
+                            y: src_rect.y + src_rect.height / 2,
+                        }
+                        this.dest_point = {
+                            x: dest_rect.x + dest_rect.width / 2,
+                            y: dest_rect.y + dest_rect.height / 2,
+                        }
+                    }
+                    else if (this.$props.settings.enum_to_group) {
 
-                    // // Position line edges properly according to line settings 
-                    // if (this.$props.settings.enum_to_item) {
-                    //     this.from_position.x += src_item.$el.offsetWidth / 2;
-                    //     this.from_position.y += src_item.$el.offsetHeight / 2;
-                    //     this.to_position.x += dest_item.$el.offsetWidth / 2;                    
-                    //     this.to_position.y += dest_item.$el.offsetHeight / 2; 
-                    // }
-                    // if (this.$props.settings.item_to_relation || this.$props.settings.relation_to_item) {
-                    //     this.from_position.x += (src_item.$el.offsetWidth);
-                    //     this.from_position.y += src_item.$el.offsetHeight / 2;
-                    //     this.to_position.y += src_item.$el.offsetHeight / 2;
-                    // }
+                        // TODO: Redo it according to specifications & make it smarter using geometry
+                        let top_line = { 
+                            x1: dest_rect.x, y1: dest_rect.y,
+                            x2: dest_rect.x + dest_rect.width, y2: dest_rect.y 
+                        };
+                        let right_line = { 
+                            x1: dest_rect.x + dest_rect.width, y1: dest_rect.y ,
+                            x2: dest_rect.x + dest_rect.width, y2: dest_rect.y + dest_rect.height 
+                        };
+                        let bottom_line = { 
+                            x1: dest_rect.x + dest_rect.width, y1: dest_rect.y + dest_rect.height,
+                            x2: dest_rect.x, y2: dest_rect.y + dest_rect.height 
+                        };
+                        let left_line = { 
+                            x1: dest_rect.x, y1: dest_rect.y + dest_rect.height,
+                            x2: dest_rect.x, y2: dest_rect.y 
+                        };
+
+                        let connector_line = {
+                            x1: src_rect.x + src_rect.width / 2, y1: src_rect.y + src_rect.height / 2,
+                            x2: dest_rect.x + dest_rect.width / 2, y2: dest_rect.y + dest_rect.height / 2 
+                        }
+
+                        /**
+                        * Calculate intersection point of 2 line segments. Line segments are represented
+                        **/
+                        function get_intersection (line1, line2) {
+                            // if the lines intersect, the result contains the x and y of the intersection (treating the lines as infinite) and booleans for whether line segment 1 or line segment 2 contain the point
+                            var denominator, a, b, numerator1, numerator2, result = {
+                                x: null,
+                                y: null
+                            };
+                            denominator = ((line2.y2 - line2.y1) * (line1.x2 - line1.x1)) - ((line2.x2- line2.x1) * (line1.y2 - line1.y1));
+
+                            // The lines might be parrallel or collinear
+                            if (denominator == 0) {
+                                return false;
+                            }
+
+                            a = line1.y1 - line2.y1;
+                            b = line1.x1 - line2.x1;
+                            numerator1 = ((line2.x2 - line2.x1) * a) - ((line2.y2 - line2.y1) * b);
+                            numerator2 = ((line1.x2 - line1.x1) * a) - ((line1.y2 - line1.y1) * b);
+                            a = numerator1 / denominator;
+                            b = numerator2 / denominator;
+
+                            // if we cast these lines infinitely in both directions, they intersect here:
+                            result.x = line1.x1 + (a * (line1.x2 - line1.x1));
+                            result.y = line1.y1 + (a * (line1.y2 - line1.y1));
+
+                            // If intersection point is on line segments 
+                            if ((a > 0 && a < 1) && (b > 0 && b < 1)) {
+                                return result
+                             } else return false;
+                        }
+
+                        let intersections = [   get_intersection(connector_line, right_line), 
+                                                get_intersection(connector_line, top_line), 
+                                                get_intersection(connector_line, bottom_line), 
+                                                get_intersection(connector_line, left_line) ];
+                        var point = intersections.find((p) => p);
+
+                        // Src point from enum's middle
+                        this.src_point = {
+                            x: connector_line.x1,
+                            y: connector_line.y1,
+                        }
+
+                        // Handle Enum inside group
+                        if (!point) {
+                            if (connector_line.y1 <= connector_line.y2) {
+                                this.dest_point = {
+                                    x: (top_line.x1 + top_line.x2) / 2,
+                                    y: top_line.y1
+                                }                               
+                            } else  {
+                                this.dest_point = {
+                                    x: (bottom_line.x1 + bottom_line.x2) / 2,
+                                    y: bottom_line.y1
+                                } 
+                            }
+                        } else {
+                            this.dest_point = {
+                                x: point.x,
+                                y: point.y,
+                            }
+                        }
+                    }
+                    else if (this.$props.settings.item_to_relation || this.$props.settings.relation_to_item) {
+                        this.src_point = {
+                            x: src_rect.x + src_rect.width,
+                            y: src_rect.y + src_rect.height / 2,
+                        }
+                        this.dest_point = {
+                            x: dest_rect.x ,
+                            y: dest_rect.y + dest_rect.height / 2,
+                        }
+                    }
+            },
+            enum_to_item() {
+                this.src_rect
+            },
+            enum_to_group () {
+
+            },
+            item_to_relation () {
+
             },
             pointer_down() {
+            }
+        },
+        watch: {
+            'src_element.rect': {
+                handler () {
+                    this.update();
+                },
+                deep: true
+            },
+            'dest_element.rect': {
+                handler () {
+                    this.update();
+                },
+                deep: true
             }
         },
         computed: {
             // Just for testing 
             path_data () {
                 const bezierWeight = 0.675; // Amount to offset control points
-                let src_offset = { x: 0, y: 0 }, dest_offset = { x: 0, y: 0 };
                 
-                // Position line edges properly according to line settings 
-                if (this.$props.settings.enum_to_item) {
-                    src_offset = { x: this.src_rect.width / 2, y: this.src_rect.height / 2 };
-                    dest_offset = { x: this.dest_rect.width / 2, y: this.dest_rect.height / 2 };
-                }
-                if (this.$props.settings.item_to_relation || this.$props.settings.relation_to_item) {
-                    src_offset = { x: this.src_rect.width, y: this.src_rect.height / 2 };
-                    dest_offset = { x: 0, y: this.dest_rect.height / 2 };
-                }
-                
-                let calc_from  = { x: this.src_rect.x + src_offset.x, y: this.src_rect.y + src_offset.y };
-                let calc_to = { x: this.dest_rect.x + dest_offset.x, y: this.dest_rect.y + dest_offset.y };
-                
-                const dx           =  Math.abs(calc_from.x - calc_to.x) * bezierWeight * !this.$props.settings.enum_to_item;
-                const c1           = { x: calc_from.x + dx, y: calc_from.y };
-                const c2           = { x: calc_to.x - dx, y: calc_to.y };
+                const dx           =  Math.abs(this.src_point.x - this.dest_point.x) * bezierWeight * !(this.$props.settings.enum_to_item || this.$props.settings.enum_to_group) ;
+                const c1           = { x: this.src_point.x + dx, y: this.src_point.y };
+                const c2           = { x: this.dest_point.x - dx, y: this.dest_point.y };
 
-                return `M ${calc_from.x} ${calc_from.y} C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${calc_to.x} ${calc_to.y}`;
+                return `M ${this.src_point.x} ${this.src_point.y} C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${this.dest_point.x} ${this.dest_point.y}`;
             },
         }
     }
@@ -144,7 +215,7 @@
         <g>
         <path @pointerdown="pointer_down" 
             :style="{ 'stroke-width': `${settings.enum_to_item ? 4 : 4}`,
-                        'stroke-dasharray': `${settings.enum_to_item ? '11,5' : 'none'}`}"
+                        'stroke-dasharray': `${settings.enum_to_item || settings.enum_to_group ? '11,5' : 'none'}`}"
             :d="path_data"
             >
         </path>

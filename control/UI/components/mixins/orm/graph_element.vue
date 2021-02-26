@@ -35,6 +35,7 @@
                     'drag': (event) => {},
                     'drag_end': (event) => {}
                 },
+                group: null,
                 last_event: null,
                 is_dragging: false,
                 ghost_mode: false
@@ -46,10 +47,9 @@
         },
         mounted () {
             this.$el.ref = this.uid;
-            this.$el.type = 'graph_element';
-
             this.rect.width  = this.$el.offsetWidth;
             this.rect.height = this.$el.offsetHeight;
+
             this.z_index = 5;
         },
         props: {
@@ -117,19 +117,19 @@
                 let mouse = { x: this.last_event.pageX - window.graph_position.x, y: this.last_event.pageY - window.graph_position.y };
                 if (mouse.x < 20) {
                     this.move_by(-5 / graph_view.scale, 0);
-                    graph_view.pan_by(5 , 0);
+                    graph_view.move_camera_by(5 , 0);
                 }
                 if (mouse.x > graph_view.init_rect.width - 20 ) {
                     this.move_by(5 / graph_view.scale , 0);
-                    graph_view.pan_by(-5 , 0);
+                    graph_view.move_camera_by(-5 , 0);
                 }
                 if (mouse.y < 20) {
                     this.move_by(0, -5 / graph_view.scale);
-                    graph_view.pan_by(0, 5 );
+                    graph_view.move_camera_by(0, 5 );
                 }
                 if (mouse.y > graph_view.init_rect.height - 20 ) {
                     this.move_by(0, 5 / graph_view.scale);
-                    graph_view.pan_by(0, -5 );
+                    graph_view.move_camera_by(0, -5 );
                 }
 
                 this.expanded_functions.drag(this.last_event);
@@ -145,6 +145,17 @@
             get_lines () {
                 return graph_view.lines.filter((line) => (line.src_info.id === this.component_id & line.src_info.type === this.component_type ) 
                                                 || (line.dest_info.id === this.component_id & line.dest_info.type === this.component_type ) );
+            },
+            get_group () {
+                if (!this.group) {
+                    let {type, id} = this.component_info;
+                    graph_view.groups.forEach((group) =>  {
+                        if (group.data.contained_elements.find((element) => element.id === id && element.type === type)) {
+                            this.group = { id: group.id, type: group.type };
+                        }
+                    });
+                }
+                return this.group;
             },
             // Update lines explicitilly 
             update_lines () {
@@ -164,6 +175,8 @@
             transformation () {
                 return  {
                     transform: `translate(${this.$props.rect.x}px,${this.$props.rect.y}px)`,
+                    minWidth: `${this.$props.rect.width}px`,
+                    minHeight: `${this.$props.rect.height}px`,
                     'z-index': this.z_index + 5 // Base z-index for graph elements 
                 }
             },
@@ -181,17 +194,8 @@
             component_type () {
                 return this.uid[0];
             },
-            group_owner () {
-                var id = this.component_id;
-                var type = this.component_type;
-
-                let group_owner = null;
-                graph_view.groups.forEach((group) =>  {
-                    if (group.data.contained_elements.find((element) => element.id === id && element.type === type)) {
-                        group_owner = group;
-                    }
-                });
-                return group_owner;
+            component_info () {
+                return { id: this.component_id, type: this.component_type };
             }
         }
     };

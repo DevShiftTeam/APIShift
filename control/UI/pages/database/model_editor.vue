@@ -29,7 +29,7 @@ const loginVue=require("../login.vue");
         data () {
             return {
                 drawer: null,
-                // Components 
+                // Components
                 item_comp: APIShift.API.getComponent('orm/item', true),
                 enum_comp: APIShift.API.getComponent('orm/enum', true),
                 group_comp: APIShift.API.getComponent('orm/group', true),
@@ -569,8 +569,7 @@ const loginVue=require("../login.vue");
             @pointerup="pointer_up"
             @pointercancel="pointer_up"
             :style="{ 'overflow' : 'hidden' }">
-        <component ref="sidemenu" 
-            :is="sidemenu_comp">
+        <component ref="side_menu" :is="side_menu_comp">
         </component>
         <!-- The center element allow us to create a smart camera that positions the elements without needed to re-render for each element -->
         <div ref="gv_center" id="graph_center" :style="{ 'transform': 'translate(' + camera.x + 'px, ' + camera.y + 'px) scale(' + scale + ')'}">

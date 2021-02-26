@@ -25,7 +25,7 @@
         data () {
             return {
                 drawer: 0,
-                showSideMenu: false,
+                show_side_menu: false,
                 actions: [ {name: 'add-item', icon: 'mdi-plus', text: "Add Item"},
                     {name: 'add-relation', icon: 'mdi-arrow-right', text: "Add Relation"},
                     {name: 'delete-element', icon: 'mdi-delete-outline', text: "Delete Tool"},
@@ -37,7 +37,7 @@
         created () {
         },
         mounted () {
-            graph_view.$refs['sidemenu'] = this;
+            
         },
         methods: {
             action_creator(action_name) {
@@ -64,7 +64,7 @@
                         break;
                 }
 
-                this.showSideMenu = false;
+                this.show_side_menu = false;
             },
             toggleDarkTheme: function() {
                 window.app.$vuetify.theme.dark = !(window.app.$vuetify.theme.dark);
@@ -78,25 +78,25 @@
 
 <template>
         <div class="gv_side_menu">
-            <v-btn height="50px" style="min-width:0;width:56px;" v-bind:class="{ 'active-border' : showSideMenu }"
-              tile @click.stop="showSideMenu = !showSideMenu;"><v-icon>fas fa-wrench</v-icon></v-btn>
-            <v-navigation-drawer class="gv_nav_drawer" v-model="showSideMenu" mini-variant :style="{'z-index': 9999}">
+            <v-btn height="50px" style="min-width:0;width:56px;" v-bind:class="{ 'active-border' : show_side_menu }"
+              tile @click.stop="show_side_menu = !show_side_menu;"><v-icon>fas fa-wrench</v-icon></v-btn>
+            <v-navigation-drawer class="gv_nav_drawer" v-model="show_side_menu" mini-variant :style="{'z-index': 9999}">
                 <v-list dense>
-                    <v-list-item link v-for="action in actions" :key="action.name" @click="action_creator(action.name)">
-                        <v-tooltip top>
-                            <template #activator="{ on }">
-                                <v-list-item-action v-on="on">
-                                        <v-icon>{{ action.icon }}</v-icon>
-                                    </v-list-item-action>
-                                    <v-list-item-content>
-                                        <v-list-item-title>
-                                            {{ action.name }}
-                                        </v-list-item-title>
-                                    </v-list-item-content>
-                                </v-list-item>
-                            </template>
-                            <span>{{action.text}}</span>
-                        </v-tooltip>
+                    <v-tooltip top v-for="action in actions" :key="action.name">
+                        <template #activator="{ on }">
+                            <v-list-item link @click="action_creator(action.name)" v-on="on">
+                                <v-list-item-action>
+                                    <v-icon>{{ action.icon }}</v-icon>
+                                </v-list-item-action>
+                                <v-list-item-content>
+                                    <v-list-item-title>
+                                        {{ action.name }}
+                                    </v-list-item-title>
+                                </v-list-item-content>
+                            </v-list-item>
+                        </template>
+                        <span>{{action.text}}</span>
+                    </v-tooltip>
                 </v-list>
             </v-navigation-drawer>
         </div>
@@ -108,7 +108,7 @@
     .active-border{
         border-right: 1px solid #4e4e4e;
     }
-    #sidemenu {
+    #show_menu {
         position: absolute;
         min-width: 50px;
         left: 0;

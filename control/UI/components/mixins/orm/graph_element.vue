@@ -25,7 +25,6 @@
         data() {
             return {
                 type: 'graph_element',
-                z_index: 0,
                 // This elements adds functionallity to drag events in needed
                 expanded_functions: {
                     'drag_start': (event) => {},
@@ -38,7 +37,8 @@
         },
         props: {
             name: String,
-            data: Object
+            data: Object,
+            index: Number
         },
         methods: {
             drag_start (event) {
@@ -50,6 +50,8 @@
                     x: event.clientX,
                     y: event.clientY
                 };
+
+                graph_view.bring_to_front(this.$props.index);
 
                 // Delete element on delete state
                 if (graph_view.cursor_state.type === 'delete') return;
@@ -133,7 +135,8 @@
             // Rendered transformation (coordinates and scale) 
             transformation () {
                 return  {
-                    transform: `translate(${this.$props.data.position.x}px,${this.$props.data.position.y}px)`
+                    transform: `translate(${this.$props.data.position.x}px,${this.$props.data.position.y}px)`,
+                    'z-index': this.$props.data.z_index
                 }
             }
         }

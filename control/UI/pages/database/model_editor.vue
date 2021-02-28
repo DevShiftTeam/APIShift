@@ -30,54 +30,59 @@ const loginVue=require("../login.vue");
             return {
                 drawer: null,
                 // Components
-                item_component: APIShift.API.getComponent('orm/item', true),
-                relation_component: APIShift.API.getComponent('orm/relation', true),
-                type_component: APIShift.API.getComponent('orm/enum_type', true),
-                enum_component: APIShift.API.getComponent('orm/enum', true),
-                group_component: APIShift.API.getComponent('orm/group', true),
+                components: [
+                    APIShift.API.getComponent('orm/item', true),
+                    APIShift.API.getComponent('orm/relation', true),
+                    APIShift.API.getComponent('orm/enum_type', true),
+                    APIShift.API.getComponent('orm/enum', true),
+                    APIShift.API.getComponent('orm/group', true)
+
+                ],
                 line_comp: APIShift.API.getComponent('orm/line', true),
                 selection_comp: APIShift.API.getComponent('orm/selection_box', true),
                 side_menu_comp: APIShift.API.getComponent('orm/side_menu', true),
-                items: [
-                    { id: 1, name: "Users", data: {
+                elements: [
+                    // Items
+                    { id: 1, component_id: 0, name: "Users", data: {
                             position: { x: 20, y: 0 }
                         }
                     },
-                    { id: 3, name: "Posts", data: {
+                    { id: 2, component_id: 0, name: "Posts", data: {
                             position: { x: 120, y: 50 }
                         }
                     },
-                    { id: 4, name: "Testers", data: {
+                    { id: 3, component_id: 0, name: "Testers", data: {
                         position: { x: 20, y: 0 }
-                    }}
-                ],
-                relations: [
-                    { id: 2, name: "UserPosts", data: {
+                    }},
+                    /** 
+                    // Relations
+                    { id: 4, component_id: 1, name: "UserPosts", data: {
                             position: { x: 220, y: 200 },
                             from: 1,
                             to: 3,
                             type: 0
                         }
-                    }
-                ],
-                enum_types: [
-                    { id: 1, name: 'test1', data: {
+                    },
+                    
+                    // Enum Types
+                    { id: 5, component_id: 2, name: 'test1', data: {
                         position: {x: 100, y: 100}
                     }},
-                    { id: 2, name: 'test1', data: {
+                    { id: 6, component_id: 2, name: 'test1', data: {
                         position: {x: 100, y: 100}
-                    }}
-                ],
-                enums: [
-                    { id: 1, name: 'enum1', data: {
+                    }},
+
+                    // Enums
+                    { id: 7, component_id: 3, name: 'enum1', data: {
                         position: {x: 50, y: 100},
                         types: [ 1 ]
-                    }}
-                ],
-                groups: [
-                    { id: 1, name: 'group', data: {
+                    }},
+
+                    // Groups
+                    { id: 8, component_id: 4, name: 'group', data: {
                         elements: [ 1, 2, 3 ]
                     }},
+                    */
                 ],
                 points: [], 
                 lookup_table: { 'i': [], 't': [], 'e': [], 'g': []},
@@ -140,7 +145,8 @@ const loginVue=require("../login.vue");
                 y: 0
             };
 
-            this.front_z_index = this.items.length;
+            // Set initial z-index
+            for(var index in this.elements) this.$set(this.elements[index].data, 'z_index', parseInt(index) + 1);
         },
         mounted () {
             this.update_graph_position();
@@ -151,6 +157,21 @@ const loginVue=require("../login.vue");
             window.removeEventListener('keydown', this.key_down);
         },
         methods: {
+            bring_to_front: function(element_id) {
+                // Ignore if in front
+                if(this.elements[element_id].data.z_index !== undefined && this.elements[element_id].data.z_index == this.elements.length) return;
+
+                let current_z_index = this.elements[element_id].data.z_index;
+
+                // Bring other elements to back
+                for(let index in this.elements)
+                    if(this.elements[index].data.z_index > current_z_index)
+                        this.elements[index].data.z_index--;
+                
+
+                // Bring to front
+                this.elements[element_id].data.z_index = this.elements.length;
+            },
             /**
              * User interactions
              */
@@ -169,7 +190,7 @@ const loginVue=require("../login.vue");
                     window.init_pointer_second = {
                         x: event.clientX,
                         y: event.clientY
-                    }
+                    };
                     window.temp_pointer = {
                         x: (window.init_pointer_first.x + window.init_pointer_second.x) / 2 - window.graph_position.x,
                         y: (window.init_pointer_first.y + window.init_pointer_second.y) / 2 - window.graph_position.y
@@ -275,8 +296,6 @@ const loginVue=require("../login.vue");
                 window.temp_pointer = Object.assign({}, window.init_pointer);
             },
             pointer_up(event) {
-                document.removeEventListener('pointerup', this.pointer_up);
-
                 this.tap_counter = 0;
 
                 if (this.cursor_state.type === 'select') {
@@ -324,13 +343,6 @@ const loginVue=require("../login.vue");
                 if (event.code === 'KeyG') {
                     // Determine contained elements
                     let contained_elements = [];
-                    this.items.forEach(item => {
-                        let item_instance = graph_view.$refs[`i${item.id}`];
-                        if (item_instance.selected && item_instance.get_group() === null) {
-                            contained_elements.push({ type: 'i', id: item.id });
-                            item_instance.selected = false;
-                        }
-                    });
                     this.groups.forEach(group => {
                         let group_instance = graph_view.$refs[`g${group.id}`];
                         if (group_instance.selected) {
@@ -552,7 +564,6 @@ const loginVue=require("../login.vue");
     <div id="graph_view"
             @wheel.prevent="wheel"
             @pointermove.prevent="drag_handler"
-            @touchmove.prevent="() => {}"
             @pointerdown="pointer_down"
             @pointerup="pointer_up"
             @pointercancel="pointer_up"
@@ -561,40 +572,14 @@ const loginVue=require("../login.vue");
         </component>
         <!-- The center element allow us to create a smart camera that positions the elements without needed to re-render for each element -->
         <div ref="gv_center" id="graph_center" :style="{ 'transform': 'translate(' + camera.x + 'px, ' + camera.y + 'px) scale(' + scale + ')'}">
-            <!-- Items -->
+            <!-- Elements -->
             <component
-                v-for="(item, index) in items"
-                :is="item_component"
+                v-for="(element, index) in elements"
+                :is="components[element.component_id]"
                 :key="index"
-                :name="item.name"
-                :data="item.data">
-            </component>
-
-            <!-- Relations -->
-            <component
-                v-for="(relation, index) in relations"
-                :is="relation_component"
-                :key="index"
-                :name="relation.name"
-                :data="relation.data">
-            </component>
-
-            <!-- Enum Types -->
-            <component
-                v-for="(enum_type, index) in enum_types"
-                :is="type_component"
-                :key="index"
-                :name="enum_type.name"
-                :data="enum_type.data">
-            </component>
-
-            <!-- Enums -->
-            <component
-                v-for="(enum, index) in enums"
-                :is="enum_component"
-                :key="index"
-                :name="enum.name"
-                :data="enum.data">
+                :index="index"
+                :name="element.name"
+                :data="element.data">
             </component>
 
             <svg id="svg_viewport" ref="gv_lines">

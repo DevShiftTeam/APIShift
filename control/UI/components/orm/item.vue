@@ -22,11 +22,6 @@
     // This shit is made for scripting
     module.exports = {
         mixins: [APIShift.API.getMixin('orm/graph_element')],
-        props: {
-            is_relation: Boolean,
-            data: Object,
-            name: String
-        },
         data () {
             return {
                 drawer: null,
@@ -40,7 +35,6 @@
             let type = this.component_type;
             let item_info = { id, type };
             
-            console.log(this.get_enums());
             this.expanded_functions.drag_start = (event) => {
 
                     if (graph_view.cursor_state.type === 'create' && graph_view.cursor_state.data === 'add-relation') {
@@ -52,23 +46,8 @@
                     }
             };
 
-            this.expanded_functions.drag = (event) => {
-                if (self.group_container) {
-                    self.group_container.set_rect();
-                }
-            };
-            this.expanded_functions.drag_end = (event) => {
-
-            };
-
         }, 
         mounted () {
-            // Draw relation lines
-            if(this.is_relation) {
-                let self_data = { type: 'i', id: this.component_id }
-                graph_view.create_line(this.$props.data.from, self_data, { item_to_relation: true, relate_type: this.$props.data.type });
-                graph_view.create_line(self_data, this.$props.data.to, { relation_to_item: true, relate_type: this.$props.data.type });
-            }
         },
         methods: {
             get_enums () {
@@ -108,13 +87,6 @@
                     let group_instance = graph_view.$refs['g' + this.get_group().id];
                     this.get_group().data.contained_elements = this.get_group().data.contained_elements.filter((element) => element.id !== id);
                 }
-            },
-            render_needed () {
-            }
-        },
-        computed: {
-            is_relation () {
-                return this.$props.data.is_relation;
             }
         }
     }
@@ -126,7 +98,7 @@
         @pointerdown.prevent="drag_start"
         @contextmenu.prevent="on_context"
         @pointerup.prevent="drag_end">
-            <v-avatar left class="item_type darken-4" :class="is_relation ? 'purple' : 'blue'">{{ is_relation ? 'R' : 'I'}}</v-avatar>
+            <v-avatar left class="item_type darken-4 blue">I</v-avatar>
             <div style="display: inline;">{{ name }}</div>
     </div>
 </template>

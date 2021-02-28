@@ -38,7 +38,8 @@
         props: {
             name: String,
             data: Object,
-            index: Number
+            index: Number,
+            id: Number
         },
         methods: {
             drag_start (event) {

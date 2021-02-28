@@ -54,16 +54,16 @@ const loginVue=require("../login.vue");
                     { id: 3, component_id: 0, name: "Testers", data: {
                         position: { x: 20, y: 0 }
                     }},
-                    /** 
                     // Relations
                     { id: 4, component_id: 1, name: "UserPosts", data: {
                             position: { x: 220, y: 200 },
                             from: 1,
-                            to: 3,
+                            to: 2,
                             type: 0
                         }
                     },
                     
+                    /** 
                     // Enum Types
                     { id: 5, component_id: 2, name: 'test1', data: {
                         position: {x: 100, y: 100}
@@ -139,6 +139,7 @@ const loginVue=require("../login.vue");
         },
         created () {
             // Store this object with a global reference
+            window.graph_elements = {};
             window.graph_view = this;
             window.origin_position = {
                 x: 0,
@@ -189,6 +190,8 @@ const loginVue=require("../login.vue");
 
                 // Handle mobile zooming
                 if(this.tap_counter === 2) {
+                    window.scale_factor = 1;
+                    window.scale_init = this.scale;
                     window.init_pointer_first = Object.assign({}, window.init_pointer);
                     window.init_pointer_second = {
                         x: event.clientX,
@@ -285,7 +288,8 @@ const loginVue=require("../login.vue");
                         (new_diff.x * new_diff.x + new_diff.y * new_diff.y) /
                         (prev_diff.x * prev_diff.x + prev_diff.y * prev_diff.y)
                     );
-                let new_scale = this.scale * change;
+                window.scale_factor *= change;
+                let new_scale = window.scale_init * window.scale_factor;
         
                 // Keep the scale on bound
                 if (new_scale < 0.2 || new_scale > 2 ) {
@@ -576,6 +580,7 @@ const loginVue=require("../login.vue");
                 :is="components[element.component_id]"
                 :key="index"
                 :index="index"
+                :id="element.id"
                 :name="element.name"
                 :data="element.data">
             </component>
@@ -597,13 +602,12 @@ const loginVue=require("../login.vue");
                     </marker>
                 </defs>
                 <component
-                    v-for="(line) in lines"
+                    v-for="(line, index) in lines"
                     :is="line_comp"
-                    :key="line.line_uid"
-                    :uid="line.line_uid" 
-                    :src_info="line.src_info"
-                    :dest_info="line.dest_info"
-                    :settings="line.settings">
+                    :key="index"
+                    :src_point="window.graph_elements[line.from_id].from_position"
+                    :dest_point="window.graph_elements[line.to_id].to_position"
+                    :data="line.data">
                 </component> 
             </svg>
         </div>

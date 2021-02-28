@@ -32,10 +32,16 @@
         },
         created () {
             window.graph_elements[this.$props.id] = this;
+        }, 
+        mounted () {
+            let rect = this.$el.getBoundingClientRect();
+            this.element_sizes = {
+                width: rect.width,
+                height: rect.height
+            };
 
-            // Check if from and to exists
+            // Create line from item to this
             if(this.$props.data.from !== undefined) {
-                // Create line from item to this
                 window.graph_view.lines.push({
                     from_id: this.$props.data.from,
                     to_id: this.$props.id,
@@ -46,8 +52,8 @@
                 });
             }
 
+            // Create line from this to item
             if(this.$props.data.to !== undefined) {
-                // Create line from this to item
                 window.graph_view.lines.push({
                     from_id: this.$props.id,
                     to_id: this.$props.data.to,
@@ -57,13 +63,6 @@
                     }
                 });
             }
-        }, 
-        mounted () {
-            let rect = this.$el.getBoundingClientRect();
-            this.element_sizes = {
-                width: rect.width,
-                height: rect.height
-            };
         },
         methods: {
             get_enums () {

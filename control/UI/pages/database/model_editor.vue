@@ -566,6 +566,7 @@ const loginVue=require("../login.vue");
     <div id="graph_view"
             @wheel.prevent="wheel"
             @pointermove.prevent="drag_handler"
+            @touchmove.prevent="() => {}"
             @pointerdown="pointer_down"
             @pointerup="pointer_up"
             @pointercancel="pointer_up"

@@ -171,6 +171,9 @@ const loginVue=require("../login.vue");
 
                 // Bring to front
                 this.elements[element_id].data.z_index = this.elements.length;
+                app.$refs.navigator.updateIndex(this.elements.length + 1);
+                app.$refs.footer.updateIndex(this.elements.length + 1);
+                window.handler.updateIndex(this.elements.length + 1);
             },
             /**
              * User interactions
@@ -541,11 +544,6 @@ const loginVue=require("../login.vue");
 
         },
         watch: {
-            front_z_index: function(newValue) {
-                app.$refs.navigator.updateIndex(newValue + 1);
-                app.$refs.footer.updateIndex(newValue + 1);
-                window.handler.updateIndex(newValue + 1);
-            },
             cursor_state: function (state) {
                 document.body.classList.add('reset-all-cursors');
                 this.$el.classList.remove('cursor_default');

@@ -54,7 +54,7 @@
                 const c1           = { x: this.src_point.x + dx, y: this.src_point.y };
                 const c2           = { x: this.dest_point.x - dx, y: this.dest_point.y };
 
-                return `M ${this.src_point.x} ${this.src_point.y} C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${this.dest_point.x} ${this.dest_point.y}`;
+                return `M ${this.src_point.x - 5} ${this.src_point.y} C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${this.dest_point.x} ${this.dest_point.y}`;
             },
         }
     }

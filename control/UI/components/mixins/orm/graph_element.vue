@@ -110,10 +110,6 @@
                 this.$props.rect.x += dx;
                 this.$props.rect.y += dy;
             },
-            get_lines () {
-                return graph_view.lines.filter((line) => (line.src_info.id === this.component_id & line.src_info.type === this.component_type ) 
-                                                || (line.dest_info.id === this.component_id & line.dest_info.type === this.component_type ) );
-            },
             get_group () {
                 if (!this.group) {
                     let {type, id} = this.component_info;

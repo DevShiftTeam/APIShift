@@ -65,7 +65,7 @@ Notice that the [configurations file](machine/core/Configurations.php) should be
  * APCu or Redis or Memcached enabled on your PHP engine
  * MySQL
   
-## Using Docker
+### Using Docker
 Run the following command to build the custom apache docker image:
 ```docker build . -t apishift.ubuntu.docker```
 

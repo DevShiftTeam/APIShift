@@ -29,10 +29,8 @@
         },
         data () {
             return {
-                uid: 'i',
                 drawer: null,
                 group_container: null,
-                connected_enums: null,
                 selected: false
             }
         },

@@ -30,49 +30,54 @@ const loginVue=require("../login.vue");
             return {
                 drawer: null,
                 // Components
-                item_comp: APIShift.API.getComponent('orm/item', true),
-                enum_comp: APIShift.API.getComponent('orm/enum', true),
-                group_comp: APIShift.API.getComponent('orm/group', true),
-                enum_type_comp: APIShift.API.getComponent('orm/enum_type', true),
+                item_component: APIShift.API.getComponent('orm/item', true),
+                relation_component: APIShift.API.getComponent('orm/relation', true),
+                type_component: APIShift.API.getComponent('orm/enum_type', true),
+                enum_component: APIShift.API.getComponent('orm/enum', true),
+                group_component: APIShift.API.getComponent('orm/group', true),
                 line_comp: APIShift.API.getComponent('orm/line', true),
                 selection_comp: APIShift.API.getComponent('orm/selection_box', true),
                 side_menu_comp: APIShift.API.getComponent('orm/side_menu', true),
                 items: [
-                    { name: "wait", id: 1, rect: { x: 20, y: 0, width: 0, height: 0 }, data: { is_relation: false } },
-                    { name: "haha", id: 2, rect: { x: 220, y: 200, width: 0, height: 0}, data: { is_relation: false } },
-                    { name: "rela", id: 3, rect: { x: 120, y: 50 , width: 0, height: 0}, data: {
-                        is_relation: true,
-                        from: { id: 1, type: 'i' },
-                        to: { id: 2, type: 'i' },
-                        type: 0
-                    } }
-                ],  
-                enums: [
-                    { name: "Enum", id: 1, rect: { x: 50, y: 100, width: 0, height: 0},
-                        data: {
-                            types: [
-                                {id: 1}
-                            ],
-                            connected: [
-                                { type: 'i', id: 1 }
-                            ]
+                    { id: 1, name: "Users", data: {
+                            position: { x: 20, y: 0 }
+                        }
+                    },
+                    { id: 3, name: "Posts", data: {
+                            position: { x: 120, y: 50 }
+                        }
+                    },
+                    { id: 4, name: "Testers", data: {
+                        position: { x: 20, y: 0 }
                     }}
                 ],
-                enum_types: [
-                    { name: 'Type', id: 1, rect: {  x: 100, y: 100, width: 0, height: 0}, data: { enum_id: 1 }},
-                    { name: 'Type', id: 2, rect: {  x: 200, y: 100, width: 0, height: 0}, data: { enum_id: null }}
-                ],
-                groups: [
-                    { 
-                        name: 'Group', id: 1, rect: { x: 0, y: 0, width: 0, height: 0},
-                        data: { 
-                            contained_elements: [
-                                {type: 'i', id: 1}, 
-                                {type: 'i', id: 2}, 
-                                {type: 'i', id: 3}
-                            ]
+                relations: [
+                    { id: 2, name: "UserPosts", data: {
+                            position: { x: 220, y: 200 },
+                            from: 1,
+                            to: 3,
+                            type: 0
                         }
                     }
+                ],
+                enum_types: [
+                    { id: 1, name: 'test1', data: {
+                        position: {x: 100, y: 100}
+                    }},
+                    { id: 2, name: 'test1', data: {
+                        position: {x: 100, y: 100}
+                    }}
+                ],
+                enums: [
+                    { id: 1, name: 'enum1', data: {
+                        position: {x: 50, y: 100},
+                        types: [ 1 ]
+                    }}
+                ],
+                groups: [
+                    { id: 1, name: 'group', data: {
+                        elements: [ 1, 2, 3 ]
+                    }},
                 ],
                 points: [], 
                 lookup_table: { 'i': [], 't': [], 'e': [], 'g': []},
@@ -123,10 +128,7 @@ const loginVue=require("../login.vue");
                         return this.id; 
                     }
                 },
-                yes: null,
-                relation_factory: {from : 0, to : 0, type : 0},
-                void_point: { x: -Number.MAX_SAFE_INTEGER, y: -Number.MAX_SAFE_INTEGER },  
-                init_rect: {x:0, y:0},
+                relation_factory: {relate_from : 0, relate_to : 0, relation_type : 0},
                 cursor_state: {type: "default"}
             }
         },
@@ -141,7 +143,6 @@ const loginVue=require("../login.vue");
             this.front_z_index = this.items.length;
         },
         mounted () {
-            this.init_rect = this.$el.getBoundingClientRect();
             this.update_graph_position();
 
             window.addEventListener('keydown', this.key_down);
@@ -257,8 +258,8 @@ const loginVue=require("../login.vue");
 
                 // Update scale
                 let change = Math.sqrt(
-                        (new_diff.x * new_diff.x + new_diff.y * new_diff.y) / 
-                        (prev_diff.x * prev_diff.x + prev_diff.y * prev_diff.y) 
+                        (new_diff.x * new_diff.x + new_diff.y * new_diff.y) /
+                        (prev_diff.x * prev_diff.x + prev_diff.y * prev_diff.y)
                     );
                 let new_scale = this.scale * change;
         
@@ -441,11 +442,12 @@ const loginVue=require("../login.vue");
             update_graph_position() {
                 let rect = this.$el.getBoundingClientRect();
                 // Stores the current position of the graph on the screen
-                window.graph_position = { x: rect.x,
-                y: rect.y,
-                width: rect.width,
-                height: rect.height 
-                }
+                window.graph_position = {
+                    x: rect.x,
+                    y: rect.y,
+                    width: rect.width,
+                    height: rect.height
+                };
             },
             /**
              * Test whether 2 graph elements hit each other on the graph.
@@ -532,29 +534,15 @@ const loginVue=require("../login.vue");
                 app.$refs.footer.updateIndex(newValue + 1);
                 window.handler.updateIndex(newValue + 1);
             },
-            cursor_state: {
-                handler: function (state) {
-                    document.body.classList.add('reset-all-cursors');
-                    this.$el.classList.remove('cursor_default');
-                    this.$el.classList.remove('cursor_delete');
-                    this.$el.classList.remove('cursor_create');
-                    this.$el.classList.remove('cursor_select');
+            cursor_state: function (state) {
+                document.body.classList.add('reset-all-cursors');
+                this.$el.classList.remove('cursor_default');
+                this.$el.classList.remove('cursor_delete');
+                this.$el.classList.remove('cursor_create');
+                this.$el.classList.remove('cursor_select');
 
-                    if ( state.type === 'default') {
-                        this.$el.classList.add('cursor_default');
-                        document.body.classList.remove('reset-all-cursors');
-                    }
-                    if ( state.type === 'delete') {
-                        this.$el.classList.add('cursor_delete');
-                    }
-                    if ( state.type === 'create') {
-                        this.$el.classList.add('cursor_create');
-                    }
-                    if ( state.type === 'select') {
-                        this.$el.classList.add('cursor_select');
-                    }
-                },
-                deep: true
+                this.$el.classList.add('cursor_' + state.type);
+                if ( state.type === 'default') document.body.classList.remove('reset-all-cursors');
             }
         }
     }
@@ -573,46 +561,42 @@ const loginVue=require("../login.vue");
         </component>
         <!-- The center element allow us to create a smart camera that positions the elements without needed to re-render for each element -->
         <div ref="gv_center" id="graph_center" :style="{ 'transform': 'translate(' + camera.x + 'px, ' + camera.y + 'px) scale(' + scale + ')'}">
+            <!-- Items -->
             <component
-                v-for="(item) in items"
-                :is="item_comp"
-                :key="'i'+item.id"
-                :uid="'i'+item.id"
+                v-for="(item, index) in items"
+                :is="item_component"
+                :key="index"
                 :name="item.name"
-                :index="item.index"
-                :rect="item.rect"
                 :data="item.data">
-            </component> 
+            </component>
+
+            <!-- Relations -->
             <component
-                v-for="(enum_type) in enum_types"
-                :is="enum_type_comp"
-                :key="'t'+enum_type.id"
-                :uid="'t'+enum_type.id"
+                v-for="(relation, index) in relations"
+                :is="relation_component"
+                :key="index"
+                :name="relation.name"
+                :data="relation.data">
+            </component>
+
+            <!-- Enum Types -->
+            <component
+                v-for="(enum_type, index) in enum_types"
+                :is="type_component"
+                :key="index"
                 :name="enum_type.name"
-                :index="enum_type.index"
-                :rect="enum_type.rect"
                 :data="enum_type.data">
             </component>
+
+            <!-- Enums -->
             <component
-                v-for="(enum_c) in enums"
-                :is="enum_comp"
-                :key="'e'+enum_c.id"
-                :uid="'e'+enum_c.id"
-                :name="enum_c.name"
-                :index="enum_c.index"
-                :rect="enum_c.rect"
-                :data="enum_c.data">
-            </component> 
-            <component
-                v-for="(group) in groups"
-                :is="group_comp"
-                :key="'g'+group.id"
-                :uid="'g'+group.id"
-                :name="group.name"
-                :index="group.index"
-                :rect="group.rect"
-                :data="group.data">
+                v-for="(enum, index) in enums"
+                :is="enum_component"
+                :key="index"
+                :name="enum.name"
+                :data="enum.data">
             </component>
+
             <svg id="svg_viewport" ref="gv_lines">
                 <defs>
                     <marker id="black-arrow" markerWidth="5" markerHeight="5" refX="0" refY="5"

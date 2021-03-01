@@ -20,8 +20,6 @@
      * @contributor Ilan Dazanashvili
      */
 
-const loginVue=require("../login.vue");
-
     window.empty_function = (event) => {};
 
     // This shit is made for scripting
@@ -530,7 +528,7 @@ const loginVue=require("../login.vue");
             front_z_index: function(newValue) {
                 app.$refs.navigator.updateIndex(newValue + 1);
                 app.$refs.footer.updateIndex(newValue + 1);
-                window.handler.updateIndex(newValue + 1);
+                window.holder.updateIndex(newValue + 1);
             },
             cursor_state: {
                 handler: function (state) {
@@ -560,95 +558,119 @@ const loginVue=require("../login.vue");
     }
 </script>
 
-<template ref="graphview">
-    <div id="graph_view"
-            @wheel.prevent="wheel"
-            @pointermove.prevent="drag_handler"
-            @touchmove.prevent="() => {}"
-            @pointerdown="pointer_down"
-            @pointerup="pointer_up"
-            @pointercancel="pointer_up"
-            :style="{ 'overflow' : 'hidden' }">
-        <component ref="side_menu" :is="side_menu_comp">
-        </component>
-        <!-- The center element allow us to create a smart camera that positions the elements without needed to re-render for each element -->
-        <div ref="gv_center" id="graph_center" :style="{ 'transform': 'translate(' + camera.x + 'px, ' + camera.y + 'px) scale(' + scale + ')'}">
-            <component
-                v-for="(item) in items"
-                :is="item_comp"
-                :key="'i'+item.id"
-                :uid="'i'+item.id"
-                :name="item.name"
-                :index="item.index"
-                :rect="item.rect"
-                :data="item.data">
-            </component> 
-            <component
-                v-for="(enum_type) in enum_types"
-                :is="enum_type_comp"
-                :key="'t'+enum_type.id"
-                :uid="'t'+enum_type.id"
-                :name="enum_type.name"
-                :index="enum_type.index"
-                :rect="enum_type.rect"
-                :data="enum_type.data">
-            </component>
-            <component
-                v-for="(enum_c) in enums"
-                :is="enum_comp"
-                :key="'e'+enum_c.id"
-                :uid="'e'+enum_c.id"
-                :name="enum_c.name"
-                :index="enum_c.index"
-                :rect="enum_c.rect"
-                :data="enum_c.data">
-            </component> 
-            <component
-                v-for="(group) in groups"
-                :is="group_comp"
-                :key="'g'+group.id"
-                :uid="'g'+group.id"
-                :name="group.name"
-                :index="group.index"
-                :rect="group.rect"
-                :data="group.data">
-            </component>
-            <svg id="svg_viewport" ref="gv_lines">
-                <defs>
-                    <marker id="black-arrow" markerWidth="5" markerHeight="5" refX="0" refY="5"
-                    viewBox="0 0 10 10" orient="auto-start-reverse" style="opacity: 0.85">
-                        <path d="M 0 0 L 10 5 L 0 10 z" />
-                    </marker>
-                    <marker id="arrow" markerWidth="10" markerHeight="10" refX="10" refY="3" orient="auto" markerUnits="strokeWidth">
-                        <path d="M0,0 L0,6 L9,3 z" fill="rgba(255,0,0,0.9)" />
-                    </marker>
-                    <marker id="arrow1" viewBox="0 0 492.004 492.004" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-                        <path d="M382.678,226.804L163.73,7.86C158.666,2.792,151.906,0,144.698,0s-13.968,2.792-19.032,7.86l-16.124,16.12
-                        c-10.492,10.504-10.492,27.576,0,38.064L293.398,245.9l-184.06,184.06c-5.064,5.068-7.86,11.824-7.86,19.028
-                        c0,7.212,2.796,13.968,7.86,19.04l16.124,16.116c5.068,5.068,11.824,7.86,19.032,7.86s13.968-2.792,19.032-7.86L382.678,265
-                        c5.076-5.084,7.864-11.872,7.848-19.088C390.542,238.668,387.754,231.884,382.678,226.804z"/>
-                    </marker>
-                </defs>
-                <component
-                    v-for="(line) in lines"
-                    :is="line_comp"
-                    :key="line.line_uid"
-                    :uid="line.line_uid" 
-                    :src_info="line.src_info"
-                    :dest_info="line.dest_info"
-                    :settings="line.settings">
-                </component> 
-            </svg>
-        </div>
-        <div ref="gv_menu" id="gv_menu">
-            
-        </div>
-        <component ref="s_box" 
-            :is="selection_comp"
-            :uid="'s0'"
-            :rect="selection_box.rect">
-        </component>
-    </div>
+<template>
+        <v-container fluid fill-height>
+            <v-card class="mx-auto" width="100%" min-height="75%" elevation-2>
+                <!-- Header -->
+                <v-app-bar>
+                    <v-menu offset-y style="z-index: 100">
+                        <template v-slot:activator="{ on }">
+                            <v-toolbar-title v-on="on">
+                                <v-btn>
+                                    {{ holder.getPageTitle() }}
+                                    
+                                    <v-icon right>mdi-menu-down</v-icon>
+                                </v-btn>
+                            </v-toolbar-title>
+                        </template>
+                        <v-list>
+                            <v-list-item to="/database">Main Page</v-list-item>
+                            <v-list-item v-for="(item, key) in holder.sub_pages" :key="key" :to="item.url">{{ item.title }}</v-list-item>
+                        </v-list>
+                    </v-menu>
+                    <v-divider class="mx-4" inset vertical></v-divider>
+                </v-app-bar>
+
+                <!-- Body -->
+                <div class="overflow-box">
+                    <div id="graph_view"
+                        @wheel.prevent="wheel"
+                        @pointermove.prevent="drag_handler"
+                        @touchmove.prevent="() => {}"
+                        @pointerdown="pointer_down"
+                        @pointerup="pointer_up"
+                        @pointercancel="pointer_up"
+                        :style="{ 'overflow' : 'hidden' }">
+                        <component ref="side_menu" :is="side_menu_comp"></component>
+                        
+                        <!-- The center element allow us to create a smart camera that positions the elements without needed to re-render for each element -->
+                        <div ref="gv_center" id="graph_center" :style="{ 'transform': 'translate(' + camera.x + 'px, ' + camera.y + 'px) scale(' + scale + ')'}">
+                            <component
+                                v-for="(item) in items"
+                                :is="item_comp"
+                                :key="'i'+item.id"
+                                :uid="'i'+item.id"
+                                :name="item.name"
+                                :index="item.index"
+                                :rect="item.rect"
+                                :data="item.data">
+                            </component> 
+                            <component
+                                v-for="(enum_type) in enum_types"
+                                :is="enum_type_comp"
+                                :key="'t'+enum_type.id"
+                                :uid="'t'+enum_type.id"
+                                :name="enum_type.name"
+                                :index="enum_type.index"
+                                :rect="enum_type.rect"
+                                :data="enum_type.data">
+                            </component>
+                            <component
+                                v-for="(enum_c) in enums"
+                                :is="enum_comp"
+                                :key="'e'+enum_c.id"
+                                :uid="'e'+enum_c.id"
+                                :name="enum_c.name"
+                                :index="enum_c.index"
+                                :rect="enum_c.rect"
+                                :data="enum_c.data">
+                            </component> 
+                            <component
+                                v-for="(group) in groups"
+                                :is="group_comp"
+                                :key="'g'+group.id"
+                                :uid="'g'+group.id"
+                                :name="group.name"
+                                :index="group.index"
+                                :rect="group.rect"
+                                :data="group.data">
+                            </component>
+                            <svg id="svg_viewport" ref="gv_lines">
+                                <defs>
+                                    <marker id="black-arrow" markerWidth="5" markerHeight="5" refX="0" refY="5"
+                                    viewBox="0 0 10 10" orient="auto-start-reverse" style="opacity: 0.85">
+                                        <path d="M 0 0 L 10 5 L 0 10 z" />
+                                    </marker>
+                                    <marker id="arrow" markerWidth="10" markerHeight="10" refX="10" refY="3" orient="auto" markerUnits="strokeWidth">
+                                        <path d="M0,0 L0,6 L9,3 z" fill="rgba(255,0,0,0.9)" />
+                                    </marker>
+                                    <marker id="arrow1" viewBox="0 0 492.004 492.004" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                                        <path d="M382.678,226.804L163.73,7.86C158.666,2.792,151.906,0,144.698,0s-13.968,2.792-19.032,7.86l-16.124,16.12
+                                        c-10.492,10.504-10.492,27.576,0,38.064L293.398,245.9l-184.06,184.06c-5.064,5.068-7.86,11.824-7.86,19.028
+                                        c0,7.212,2.796,13.968,7.86,19.04l16.124,16.116c5.068,5.068,11.824,7.86,19.032,7.86s13.968-2.792,19.032-7.86L382.678,265
+                                        c5.076-5.084,7.864-11.872,7.848-19.088C390.542,238.668,387.754,231.884,382.678,226.804z"/>
+                                    </marker>
+                                </defs>
+                                <component
+                                    v-for="(line) in lines"
+                                    :is="line_comp"
+                                    :key="line.line_uid"
+                                    :uid="line.line_uid" 
+                                    :src_info="line.src_info"
+                                    :dest_info="line.dest_info"
+                                    :settings="line.settings">
+                                </component> 
+                            </svg>
+                        </div>
+                        <component ref="s_box" 
+                            :is="selection_comp"
+                            :uid="'s0'"
+                            :rect="selection_box.rect">
+                        </component>
+                    </div>
+                </div>
+            </v-card>
+        </v-container>
 </template>
 
 <style scoped>

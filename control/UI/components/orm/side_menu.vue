@@ -130,6 +130,6 @@
         position: absolute;
         width: fit-content;
         height: 100%;
-        z-index: 10000;
+        z-index: 90;
     }
 </style>

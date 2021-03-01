@@ -119,7 +119,7 @@ module.exports = {
             APIShift.API.notify("Logged out", "success");
             // Load login screen
             APIShift.logged_in = false;
-            app.$router.push("login");
+            app.$router.push("/login");
             window.app.app_loader = null;
             window.app.app_footer = null;
             window.app.app_navigator = null;

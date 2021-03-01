@@ -253,11 +253,6 @@
                 </v-dialog>
             </template>
 
-            <template v-slot:item.name="{ item }">
-                <v-chip>{{ getRuleType(item) }}</v-chip>
-                <span>{{ getRuleName(item) }}</span>
-            </template>
-
             <template v-slot:item.actions="{ item }">
                 <v-icon @click="editDatabase(item)">
                     mdi-pencil-circle

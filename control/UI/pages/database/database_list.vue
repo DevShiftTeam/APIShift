@@ -36,6 +36,7 @@
                     { text: 'Password', value: 'pass' },
                     { text: 'Database', value: 'db' },
                     { text: 'Port', value: 'port' },
+                    { text: 'Actions', value: 'actions' }
                     
                 ],
                 rules: {
@@ -120,7 +121,6 @@
                     db: database.db,
                     port: database.port
                 }
-                this.getAvailableRulesForType(this.in_edit.type);
             },
             removeDatabase: function(database_id) {
                 if(!this.delete_dialog) {
@@ -259,7 +259,7 @@
                     <v-card>
                         <v-card-title>Sure?</v-card-title>
                         <v-card-text>
-                            Deleting an important access rule might lead to an information leak
+                            Deleting an important database might lead to an information leak
                         </v-card-text>
                         <v-divider></v-divider>
                         <v-card-actions>

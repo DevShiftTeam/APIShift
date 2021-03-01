@@ -38,7 +38,11 @@ class DatabaseList
      */
     public static function getDatabaseList()
     {
-        Status::message(Status::SUCCESS, CacheManager::get("databases"));
+        $data_to_load = [];
+        if(DatabaseManager::fetchInto("main", $data_to_load, "SELECT * FROM `databases`") === false)
+                Status::message(Status::ERROR, "Couldn't retrieve `databasesgit a` from DB");
+        
+        Status::message(Status::SUCCESS, $data_to_load);
     }
 
     /**
@@ -54,8 +58,6 @@ class DatabaseList
         if(!isset($_POST['db'])) Status::message(Status::ERROR, "At least specify a databse");
         // Set defaults if not provided
         if(!isset($_POST['port'])) $_POST['port'] = 3306;
-
-        $_POST['port'] = intval($_POST['port']);
 
         // Add the session state
         $res = DatabaseManager::query("main",
@@ -82,7 +84,7 @@ class DatabaseList
         $qstr = implode(", ", $qstr);
 
         // Update the data
-        $res = DatabaseManager::query("main", "UPDATE databases SET " . $qstr . " WHERE id = :id", $_POST);
+        $res = DatabaseManager::query("main", "UPDATE `databases` SET " . $qstr . " WHERE id = :id", $_POST);
         if(!$res) Status::message(Status::ERROR, "Couldn't update the DB");
 
         // Refresh Cache to apply changes
@@ -97,7 +99,7 @@ class DatabaseList
     {
         if(!isset($_POST['id'])) Status::message(Status::ERROR, "Didn't set element to remove");
         // Remove the element
-        $res = DatabaseManager::query("main", "DELETE FROM databases WHERE id = :id", $_POST);
+        $res = DatabaseManager::query("main", "DELETE FROM `databases` WHERE id = :id", $_POST);
         if(!$res) Status::message(Status::ERROR, "Couldn't update the DB");
 
         // Refresh Cache to apply changes

@@ -28,7 +28,7 @@
     <!-- Font & CSS -->
     <link href="../externals/styles/google-roboto.css" rel="stylesheet">
     <link rel="stylesheet" href="//cdn.materialdesignicons.com/5.4.55/css/materialdesignicons.min.css">
-    <link href="../externals/styles/vuetify.css" rel="stylesheet">
+    <!-- <link href="../externals/styles/vuetify.css" rel="stylesheet"> -->
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/all.css" media="all">
     <!-- System CSS -->
     <link href="UI/style/main.css" rel="stylesheet">
@@ -36,35 +36,19 @@
 
 <body>
     <div id="app">
-        <v-app id="inspire">
-            <!-- Notifications -->
-            <component ref="notifications" :is="app_notifications" :alerts="alerts"></component>
-
-            <!-- Loader -->
-            <component ref="loader" :is="app_loader" v-if="loader.visible" :message="loader.message"></component>
-
-            <!-- Navigator -->
-            <component ref="navigator" :is="app_navigator"></component>
-
-            <!-- Page Body -->
-            <router-view></router-view>
-
-            <!-- Footer -->
-            <component ref="footer" :is="app_footer"></component>
-        </v-app>
     </div>
 
     <!-- Scripts -->
-    <script src="../externals/scripts/vue.js"></script>
+    <!-- <script src="../externals/scripts/vue.js"></script>
     <script src="../externals/scripts/vuebar.js"></script>
     <script src="../externals/scripts/vuetify.js"></script>
     <script src="../externals/scripts/http-vue-loader.js"></script>
     <script src="../externals/scripts/vue-router.js"></script>
-    <script src="../externals/scripts/jquery.js"></script>
+    <script src="../externals/scripts/jquery.js"></script> -->
     <!-- System scripts -->
-    <script src="UI/scripts/utils.js"></script>
+    <!-- <script src="UI/scripts/utils.js"></script>
     <script src="UI/scripts/APIShift.js"></script>
-    <script src="UI/scripts/main.js"></script>
+    <script src="UI/scripts/main.js"></script> -->
 </body>
 
 </html>

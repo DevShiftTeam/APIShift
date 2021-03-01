@@ -38,4 +38,4 @@ RUN a2ensite default-ssl
 RUN chown -R www-data:www-data /var/www
 RUN chmod 666 /var/www/machine/core/Configurations.php
 
-CMD ["/usr/sbin/apachectl", "-D", "FOREGROUND"]
+CMD sed -i "s/80/$PORT/g" /etc/apache2/sites-enabled/default-ssl.conf /etc/apache2/ports.conf && ["/usr/sbin/apachectl", "-D", "FOREGROUND"]

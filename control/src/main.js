@@ -17,8 +17,12 @@
  *
  * @author Sapir Shemer
  */
+import Vue from "vue";
+import App from "./App.vue";
+import Vuetify from "vuetify/lib";
+
+Vue.use(Vuetify);
 window.app = new Vue({
-    el: "#app",
     router: new VueRouter({
         routes: [],
     }),
@@ -26,11 +30,11 @@ window.app = new Vue({
         theme: {
             dark: true,
             light: {
-                primary: "#003060"
+                primary: "#003060",
             },
             themes: {
                 dark: {
-                    primary: "#a8daff"
+                    primary: "#a8daff",
                 },
             },
         },
@@ -97,9 +101,7 @@ window.app = new Vue({
                 else {
                     // Construct current page title
                     if (window.nav_holder !== undefined) {
-                        let page_holder = Object.values(nav_holder.pages).find(function(
-                            r
-                        ) {
+                        let page_holder = Object.values(nav_holder.pages).find(function(r) {
                             if (r.parent == 0) return to.path === "/" + r.path;
                             let parent_paths = to.path.split("/");
                             return (
@@ -119,4 +121,5 @@ window.app = new Vue({
         });
     },
     methods: {},
-});
+    render: (h) => h(App),
+}).$mount("#app");

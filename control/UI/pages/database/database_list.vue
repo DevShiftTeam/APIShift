@@ -2,7 +2,7 @@
     /**
      * APIShift Engine v1.0.0
      * 
-     * Copyright 2020-present Sagi Weizmann, DevShift (devshift.biz)
+     * Copyright 2020-present Sapir Shemer, DevShift (devshift.biz)
      * 
      * Licensed under the Apache License, Version 2.0 (the "License");
      * you may not use this file except in compliance with the License.
@@ -51,11 +51,11 @@
         created() {
             APIShift.Loader.changeLoader("database_list", this.loader);
             window.dbholder = this;
-            APIShift.Loader.close();
+            this.updateDatabases();
         },
         methods: {
             updateDatabases: function() {
-                APIShift.API.request("Admin\\Access\\Controller", "getControllersTasks", {}, function (response) {
+                APIShift.API.request("Admin\\Database\\DatabaseList", "getDatabaseList", {}, function (response) {
                     if(response.status == APIShift.API.status_codes.SUCCESS) {
                         dbholder.database_list = Object.assign([], response.data);
                     } else {
@@ -95,15 +95,7 @@
                     return;
                 }
                 
-                APIShift.API.request("Admin\\Access\\Database", this.is_creating ? "createDatabase" : "editDatabase", {
-                        id: this.is_creating ? undefined : this.in_edit.id,
-                        name: this.in_edit.name,
-                        host: this.in_edit.host,
-                        user: this.in_edit.user,
-                        pass: this.in_edit.pass,
-                        db: this.in_edit.db,
-                        port: this.in_edit.port
-                    }, function(response) {
+                APIShift.API.request("Admin\\Database\\DatabaseList", this.is_creating ? "createDatabase" : "editDatabase", this.in_edit, function(response) {
                     if(response.status === APIShift.API.status_codes.SUCCESS) {
                         APIShift.API.notify(response.data, 'success');
                     }
@@ -137,7 +129,7 @@
                     return;
                 }
 
-                APIShift.API.request("Admin\\Access\\Controller", "removeDatabase", { id: this.in_edit.id }, function(response) {
+                APIShift.API.request("Admin\\Database\\DatabaseList", "removeDatabase", { id: this.in_edit.id }, function(response) {
                     if(response.status === APIShift.API.status_codes.SUCCESS) {
                         APIShift.API.notify(response.data, 'success');
                     }

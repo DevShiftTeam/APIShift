@@ -2,7 +2,7 @@
     /**
      * APIShift Engine v1.0.0
      * 
-     * Copyright 2020-present Sapir Shemer, DevShift (devshift.biz)
+     * Copyright 2020-present Sagi Weizmann, DevShift (devshift.biz)
      * 
      * Licensed under the Apache License, Version 2.0 (the "License");
      * you may not use this file except in compliance with the License.
@@ -16,14 +16,13 @@
      * See the License for the specific language governing permissions and
      * limitations under the License.
      * 
-     * @author Sapir Shemer
+     * @author Sagi Weizmann
      */
 
     module.exports = {
-        mixins: [APIShift.API.getMixin('access/rule')],
         data() {
             return {
-                controller_access_list: [],
+                database_list: [],
                 search: '',
                 loader: {
                     visible: false,
@@ -31,11 +30,17 @@
                     processes: 0
                 },
                 headers: [
-                    { text: 'Controller', value: 'controller' },
-                    { text: 'Method', value: 'method' },
-                    { text: 'Task name', value: 'name' },
-                    { text: 'Actions', value: 'actions', sortable: false }
+                    { text: 'Name', value: 'name' },
+                    { text: 'Host', value: 'host' },
+                    { text: 'User', value: 'user' },
+                    { text: 'Password', value: 'pass' },
+                    { text: 'Database', value: 'db' },
+                    { text: 'Port', value: 'port' },
+                    
                 ],
+                rules: {
+                    port: value => (!isNaN(value) && value >= 0 && value <= 65353) || 'Port Should be between (0-65353).',
+                },
                 in_edit: null,
                 is_creating: false,
                 delete_dialog: false,
@@ -44,27 +49,30 @@
             }
         },
         created() {
-            APIShift.Loader.changeLoader("access_controllers", this.loader);
-            window.cahandler = this;         
+            APIShift.Loader.changeLoader("database_list", this.loader);
+            window.dbholder = this;
+            APIShift.Loader.close();
         },
         methods: {
-            updateControllerTasks: function() {
+            updateDatabases: function() {
                 APIShift.API.request("Admin\\Access\\Controller", "getControllersTasks", {}, function (response) {
                     if(response.status == APIShift.API.status_codes.SUCCESS) {
-                        cahandler.controller_access_list = Object.assign([], response.data);
+                        dbholder.database_list = Object.assign([], response.data);
                     } else {
                         APIShift.API.notify(response.data, "error");
                     }
                 }, true);
             },
-            createAccessRule: function () {
+            createDatabase: function () {
                 this.is_creating = true;
                 this.edit_dialog = true;
                 this.in_edit = {
-                    controller: '',
-                    method: '',
-                    type: '',
-                    rule: null
+                    name: '',
+                    host: '',
+                    user: '',
+                    pass: '',
+                    db: '',
+                    port: 0
                 }
             },
             discard: function() {
@@ -75,22 +83,26 @@
                 if(this.is_creating) this.is_creating = false;
                 this.edit_dialog = false;
                 this.discard_dialog = false;
-                this.access_names = []; // Empty access names
             },
             save: function() {
-                if(this.in_edit.controller === ""
-                    || this.in_edit.method === ""
-                    || this.in_edit.type === "") {
+                if(this.in_edit.name === ""
+                    || this.in_edit.host === ""
+                    || this.in_edit.user === ""
+                    || this.in_edit.pass === ""
+                    || this.in_edit.db === ""
+                    || this.in_edit.port === "") {
                     APIShift.API.notify("Please fill in valid data", 'warning');
                     return;
                 }
                 
-                APIShift.API.request("Admin\\Access\\Controller", this.is_creating ? "createAccessRule" : "editAccessRule", {
+                APIShift.API.request("Admin\\Access\\Database", this.is_creating ? "createDatabase" : "editDatabase", {
                         id: this.is_creating ? undefined : this.in_edit.id,
-                        type: this.in_edit.type,
-                        rule: this.in_edit.type != 'Function' ? this.getAccessNameByValue(this.in_edit.rule) : this.in_edit.rule,
-                        controller: this.in_edit.controller,
-                        method: this.in_edit.method
+                        name: this.in_edit.name,
+                        host: this.in_edit.host,
+                        user: this.in_edit.user,
+                        pass: this.in_edit.pass,
+                        db: this.in_edit.db,
+                        port: this.in_edit.port
                     }, function(response) {
                     if(response.status === APIShift.API.status_codes.SUCCESS) {
                         APIShift.API.notify(response.data, 'success');
@@ -98,40 +110,41 @@
                     else {
                         APIShift.API.notify(response.data, 'error');
                     }
-                    cahandler.updateControllerTasks();
+                    dbholder.updateDatabases();
                 });
 
                 this.is_creating = false;
                 this.edit_dialog = false;
-                this.access_names = []; // Empty access names
                 return;
             },
-            editAccessRule: function(access_rule) {
+            editDatabase: function(database) {
                 this.edit_dialog = true;
                 this.in_edit = {
-                    controller: access_rule.controller,
-                    method: access_rule.method,
-                    type: this.getRuleType(access_rule),
-                    rule: 0,
-                    id: access_rule.id
+                    id: database.id,
+                    name: database.name,
+                    host: database.host,
+                    user: database.user,
+                    pass: database.pass,
+                    db: database.db,
+                    port: database.port
                 }
                 this.getAvailableRulesForType(this.in_edit.type);
             },
-            removeAccessRule: function(rule_id) {
+            removeDatabase: function(database_id) {
                 if(!this.delete_dialog) {
-                    this.in_edit = Object.assign({}, this.controller_access_list.find(r => r.id === rule_id));
+                    this.in_edit = Object.assign({}, this.database_list.find(r => r.id === database_id));
                     this.delete_dialog = true;
                     return;
                 }
 
-                APIShift.API.request("Admin\\Access\\Controller", "removeAccessRule", { id: this.in_edit.id }, function(response) {
+                APIShift.API.request("Admin\\Access\\Controller", "removeDatabase", { id: this.in_edit.id }, function(response) {
                     if(response.status === APIShift.API.status_codes.SUCCESS) {
                         APIShift.API.notify(response.data, 'success');
                     }
                     else {
                         APIShift.API.notify(response.data, 'error');
                     }
-                    cahandler.updateControllerTasks();
+                    dbholder.updateDatabases();
                 });
                 this.delete_dialog = false;
             }
@@ -143,7 +156,7 @@
         <v-data-table
             class="mx-auto ca_table" elevation-2 max-height="75%"
             :headers="headers"
-            :items="controller_access_list"
+            :items="database_list"
             :search="search">
             <template v-slot:top>
                 <v-app-bar>
@@ -175,7 +188,7 @@
                     <v-spacer></v-spacer>
                     <v-tooltip top>
                         <template #activator="{ on }">
-                            <v-btn icon v-on="on" @click="createAccessRule()">
+                            <v-btn icon v-on="on" @click="createDatabase()">
                                 <v-icon v-if="is_creating">mdi-close-circle</v-icon>
                                 <v-icon v-else>mdi-plus-circle</v-icon>
                             </v-btn>
@@ -188,24 +201,29 @@
                 <!-- Edit/Add dialog -->
                 <v-dialog v-if="edit_dialog" v-model="edit_dialog" max-width="500px">
                     <v-card>
-                        <v-card-title><span class="headline">{{ is_creating ? "Create New Rule" : "Edit" }}</span></v-card-title>
+                        <v-card-title><span class="headline">{{ is_creating ? "Create New Database" : "Edit" }}</span></v-card-title>
 
                         <v-card-text>
                             <v-container>
                                 <v-row>
                                     <v-col cols="12" sm="6" md="6">
-                                        <v-text-field v-model="in_edit.controller" label="Controller"></v-text-field>
+                                        <v-text-field v-model="in_edit.name" label="Name"></v-text-field>
                                     </v-col>
                                     <v-col cols="12" sm="6" md="6">
-                                        <v-text-field v-model="in_edit.method"  label="Method"></v-text-field>
+                                        <v-text-field v-model="in_edit.host"  label="Host"></v-text-field>
                                     </v-col>
                                     <v-col cols="12" sm="6" md="6">
-                                        <v-select @change="getAvailableRulesForType(in_edit.type)" v-model="in_edit.type" :items="access_types" label="Authentication type"></v-select>
-                                    </v-col>
+                                        <v-text-field v-model="in_edit.user"  label="User"></v-text-field>
+                                    </v-col> 
                                     <v-col cols="12" sm="6" md="6">
-                                        <v-autocomplete v-if="in_edit.type != 'Function'" v-model="in_edit.rule" :items="access_names" item-text="text" item-value="val" :label="in_edit.type"></v-autocomplete>
-                                        <v-text-field v-else v-model="in_edit.rule" label="Function"></v-text-field>
+                                        <v-text-field v-model="in_edit.pass" type="password"  label="Password"></v-text-field>
                                     </v-col>
+                                     <v-col cols="12" sm="6" md="6">
+                                        <v-text-field v-model="in_edit.db" label="Database"></v-text-field>
+                                    </v-col>                              
+                                     <v-col cols="12" sm="6" md="6">
+                                        <v-text-field v-model="in_edit.port" :rules="[rules.port]" hint="(0-65353)" label="Port"></v-text-field>
+                                    </v-col>                            
                                 </v-row>
                             </v-container>
                         </v-card-text>
@@ -241,13 +259,13 @@
             </template>
 
             <template v-slot:item.actions="{ item }">
-                <v-icon @click="editAccessRule(item)">
+                <v-icon @click="editDatabase(item)">
                     mdi-pencil-circle
                 </v-icon>
                 <!-- Delete dialog -->
                 <v-dialog v-model="delete_dialog" max-width="500px">
                     <template v-slot:activator="{ on }">
-                        <v-icon v-on="on" @click="removeAccessRule(item.id)">
+                        <v-icon v-on="on" @click="removeDatabase(item.id)">
                             mdi-delete-circle
                         </v-icon>
                     </template>
@@ -259,7 +277,7 @@
                         <v-divider></v-divider>
                         <v-card-actions>
                             <v-spacer></v-spacer>
-                            <v-btn color="primary" text @click="removeAccessRule(item.id)">Remove</v-btn>
+                            <v-btn color="primary" text @click="removeDatabase(item.id)">Remove</v-btn>
                             <v-btn text @click="delete_dialog = false">Cancel</v-btn>
                         </v-card-actions>
                     </v-card>

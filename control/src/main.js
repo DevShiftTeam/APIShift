@@ -20,9 +20,14 @@
 import Vue from "vue";
 import App from "./App.vue";
 import Vuetify from "vuetify/lib";
+import VueRouter from "vue-router";
+import i18n from './locale/i18n'
+import { APIShift, APIHandler, Loader } from "./scripts/APIShift.js";
 
+Vue.use(VueRouter);
 Vue.use(Vuetify);
 window.app = new Vue({
+    i18n,
     router: new VueRouter({
         routes: [],
     }),
@@ -60,6 +65,7 @@ window.app = new Vue({
     created() {
         // Initialize APIShift Engine
         this.apishift = new APIShift(this.loader);
+        window.APIShift = this.apishift;
 
         // Link components to apishift
         APIShift.Loader.load((resolve, reject) => {
@@ -69,15 +75,17 @@ window.app = new Vue({
 
         APIShift.Loader.load((resolve, reject) => {
             // Add loaded routes & pages
-            app.$router.addRoutes(APIShift.admin_routes);
+            this._router.addRoutes(APIShift.admin_routes);
 
             // Handle first load of page
             if (!APIShift.installed) {
                 app.apishift.setSubtitle("Installer");
-                app.$router.push("/installer");
+                if (app.$route.path != "/installer")
+                    app.$router.push("/installer");
             } else if (!APIShift.logged_in) {
                 app.apishift.setSubtitle("Login");
-                app.$router.push("/login");
+                if (app.$route.path != "/login")
+                    app.$router.push("/login");
             } else if (app.$route.path == "/") app.$router.push("/main");
 
             //  Don't load other components if system isn't installed
@@ -123,3 +131,5 @@ window.app = new Vue({
     methods: {},
     render: (h) => h(App),
 }).$mount("#app");
+
+export default window.app;

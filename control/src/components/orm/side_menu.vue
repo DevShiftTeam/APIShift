@@ -67,10 +67,10 @@
                 this.show_side_menu = false;
             },
             toggleDarkTheme: function() {
-                window.app.$vuetify.theme.dark = !(window.app.$vuetify.theme.dark);
+                this.$vuetify.theme.dark = !(this.$vuetify.theme.dark);
             },
             isOnDarkMode () {
-                return window.app.$vuetify.theme.dark;
+                return this.$vuetify.theme.dark;
             }
         }
     }

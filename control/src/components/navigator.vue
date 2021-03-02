@@ -146,7 +146,7 @@ module.exports = {
       ></v-app-bar-nav-icon>
       <v-toolbar-title>
         <v-avatar tile style="height: auto; margin-right: 10px">
-          <img src="../images/apishift-logo.png" alt="APIShift" />
+          <img src="/images/apishift-logo.png" alt="APIShift" />
         </v-avatar>
         APIShift Control Panel
       </v-toolbar-title>

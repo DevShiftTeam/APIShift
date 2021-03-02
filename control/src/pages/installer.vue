@@ -30,11 +30,11 @@
                         name: "Admin configurations",
                         fields: [
                             // regex is used for validating the data before sending it to server for further validation
-                            {label: "Admin User", name: "login", icon: "person", type: "text", data: "admin",
+                            {label: "Admin User", name: "login", icon: "mdi-account", type: "text", data: "admin",
                              regex:"^[a-z0-9_-]{5,16}$",format:"At least 5 characters,Max is 16 characters"
                             },
                             {
-                                label: "Admin Password", name: "password", icon: "lock", type: "password", data: "",
+                                label: "Admin Password", name: "password", icon: "mdi-lock", type: "password", data: "",
                                 regex: "^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{8,})", format: "At least 8 characters, with numbers and characters"
                             },
                             { label: "Repeat Password", name: "repeat_password", icon: "mdi-repeat", type: "password", data: "" }
@@ -147,8 +147,8 @@
             },
             focusOnIncorrectField: function (handler = this) {
                 var field_id = this.findIncorrectField(handler.current_step, false);
-                if(field_id != -1) $('#' + handler.steps[handler.current_step].fields[field_id].name).focus();
-                else $('#' + handler.steps[handler.current_step].fields[0].name).focus();
+                if(field_id != -1) document.querySelector('#' + handler.steps[handler.current_step].fields[field_id].name).focus();
+                else document.querySelector('#' + handler.steps[handler.current_step].fields[0].name).focus();
             },
             /**
              * Validate and move into next step
@@ -235,7 +235,7 @@
                 });
             },
             toggleDarkTheme: function() {
-                window.app.$vuetify.theme.dark = !(window.app.$vuetify.theme.dark);
+                this.$vuetify.theme.dark = !(this.$vuetify.theme.dark);
             }
         }
     }
@@ -254,7 +254,7 @@
                             <v-tooltip bottom>
                             <template v-slot:activator="{ on }">
                                 <v-btn class="lightbulb" v-on="on" icon large target="_blank" v-on:click="toggleDarkTheme()">
-                                    <v-icon v-if="app.$vuetify.theme.dark">mdi-lightbulb</v-icon>
+                                    <v-icon v-if="$vuetify.theme.dark">mdi-lightbulb</v-icon>
                                     <v-icon v-else>fas fa-moon</v-icon>
                                 </v-btn>
                             </template>

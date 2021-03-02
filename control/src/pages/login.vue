@@ -29,9 +29,9 @@
                     name: "APIShift CP Login",
                     fields: [
                         // regex is used for validating the data before sending it to server for further validation
-                        {label: "Username", name: "login", icon: "person", type: "text", data: "" },
+                        {label: "Username", name: "login", icon: "mdi-account", type: "text", data: "" },
                         {
-                            label: "Password", name: "password", icon: "lock", type: "password", data: "",
+                            label: "Password", name: "password", icon: "mdi-lock", type: "password", data: "",
                             regex: "^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{8,})", format: "At least 8 characters, with numbers and characters"
                         }
                     ]

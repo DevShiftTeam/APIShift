@@ -1,19 +1,21 @@
 {
-    "name": "apishift",
+    "name": "apishift-control",
     "version": "1.0.0",
     "private": false,
     "scripts": {
-        "serve": "vue-cli-service serve",
+        "serve": "vue-cli-service serve --https",
         "build": "vue-cli-service build",
         "lint": "vue-cli-service lint"
     },
     "dependencies": {
+        "axios": "^0.21.1",
         "core-js": "^3.6.4",
+        "http-vue-loader": "^1.4.2",
         "register-service-worker": "^1.6.2",
         "vue": "^2.6.12",
         "vue-i18n": "^8.15.5",
         "vue-router": "^3.5.1",
-        "vuetify": "^2.4.3"
+        "vuetify": "^2.4.5"
     },
     "devDependencies": {
         "@intlify/vue-i18n-loader": "^0.6.1",

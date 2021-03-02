@@ -6,7 +6,6 @@
  * file in the root folder of the APIShift Engine original release source-code
  * @author Sapir Shemer
  */
-
 /**
  * If the request mode wasn't set beforehand then assume we work using PHP mode
  * true = http api request

@@ -24,6 +24,7 @@
   * or in a PHP file
   */
  $REQUEST_MODE = true;
+ header("Access-Control-Allow-Origin: *");
 
  require "APIShift.php";
 

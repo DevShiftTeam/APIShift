@@ -29,13 +29,12 @@ RUN printf "\n" | pecl install apcu -y
 RUN a2enmod ssl
 # RUN a2ensite default-ssl.conf
 
-COPY / /var/www/
+COPY --chown=www-data:www-data / /var/www/
 COPY ./conf/default.conf /etc/apache2/sites-available
 COPY ./conf/default-ssl.conf /etc/apache2/sites-available
 
 RUN a2ensite default-ssl
 
-RUN chown -R www-data:www-data /var/www
 RUN chmod 666 /var/www/machine/core/Configurations.php
 
-CMD sed -i "s/80/$PORT/g" /etc/apache2/sites-enabled/default-ssl.conf /etc/apache2/ports.conf && ["/usr/sbin/apachectl", "-D", "FOREGROUND"]
+CMD ["/usr/sbin/apachectl", "-D", "FOREGROUND"]

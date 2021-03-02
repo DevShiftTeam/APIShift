@@ -131,7 +131,6 @@
                         return this.id; 
                     }
                 },
-                relation_factory: {relate_from : 0, relate_to : 0, relation_type : 0},
                 cursor_state: {type: "default"}
             }
         },
@@ -361,71 +360,6 @@
             move_camera_by (dx, dy) {
                 this.camera.x += dx;
                 this.camera.y += dy;
-            },
-            /**
-             * Control functions 
-             */
-            create_line ( src_info = { type: '', from_id: 0}, dest_info = {type: '', to_id: 0}, settings = {  }) {
-                    var line_uid, from_uid, to_uid;
-
-                    // String concatination 
-                    from_uid  = src_info.type + src_info.id;
-                    to_uid = dest_info.type + dest_info.id;
-
-                    // Line already in list 
-                    line_uid = `${from_uid}-${to_uid}`;
-                    if (graph_view.lines.find((l) => l.line_uid === line_uid)) return;
-
-                    // Add line to system 
-                    graph_view.lines.push({line_uid, src_info, dest_info, settings});
-            },
-            delete_line ( src_info = { type: '', from_id: 0}, dest_info = {type: '', to_id: 0} ) {  
-                    var line_uid, from_uid, to_uid;
-
-                    // String concatination 
-                    from_uid  = src_info.type + src_info.id;
-                    to_uid = dest_info.type + dest_info.id;
-
-                    // Line already in list 
-                    line_uid = `${from_uid}-${to_uid}`;
-
-                    // Queue deletion to next frame execution due to potential race conditions
-                    setTimeout(() => graph_view.lines = graph_view.lines.filter((line) =>  line.line_uid !== line_uid),0);
-            },
-            relation_builder ( relate_from = {}, relate_to = {}, relate_type) {
-                if (relate_from && Object.keys(relate_from) !== 0) {
-                    this.relation_factory['from'] = relate_from;    
-                }
-                if (relate_to && Object.keys(relate_to) !== 0) {
-                    this.relation_factory['to'] = relate_to;
-                }
-                if (relate_type) {
-                    this.relation_factory['type'] = relate_type;
-                }
-                
-                // All properties are set 
-                if (Object.values(this.relation_factory).every((v) => v)) {
-                    let from = { type: this.relation_factory.from.type , id: this.relation_factory.from.id };
-                    let to = { type: this.relation_factory.to.type , id: this.relation_factory.to.id };
-                    let type = this.relation_factory.type;
-
-                    let element_from = this.get_element_by_info(from);
-                    let element_to = this.get_element_by_info(to);
-
-                    let rect = {
-                        x: (element_from.rect.x + element_to.rect.x) / 2,
-                        y: (element_from.rect.y + element_to.rect.y) / 2,
-                        width: 0,
-                        height: 0 
-                    };
-
-                    // Reset factory and create new relation element
-                    this.relation_factory = {from: 0,to: 0,type: 0};
-                    this.cursor_state = Object.assign({}, { type: 'default' });
-                    this.create_element_on_runtime('item', { name: 'relation', rect , data: {is_relation: true,from, to, type}});
-
-                } else this.cursor_state = Object.assign({}, { type: 'create', data: 'add-relation'});
-                
             },
             /**
              * Create new element on screen according to params.

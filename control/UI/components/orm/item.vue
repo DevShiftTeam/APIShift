@@ -23,13 +23,11 @@
     module.exports = {
         mixins: [APIShift.API.getMixin('orm/graph_element')],
         props: {
-            is_relation: Boolean,
             data: Object,
             name: String
         },
         data () {
             return {
-                uid: 'i',
                 drawer: null,
                 group_container: null,
                 selected: false,
@@ -116,7 +114,7 @@
         @pointerdown.prevent="drag_start"
         @contextmenu.prevent="on_context"
         @pointerup.prevent="drag_end">
-            <v-avatar left class="item_type darken-4" :class="is_relation ? 'purple' : 'blue'">{{ is_relation ? 'R' : 'I'}}</v-avatar>
+            <v-avatar left class="item_type darken-4 blue">I</v-avatar>
             <div style="display: inline;">{{ name }}</div>
     </div>
 </template>

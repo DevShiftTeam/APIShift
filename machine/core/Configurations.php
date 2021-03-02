@@ -33,11 +33,11 @@ class Configurations {
     /**
      * Database login info
      */
-    const DB_HOST = "mysql_web";
+    const DB_HOST = "127.0.0.1";
     const DB_PORT = 3306;
-    const DB_USER = "admin";
-    const DB_PASS = "123qwe@@";
-    const DB_NAME = "test";
+    const DB_USER = "root";
+    const DB_PASS = "";
+    const DB_NAME = "apishift";
     const DB_TYPE = "MySQL";
 
     /**
@@ -48,7 +48,7 @@ class Configurations {
     /**
      * Cache system configurations
      */
-    const CACHE_TYPE = CacheManager::APCU;
+    const CACHE_TYPE = CacheManager::NO_CACHE;
     const CACHE_HOST = "127.0.0.1";
     const CACHE_PORT = 6379;
     const CACHE_PASS = "";

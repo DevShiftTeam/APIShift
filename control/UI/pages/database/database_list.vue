@@ -131,7 +131,7 @@
                     else {
                         APIShift.API.notify(response.data, 'error');
                     }
-                    is_checking = false;
+                    dbholder.is_checking = false;
                 });
             },
             removeDatabase: function(database_id) {

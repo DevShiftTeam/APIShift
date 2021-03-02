@@ -30,16 +30,36 @@ import { API_SERVER } from "../.env";
 import axios from "axios";
 export class APIShift {
     constructor(loader = app.loader, title = "APIShift") {
+        this.server = API_SERVER;
+        this.client = "https://localhost:8080/";
         // Step 1: Store site title reference
+        /**
+         * Holds the APIShift server installation parent url on the server
+         * Calculated automatically when APIShift file is loaded
+         */
+        /**
+         * Determines if the user is working in admin page
+         * Admin mode is client based, admin operations are authenticated by the server separately
+         */
+        this.admin_mode = false;
+        /**
+         * Pages are loaded using the loader from the API
+         */
+        this.pages = {};
+        this.admin_routes = [];
+        this.components = {};
+        this.load_components = true;
+        this.logged_in = false;
+        this.installed = true;
+        this.mixins = {};
         document.title = title;
         this.main_title = title;
-        APIShift.Loader = new Loader();
-        APIShift.API = new APIHandler();
+        this.API = new APIHandler(this);
+        this.Loader = new Loader(this);
         // Step 2: Set default loader
-        APIShift.Loader.changeLoader("main", loader);
+        this.Loader.changeLoader("main", loader);
         // Step 3: Initialize
-        APIShift.Loader.message("Loading System");
-        this.initialize();
+        this.Loader.message("Loading System");
     }
 
     setSubtitle(sub_title) {
@@ -51,47 +71,46 @@ export class APIShift {
     }
 
     initialize() {
-        APIShift.Loader.show("main"); // Show main loader
+        this.Loader.show("main"); // Show main loader
         // Set admin mode in case the user is in admin page
-        APIShift.Loader.load((resolve, reject) => {
-            if (location.href.indexOf(APIShift.client + "/control") == 0) {
-                APIShift.admin_mode = true;
+        this.Loader.load((resolve, reject) => {
+            if (location.href.indexOf(this.client + "/control") == 0) {
+                this.admin_mode = true;
                 // Load default components
-                APIShift.API.getComponent("notifications", true);
+                this.API.getComponent("notifications", true);
             }
             resolve(0);
         });
 
         // Load statuses
-        APIShift.API.request(
+        this.API.request(
             "Main\\Status",
             "getAllStatuses", {},
-            function(response) {
+            (response) => {
                 switch (response.status) {
-                    case APIShift.API.status_codes.ERROR:
-                        APIShift.API.notify("Error: " + response.data, "error");
+                    case this.API.status_codes.ERROR:
+                        this.API.notify("Error: " + response.data, "error");
                         break;
-                    case APIShift.API.status_codes.SUCCESS:
+                    case this.API.status_codes.SUCCESS:
                         for (let status in response.data)
-                            APIShift.API.status_codes[response.data[status].name] =
+                            this.API.status_codes[response.data[status].name] =
                             4 + response.data[status].id;
-                        APIShift.load_components = true;
+                        this.load_components = true;
                         break;
-                    case APIShift.API.status_codes.NOT_INSTALLED:
+                    case this.API.status_codes.NOT_INSTALLED:
                         // Redirect user to admin page if system is not installed
-                        if (!APIShift.admin_mode)
-                            location.href = APIShift.client + "/control/";
+                        if (!this.admin_mode) location.href = this.client + "/control/";
                         // Route to installation page
                         else {
-                            APIShift.admin_routes.push({
+                            this.admin_routes.push({
                                 path: "/installer",
-                                component: APIShift.API.getPage("installer", true),
+                                component: this.API.getPage("installer", true),
                             });
-                            APIShift.installed = false; // Don't continue loading system if not installed
+                            this.installed = false; // Don't continue loading system if not installed
                         }
                         break;
                     default:
-                        APIShift.API.notify(response.data, "error");
+                        this.API.notify(response.data, "error");
                         return;
                 }
             },
@@ -99,28 +118,28 @@ export class APIShift {
         );
 
         // Check admin mode & installation
-        APIShift.Loader.load((resolve, reject) => {
+        this.Loader.load((resolve, reject) => {
             // Preceding code is only for the CP
-            if (!APIShift.admin_mode) {
+            if (!this.admin_mode) {
                 resolve(2); // Jump 2 stage forward
             }
 
             // Installation check
-            if (!APIShift.installed) {
+            if (!this.installed) {
                 resolve(2); // Jump 2 stage forward
             }
 
             // Start update loop with server
-            APIShift.API.startUpdate();
+            this.API.startUpdate();
 
             // Load default pages
-            APIShift.admin_routes.push({
+            this.admin_routes.push({
                 path: "/main",
-                component: APIShift.API.getPage("main", true),
+                component: this.API.getPage("main", true),
             });
-            APIShift.admin_routes.push({
+            this.admin_routes.push({
                 path: "/login",
-                component: APIShift.API.getPage("login", true),
+                component: this.API.getPage("login", true),
             });
 
             resolve(0);
@@ -128,35 +147,35 @@ export class APIShift {
 
         // Check that session state allows to proceed
         let is_session_admin = false;
-        APIShift.API.request(
+        this.API.request(
             "Main\\SessionState",
             "getCurrentSessionState", {},
-            function(response) {
-                if (response.status == APIShift.API.status_codes.SUCCESS)
+            (response) => {
+                if (response.status == this.API.status_codes.SUCCESS)
                     is_session_admin = response.data == 1;
                 else
-                    APIShift.API.notify(
-                        APIShift.API.getStatusName(response.status) + ": " + response.data,
+                    this.API.notify(
+                        this.API.getStatusName(response.status) + ": " + response.data,
                         "error"
                     );
             },
             true
         );
 
-        APIShift.Loader.load((resolve, reject) => {
+        this.Loader.load((resolve, reject) => {
             if (is_session_admin) {
-                APIShift.load_components = true;
-                APIShift.logged_in = true;
+                this.load_components = true;
+                this.logged_in = true;
             } else {
-                APIShift.load_components = false; // Don't load other system components before login
+                this.load_components = false; // Don't load other system components before login
                 resolve(0);
             }
 
             // Load admin components
-            APIShift.API.getComponent("footer", true);
-            APIShift.API.getComponent("navigator", true);
-            APIShift.API.getComponent("loader", true);
-            APIShift.API.getMixin("access/rule", true);
+            this.API.getComponent("footer", true);
+            this.API.getComponent("navigator", true);
+            this.API.getComponent("loader", true);
+            this.API.getMixin("access/rule", true);
             resolve(0);
         });
     }
@@ -166,14 +185,16 @@ export class APIShift {
      */
     isSessionState(state_id) {
         let result = false;
-        APIShift.API.request(
+        this.API.request(
             "Main\\SessionState",
             "getCurrentSessionState", {},
-            function(response) {
+            (response) => {
                 if (response.status == 1) result = response.data == state_id;
                 else
-                    APIShift.API.notify(
-                        APIShift.API.getStatusName(response.status) + ": " + response.data,
+                    this.API.notify(
+                        this.Loader.API.getStatusName(response.status) +
+                        ": " +
+                        response.data,
                         "error"
                     );
             },
@@ -191,7 +212,7 @@ export class APIShift {
  * of the number of running processes, this counter is incremented when a loader is called, and decremented when a process is finished
  */
 export class Loader {
-    constructor() {
+    constructor(apishift) {
         // Collection of the loaders in the screen
         this.loader_manager = {};
         // Currently selected loader key
@@ -312,19 +333,19 @@ export class Loader {
                 promiseHolder == null ||
                 this.loader_manager[loader_name].processes == 0
             ) {
-                promiseHolder = new Promise(function(resolutionFunc) {
-                    APIShift.Loader.show(loader_name);
+                promiseHolder = new Promise((resolutionFunc) => {
+                    this.show(loader_name);
                     resolutionFunc(0);
                 });
             } else {
                 promiseHolder.then((value) => {
-                    APIShift.Loader.show(loader_name);
+                    this.show(loader_name);
                     return value;
                 });
             }
             this.loader_manager[loader_name].processes++;
         } else {
-            promiseHolder = new Promise(function(resolutionFunc) {
+            promiseHolder = new Promise((resolutionFunc) => {
                 resolutionFunc(0);
             });
         }
@@ -334,14 +355,14 @@ export class Loader {
             .then((value) => {
                 // Skip processses
                 if (value != 0 && value !== undefined && value != null) {
-                    APIShift.Loader.loader_manager[loader_name].processes--;
+                    window.APIShift.Loader.loader_manager[loader_name].processes--;
                     return --value;
                 }
                 return new Promise(handlerMethod);
             })
             .then(function(value) {
                 // When done close loader
-                if (chain) APIShift.Loader.close(loader_name);
+                if (chain) window.APIShift.Loader.close(loader_name);
                 return value;
             });
 
@@ -362,10 +383,10 @@ export class Loader {
         before = function() {},
         loader_name = this.current_loader
     ) {
-        APIShift.Loader.show(loader_name);
+        this.show(loader_name);
         setTimeout(function() {
             before();
-            APIShift.Loader.close(loader_name);
+            window.APIShift.Loader.close(loader_name);
             after();
         }, ms);
     }
@@ -384,7 +405,7 @@ export class Loader {
  * Holds API specific data & handling functions
  */
 export class APIHandler {
-    constructor() {
+    constructor(apishift) {
         // Collection of the status codes available
         this.status_codes = {
             ERROR: 0,
@@ -399,7 +420,7 @@ export class APIHandler {
         // Map of functions to run on server update loop
         this.update_function = {
             KeepAlive: function() {
-                APIShift.API.request(
+                window.APIShift.API.request(
                     "Main\\KeepAlive",
                     "stillHere", {},
                     () => {},
@@ -419,8 +440,8 @@ export class APIHandler {
         // Continue only if update loop is not running
         if (this.update_function_running !== false) return;
         this.update_function_running = setInterval(() => {
-            for (let key in APIShift.API.update_function) {
-                APIShift.API.update_function[key]();
+            for (let key in window.APIShift.API.update_function) {
+                window.APIShift.API.update_function[key]();
             }
         }, interval);
     }
@@ -487,10 +508,14 @@ export class APIHandler {
         chain = true
     ) {
         // Define request function without running it
-        return APIShift.Loader.load(
+        return window.APIShift.Loader.load(
             (resolve, reject) => {
                 fetch(
-                        APIShift.server + "/machine/API.php?c=" + controller + "&m=" + method, {
+                        window.APIShift.server +
+                        "/machine/API.php?c=" +
+                        controller +
+                        "&m=" +
+                        method, {
                             body: attached_data ? new URLSearchParams(attached_data) : null,
                             headers: {
                                 "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -500,9 +525,9 @@ export class APIHandler {
                     )
                     .then((response) => {
                         if (
-                            response.status == APIShift.API.status_codes.NO_AUTH &&
-                            APIShift.admin_mode &&
-                            APIShift.logged_in &&
+                            response.status == window.APIShift.API.status_codes.NO_AUTH &&
+                            window.APIShift.admin_mode &&
+                            window.APIShift.logged_in &&
                             window.nav_holder !== undefined
                         )
                             nav_holder.logout();
@@ -517,7 +542,7 @@ export class APIHandler {
                     })
                     .finally(() => resolve(0));
             },
-            APIShift.Loader.current_loader,
+            window.APIShift.Loader.current_loader,
             chain
         );
     }
@@ -567,7 +592,11 @@ export class APIHandler {
     }
 
     getUIFolder() {
-        return APIShift.server + (APIShift.admin_mode ? "/control" : "") + "/UI";
+        return (
+            window.APIShift.server +
+            (window.APIShift.admin_mode ? "/control" : "") +
+            "/UI"
+        );
     }
 
     /**
@@ -576,10 +605,10 @@ export class APIHandler {
      * @param {boolean} init Set true to retrieve element if not exists
      */
     getPage(page_name, init = false) {
-        if (init && APIShift.pages[page_name] === undefined)
-            APIShift.pages[page_name] = () =>
+        if (init && window.APIShift.pages[page_name] === undefined)
+            window.APIShift.pages[page_name] = () =>
             import (`../pages/${page_name}.vue`);
-        return APIShift.pages[page_name];
+        return window.APIShift.pages[page_name];
     }
 
     /**
@@ -588,13 +617,13 @@ export class APIHandler {
      * @param {boolean} init Set true to retrieve element if not exists
      */
     getComponent(component_name, init = false) {
-        if (init && APIShift.components[component_name] === undefined)
-            APIShift.components[component_name] = () =>
+        if (init && window.APIShift.components[component_name] === undefined)
+            window.APIShift.components[component_name] = () =>
             import (`../components/${component_name}.vue`);
         // APIShift.components[component_name] = httpVueLoader(
         //     this.getUIFolder() + "/components/" + component_name + ".vue"
         // );
-        return APIShift.components[component_name];
+        return window.APIShift.components[component_name];
     }
 
     /**
@@ -603,12 +632,12 @@ export class APIHandler {
      * @param {boolean} init Set true to retrieve element if not exists
      */
     getMixin(mixin_name, init = false) {
-        if (init && APIShift.mixins[mixin_name] === undefined) {
+        if (init && window.APIShift.mixins[mixin_name] === undefined) {
             // Load mixin as object
             return () =>
                 import ("../components/mixins/" + mixin_name + ".vue");
         }
-        return APIShift.mixins[mixin_name];
+        return window.APIShift.mixins[mixin_name];
     }
 
     hasOwnProperty(obj, prop) {
@@ -618,27 +647,6 @@ export class APIHandler {
 }
 
 /**
- * Holds the APIShift server installation parent url on the server
- * Calculated automatically when APIShift file is loaded
- */
-APIShift.server = null;
-APIShift.client = null;
-/**
- * Determines if the user is working in admin page
- * Admin mode is client based, admin operations are authenticated by the server separately
- */
-APIShift.admin_mode = false;
-/**
- * Pages are loaded using the loader from the API
- */
-APIShift.pages = {};
-APIShift.admin_routes = [];
-APIShift.components = {};
-APIShift.load_components = true;
-APIShift.logged_in = false;
-APIShift.installed = true;
-APIShift.mixins = {};
-/**
  * Helpers
  */
 // APIShift.Loader = new Loader();
@@ -646,8 +654,6 @@ APIShift.mixins = {};
 
 // Calculate installation parent folder url
 (function() {
-    APIShift.server = API_SERVER;
-    APIShift.client = "https://localhost:8080/";
-    axios.defaults.headers.common["Access-Control-Allow-Origin"] = "*";
+
     // APIShift.server = APIShift.server.substr(0, APIShift.server.indexOf("/control/UI/scripts/"));
 })();

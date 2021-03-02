@@ -18,9 +18,9 @@
  *
  * @author Sapir Shemer
  */
-
+import { FilterObject } from "../scripts/utils";
 // This shit is made for scripting
-module.exports = {
+export default {
   data() {
     return {
       drawer: 1,
@@ -35,86 +35,78 @@ module.exports = {
   },
   computed: {
     showNavBar: {
-      get: function () {
+      get: function() {
         return this.drawer > 0;
       },
-      set: function (newValue) {
+      set: function(newValue) {
         this.drawer = newValue;
       },
     },
     noParentPages() {
       if (this.pages) {
-        return Object.filter(this.pages, (f) => f.parent === 0);
+        return FilterObject(this.pages, (f) => f.parent === 0);
       }
       return [];
     },
   },
   methods: {
-    updateIndex: function (new_index) {
+    updateIndex: function(new_index) {
       this.index = new_index;
     },
-    updatePages: function () {
-      APIShift.API.request(
-        "Admin\\Control",
-        "getPages",
-        {},
-        function (response) {
-          if (response.status == APIShift.API.status_codes.SUCCESS) {
-            nav_holder.pages = Object.assign({}, response.data);
-            // Add routes
-            for (let item in response.data) {
-              // Construct path to page
-              if (response.data[item].parent === 0) {
-                APIShift.admin_routes.push({
-                  path: "/" + response.data[item].path,
-                  component: APIShift.API.getPage(
+    updatePages: function() {
+      APIShift.API.request("Admin\\Control", "getPages", {}, function(
+        response
+      ) {
+        if (response.status == APIShift.API.status_codes.SUCCESS) {
+          nav_holder.pages = Object.assign({}, response.data);
+          // Add routes
+          for (let item in response.data) {
+            // Construct path to page
+            if (response.data[item].parent === 0) {
+              APIShift.admin_routes.push({
+                path: "/" + response.data[item].path,
+                component: APIShift.API.getPage(response.data[item].path, true),
+              });
+            } else {
+              let routeData = APIShift.admin_routes.find(
+                (r) =>
+                  r.path ===
+                  "/" + response.data[response.data[item].parent].path
+              );
+              if (routeData.children === undefined) routeData.children = [];
+              routeData.children.push({
+                path: response.data[item].path,
+                component: APIShift.API.getPage(
+                  response.data[response.data[item].parent].path +
+                    "/" +
                     response.data[item].path,
-                    true
-                  ),
-                });
-              } else {
-                let routeData = APIShift.admin_routes.find(
-                  (r) =>
-                    r.path ===
-                    "/" + response.data[response.data[item].parent].path
-                );
-                if (routeData.children === undefined) routeData.children = [];
-                routeData.children.push({
-                  path: response.data[item].path,
-                  component: APIShift.API.getPage(
-                    response.data[response.data[item].parent].path +
-                      "/" +
-                      response.data[item].path,
-                    true
-                  ),
-                });
-              }
+                  true
+                ),
+              });
             }
-            // Update routes
-            app.$router.addRoutes(APIShift.admin_routes);
-          } else {
-            APIShift.API.notify(
-              APIShift.API.getStatusName(response.status) +
-                ": " +
-                response.data,
-              "error"
-            );
           }
+          // Update routes
+          app.$router.addRoutes(APIShift.admin_routes);
+        } else {
+          APIShift.API.notify(
+            APIShift.API.getStatusName(response.status) + ": " + response.data,
+            "error"
+          );
         }
-      );
+      });
     },
-    toggleDarkTheme: function () {
+    toggleDarkTheme: function() {
       window.app.$vuetify.theme.dark = !window.app.$vuetify.theme.dark;
     },
-    isOnDarkMode: function () {
+    isOnDarkMode: function() {
       return window.app.$vuetify.theme.dark;
     },
-    logout: function () {
+    logout: function() {
       APIShift.API.request(
         "Main\\SessionState",
         "changeState",
         { state: "DEFAULT_VIEWER" },
-        function (response) {
+        function(response) {
           if (response.status == 1) {
             APIShift.API.notify("Logged out", "success");
             // Load login screen

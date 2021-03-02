@@ -22,7 +22,7 @@ import App from "./App.vue";
 import Vuetify from "vuetify/lib";
 import VueRouter from "vue-router";
 import i18n from './locale/i18n'
-import { APIShift, APIHandler, Loader } from "./scripts/APIShift.js";
+import { APIShift as APIShiftClass } from "./scripts/APIShift.js";
 
 Vue.use(VueRouter);
 Vue.use(Vuetify);
@@ -64,9 +64,9 @@ window.app = new Vue({
     },
     created() {
         // Initialize APIShift Engine
-        this.apishift = new APIShift(this.loader);
+        this.apishift = new APIShiftClass(this.loader);
         window.APIShift = this.apishift;
-
+        this.apishift.initialize();
         // Link components to apishift
         APIShift.Loader.load((resolve, reject) => {
             app.app_notifications = APIShift.API.getComponent("notifications");
@@ -78,12 +78,12 @@ window.app = new Vue({
             this._router.addRoutes(APIShift.admin_routes);
 
             // Handle first load of page
-            if (!APIShift.installed) {
-                app.apishift.setSubtitle("Installer");
+            if (!this.apishift.installed) {
+                this.apishift.setSubtitle("Installer");
                 if (app.$route.path != "/installer")
                     app.$router.push("/installer");
-            } else if (!APIShift.logged_in) {
-                app.apishift.setSubtitle("Login");
+            } else if (!this.apishift.logged_in) {
+                this.apishift.setSubtitle("Login");
                 if (app.$route.path != "/login")
                     app.$router.push("/login");
             } else if (app.$route.path == "/") app.$router.push("/main");

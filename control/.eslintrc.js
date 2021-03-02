@@ -15,9 +15,10 @@ module.exports = {
         "no-extra-semi": "off",
         "no-unreachable": "off",
         "vue/no-use-v-if-with-v-for": "off",
-        "vue/no-unused-vars": "off"
+        "vue/no-unused-vars": "off",
+        "no-prototype-builtins": "off",
     },
     overrides: [{
         files: ["src/**/*.js"],
-    }, ]
+    }, ],
 };

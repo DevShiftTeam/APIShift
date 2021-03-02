@@ -259,8 +259,8 @@
             </template>
 
             <template v-slot:item.actions="{ item }">
-                <v-btn icon>
-                    <v-icon @click="editDatabase(item)">
+                <v-btn icon @click="editDatabase(item)">
+                    <v-icon>
                         mdi-pencil-circle
                     </v-icon>
                 </v-btn>
@@ -272,8 +272,8 @@
                 <!-- Delete dialog -->
                 <v-dialog v-model="delete_dialog" max-width="500px">
                     <template v-slot:activator="{ on }">
-                        <v-btn v-on="on" icon>
-                            <v-icon @click="removeDatabase(item.id)">
+                        <v-btn v-on="on" icon @click="removeDatabase(item.id)">
+                            <v-icon>
                                 mdi-delete-circle
                             </v-icon>
                         </v-btn>

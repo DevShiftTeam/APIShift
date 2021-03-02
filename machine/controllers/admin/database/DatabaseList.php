@@ -93,6 +93,45 @@ class DatabaseList
     }
 
     /**
+     * Check a database existence
+     */
+    public static function checkDatabase()
+    {
+        // Name is required
+        if(!isset($_POST['name']) || $_POST['name'] == "") Status::message(Status::ERROR, "At least specify a name");
+        if(!isset($_POST['host']) || $_POST['host'] == "") Status::message(Status::ERROR, "At least specify a host");
+        if(!isset($_POST['user']) || $_POST['user'] == "") Status::message(Status::ERROR, "At least specify a user");
+        if(!isset($_POST['pass'])) Status::message(Status::ERROR, "At least specify a password");
+        if(!isset($_POST['db']) || $_POST['db'] == "") Status::message(Status::ERROR, "At least specify a databse");
+        // Set defaults if not provided
+        if(!isset($_POST['port'])|| $_POST['port'] == "") $_POST['port'] = 3306;
+        
+        // Try connecting
+        DatabaseManager::startConnection($_POST['name'], $_POST['host'], $_POST['user'], $_POST['pass'], $_POST['port'], $_POST['db'], false);
+
+        try {
+            // Create schema if not exists
+            if(Status::getStatus() == Status::DB_CONNECTION_FAILED) {
+                // Re-start connection with no database name
+                Status::message(Status::SUCCESS, null, false);
+                DatabaseManager::deleteConnection($_POST['name']);
+                DatabaseManager::startConnection($_POST['name'], $_POST['host'], $_POST['user'], $_POST['pass'], $_POST['port'], null, false);
+
+                // Check for possible errors
+                if(Status::getStatus() == Status::DB_CONNECTION_FAILED)
+                    Status::message(Status::ERROR, "Couldn't connect to DB '" . $_POST['user'] . "'@'" . $_POST['host']);
+                if(!DatabaseManager::query($_POST['name'], "CREATE SCHEMA {$_POST['db']}"))
+                    Status::message(Status::ERROR, "Can connect but couldn't create DB schema");
+            }
+        }
+        catch (Exception $e) {
+            Status::message(Status::ERROR, "Error while connecting to database");
+        }
+
+        // Notify changes
+        Status::message(Status::SUCCESS, "Connected Successfully! :)");
+    }
+    /**
      * Remove a database .
      */
     public static function removeDatabase()

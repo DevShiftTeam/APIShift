@@ -46,7 +46,8 @@
                 is_creating: false,
                 delete_dialog: false,
                 edit_dialog: false,
-                discard_dialog: false
+                discard_dialog: false,
+                is_checking: false
             }
         },
         created() {
@@ -89,7 +90,6 @@
                 if(this.in_edit.name === ""
                     || this.in_edit.host === ""
                     || this.in_edit.user === ""
-                    || this.in_edit.pass === ""
                     || this.in_edit.db === ""
                     || this.in_edit.port === "") {
                     APIShift.API.notify("Please fill in valid data", 'warning');
@@ -121,6 +121,18 @@
                     db: database.db,
                     port: database.port
                 }
+            },
+            checkDatabase: function (database) {
+                this.is_checking = true;
+                APIShift.API.request("Admin\\Database\\DatabaseList", "checkDatabase", database, function(response) {
+                    if(response.status === APIShift.API.status_codes.SUCCESS) {
+                        APIShift.API.notify(response.data, 'success');
+                    }
+                    else {
+                        APIShift.API.notify(response.data, 'error');
+                    }
+                    is_checking = false;
+                });
             },
             removeDatabase: function(database_id) {
                 if(!this.delete_dialog) {
@@ -210,10 +222,10 @@
                                     <v-col cols="12" sm="6" md="6">
                                         <v-text-field v-model="in_edit.pass" type="password"  label="Password"></v-text-field>
                                     </v-col>
-                                     <v-col cols="12" sm="6" md="6">
+                                    <v-col cols="12" sm="6" md="6">
                                         <v-text-field v-model="in_edit.db" label="Database"></v-text-field>
                                     </v-col>                              
-                                     <v-col cols="12" sm="6" md="6">
+                                    <v-col cols="12" sm="6" md="6">
                                         <v-text-field v-model="in_edit.port" :rules="[rules.port]" hint="(0-65353)" label="Port"></v-text-field>
                                     </v-col>                            
                                 </v-row>
@@ -223,6 +235,7 @@
                         <v-card-actions>
                             <v-spacer></v-spacer>
                             <v-btn color="primary" text @click="save()">{{ is_creating ? "Create" : "Save" }}</v-btn>
+                            <v-btn :disabled="is_checking" text @click="checkDatabase(in_edit)">Check</v-btn>
                             <v-btn text @click="discard()">Cancel</v-btn>
                         </v-card-actions>
                     </v-card>
@@ -246,15 +259,24 @@
             </template>
 
             <template v-slot:item.actions="{ item }">
-                <v-icon @click="editDatabase(item)">
-                    mdi-pencil-circle
-                </v-icon>
+                <v-btn icon>
+                    <v-icon @click="editDatabase(item)">
+                        mdi-pencil-circle
+                    </v-icon>
+                </v-btn>
+                <v-btn icon :disabled="is_checking">
+                    <v-icon @click="checkDatabase(item)">
+                        mdi-check-circle
+                    </v-icon>
+                </v-btn>
                 <!-- Delete dialog -->
                 <v-dialog v-model="delete_dialog" max-width="500px">
                     <template v-slot:activator="{ on }">
-                        <v-icon v-on="on" @click="removeDatabase(item.id)">
-                            mdi-delete-circle
-                        </v-icon>
+                        <v-btn v-on="on" icon>
+                            <v-icon @click="removeDatabase(item.id)">
+                                mdi-delete-circle
+                            </v-icon>
+                        </v-btn>
                     </template>
                     <v-card>
                         <v-card-title>Sure?</v-card-title>

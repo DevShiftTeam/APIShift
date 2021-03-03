@@ -222,7 +222,7 @@
 
                 // Handle installation
                 APIShift.Loader.show();
-                APIShift.API.request("Main\\Installer", "runInstallation", to_send, function (response) {
+                APIShift.API.request("Main\\Installer", "runInstallation", to_send, (response) => {
                     if(response.status == APIShift.API.status_codes.ERROR) {
                         APIShift.API.notify("Error: " + response.data, "error");
                     }

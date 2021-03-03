@@ -50,7 +50,7 @@
         },
         methods: {
             updateControllerTasks: function() {
-                APIShift.API.request("Admin\\Access\\Controller", "getControllersTasks", {}, function (response) {
+                APIShift.API.request("Admin\\Access\\Controller", "getControllersTasks", {}, (response) => {
                     if(response.status == APIShift.API.status_codes.SUCCESS) {
                         cahandler.controller_access_list = Object.assign([], response.data);
                     } else {

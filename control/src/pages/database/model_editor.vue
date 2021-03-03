@@ -547,8 +547,8 @@ module.exports = {
   },
   watch: {
     front_z_index: function(newValue) {
-      app.$refs.navigator.updateIndex(newValue + 1);
-      app.$refs.footer.updateIndex(newValue + 1);
+      this.$root.$children[0].$refs.navigator.updateIndex(newValue + 1);
+      this.$root.$children[0].$refs.footer.updateIndex(newValue + 1);
       window.handler.updateIndex(newValue + 1);
     },
     cursor_state: function(state) {

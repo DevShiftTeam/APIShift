@@ -7,6 +7,16 @@ module.exports = {
             template: "./public/index.html",
         },
     },
+    devServer: {
+        proxy: {
+            "/api": {
+                target: "https://apishift.local/",
+                changeOrigin: true,
+                pathRewrite: { "^/api": "" },
+                logLevel: "debug",
+            },
+        },
+    },
     runtimeCompiler: true,
     chainWebpack: (config) => {
         config.module

@@ -29,6 +29,7 @@ export default {
     };
   },
   created() {
+    console.log('load navigator');
     window.nav_holder = this;
     // Load control panel pages
     this.updatePages();
@@ -106,15 +107,16 @@ export default {
         "Main\\SessionState",
         "changeState",
         { state: "DEFAULT_VIEWER" },
-        function(response) {
+        (response) => {
           if (response.status == 1) {
             APIShift.API.notify("Logged out", "success");
             // Load login screen
-            APIShift.logged_in = false;
+            // APIShift.logged_in = false;
+            this.$store.commit("auth/SET", false);
             app.$router.push("login");
             window.app.app_loader = null;
             window.app.app_footer = null;
-            window.app.app_navigator = null;
+            // Vue.prototype.$appNavigator = null;
           } else {
             APIShift.API.notify(
               APIShift.API.getStatusName(response.status) +

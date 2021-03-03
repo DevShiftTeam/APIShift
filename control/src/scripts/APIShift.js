@@ -29,9 +29,18 @@ import { API_SERVER } from "../.env";
  */
 import axios from "axios";
 export class APIShift {
+    get logged_in() {
+        return app.$store.getters["auth/isAuthenticated"];
+    }
+
     constructor(loader = app.loader, title = "APIShift") {
         this.server = API_SERVER;
-        this.client = "https://localhost:8080/";
+
+        APIShift.server = document.currentScript.src;
+        APIShift.server = APIShift.server.substr(
+            0,
+            APIShift.server.indexOf("/control/UI/scripts/")
+        );
         // Step 1: Store site title reference
         /**
          * Holds the APIShift server installation parent url on the server
@@ -49,7 +58,7 @@ export class APIShift {
         this.admin_routes = [];
         this.components = {};
         this.load_components = true;
-        this.logged_in = false;
+        // this.logged_in = false;
         this.installed = true;
         this.mixins = {};
         document.title = title;
@@ -74,7 +83,7 @@ export class APIShift {
         this.Loader.show("main"); // Show main loader
         // Set admin mode in case the user is in admin page
         this.Loader.load((resolve, reject) => {
-            if (location.href.indexOf(this.client + "/control") == 0) {
+            if (location.href.indexOf("/control") == 0) {
                 this.admin_mode = true;
                 // Load default components
                 this.API.getComponent("notifications", true);
@@ -99,7 +108,7 @@ export class APIShift {
                         break;
                     case this.API.status_codes.NOT_INSTALLED:
                         // Redirect user to admin page if system is not installed
-                        if (!this.admin_mode) location.href = this.client + "/control/";
+                        if (!this.admin_mode) location.href = "/control/";
                         // Route to installation page
                         else {
                             this.admin_routes.push({
@@ -165,7 +174,8 @@ export class APIShift {
         this.Loader.load((resolve, reject) => {
             if (is_session_admin) {
                 this.load_components = true;
-                this.logged_in = true;
+                // this.logged_in = true;
+
             } else {
                 this.load_components = false; // Don't load other system components before login
                 resolve(0);
@@ -406,36 +416,36 @@ export class Loader {
  */
 export class APIHandler {
     constructor(apishift) {
-        // Collection of the status codes available
-        this.status_codes = {
-            ERROR: 0,
-            SUCCESS: 1,
-            NO_AUTH: 2,
-            NOT_INSTALLED: 3,
-            DB_CONNECTION_FAILED: 4,
-            INVALID_CONFIG_FILE: 5,
-            WARNING: 6,
-        };
+            // Collection of the status codes available
+            this.cookies = null;
+            this.status_codes = {
+                ERROR: 0,
+                SUCCESS: 1,
+                NO_AUTH: 2,
+                NOT_INSTALLED: 3,
+                DB_CONNECTION_FAILED: 4,
+                INVALID_CONFIG_FILE: 5,
+                WARNING: 6,
+            };
 
-        // Map of functions to run on server update loop
-        this.update_function = {
-            KeepAlive: function() {
-                window.APIShift.API.request(
-                    "Main\\KeepAlive",
-                    "stillHere", {},
-                    () => {},
-                    false
-                );
-            },
-        };
-        this.update_function_running = false;
-    }
-
-    /**
-     * Start a loop that updates every given interval with the update function defined by the user
-     *
-     * @param {number} interval
-     */
+            // Map of functions to run on server update loop
+            this.update_function = {
+                KeepAlive: function() {
+                    window.APIShift.API.request(
+                        "Main\\KeepAlive",
+                        "stillHere", {},
+                        () => {},
+                        false
+                    );
+                },
+            };
+            this.update_function_running = false;
+        }
+        /**
+         * Start a loop that updates every given interval with the update function defined by the user
+         *
+         * @param {number} interval
+         */
     startUpdate(interval = 5000) {
         // Continue only if update loop is not running
         if (this.update_function_running !== false) return;
@@ -504,25 +514,20 @@ export class APIHandler {
         controller,
         method,
         attached_data = {},
-        handlerMethod = function(response) {},
+        handlerMethod = (response) => {},
         chain = true
     ) {
         // Define request function without running it
         return window.APIShift.Loader.load(
             (resolve, reject) => {
-                fetch(
-                        window.APIShift.server +
-                        "/machine/API.php?c=" +
-                        controller +
-                        "&m=" +
-                        method, {
-                            body: attached_data ? new URLSearchParams(attached_data) : null,
-                            headers: {
-                                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-                            },
-                            method: "POST",
-                        }
-                    )
+                fetch("/api" + "/machine/API.php?c=" + controller + "&m=" + method, {
+                        body: attached_data ? new URLSearchParams(attached_data) : null,
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+                        },
+                        method: "POST",
+                        credentials: "include",
+                    })
                     .then((response) => {
                         if (
                             response.status == window.APIShift.API.status_codes.NO_AUTH &&
@@ -531,10 +536,12 @@ export class APIHandler {
                             window.nav_holder !== undefined
                         )
                             nav_holder.logout();
-                        response.text().then((r) => handlerMethod(r ? JSON.parse(r) : {}));
+
+                        if (handlerMethod)
+                            response.text().then((r) => handlerMethod(r ? JSON.parse(r) : {}));
                     })
                     .catch((ex) => {
-                        console.log(ex);
+                        console.error(ex);
                         handlerMethod({
                             status: 0,
                             data: "Request couldn't be complete",
@@ -604,8 +611,8 @@ export class APIHandler {
      * @param {string} page_name Page name to get path to
      * @param {boolean} init Set true to retrieve element if not exists
      */
-    getPage(page_name, init = false) {
-        if (init && window.APIShift.pages[page_name] === undefined)
+    getPage(page_name) {
+        if (window.APIShift.pages[page_name] === undefined)
             window.APIShift.pages[page_name] = () =>
             import (`../pages/${page_name}.vue`);
         return window.APIShift.pages[page_name];
@@ -616,8 +623,8 @@ export class APIHandler {
      * @param {string} component_name Page name to get path to
      * @param {boolean} init Set true to retrieve element if not exists
      */
-    getComponent(component_name, init = false) {
-        if (init && window.APIShift.components[component_name] === undefined)
+    getComponent(component_name) {
+        if (window.APIShift.components[component_name] === undefined)
             window.APIShift.components[component_name] = () =>
             import (`../components/${component_name}.vue`);
         // APIShift.components[component_name] = httpVueLoader(
@@ -631,8 +638,8 @@ export class APIHandler {
      * @param {string} mixin_name Name of the mixin to add
      * @param {boolean} init Set true to retrieve element if not exists
      */
-    getMixin(mixin_name, init = false) {
-        if (init && window.APIShift.mixins[mixin_name] === undefined) {
+    getMixin(mixin_name) {
+        if (window.APIShift.mixins[mixin_name] === undefined) {
             // Load mixin as object
             return () =>
                 import ("../components/mixins/" + mixin_name + ".vue");
@@ -654,6 +661,5 @@ export class APIHandler {
 
 // Calculate installation parent folder url
 (function() {
-
     // APIShift.server = APIShift.server.substr(0, APIShift.server.indexOf("/control/UI/scripts/"));
 })();

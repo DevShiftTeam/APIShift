@@ -21,13 +21,19 @@ import Vue from "vue";
 import App from "./App.vue";
 import Vuetify from "vuetify/lib";
 import VueRouter from "vue-router";
-import i18n from './locale/i18n'
+import i18n from "./locale/i18n";
+import store from "./store/index";
 import { APIShift as APIShiftClass } from "./scripts/APIShift.js";
+import Vuebar from 'vuebar';
 
+Vue.use(Vuebar);
 Vue.use(VueRouter);
 Vue.use(Vuetify);
+
+let vue = new Vue({ store });
 window.app = new Vue({
     i18n,
+    store: store,
     router: new VueRouter({
         routes: [],
     }),
@@ -77,22 +83,30 @@ window.app = new Vue({
             // Add loaded routes & pages
             this._router.addRoutes(APIShift.admin_routes);
 
+            console.log(this.apishift.logged_in);
             // Handle first load of page
             if (!this.apishift.installed) {
                 this.apishift.setSubtitle("Installer");
-                if (app.$route.path != "/installer")
-                    app.$router.push("/installer");
+                if (app.$route.path != "/installer") app.$router.push("/installer");
             } else if (!this.apishift.logged_in) {
                 this.apishift.setSubtitle("Login");
-                if (app.$route.path != "/login")
-                    app.$router.push("/login");
+                if (app.$route.path != "/login") app.$router.push("/login");
             } else if (app.$route.path == "/") app.$router.push("/main");
 
             //  Don't load other components if system isn't installed
             if (APIShift.load_components) {
-                app.app_loader = APIShift.API.getComponent("loader");
-                app.app_navigator = APIShift.API.getComponent("navigator");
-                app.app_footer = APIShift.API.getComponent("footer");
+                this.$store.commit(
+                    "SET_LOADER",
+                    "loader"
+                );
+                this.$store.commit(
+                    "SET_NAVIGATOR",
+                    "navigator"
+                );
+                this.$store.commit(
+                    "SET_FOOTER",
+                    "footer"
+                );
             }
 
             // Navigation gaurd for control panel

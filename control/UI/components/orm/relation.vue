@@ -31,7 +31,7 @@
             }
         },
         created () {
-            window.graph_elements[this.$props.id] = this;
+            window.graph_elements[this.$props.index] = this;
         }, 
         mounted () {
             let rect = this.$el.getBoundingClientRect();
@@ -40,11 +40,16 @@
                 height: rect.height
             };
 
+            let from_index = 
+                graph_view.elements.findIndex((elem) => elem.id == this.$props.data.from && (elem.component_id == 0 || elem.component_id == 1));
+            let to_index =
+                graph_view.elements.findIndex((elem) => elem.id == this.$props.data.to && (elem.component_id == 0 || elem.component_id == 1));
+
             // Create line from item to this
             if(this.$props.data.from !== undefined) {
                 window.graph_view.lines.push({
-                    from_id: this.$props.data.from,
-                    to_id: this.$props.id,
+                    from_index: from_index,
+                    to_index: this.$props.index,
                     data: {
                         is_curvy: true,
                         is_stroked: false
@@ -55,8 +60,8 @@
             // Create line from this to item
             if(this.$props.data.to !== undefined) {
                 window.graph_view.lines.push({
-                    from_id: this.$props.id,
-                    to_id: this.$props.data.to,
+                    from_index: this.$props.index,
+                    to_index: to_index,
                     data: {
                         is_curvy: true,
                         is_stroked: false

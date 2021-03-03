@@ -61,23 +61,23 @@
                         }
                     },
                     
-                    /** 
                     // Enum Types
-                    { id: 5, component_id: 2, name: 'test1', data: {
+                    { id: 1, component_id: 2, name: 'test1', data: {
                         position: {x: 100, y: 100}
                     }},
-                    { id: 6, component_id: 2, name: 'test1', data: {
+                    { id: 2, component_id: 2, name: 'test1', data: {
                         position: {x: 100, y: 100}
                     }},
 
                     // Enums
-                    { id: 7, component_id: 3, name: 'enum1', data: {
+                    { id: 1, component_id: 3, name: 'enum1', data: {
                         position: {x: 50, y: 100},
                         types: [ 1 ]
                     }},
 
+                    /**
                     // Groups
-                    { id: 8, component_id: 4, name: 'group', data: {
+                    { id: 1, component_id: 4, name: 'group', data: {
                         elements: [ 1, 2, 3 ]
                     }},
                     */
@@ -145,6 +145,9 @@
 
             // Set initial z-index
             for(var index in this.elements) this.$set(this.elements[index].data, 'z_index', parseInt(index) + 1);
+
+            // Allows to know which enum has been hovered
+            window.enum_hovered = -1;
         },
         mounted () {
             this.update_graph_position();
@@ -563,8 +566,8 @@
                                     v-for="(line, index) in lines"
                                     :is="line_comp"
                                     :key="index"
-                                    :src_point="window.graph_elements[line.from_id].from_position"
-                                    :dest_point="window.graph_elements[line.to_id].to_position"
+                                    :src_point="window.graph_elements[line.from_index].from_position"
+                                    :dest_point="window.graph_elements[line.to_index].to_position"
                                     :data="line.data">
                                 </component> 
                             </svg>

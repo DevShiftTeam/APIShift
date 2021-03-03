@@ -22,45 +22,24 @@
     // This shit is made for scripting
     module.exports = {
         mixins: [APIShift.API.getMixin('orm/graph_element')],
-        props: {
-            name: String,
-        },
         data () {
             return {
                 drawer: null,
             }
         },
-        created () {   
-            var id = this.component_id;
-            var component_info = this.component_info;
-
-            // If contained in enum, remove from enum and null the corresponding data 
-            this.expanded_functions.drag_start = (event) => {
-                this.remove_from_enum();
-            };
-            this.expanded_functions.drag = (event) => {
-
-            };
-
-            // If hits Enum element, add it to Enum
-            this.expanded_functions.drag_end = (event) => {
-                const hitting_enum = graph_view.enums.find(e => graph_view.hittest({type:'e', id: e.id}, component_info));
-                // Enum element has been hitted
-                if (hitting_enum) {
-                    // Type is not contained - add it to enum
-                    if (!hitting_enum.data.types.find(t => t.id === id)) {
-                        hitting_enum.data.types.push({ id });
-                        this.$props.data.enum_id = hitting_enum.id;
-                    }
-                }
-            };
+        created () {
+            window.graph_elements[this.$props.index] = this;
         }, 
         mounted () {
-            this.z_index = 11;
+            let rect = this.$el.getBoundingClientRect();
+            this.expanded_functions.drag_start = function(event) {
+                window.type_width = rect.width;
+                window.type_height = rect.height;
+                window.type_mouse_relative_x = event.clientX - rect.x;
+                window.type_mouse_relative_y = event.clientY - rect.y;
+            }
         },
         methods: {
-            render_needed () {
-            },
             on_context() {
 
             },
@@ -98,7 +77,7 @@
 </script>
 
 <template>
-    <div class="type" color="#8789ff" :class="{ ghost_mode }"
+    <div class="type" color="#8789ff" :class="{ type_over_enum: is_dragging && window.enum_hovered !== -1 }"
         :style="transformation" 
         @pointerdown.prevent="drag_start"
         @contextmenu.prevent="on_context"
@@ -127,7 +106,7 @@
     background: #8789ff;
     box-shadow: 50px 50px 50px rgba(255, 242, 94, 0); /* Removing weird trace on chrome */
 }
-.type.ghost_mode {
+.type_over_enum {
     opacity: 0.7;
 }
 

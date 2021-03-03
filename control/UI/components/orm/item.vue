@@ -22,10 +22,6 @@
     // This shit is made for scripting
     module.exports = {
         mixins: [APIShift.API.getMixin('orm/graph_element')],
-        props: {
-            data: Object,
-            name: String
-        },
         data () {
             return {
                 drawer: null,
@@ -35,7 +31,7 @@
             }
         },
         created () {
-            window.graph_elements[this.$props.id] = this;
+            window.graph_elements[this.$props.index] = this;
         }, 
         mounted () {
             let rect = this.$el.getBoundingClientRect();
@@ -82,13 +78,6 @@
                     let group_instance = graph_view.$refs['g' + this.get_group().id];
                     this.get_group().data.contained_elements = this.get_group().data.contained_elements.filter((element) => element.id !== id);
                 }
-            },
-            render_needed () {
-            }
-        },
-        computed: {
-            is_relation () {
-                return this.$props.data.is_relation;
             }
         },
         computed: {

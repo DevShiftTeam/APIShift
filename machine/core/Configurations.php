@@ -35,15 +35,9 @@ class Configurations {
      */
     const DB_HOST = "127.0.0.1";
     const DB_PORT = 3306;
-<<<<<<< HEAD
-    const DB_USER = "root";
-    const DB_PASS = "";
-    const DB_NAME = "apishift";
-=======
     const DB_USER = "";
     const DB_PASS = "";
     const DB_NAME = "";
->>>>>>> master
     const DB_TYPE = "MySQL";
 
     /**

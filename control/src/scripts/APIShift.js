@@ -33,9 +33,22 @@ export class APIShift {
         return app.$store.getters["auth/isAuthenticated"];
     }
 
-    constructor(loader = app.loader, title = "APIShift") {
-        this.server = API_SERVER;
+    get admin_mode() {
+        return app.$store.getters["ADMIN_MODE"];
+    }
+    set admin_mode(val) {
+        return app.$store.commit("SET_ADMIN_MODE", val);
+    }
 
+    get installed() {
+        return app.$store.getters["SET_INSTALLED"];
+    }
+    set installed(val) {
+        return app.$store.commit("SET_INSTALLED", val);
+    }
+    constructor(loader = app.loader, title = "APIShift", appContext = null) {
+        this.server = API_SERVER;
+        window.app = appContext;
         APIShift.server = document.currentScript.src;
         APIShift.server = APIShift.server.substr(
             0,
@@ -50,7 +63,7 @@ export class APIShift {
          * Determines if the user is working in admin page
          * Admin mode is client based, admin operations are authenticated by the server separately
          */
-        this.admin_mode = false;
+        // this.admin_mode = false;
         /**
          * Pages are loaded using the loader from the API
          */
@@ -59,7 +72,7 @@ export class APIShift {
         this.components = {};
         this.load_components = true;
         // this.logged_in = false;
-        this.installed = true;
+        // this.installed = true;
         this.mixins = {};
         document.title = title;
         this.main_title = title;
@@ -80,13 +93,14 @@ export class APIShift {
     }
 
     initialize() {
+        var self = this;
         this.Loader.show("main"); // Show main loader
         // Set admin mode in case the user is in admin page
         this.Loader.load((resolve, reject) => {
-            if (location.href.indexOf("/control") == 0) {
-                this.admin_mode = true;
+            if (location.href.indexOf("/control") >= -1) {
+                self.admin_mode = true;
                 // Load default components
-                this.API.getComponent("notifications", true);
+                self.API.getComponent("notifications", true);
             }
             resolve(0);
         });
@@ -97,29 +111,30 @@ export class APIShift {
             "getAllStatuses", {},
             (response) => {
                 switch (response.status) {
-                    case this.API.status_codes.ERROR:
-                        this.API.notify("Error: " + response.data, "error");
+                    case self.API.status_codes.ERROR:
+                        self.API.notify("Error: " + response.data, "error");
                         break;
-                    case this.API.status_codes.SUCCESS:
+                    case self.API.status_codes.SUCCESS:
                         for (let status in response.data)
-                            this.API.status_codes[response.data[status].name] =
+                            self.API.status_codes[response.data[status].name] =
                             4 + response.data[status].id;
                         this.load_components = true;
                         break;
-                    case this.API.status_codes.NOT_INSTALLED:
+                    case self.API.status_codes.NOT_INSTALLED:
                         // Redirect user to admin page if system is not installed
-                        if (!this.admin_mode) location.href = "/control/";
+                        if (!self.admin_mode) location.href = "/control/";
                         // Route to installation page
                         else {
-                            this.admin_routes.push({
+                            self.admin_routes.push({
                                 path: "/installer",
-                                component: this.API.getPage("installer", true),
+                                component: self.API.getPage("installer", true),
                             });
-                            this.installed = false; // Don't continue loading system if not installed
+                            app.$store.commit("SET_INSTALLED", false);
+                            // self.installed = false; // Don't continue loading system if not installed
                         }
                         break;
                     default:
-                        this.API.notify(response.data, "error");
+                        self.API.notify(response.data, "error");
                         return;
                 }
             },
@@ -139,16 +154,16 @@ export class APIShift {
             }
 
             // Start update loop with server
-            this.API.startUpdate();
+            self.API.startUpdate();
 
             // Load default pages
             this.admin_routes.push({
                 path: "/main",
-                component: this.API.getPage("main", true),
+                component: self.API.getPage("main", true),
             });
             this.admin_routes.push({
                 path: "/login",
-                component: this.API.getPage("login", true),
+                component: self.API.getPage("login", true),
             });
 
             resolve(0);
@@ -160,11 +175,11 @@ export class APIShift {
             "Main\\SessionState",
             "getCurrentSessionState", {},
             (response) => {
-                if (response.status == this.API.status_codes.SUCCESS)
+                if (response.status == self.API.status_codes.SUCCESS)
                     is_session_admin = response.data == 1;
                 else
-                    this.API.notify(
-                        this.API.getStatusName(response.status) + ": " + response.data,
+                    self.API.notify(
+                        self.API.getStatusName(response.status) + ": " + response.data,
                         "error"
                     );
             },
@@ -175,17 +190,16 @@ export class APIShift {
             if (is_session_admin) {
                 this.load_components = true;
                 // this.logged_in = true;
-
             } else {
                 this.load_components = false; // Don't load other system components before login
                 resolve(0);
             }
 
             // Load admin components
-            this.API.getComponent("footer", true);
-            this.API.getComponent("navigator", true);
-            this.API.getComponent("loader", true);
-            this.API.getMixin("access/rule", true);
+            self.API.getComponent("footer", true);
+            self.API.getComponent("navigator", true);
+            self.API.getComponent("loader", true);
+            self.API.getMixin("access/rule", true);
             resolve(0);
         });
     }
@@ -538,7 +552,9 @@ export class APIHandler {
                             nav_holder.logout();
 
                         if (handlerMethod)
-                            response.text().then((r) => handlerMethod(r ? JSON.parse(r) : {}));
+                            response
+                            .text()
+                            .then((r) => handlerMethod(r ? JSON.parse(r) : {}));
                     })
                     .catch((ex) => {
                         console.error(ex);

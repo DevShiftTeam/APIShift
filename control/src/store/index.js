@@ -15,6 +15,8 @@ export default new Vuex.Store({
         navigator: null,
         footer: null,
         loader: null,
+        installed: null,
+        admin_mode: null,
     },
     mutations: {
         SET_NAVIGATOR(state, comp) {
@@ -26,8 +28,17 @@ export default new Vuex.Store({
         SET_LOADER(state, comp) {
             state.loader = comp;
         },
+        SET_INSTALLED(state, val) {
+            state.installed = val;
+        },
+        SET_ADMIN_MODE(state, val) {
+            state.admin_mode = val;
+        },
     },
     getters: {
+        INSTALLED(state) {
+            return state.installed;
+        },
         NAVIGATOR(state) {
             return state.navigator;
         },
@@ -37,5 +48,8 @@ export default new Vuex.Store({
         LOADER(state) {
             return state.loader;
         },
+        ADMIN_MODE(state) {
+            return state.admin_mode;
+        }
     },
 });

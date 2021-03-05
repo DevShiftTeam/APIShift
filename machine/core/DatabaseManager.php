@@ -227,6 +227,7 @@ class DatabaseManager {
      * @return bool|\PDOStatement Returns FALSE on failure and PDOStatement on success
      */
     public static function query($connectionName, $query, $data = array()) {
+
         if(self::$connections[$connectionName] == null) {
             self::startConnection($connectionName); // Try to establish a connection
             if(self::$connections[$connectionName] == null) return false;

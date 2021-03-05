@@ -108,8 +108,7 @@
             },
             save: function() {
                 if(this.in_edit.name === ""
-                    || this.in_edit.path === ""
-                    || this.in_edit.icon === "") {
+                    || this.in_edit.path === "") {
                     APIShift.API.notify("Please fill in valid data", 'warning');
                     return;
                 }

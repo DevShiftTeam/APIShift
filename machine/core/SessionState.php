@@ -21,6 +21,8 @@
 
 namespace APIShift\Core;
 
+use APIShift\Controllers\Admin\Access\Database;
+
 /**
  * Manages everything about session states & their data structure
  */

@@ -18,7 +18,7 @@
  *
  * @author Sapir Shemer
  */
-module.exports = {
+export default {
   data() {
     return {
       search: "",
@@ -433,306 +433,302 @@ module.exports = {
         </v-app-bar>
 
         <!-- Body -->
-        <div class="overflow-box" v-bar>
-          <div>
-            <v-layout class="mx-auto" align-start justify-center row wrap>
-              <!-- Iterate through session states and show them -->
-              <v-hover
-                v-for="(val, key) in states_collection"
-                :key="key"
-                v-slot:default="{ hover }"
-                v-if="val !== undefined && val.parent == current_parent"
+        <v-card-text>
+          <v-layout class="mx-auto" align-start justify-center row wrap>
+            <!-- Iterate through session states and show them -->
+            <v-hover
+              v-for="(val, key) in states_collection"
+              :key="key"
+              v-slot:default="{ hover }"
+              v-if="val !== undefined && val.parent == current_parent"
+            >
+              <v-card
+                outlined
+                class="px-0 session-card mt-5 mb-5"
+                :elevation="hover ? 24 : 4"
               >
-                <v-card
-                  outlined
-                  class="px-0 session-card"
-                  :elevation="hover ? 24 : 4"
-                >
-                  <!-- Session state header with name & actions -->
-                  <v-toolbar>
-                    <v-toolbar-title>{{ val.name }}</v-toolbar-title>
-                    <v-spacer></v-spacer>
-                    <!-- Discard changes -->
-                    <v-tooltip v-if="key == in_edit && !delete_dialog" top>
-                      <template #activator="{ on }">
-                        <v-btn icon v-on="on" @click="discardStateEdit()">
-                          <v-icon>mdi-close-circle</v-icon>
-                        </v-btn>
-                      </template>
-                      <span>Discard Changes</span>
-                    </v-tooltip>
-                    <!-- Edit state dialog & trigger -->
-                    <v-tooltip top>
-                      <template #activator="{ on }">
-                        <v-btn
-                          v-if="key == in_edit && !delete_dialog"
-                          icon
-                          v-on="on"
-                          @click="saveStateEdit()"
-                        >
-                          <v-icon>mdi-checkbox-marked-circle</v-icon>
-                        </v-btn>
-                        <v-btn
-                          v-else
-                          icon
-                          v-on="on"
-                          @click="startStateEdit(key)"
-                          :disabled="in_edit != key && in_edit != 0"
-                        >
-                          <v-icon>mdi-pencil-circle</v-icon>
-                        </v-btn>
-                      </template>
-                      <span v-if="key == in_edit">Save Changes</span>
-                      <span v-else>Edit</span>
-                    </v-tooltip>
-                    <!-- Remove state dialog & trigger -->
-                    <v-tooltip top>
-                      <template #activator="{ on }">
-                        <v-btn
-                          icon
-                          v-on="on"
-                          @click="deleteState(key)"
-                          :disabled="
-                            (in_edit != key && in_edit != 0) ||
-                              (in_edit == key &&
-                                (!adding_state || !delete_dialog))
-                          "
-                        >
-                          <v-icon>mdi-minus-circle</v-icon>
-                        </v-btn>
-                      </template>
-                      <span>Remove</span>
-                    </v-tooltip>
-                    <!-- Authorization trigger -->
-                    <v-tooltip top>
-                      <template #activator="{ on }">
-                        <v-btn icon v-on="on" to="/access/session">
-                          <v-icon>mdi-lock</v-icon>
-                        </v-btn>
-                      </template>
-                      <span>Define Authorization Process</span>
-                    </v-tooltip>
-                  </v-toolbar>
-
-                  <v-card-text>
-                    <v-form>
-                      <v-tooltip top>
-                        <template #activator="{ on }">
-                          <v-text-field
-                            v-on="on"
-                            class="session_field"
-                            type="text"
-                            label="name"
-                            v-model="val.name"
-                            :disabled="in_edit != key || delete_dialog"
-                          ></v-text-field>
-                        </template>
-                        <span>Session Name</span>
-                      </v-tooltip>
-                      <v-tooltip top>
-                        <template #activator="{ on }">
-                          <v-text-field
-                            v-on="on"
-                            class="session_field"
-                            type="number"
-                            label="active timeout"
-                            v-model="val.active_timeout"
-                            :disabled="in_edit != key || delete_dialog"
-                          ></v-text-field>
-                        </template>
-                        <span>Timeout When User Active (s)</span>
-                      </v-tooltip>
-                      <v-tooltip top>
-                        <template #activator="{ on }">
-                          <v-text-field
-                            v-on="on"
-                            class="session_field"
-                            type="number"
-                            label="inactive timeout"
-                            v-model="val.inactive_timeout"
-                            :disabled="in_edit != key || delete_dialog"
-                          ></v-text-field>
-                        </template>
-                        <span>Timeout When User Inactive (s)</span>
-                      </v-tooltip>
-                    </v-form>
-                  </v-card-text>
-
-                  <v-card-actions>
-                    <v-btn
-                      text
-                      color="primary"
-                      width="100%"
-                      @click="
-                        structure_in_edit = key;
-                        edit_state_structure = true;
-                      "
-                    >
-                      Edit Structure
-                    </v-btn>
-                    <v-btn
-                      text
-                      color="primary"
-                      width="100%"
-                      @click="setParentView(key)"
-                    >
-                      View Children
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-hover>
-
-              <!-- Delete state dialog -->
-              <v-dialog v-model="delete_dialog" max-width="450px">
-                <v-card>
-                  <v-card-title>Sure?</v-card-title>
-                  <v-card-text>
-                    Deleting the session state will break all the state changes
-                    happening to it.
-                  </v-card-text>
-                  <v-divider></v-divider>
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="primary" text @click="deleteState()"
-                      >Remove</v-btn
-                    >
-                    <v-btn
-                      text
-                      @click="
-                        delete_dialog = false;
-                        in_edit = 0;
-                      "
-                      >Cancel</v-btn
-                    >
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
-
-              <!-- Discard state dialog -->
-              <v-dialog v-model="discard_dialog" max-width="450px">
-                <v-card>
-                  <v-card-title>Sure?</v-card-title>
-                  <v-card-text>
-                    You cannot go back to changes you've discarded
-                  </v-card-text>
-                  <v-divider></v-divider>
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="primary" text @click="discardStateEdit()"
-                      >Discard</v-btn
-                    >
-                    <v-btn text @click="discard_dialog = false">Cancel</v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
-
-              <!-- Edit session structure dialog -->
-              <v-dialog v-model="edit_state_structure" max-width="1000px">
-                <v-card>
-                  <v-data-table
-                    class="mx-auto ca_table"
-                    elevation-2
-                    max-height="75%"
-                    :headers="structure_headers"
-                    :items="structures[structure_in_edit]"
-                    :search="search"
-                  >
-                    <template v-slot:top>
-                      <v-app-bar>
-                        <v-toolbar-title
-                          >Edit
-                          {{
-                            states_collection[structure_in_edit].name
-                          }}
-                          Structure</v-toolbar-title
-                        >
-                        <v-spacer></v-spacer>
-                        <v-text-field
-                          v-model="search"
-                          append-icon="mdi-magnify"
-                          label="Search"
-                          single-line
-                          :loading="app.loader.visible"
-                          :loading-text="app.loader.message"
-                          hide-details
-                        ></v-text-field>
-                        <v-spacer></v-spacer>
-                        <v-tooltip top>
-                          <template #activator="{ on }">
-                            <v-btn icon v-on="on">
-                              <v-icon v-if="structure_key_in_edit"
-                                >mdi-close-circle</v-icon
-                              >
-                              <v-icon v-else>mdi-plus-circle</v-icon>
-                            </v-btn>
-                          </template>
-                          <span v-if="structure_key_in_edit"
-                            >Discard new session structure key</span
-                          >
-                          <span v-else>Add new session structure key</span>
-                        </v-tooltip>
-                      </v-app-bar>
+                <!-- Session state header with name & actions -->
+                <v-toolbar>
+                  <v-toolbar-title>{{ val.name }}</v-toolbar-title>
+                  <v-spacer></v-spacer>
+                  <!-- Discard changes -->
+                  <v-tooltip v-if="key == in_edit && !delete_dialog" top>
+                    <template #activator="{ on }">
+                      <v-btn icon v-on="on" @click="discardStateEdit()">
+                        <v-icon>mdi-close-circle</v-icon>
+                      </v-btn>
                     </template>
-
-                    <template v-slot:item.task_name="{ item }">
-                      <v-chip>{{ getKeyType(item) }}</v-chip>
-                      <span>{{ getKeyName(item) }}</span>
-                    </template>
-                    <template v-slot:item.actions="{ item }">
-                      <v-tooltip top>
-                        <template v-slot:activator="{ on }">
-                          <v-icon v-on="on">
-                            mdi-pencil-circle
-                          </v-icon>
-                        </template>
-                        <span>Edit Key</span>
-                      </v-tooltip>
-                      <!-- Delete dialog -->
-                      <v-tooltip top>
-                        <template v-slot:activator="{ on }">
-                          <v-icon
-                            v-on="on"
-                            @click="delete_structure_key_dialog = true"
-                          >
-                            mdi-delete-circle
-                          </v-icon>
-                        </template>
-                        <span>Delete Key</span>
-                      </v-tooltip>
-                      <v-dialog
-                        v-model="delete_structure_key_dialog"
-                        max-width="500px"
+                    <span>Discard Changes</span>
+                  </v-tooltip>
+                  <!-- Edit state dialog & trigger -->
+                  <v-tooltip top>
+                    <template #activator="{ on }">
+                      <v-btn
+                        v-if="key == in_edit && !delete_dialog"
+                        icon
+                        v-on="on"
+                        @click="saveStateEdit()"
                       >
-                        <v-card>
-                          <v-card-title>Sure?</v-card-title>
-                          <v-card-text> </v-card-text>
-                          <v-divider></v-divider>
-                          <v-card-actions>
-                            <v-spacer></v-spacer>
-                            <v-btn color="primary" text>Remove</v-btn>
-                            <v-btn
-                              text
-                              @click="delete_structure_key_dialog = false"
-                              >Cancel</v-btn
-                            >
-                          </v-card-actions>
-                        </v-card>
-                      </v-dialog>
+                        <v-icon>mdi-checkbox-marked-circle</v-icon>
+                      </v-btn>
+                      <v-btn
+                        v-else
+                        icon
+                        v-on="on"
+                        @click="startStateEdit(key)"
+                        :disabled="in_edit != key && in_edit != 0"
+                      >
+                        <v-icon>mdi-pencil-circle</v-icon>
+                      </v-btn>
                     </template>
-                  </v-data-table>
-                  <v-divider></v-divider>
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="primary" text>Save</v-btn>
-                    <v-btn text @click="edit_state_structure = false"
-                      >Cancel</v-btn
+                    <span v-if="key == in_edit">Save Changes</span>
+                    <span v-else>Edit</span>
+                  </v-tooltip>
+                  <!-- Remove state dialog & trigger -->
+                  <v-tooltip top>
+                    <template #activator="{ on }">
+                      <v-btn
+                        icon
+                        v-on="on"
+                        @click="deleteState(key)"
+                        :disabled="
+                          (in_edit != key && in_edit != 0) ||
+                            (in_edit == key &&
+                              (!adding_state || !delete_dialog))
+                        "
+                      >
+                        <v-icon>mdi-minus-circle</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Remove</span>
+                  </v-tooltip>
+                  <!-- Authorization trigger -->
+                  <v-tooltip top>
+                    <template #activator="{ on }">
+                      <v-btn icon v-on="on" to="/access/session">
+                        <v-icon>mdi-lock</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Define Authorization Process</span>
+                  </v-tooltip>
+                </v-toolbar>
+
+                <v-card-text>
+                  <v-form>
+                    <v-tooltip top>
+                      <template #activator="{ on }">
+                        <v-text-field
+                          v-on="on"
+                          class="session_field"
+                          type="text"
+                          label="name"
+                          v-model="val.name"
+                          :disabled="in_edit != key || delete_dialog"
+                        ></v-text-field>
+                      </template>
+                      <span>Session Name</span>
+                    </v-tooltip>
+                    <v-tooltip top>
+                      <template #activator="{ on }">
+                        <v-text-field
+                          v-on="on"
+                          class="session_field"
+                          type="number"
+                          label="active timeout"
+                          v-model="val.active_timeout"
+                          :disabled="in_edit != key || delete_dialog"
+                        ></v-text-field>
+                      </template>
+                      <span>Timeout When User Active (s)</span>
+                    </v-tooltip>
+                    <v-tooltip top>
+                      <template #activator="{ on }">
+                        <v-text-field
+                          v-on="on"
+                          class="session_field"
+                          type="number"
+                          label="inactive timeout"
+                          v-model="val.inactive_timeout"
+                          :disabled="in_edit != key || delete_dialog"
+                        ></v-text-field>
+                      </template>
+                      <span>Timeout When User Inactive (s)</span>
+                    </v-tooltip>
+                  </v-form>
+                </v-card-text>
+
+                <v-card-actions>
+                  <v-btn
+                    text
+                    color="primary"
+                    width="100%"
+                    @click="
+                      structure_in_edit = key;
+                      edit_state_structure = true;
+                    "
+                  >
+                    Edit Structure
+                  </v-btn>
+                  <v-btn
+                    text
+                    color="primary"
+                    width="100%"
+                    @click="setParentView(key)"
+                  >
+                    View Children
+                  </v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-hover>
+
+            <!-- Delete state dialog -->
+            <v-dialog v-model="delete_dialog" max-width="450px">
+              <v-card>
+                <v-card-title>Sure?</v-card-title>
+                <v-card-text>
+                  Deleting the session state will break all the state changes
+                  happening to it.
+                </v-card-text>
+                <v-divider></v-divider>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn color="primary" text @click="deleteState()"
+                    >Remove</v-btn
+                  >
+                  <v-btn
+                    text
+                    @click="
+                      delete_dialog = false;
+                      in_edit = 0;
+                    "
+                    >Cancel</v-btn
+                  >
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
+
+            <!-- Discard state dialog -->
+            <v-dialog v-model="discard_dialog" max-width="450px">
+              <v-card>
+                <v-card-title>Sure?</v-card-title>
+                <v-card-text>
+                  You cannot go back to changes you've discarded
+                </v-card-text>
+                <v-divider></v-divider>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn color="primary" text @click="discardStateEdit()"
+                    >Discard</v-btn
+                  >
+                  <v-btn text @click="discard_dialog = false">Cancel</v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
+
+            <!-- Edit session structure dialog -->
+            <v-dialog v-model="edit_state_structure" max-width="1000px">
+              <v-card>
+                <v-data-table
+                  class="mx-auto ca_table"
+                  elevation-2
+                  max-height="75%"
+                  :headers="structure_headers"
+                  :items="structures[structure_in_edit]"
+                  :search="search"
+                >
+                  <template v-slot:top>
+                    <v-app-bar>
+                      <v-toolbar-title
+                        >Edit
+                        {{ states_collection[structure_in_edit].name }}
+                        Structure</v-toolbar-title
+                      >
+                      <v-spacer></v-spacer>
+                      <v-text-field
+                        v-model="search"
+                        append-icon="mdi-magnify"
+                        label="Search"
+                        single-line
+                        :loading="app.loader.visible"
+                        :loading-text="app.loader.message"
+                        hide-details
+                      ></v-text-field>
+                      <v-spacer></v-spacer>
+                      <v-tooltip top>
+                        <template #activator="{ on }">
+                          <v-btn icon v-on="on">
+                            <v-icon v-if="structure_key_in_edit"
+                              >mdi-close-circle</v-icon
+                            >
+                            <v-icon v-else>mdi-plus-circle</v-icon>
+                          </v-btn>
+                        </template>
+                        <span v-if="structure_key_in_edit"
+                          >Discard new session structure key</span
+                        >
+                        <span v-else>Add new session structure key</span>
+                      </v-tooltip>
+                    </v-app-bar>
+                  </template>
+
+                  <template v-slot:item.task_name="{ item }">
+                    <v-chip>{{ getKeyType(item) }}</v-chip>
+                    <span>{{ getKeyName(item) }}</span>
+                  </template>
+                  <template v-slot:item.actions="{ item }">
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on }">
+                        <v-icon v-on="on">
+                          mdi-pencil-circle
+                        </v-icon>
+                      </template>
+                      <span>Edit Key</span>
+                    </v-tooltip>
+                    <!-- Delete dialog -->
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on }">
+                        <v-icon
+                          v-on="on"
+                          @click="delete_structure_key_dialog = true"
+                        >
+                          mdi-delete-circle
+                        </v-icon>
+                      </template>
+                      <span>Delete Key</span>
+                    </v-tooltip>
+                    <v-dialog
+                      v-model="delete_structure_key_dialog"
+                      max-width="500px"
                     >
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
-            </v-layout>
-          </div>
-        </div>
+                      <v-card>
+                        <v-card-title>Sure?</v-card-title>
+                        <v-card-text> </v-card-text>
+                        <v-divider></v-divider>
+                        <v-card-actions>
+                          <v-spacer></v-spacer>
+                          <v-btn color="primary" text>Remove</v-btn>
+                          <v-btn
+                            text
+                            @click="delete_structure_key_dialog = false"
+                            >Cancel</v-btn
+                          >
+                        </v-card-actions>
+                      </v-card>
+                    </v-dialog>
+                  </template>
+                </v-data-table>
+                <v-divider></v-divider>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn color="primary" text>Save</v-btn>
+                  <v-btn text @click="edit_state_structure = false"
+                    >Cancel</v-btn
+                  >
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
+          </v-layout>
+        </v-card-text>
       </v-card>
     </v-container>
   </v-main>

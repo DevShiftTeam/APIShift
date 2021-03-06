@@ -19,7 +19,7 @@
      * @author Sapir Shemer
      */
 
-    module.exports = {
+    export default {
         mixins: [APIShift.API.getMixin('access/rule')],
         data() {
             return {
@@ -236,12 +236,12 @@
                 </v-dialog>
             </template>
 
-            <template v-slot:item.name="{ item }">
+            <template v-slot:[`item.name`]="{ item }">
                 <v-chip>{{ getRuleType(item) }}</v-chip>
                 <span>{{ getRuleName(item) }}</span>
             </template>
 
-            <template v-slot:item.actions="{ item }">
+            <template v-slot:[`item.actions`]="{ item }">
                 <v-icon @click="editAccessRule(item)">
                     mdi-pencil-circle
                 </v-icon>

@@ -44,6 +44,7 @@ export default {
     // Determines if loader is visible
   }),
   created() {
+    var self = this;
     // Initialize APIShift Engine
     this.apishift = new APIShiftClass(this.loader, "APIShift", this);
     window.APIShift = this.apishift;
@@ -56,27 +57,28 @@ export default {
 
     APIShift.Loader.load((resolve, reject) => {
       // Add loaded routes & pages
-      this.$router.addRoutes(APIShift.admin_routes);
+      //   self.$router.getRoutes()
+      self.$router.addRoutes(APIShift.admin_routes);
       // Handle first load of page
-      if (!this.apishift.installed) {
-        this.apishift.setSubtitle("Installer");
-        if (this.$route.path != "/installer") this.$router.push("/installer");
-      } else if (!this.apishift.logged_in) {
-        this.apishift.setSubtitle("Login");
-        if (this.$route.path != "/login") this.$router.push("/login");
-      } else if (this.$route.path == "/") this.$router.push("/main");
+      if (!self.apishift.installed) {
+        self.apishift.setSubtitle("Installer");
+        if (self.$route.path != "/installer") self.$router.push("/installer");
+      } else if (!self.apishift.logged_in) {
+        self.apishift.setSubtitle("Login");
+        if (self.$route.path != "/login") self.$router.push("/login");
+      } else if (self.$route.path == "/") self.$router.push("/main");
 
       //  Don't load other components if system isn't installed
       if (APIShift.load_components) {
-        this.$store.commit("SET_LOADER", "loader");
-        this.$store.commit("SET_NAVIGATOR", "navigator");
-        this.$store.commit("SET_FOOTER", "footer");
+        self.$store.commit("SET_LOADER", "loader");
+        self.$store.commit("SET_NAVIGATOR", "navigator");
+        self.$store.commit("SET_FOOTER", "footer");
       }
 
       // Navigation gaurd for control panel
-      this.$router.beforeEach((to, from, next) => {
+      self.$router.beforeEach((to, from, next) => {
         // Move to installation if not installed
-        if (to.path != "/installer" && !APIShift.installed) next("/installer");
+        if (from.path != "/installer" && to.path != "/installer" && !APIShift.installed) next("/installer");
         // Move to login if not authenticated
         else if (
           to.path != "/login" &&
@@ -96,7 +98,7 @@ export default {
               );
             });
             if (page_holder !== undefined)
-              this.apishift.setSubtitle(page_holder.name);
+              self.apishift.setSubtitle(page_holder.name);
           }
           // Move to next page if everything's in place
           next();
@@ -107,6 +109,9 @@ export default {
     });
   },
   computed: {
+    routes() {
+      return this.$router.options.routes;
+    },
     app_loader_name() {
       return this.$store.getters["LOADER"];
     },

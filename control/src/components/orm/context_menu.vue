@@ -20,7 +20,7 @@
      */
 
     //TODO: Design better z-index system.
-    module.exports = {
+    export default {
         props: {
             data: Object
         },

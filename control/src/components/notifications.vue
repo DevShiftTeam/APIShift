@@ -20,7 +20,7 @@
      */
     
     // This shit is made for scripting
-    module.exports = {
+    export default {
         // This prop is used to allow updates from the root vue app
         props: {
             alerts: {

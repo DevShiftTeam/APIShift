@@ -20,7 +20,7 @@
      */
 
     // This shit is made for scripting
-    module.exports = {
+    export default {
         data () {
             return {
                 drawer: null,
@@ -86,7 +86,7 @@
             }
         },
         created () {
-            app.apishift.setSubtitle("Installer");
+            APIShift.setSubtitle("Installer");
             APIShift.Loader.changeLoader("installer", this.loader);
             APIShift.Loader.close("installer");
         },

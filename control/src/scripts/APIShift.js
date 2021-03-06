@@ -32,7 +32,9 @@ export class APIShift {
     get logged_in() {
         return app.$store.getters["auth/isAuthenticated"];
     }
-
+    set logged_in(val) {
+        return app.$store.commit("auth/SET", val);
+    }
     get admin_mode() {
         return app.$store.getters["ADMIN_MODE"];
     }
@@ -41,7 +43,7 @@ export class APIShift {
     }
 
     get installed() {
-        return app.$store.getters["SET_INSTALLED"];
+        return app.$store.getters["INSTALLED"];
     }
     set installed(val) {
         return app.$store.commit("SET_INSTALLED", val);
@@ -115,6 +117,7 @@ export class APIShift {
                         self.API.notify("Error: " + response.data, "error");
                         break;
                     case self.API.status_codes.SUCCESS:
+                        self.installed = true;
                         for (let status in response.data)
                             self.API.status_codes[response.data[status].name] =
                             4 + response.data[status].id;
@@ -122,16 +125,20 @@ export class APIShift {
                         break;
                     case self.API.status_codes.NOT_INSTALLED:
                         // Redirect user to admin page if system is not installed
+                        app.$router.addRoute({
+                            path: "/installer",
+                            component: self.API.getPage("installer", true),
+                        });
+                        app.$store.commit("SET_INSTALLED", false);
                         if (!self.admin_mode) location.href = "/control/";
                         // Route to installation page
-                        else {
-                            self.admin_routes.push({
-                                path: "/installer",
-                                component: self.API.getPage("installer", true),
-                            });
-                            app.$store.commit("SET_INSTALLED", false);
-                            // self.installed = false; // Don't continue loading system if not installed
-                        }
+                        // else {
+                        //   // self.admin_routes.push({
+                        //   //     path: "/installer",
+                        //   //     component: self.API.getPage("installer", true),
+                        //   // });
+                        //   // self.installed = false; // Don't continue loading system if not installed
+                        // }
                         break;
                     default:
                         self.API.notify(response.data, "error");
@@ -144,12 +151,12 @@ export class APIShift {
         // Check admin mode & installation
         this.Loader.load((resolve, reject) => {
             // Preceding code is only for the CP
-            if (!this.admin_mode) {
+            if (!self.admin_mode) {
                 resolve(2); // Jump 2 stage forward
             }
 
             // Installation check
-            if (!this.installed) {
+            if (!self.installed) {
                 resolve(2); // Jump 2 stage forward
             }
 
@@ -157,11 +164,11 @@ export class APIShift {
             self.API.startUpdate();
 
             // Load default pages
-            this.admin_routes.push({
+            self.admin_routes.push({
                 path: "/main",
                 component: self.API.getPage("main", true),
             });
-            this.admin_routes.push({
+            self.admin_routes.push({
                 path: "/login",
                 component: self.API.getPage("login", true),
             });
@@ -188,10 +195,10 @@ export class APIShift {
 
         this.Loader.load((resolve, reject) => {
             if (is_session_admin) {
-                this.load_components = true;
+                self.load_components = true;
                 // this.logged_in = true;
             } else {
-                this.load_components = false; // Don't load other system components before login
+                self.load_components = false; // Don't load other system components before login
                 resolve(0);
             }
 
@@ -215,7 +222,7 @@ export class APIShift {
             (response) => {
                 if (response.status == 1) result = response.data == state_id;
                 else
-                    this.API.notify(
+                    self.API.notify(
                         this.Loader.API.getStatusName(response.status) +
                         ": " +
                         response.data,

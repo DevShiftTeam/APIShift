@@ -29,7 +29,6 @@ export default {
     };
   },
   created() {
-    console.log('load navigator');
     window.nav_holder = this;
     // Load control panel pages
     this.updatePages();
@@ -55,9 +54,7 @@ export default {
       this.index = new_index;
     },
     updatePages: function() {
-      APIShift.API.request("Admin\\Control", "getPages", {}, function(
-        response
-      ) {
+      APIShift.API.request("Admin\\Control", "getPages", {}, (response) => {
         if (response.status == APIShift.API.status_codes.SUCCESS) {
           nav_holder.pages = Object.assign({}, response.data);
           // Add routes
@@ -88,6 +85,11 @@ export default {
           }
           // Update routes
           app.$router.addRoutes(APIShift.admin_routes);
+        } else if (response.status == APIShift.API.status_codes.NO_AUTH) {
+          APIShift.logged_in = false;
+          app.$router.push({
+            path: "/login"
+          });
         } else {
           APIShift.API.notify(
             APIShift.API.getStatusName(response.status) + ": " + response.data,

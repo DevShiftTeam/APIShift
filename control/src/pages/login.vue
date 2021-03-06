@@ -60,7 +60,7 @@ export default {
   },
   created() {
     if (APIShift.logged_in) app.$router.push("/main");
-    app.apishift.setSubtitle("Login");
+    APIShift.setSubtitle("Login");
   },
   updated() {
     // If step action accurred, then focus on the selected field
@@ -149,7 +149,7 @@ export default {
           } else if (response.status == APIShift.API.status_codes.SUCCESS) {
             APIShift.API.notify("Success! :) " + response.data, "success");
             // Re-initialize devshift system to logged id state
-            window.app.apishift.initialize();
+            APIShift.initialize();
             APIShift.Loader.load((resolve, reject) => {
             //   APIShift.logged_in = true;
               this.$store.commit("auth/SET", true);

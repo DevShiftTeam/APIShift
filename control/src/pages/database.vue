@@ -19,7 +19,7 @@
      * @author Sapir Shemer
      */
 
-    module.exports = {
+    export default {
         data() {
             return {
                 current_page: 0,

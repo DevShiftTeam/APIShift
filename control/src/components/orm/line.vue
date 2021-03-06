@@ -26,9 +26,9 @@
      * Line component represents a continuous extent of length between p1 and p2 using SVG's Path element drawing function 
      * we draw line according to settings inferred by the connection and relation of the nodes
      */
-    module.exports = {
+    export default {
         props: {
-            uid: String,
+            // uid: String,
             // Functional data
             src_info: Object,
             dest_info: Object,
@@ -36,7 +36,7 @@
         },
         data () {
             return {
-                uid: '',
+                uid: "",
                 src_rect: {
                     x: 0,
                     y: 0,

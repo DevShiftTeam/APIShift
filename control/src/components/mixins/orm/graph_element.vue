@@ -21,10 +21,10 @@
      */
 
 
-    module.exports = {
+    export default {
         data() {
             return {
-                uid: '',
+                // uid: '',
                 type: 'graph_element',
                 z_index: 0,
                 height: 0,

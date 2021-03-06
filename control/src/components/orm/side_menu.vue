@@ -19,7 +19,7 @@
  * @author Ilan Dazanashvili
  */
 
-module.exports = {
+export default {
   props: {},
   data() {
     return {

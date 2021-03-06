@@ -19,7 +19,7 @@
      * @author Sapir Shemer
      */
 
-    module.exports = {
+    export default {
         data() {
             return {
                 item: 3,
@@ -43,7 +43,7 @@
             };
         },
         created() {
-            app.apishift.setSubtitle("Dashboard");
+            APIShift.setSubtitle("Dashboard");
             APIShift.Loader.changeLoader("main");
         },
         methods: {

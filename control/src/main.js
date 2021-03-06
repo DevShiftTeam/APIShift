@@ -25,7 +25,7 @@ import i18n from "./locale/i18n";
 import store from "./store/index";
 import { APIShift as APIShiftClass } from "./scripts/APIShift.js";
 import Vuebar from 'vuebar';
-
+import Main from './pages/main'
 Vue.use(Vuebar);
 Vue.use(VueRouter);
 Vue.use(Vuetify);

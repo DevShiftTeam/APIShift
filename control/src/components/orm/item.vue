@@ -20,7 +20,7 @@
      */
 
     // This shit is made for scripting
-    module.exports = {
+    export default {
         mixins: [APIShift.API.getMixin('orm/graph_element')],
         props: {
             is_relation: Boolean,

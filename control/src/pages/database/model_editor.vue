@@ -25,7 +25,7 @@ const loginVue = require("../login.vue");
 window.empty_function = (event) => {};
 
 // This shit is made for scripting
-module.exports = {
+export default {
   data() {
     return {
       drawer: null,

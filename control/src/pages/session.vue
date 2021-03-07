@@ -671,11 +671,11 @@ export default {
                     </v-app-bar>
                   </template>
 
-                  <template v-slot:item.task_name="{ item }">
+                  <template v-slot:[`item.task_name`]="{ item }">
                     <v-chip>{{ getKeyType(item) }}</v-chip>
                     <span>{{ getKeyName(item) }}</span>
                   </template>
-                  <template v-slot:item.actions="{ item }">
+                  <template v-slot:[`item.actions`]="{  }">
                     <v-tooltip top>
                       <template v-slot:activator="{ on }">
                         <v-icon v-on="on">

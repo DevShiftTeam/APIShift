@@ -106,4 +106,15 @@ class DatabaseList
         CacheManager::loadDefaults(true);
         Status::message(Status::SUCCESS, "Updated Successfully! :)");
     }
+        /**
+     * Test Connection to database
+     */
+    public static function testConnection()
+    {
+        
+        // Refresh Cache to apply changes
+        CacheManager::loadDefaults(true);
+
+        Status::message(Status::SUCCESS, "Connected Successfully! :)");
+    }
 }

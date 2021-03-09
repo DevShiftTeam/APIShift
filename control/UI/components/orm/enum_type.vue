@@ -25,23 +25,39 @@
         data () {
             return {
                 drawer: null,
+                enum_hovered: -1
             }
         },
         created () {
             window.graph_elements[this.$props.index] = this;
         }, 
         mounted () {
-            let rect = this.$el.getBoundingClientRect();
-            this.expanded_functions.drag_start = function(event) {
-                window.type_width = rect.width;
-                window.type_height = rect.height;
-                window.type_mouse_relative_x = event.clientX - rect.x;
-                window.type_mouse_relative_y = event.clientY - rect.y;
-            }
+            this.expanded_functions.drag = this.drag_addition;
+            this.expanded_functions.drag_end = this.drag_end_addition;
         },
         methods: {
-            on_context() {
+            drag_addition(event) {
+                let enum_found = -1, z_index = 0;
+                
+                for(let index in [...graph_view.elements.keys()]) {
+                    // Skip non-enums
+                    if(window.graph_elements[index] === undefined || graph_view.elements[index].component_id != 3)
+                        continue;
+                    
+                    // Check collisions
+                    if(graph_view.collision_check(this.get_rect(), window.graph_elements[index].get_rect())
+                    && window.graph_elements[index].data.z_index > z_index) {
+                        z_index = window.graph_elements[index].data.z_index;
+                        enum_found = index;
+                    }
+                }
 
+                this.enum_hovered = enum_found;
+            },
+            drag_end_addition(event) {
+                if(this.enum_hovered == -1) return;
+                
+                // Add type to enum
             },
             remove_from_enum () {
                 let id = this.component_id;
@@ -77,7 +93,7 @@
 </script>
 
 <template>
-    <div class="type" color="#8789ff" :class="{ type_over_enum: is_dragging && window.enum_hovered !== -1 }"
+    <div class="type" color="#8789ff" :class="{ type_over_enum: enum_hovered != -1 }"
         :style="transformation" 
         @pointerdown.prevent="drag_start"
         @contextmenu.prevent="on_context"

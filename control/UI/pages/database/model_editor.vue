@@ -138,16 +138,9 @@
             // Store this object with a global reference
             window.graph_elements = {};
             window.graph_view = this;
-            window.origin_position = {
-                x: 0,
-                y: 0
-            };
 
             // Set initial z-index
             for(var index in this.elements) this.$set(this.elements[index].data, 'z_index', parseInt(index) + 1);
-
-            // Allows to know which enum has been hovered
-            window.enum_hovered = -1;
         },
         mounted () {
             this.update_graph_position();
@@ -405,24 +398,16 @@
             },
             /**
              * Test whether 2 graph elements hit each other on the graph.
-             * @param {Info} info_1, @param {Info} info_2
+             * @param {Object} size_object_1
+             * @param {Object} size_object_2
              * @returns {Boolean} 
              */
-            hittest: function(info_1, info_2){
-
-                let element1 = this.get_element_by_info(info_1);
-                let element2 = this.get_element_by_info(info_2);
-                
-                if (!element1 || !element2) return null;
-
-                var rect1 = element1.rect;
-                var rect2 = element2.rect;
-
-                return !(
-                    ((rect1.y + rect1.height) < (rect2.y)) ||
-                    (rect1.y > (rect2.y + rect2.height)) ||
-                    ((rect1.x + rect1.width) < rect2.x) ||
-                    (rect1.x > (rect2.x + rect2.width))
+            collision_check: function(size_object_1, size_object_2){
+                return (
+                    size_object_1.x < size_object_2.x + size_object_2.width &&
+                    size_object_1.x > size_object_2.x - size_object_1.width &&
+                    size_object_1.y < size_object_2.y + size_object_2.height &&
+                    size_object_1.y > size_object_2.y - size_object_1.height
                 );
             },
             /**

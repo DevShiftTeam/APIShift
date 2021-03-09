@@ -126,6 +126,14 @@
                 this.get_lines().forEach(line => {
                     graph_view.$refs[line.line_uid].update();
                 });
+            },
+            get_rect: function() {
+                return {
+                    x: this.$props.data.position.x,
+                    y: this.$props.data.position.y,
+                    width: this.$el.offsetWidth,
+                    height: this.$el.offsetHeight
+                };
             }
         },
         computed: {

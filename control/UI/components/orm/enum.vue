@@ -31,6 +31,7 @@
             }
         },
         created () {
+            window.graph_elements[this.$props.index] = this;
         }, 
         mounted () {
             this.occupied_height = 0;
@@ -41,7 +42,6 @@
                 // Store element
                 let type_id = this.$props.data.types[type];
                 let index = graph_view.elements.findIndex((elem) => elem.id == type_id && elem.component_id == 2);
-                console.log(graph_view.elements);
                 this.type_elements[type_id] = window.graph_elements[index];
 
                 // Calculate width & height
@@ -49,43 +49,24 @@
                 this.occupied_height += rect.height;
                 if(this.occupied_width - 14 < rect.width) max_width = rect.width + 14; // 14 for 7 pixel padding at each side
             }
-
-            // General z_index for Enum's
-            this.z_index = 10;
         },
         methods: {
-            
-        },
-        computed: {
-            padding: function() {
-                return {
-                    'padding-top': window.type_height - window.type_mouse_relative_y,
-                    'padding-left': window.type_width - window.type_mouse_relative_x,
-                    'padding-right': window.type_mouse_relative_x,
-                    'padding-bottom': window.type_mouse_relative_y,
-                };
-            }
         }
     }
 </script>
 
 <template>
-    <div class="enum_wrapper"
-        :style="transformation">
         <div class="enum" color="#8789ff"
+        :style="transformation"
             @pointerdown.prevent="drag_start"
             @contextmenu.prevent="on_context"
             @pointerup.prevent="drag_end">
                 <v-avatar left class="enum_type darken-4 red" >E</v-avatar>
                 <div style="display: inline;">{{ name }}</div>
         </div>
-    </div>
 </template>
 
 <style scoped>
-.enum_wrapper {
-    position: relative;
-}
 
 /* Please style this crap, with style */
 .enum_type {

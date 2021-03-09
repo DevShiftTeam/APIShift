@@ -49,8 +49,11 @@
                             position: { x: 120, y: 50 }
                         }
                     },
-                    { id: 3, component_id: 0, name: "Testers", data: {
-                        position: { x: 20, y: 0 }
+                    { id: 3, component_id: 1, name: "Testers", data: {
+                        position: { x: 20, y: 0 },
+                        from: 1,
+                        to: 4,
+                        type: 0
                     }},
                     // Relations
                     { id: 4, component_id: 1, name: "UserPosts", data: {

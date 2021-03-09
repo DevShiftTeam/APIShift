@@ -27,7 +27,8 @@
                 drawer: null,
                 occupied_width: 0,
                 occupied_height: 0,
-                init_height: 0
+                init_height: 0,
+                init_width: 0
             }
         },
         created () {
@@ -37,6 +38,7 @@
         }, 
         mounted () {
             this.init_height = this.$el.offsetHeight * 3;
+            this.init_width = -1;
 
             // Set enum size and type positions
             this.reset_enum_sizes();
@@ -56,7 +58,7 @@
             },
             reset_enum_sizes: function() {
                 this.occupied_height = this.init_height;
-                this.occupied_width = this.$el.offsetWidth;
+                this.occupied_width = this.init_width;
 
                 // Get all type objects connected to this enum & calculate height & max width
                 for(let type in this.$props.data.types) {
@@ -91,7 +93,7 @@
         computed: {
             sizes: function() {
                 return {
-                    'width': this.occupied_width + 'px',
+                    'width': this.occupied_width == -1 ? 'auto' : this.occupied_width + 'px',
                     'height': this.occupied_height + 'px'
                 };
             }

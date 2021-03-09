@@ -58,6 +58,9 @@
                 if(this.enum_hovered == -1) return;
                 
                 // Add type to enum
+
+                // Reset hovered enum
+                this.enum_hovered = -1;
             },
             remove_from_enum () {
                 let id = this.component_id;

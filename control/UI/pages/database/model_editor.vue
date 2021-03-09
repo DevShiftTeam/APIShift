@@ -65,14 +65,14 @@
                     { id: 1, component_id: 2, name: 'test1', data: {
                         position: {x: 100, y: 100}
                     }},
-                    { id: 2, component_id: 2, name: 'test1', data: {
+                    { id: 2, component_id: 2, name: 'test2', data: {
                         position: {x: 100, y: 100}
                     }},
 
                     // Enums
                     { id: 1, component_id: 3, name: 'enum1', data: {
                         position: {x: 50, y: 100},
-                        types: [ 1 ]
+                        types: [ 1, 2 ]
                     }},
 
                     /**

@@ -27,37 +27,75 @@
                 drawer: null,
                 occupied_width: 0,
                 occupied_height: 0,
-                type_elements: {}
+                type_indicies: [],
+                init_height: 0
             }
         },
         created () {
             window.graph_elements[this.$props.index] = this;
+            this.expanded_functions.drag = this.drag_addition;
         }, 
         mounted () {
-            this.occupied_height = 0;
+            this.init_height = this.$el.offsetHeight * 3;
+            this.occupied_height = this.init_height;
             this.occupied_width = this.$el.offsetWidth;
 
             // Get all type objects connected to this enum & calculate height & max width
             for(let type in this.$props.data.types) {
-                // Store element
+                // Find type index
                 let type_id = this.$props.data.types[type];
                 let index = graph_view.elements.findIndex((elem) => elem.id == type_id && elem.component_id == 2);
-                this.type_elements[type_id] = window.graph_elements[index];
+                this.type_indicies.push(index);
 
                 // Calculate width & height
-                let rect = this.type_elements[type_id].$el.getBoundingClientRect();
-                this.occupied_height += rect.height;
-                if(this.occupied_width - 14 < rect.width) max_width = rect.width + 14; // 14 for 7 pixel padding at each side
+                let rect = window.graph_elements[index].get_rect();
+                this.occupied_height += rect.height + 7;
+                if(this.occupied_width - 14 < rect.width) this.occupied_width = rect.width + 14; // 14 for 7 pixel padding at each side
+            }
+
+            // Set all connected type positions
+            let current_position_height = this.$props.data.position.y + this.init_height;
+
+            for(let type in this.type_indicies) {
+                let index = this.type_indicies[type];
+
+                graph_view.elements[index].data.position.y = current_position_height;
+                graph_view.elements[index].data.position.x = this.$props.data.position.x + 7;
+
+                graph_view.bring_to_front(index);
+                current_position_height += window.graph_elements[index].get_rect().height + 7;
             }
         },
         methods: {
+            drag_addition: function(event) {
+                // Move types with enum & update their index to height than enum
+                let current_position_height = this.$props.data.position.y + this.init_height;
+
+                for(let type in this.type_indicies) {
+                    let index = this.type_indicies[type];
+
+                    graph_view.elements[index].data.position.y = current_position_height;
+                    graph_view.elements[index].data.position.x = this.$props.data.position.x + 7;
+
+                    graph_view.bring_to_front(index);
+                    current_position_height += window.graph_elements[index].get_rect().height + 7;
+                }
+            }
+        },
+        computed: {
+            sizes: function() {
+                return {
+                    'width': this.occupied_width + 'px',
+                    'height': this.occupied_height + 'px'
+                };
+            }
         }
     }
 </script>
 
 <template>
         <div class="enum" color="#8789ff"
-        :style="transformation"
+            :style="[transformation, sizes]"
             @pointerdown.prevent="drag_start"
             @contextmenu.prevent="on_context"
             @pointerup.prevent="drag_end">

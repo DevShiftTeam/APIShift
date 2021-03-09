@@ -25,7 +25,8 @@
         data () {
             return {
                 drawer: null,
-                enum_hovered: -1
+                enum_hovered: -1,
+                attached_enum: 0
             }
         },
         created () {
@@ -62,15 +63,6 @@
                 // Reset hovered enum
                 this.enum_hovered = -1;
             },
-            remove_from_enum () {
-                let id = this.component_id;
-                if(this.$props.data.enum_id) {
-                    let enum_info = {type: 'e', id: this.$props.data.enum_id};
-                    let element_enum = graph_view.get_element_by_info(enum_info);
-                    element_enum.data.types = element_enum.data.types.filter(t => t.id !== id);
-                    this.$props.data.enum_id = null;
-                }
-            },
             on_delete() {
                 let id = this.component_id;
 
@@ -80,10 +72,6 @@
                 // Finally remove element from screen
                 graph_view.enum_types = graph_view.enum_types.filter((enum_type) => enum_type.id !== id);
                 delete graph_view.lookup_table['t'][id];
-            },
-            move_to (xpos, ypos) {
-                this.$props.position.x = xpos;
-                this.$props.position.y = ypos;
             }
         },
         computed: {

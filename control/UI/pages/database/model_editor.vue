@@ -65,7 +65,7 @@
                     { id: 1, component_id: 2, name: 'test1', data: {
                         position: {x: 100, y: 100}
                     }},
-                    { id: 2, component_id: 2, name: 'test2', data: {
+                    { id: 2, component_id: 2, name: 'testsdfsdfsd2', data: {
                         position: {x: 100, y: 100}
                     }},
 

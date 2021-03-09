@@ -26,17 +26,33 @@
             return {
                 drawer: null,
                 enum_hovered: -1,
-                attached_enum: 0
+                attached_enum: -1
             }
         },
         created () {
             window.graph_elements[this.$props.index] = this;
         }, 
         mounted () {
+            this.expanded_functions.drag_start = this.drag_start_addition;
             this.expanded_functions.drag = this.drag_addition;
             this.expanded_functions.drag_end = this.drag_end_addition;
         },
         methods: {
+            drag_start_addition: function(event) {
+                // Remove from attached enum
+                if(this.attached_enum != -1) {
+                    // Remove from enum
+                    let index = window.graph_elements[this.attached_enum].data.types.indexOf(this.$props.id);
+                    window.graph_elements[this.attached_enum].data.types.splice(index, 1);
+
+                    // Reset enum sizes
+                    window.graph_elements[this.attached_enum].reset_enum_sizes();
+                    window.graph_elements[this.attached_enum].reset_type_position();
+
+                    this.attached_enum = -1;
+                    graph_view.bring_to_front(this.$props.index);
+                }
+            },
             drag_addition(event) {
                 let enum_found = -1, z_index = 0;
                 
@@ -59,6 +75,12 @@
                 if(this.enum_hovered == -1) return;
                 
                 // Add type to enum
+                this.attached_enum = this.enum_hovered;
+                window.graph_elements[this.attached_enum].data.types.push(this.$props.id);
+
+                // Reset enum sizes
+                window.graph_elements[this.attached_enum].reset_enum_sizes();
+                window.graph_elements[this.attached_enum].reset_type_position();
 
                 // Reset hovered enum
                 this.enum_hovered = -1;

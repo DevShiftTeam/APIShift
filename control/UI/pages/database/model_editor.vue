@@ -77,7 +77,7 @@
 
                     // Enums
                     { id: 1, component_id: 3, name: 'enum1', data: {
-                        position: {x: 50, y: 100},
+                        position: {x: 200, y: 200},
                         types: [ 1, 2 ]
                     }},
 
@@ -85,6 +85,10 @@
                     { id: 1, component_id: 4, name: 'group', data: {
                         elements: [ 1, 2, 3 ],
                         parent: 0
+                    }},
+                    { id: 2, component_id: 4, name: 'group', data: {
+                        elements: [ 4 ],
+                        parent: 1
                     }}
                 ],
                 points: [], 

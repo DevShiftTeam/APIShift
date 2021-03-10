@@ -29,6 +29,8 @@
                 occupied_width: 0,
                 occupied_height: 0,
                 element_indicies: [],
+                group_indicies: [],
+                parent_group_index: -1,
                 selected: false
             }
         },
@@ -48,7 +50,7 @@
             this.init_height = rect.height;
             this.init_width = rect.width;
 
-
+            // Get all element indicies
             for(let elem in this.$props.data.elements) {
                 let item_id = this.$props.data.elements[elem];
                 let index = graph_view.elements.findIndex(el => el.id === item_id && (el.component_id == 1 || el.component_id == 0));
@@ -58,16 +60,58 @@
                 graph_view.bring_to_front(index);
             }
 
+            // Get all group indicies
+            for(let grp_index in graph_view.elements) {
+                if(graph_view.elements[grp_index].component_id != 4 || graph_view.elements[grp_index].data.parent != this.$props.id)
+                    continue;
+                window.graph_elements[grp_index].bring_to_front();
+                window.graph_elements[grp_index].parent_group_index = this.$props.index;
+                this.group_indicies.push(grp_index);
+            }
+
             // Determine new calculated rect & bounds
             this.update_group_size();
+            if(this.parent_group_index != -1) window.graph_elements[this.parent_group_index].update_group_size();
         },
         methods: {
+            bring_to_front: function() {
+                graph_view.bring_to_front(this.$props.index);
+
+                for(let elem in this.element_indicies)
+                    graph_view.bring_to_front(this.element_indicies[elem]);
+            },
             update_group_size () {
-                // Calculate size
                 let rect = {};
 
+                // Calculate size via elements
                 for(let elem in this.element_indicies) {
                     let index = this.element_indicies[elem];
+
+                    // Get first rect
+                    let temp_rect = window.graph_elements[index].get_rect();
+
+                    if(rect.x === undefined) {
+                        rect.x = temp_rect.x;
+                        rect.y = temp_rect.y;
+                        rect.x_end = temp_rect.x + temp_rect.width;
+                        rect.y_end = temp_rect.y + temp_rect.height;
+                    }
+                    else {
+                        // Get start of group
+                        if(rect.x > temp_rect.x) rect.x = temp_rect.x;
+                        if(rect.y > temp_rect.y) rect.y = temp_rect.y;
+
+                        // Get end of group
+                        if(rect.x_end < temp_rect.x + temp_rect.width)
+                            rect.x_end = temp_rect.x + temp_rect.width;
+                        if(rect.y_end < temp_rect.y + temp_rect.height)
+                            rect.y_end = temp_rect.y + temp_rect.height;
+                    }
+                }
+
+                // Calculate size via sub_groups
+                for(let grp in this.group_indicies) {
+                    let index = this.group_indicies[grp];
 
                     // Get first rect
                     let temp_rect = window.graph_elements[index].get_rect();
@@ -98,17 +142,38 @@
                 this.occupied_height = rect.y_end - rect.y;
             },
             drag_start_addition: function(event) {
+                // Initialize all elements
                 for(let elem in this.element_indicies) {
                     let index = this.element_indicies[elem];
                     graph_view.bring_to_front(index);
                     window.graph_elements[index].init_position = Object.assign({}, window.graph_elements[index].data.position);
                 }
+
+                // Initialize all sub-groups
+                for(let sub_group in this.group_indicies)
+                    window.graph_elements[this.group_indicies[sub_group]].drag_start(event);
+                
+                graph_view.drag_handler = this.drag;
             },
             drag_addition: function(event) {
-                for(let elem in this.element_indicies) {
-                    let index = this.element_indicies[elem];
-                    window.graph_elements[index].drag(event);
-                }
+                if(this.parent_group_index != -1 && !(window.graph_elements[this.parent_group_index].is_dragging))
+                    window.graph_elements[this.parent_group_index].update_group_size();
+
+                // Drag all elements
+                for(let elem in this.element_indicies)
+                    window.graph_elements[this.element_indicies[elem]].drag(event);
+
+                // Drag all sub groups
+                for(let sub_group in this.group_indicies)
+                    window.graph_elements[this.group_indicies[sub_group]].drag(event);
+            },
+            get_rect: function() {
+                return {
+                    x: this.$props.data.position.x,
+                    y: this.$props.data.position.y,
+                    width: this.occupied_width,
+                    height: this.occupied_height + 24
+                };
             },
             on_context () {
                 
@@ -199,9 +264,5 @@
 
 .group.selected {
     outline: dashed white 2px;
-}
-
-.group.highlight {
-
 }
 </style>

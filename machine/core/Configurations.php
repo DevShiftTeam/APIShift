@@ -48,7 +48,7 @@ class Configurations {
     /**
      * Cache system configurations
      */
-    const CACHE_TYPE = CacheManager::NO_CACHE;
+    const CACHE_TYPE = CacheManager::APCU;
     const CACHE_HOST = "127.0.0.1";
     const CACHE_PORT = 6379;
     const CACHE_PASS = "";

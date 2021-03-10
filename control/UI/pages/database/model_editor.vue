@@ -28,49 +28,68 @@
             return {
                 drawer: null,
                 // Components
-                item_comp: APIShift.API.getComponent('orm/item', true),
-                enum_comp: APIShift.API.getComponent('orm/enum', true),
-                group_comp: APIShift.API.getComponent('orm/group', true),
-                enum_type_comp: APIShift.API.getComponent('orm/enum_type', true),
+                components: [
+                    APIShift.API.getComponent('orm/item', true),
+                    APIShift.API.getComponent('orm/relation', true),
+                    APIShift.API.getComponent('orm/enum_type', true),
+                    APIShift.API.getComponent('orm/enum', true),
+                    APIShift.API.getComponent('orm/group', true)
+
+                ],
                 line_comp: APIShift.API.getComponent('orm/line', true),
                 selection_comp: APIShift.API.getComponent('orm/selection_box', true),
                 side_menu_comp: APIShift.API.getComponent('orm/side_menu', true),
-                items: [
-                    { name: "wait", id: 1, rect: { x: 20, y: 0, width: 0, height: 0 }, data: { is_relation: false } },
-                    { name: "haha", id: 2, rect: { x: 220, y: 200, width: 0, height: 0}, data: { is_relation: false } },
-                    { name: "rela", id: 3, rect: { x: 120, y: 50 , width: 0, height: 0}, data: {
-                        is_relation: true,
-                        from: { id: 1, type: 'i' },
-                        to: { id: 2, type: 'i' },
-                        type: 0
-                    } }
-                ],  
-                enums: [
-                    { name: "Enum", id: 1, rect: { x: 50, y: 100, width: 0, height: 0},
-                        data: {
-                            types: [
-                                {id: 1}
-                            ],
-                            connected: [
-                                { type: 'i', id: 1 }
-                            ]
-                    }}
-                ],
-                enum_types: [
-                    { name: 'Type', id: 1, rect: {  x: 100, y: 100, width: 0, height: 0}, data: { enum_id: 1 }},
-                    { name: 'Type', id: 2, rect: {  x: 200, y: 100, width: 0, height: 0}, data: { enum_id: null }}
-                ],
-                groups: [
-                    { 
-                        name: 'Group', id: 1, rect: { x: 0, y: 0, width: 0, height: 0},
-                        data: { 
-                            contained_elements: [
-                                {type: 'i', id: 1}, 
-                                {type: 'i', id: 2}, 
-                                {type: 'i', id: 3}
-                            ]
+                elements: [
+                    // Items
+                    { id: 1, component_id: 0, name: "Users", data: {
+                            position: { x: 20, y: 0 }
                         }
-                    }
+                    },
+                    { id: 2, component_id: 0, name: "Posts", data: {
+                            position: { x: 120, y: 50 }
+                        }
+                    },
+                    { id: 3, component_id: 1, name: "Testers", data: {
+                        position: { x: 20, y: 0 },
+                        from: 1,
+                        to: 4,
+                        type: 0
+                    }},
+                    // Relations
+                    { id: 4, component_id: 1, name: "UserPosts", data: {
+                            position: { x: 220, y: 200 },
+                            from: 1,
+                            to: 2,
+                            type: 0
+                        }
+                    },
+                    
+                    // Enum Types
+                    { id: 1, component_id: 2, name: 'test1', data: {
+                        position: {x: 100, y: 100}
+                    }},
+                    { id: 2, component_id: 2, name: 'testsdfs2', data: {
+                        position: {x: 100, y: 100}
+                    }},
+                    { id: 3, component_id: 2, name: '3testing', data: {
+                        position: {x: 100, y: 100}
+                    }},
+
+                    // Enums
+                    { id: 1, component_id: 3, name: 'enum1', data: {
+                        position: {x: 200, y: 200},
+                        types: [ 1, 2 ]
+                    }},
+
+                    // Groups
+                    { id: 1, component_id: 4, name: 'group', data: {
+                        elements: [ 1, 2, 3 ],
+                        parent: 0
+                    }},
+                    { id: 2, component_id: 4, name: 'group', data: {
+                        elements: [ 4 ],
+                        parent: 1
+                    }}
                 ],
                 points: [], 
                 lookup_table: { 'i': [], 't': [], 'e': [], 'g': []},
@@ -121,25 +140,18 @@
                         return this.id; 
                     }
                 },
-                yes: null,
-                relation_factory: {from : 0, to : 0, type : 0},
-                void_point: { x: -Number.MAX_SAFE_INTEGER, y: -Number.MAX_SAFE_INTEGER },  
-                init_rect: {x:0, y:0},
                 cursor_state: {type: "default"}
             }
         },
         created () {
             // Store this object with a global reference
+            window.graph_elements = {};
             window.graph_view = this;
-            window.origin_position = {
-                x: 0,
-                y: 0
-            };
 
-            this.front_z_index = this.items.length;
+            // Set initial z-index
+            for(var index in this.elements) this.$set(this.elements[index].data, 'z_index', parseInt(index) + 1);
         },
         mounted () {
-            this.init_rect = this.$el.getBoundingClientRect();
             this.update_graph_position();
 
             window.addEventListener('keydown', this.key_down);
@@ -148,6 +160,24 @@
             window.removeEventListener('keydown', this.key_down);
         },
         methods: {
+            bring_to_front: function(element_id) {
+                // Ignore if in front
+                if(this.elements[element_id].data.z_index !== undefined && this.elements[element_id].data.z_index == this.elements.length) return;
+
+                let current_z_index = this.elements[element_id].data.z_index;
+
+                // Bring other elements to back
+                for(let index in this.elements)
+                    if(this.elements[index].data.z_index > current_z_index)
+                        this.elements[index].data.z_index--;
+                
+
+                // Bring to front
+                this.elements[element_id].data.z_index = this.elements.length;
+                app.$refs.navigator.updateIndex(this.elements.length + 1);
+                app.$refs.footer.updateIndex(this.elements.length + 1);
+                window.holder.updateIndex(this.elements.length + 1);
+            },
             /**
              * User interactions
              */
@@ -162,11 +192,13 @@
 
                 // Handle mobile zooming
                 if(this.tap_counter === 2) {
+                    window.scale_factor = 1;
+                    window.scale_init = this.scale;
                     window.init_pointer_first = Object.assign({}, window.init_pointer);
                     window.init_pointer_second = {
                         x: event.clientX,
                         y: event.clientY
-                    }
+                    };
                     window.temp_pointer = {
                         x: (window.init_pointer_first.x + window.init_pointer_second.x) / 2 - window.graph_position.x,
                         y: (window.init_pointer_first.y + window.init_pointer_second.y) / 2 - window.graph_position.y
@@ -255,13 +287,14 @@
 
                 // Update scale
                 let change = Math.sqrt(
-                        (new_diff.x * new_diff.x + new_diff.y * new_diff.y) / 
-                        (prev_diff.x * prev_diff.x + prev_diff.y * prev_diff.y) 
+                        (new_diff.x * new_diff.x + new_diff.y * new_diff.y) /
+                        (prev_diff.x * prev_diff.x + prev_diff.y * prev_diff.y)
                     );
-                let new_scale = this.scale * change;
+                window.scale_factor *= change;
+                let new_scale = window.scale_init * window.scale_factor;
         
                 // Keep the scale on bound
-                if (new_scale < 0.2 || new_scale > 2 ) {
+                if (new_scale < 0.2 || new_scale > 4 ) {
                     return;
                 }
                 this.scale = new_scale;
@@ -272,8 +305,6 @@
                 window.temp_pointer = Object.assign({}, window.init_pointer);
             },
             pointer_up(event) {
-                document.removeEventListener('pointerup', this.pointer_up);
-
                 this.tap_counter = 0;
 
                 if (this.cursor_state.type === 'select') {
@@ -308,7 +339,7 @@
                 let new_scale = this.scale * change;
                 
                 // Keep the scale on bound
-                if (new_scale < 0.2 || new_scale > 2 ) {
+                if (new_scale < 0.2 || new_scale > 4 ) {
                     return;
                 }
                 this.scale = new_scale;
@@ -321,13 +352,6 @@
                 if (event.code === 'KeyG') {
                     // Determine contained elements
                     let contained_elements = [];
-                    this.items.forEach(item => {
-                        let item_instance = graph_view.$refs[`i${item.id}`];
-                        if (item_instance.selected && item_instance.get_group() === null) {
-                            contained_elements.push({ type: 'i', id: item.id });
-                            item_instance.selected = false;
-                        }
-                    });
                     this.groups.forEach(group => {
                         let group_instance = graph_view.$refs[`g${group.id}`];
                         if (group_instance.selected) {
@@ -341,71 +365,6 @@
             move_camera_by (dx, dy) {
                 this.camera.x += dx;
                 this.camera.y += dy;
-            },
-            /**
-             * Control functions 
-             */
-            create_line ( src_info = { type: '', from_id: 0}, dest_info = {type: '', to_id: 0}, settings = {  }) {
-                    var line_uid, from_uid, to_uid;
-
-                    // String concatination 
-                    from_uid  = src_info.type + src_info.id;
-                    to_uid = dest_info.type + dest_info.id;
-
-                    // Line already in list 
-                    line_uid = `${from_uid}-${to_uid}`;
-                    if (graph_view.lines.find((l) => l.line_uid === line_uid)) return;
-
-                    // Add line to system 
-                    graph_view.lines.push({line_uid, src_info, dest_info, settings});
-            },
-            delete_line ( src_info = { type: '', from_id: 0}, dest_info = {type: '', to_id: 0} ) {  
-                    var line_uid, from_uid, to_uid;
-
-                    // String concatination 
-                    from_uid  = src_info.type + src_info.id;
-                    to_uid = dest_info.type + dest_info.id;
-
-                    // Line already in list 
-                    line_uid = `${from_uid}-${to_uid}`;
-
-                    // Queue deletion to next frame execution due to potential race conditions
-                    setTimeout(() => graph_view.lines = graph_view.lines.filter((line) =>  line.line_uid !== line_uid),0);
-            },
-            relation_builder ( relate_from = {}, relate_to = {}, relate_type) {
-                if (relate_from && Object.keys(relate_from) !== 0) {
-                    this.relation_factory['from'] = relate_from;    
-                }
-                if (relate_to && Object.keys(relate_to) !== 0) {
-                    this.relation_factory['to'] = relate_to;
-                }
-                if (relate_type) {
-                    this.relation_factory['type'] = relate_type;
-                }
-                
-                // All properties are set 
-                if (Object.values(this.relation_factory).every((v) => v)) {
-                    let from = { type: this.relation_factory.from.type , id: this.relation_factory.from.id };
-                    let to = { type: this.relation_factory.to.type , id: this.relation_factory.to.id };
-                    let type = this.relation_factory.type;
-
-                    let element_from = this.get_element_by_info(from);
-                    let element_to = this.get_element_by_info(to);
-
-                    let rect = {
-                        x: (element_from.rect.x + element_to.rect.x) / 2,
-                        y: (element_from.rect.y + element_to.rect.y) / 2,
-                        width: 0,
-                        height: 0 
-                    };
-
-                    // Reset factory and create new relation element
-                    this.relation_factory = {from: 0,to: 0,type: 0};
-                    this.cursor_state = Object.assign({}, { type: 'default' });
-                    this.create_element_on_runtime('item', { name: 'relation', rect , data: {is_relation: true,from, to, type}});
-
-                } else this.cursor_state = Object.assign({}, { type: 'create', data: 'add-relation'});
-                
             },
             /**
              * Create new element on screen according to params.
@@ -439,32 +398,25 @@
             update_graph_position() {
                 let rect = this.$el.getBoundingClientRect();
                 // Stores the current position of the graph on the screen
-                window.graph_position = { x: rect.x,
-                y: rect.y,
-                width: rect.width,
-                height: rect.height 
-                }
+                window.graph_position = {
+                    x: rect.x,
+                    y: rect.y,
+                    width: rect.width,
+                    height: rect.height
+                };
             },
             /**
              * Test whether 2 graph elements hit each other on the graph.
-             * @param {Info} info_1, @param {Info} info_2
+             * @param {Object} size_object_1
+             * @param {Object} size_object_2
              * @returns {Boolean} 
              */
-            hittest: function(info_1, info_2){
-
-                let element1 = this.get_element_by_info(info_1);
-                let element2 = this.get_element_by_info(info_2);
-                
-                if (!element1 || !element2) return null;
-
-                var rect1 = element1.rect;
-                var rect2 = element2.rect;
-
-                return !(
-                    ((rect1.y + rect1.height) < (rect2.y)) ||
-                    (rect1.y > (rect2.y + rect2.height)) ||
-                    ((rect1.x + rect1.width) < rect2.x) ||
-                    (rect1.x > (rect2.x + rect2.width))
+            collision_check: function(size_object_1, size_object_2){
+                return (
+                    size_object_1.x < size_object_2.x + size_object_2.width &&
+                    size_object_1.x > size_object_2.x - size_object_1.width &&
+                    size_object_1.y < size_object_2.y + size_object_2.height &&
+                    size_object_1.y > size_object_2.y - size_object_1.height
                 );
             },
             /**
@@ -525,34 +477,15 @@
 
         },
         watch: {
-            front_z_index: function(newValue) {
-                app.$refs.navigator.updateIndex(newValue + 1);
-                app.$refs.footer.updateIndex(newValue + 1);
-                window.holder.updateIndex(newValue + 1);
-            },
-            cursor_state: {
-                handler: function (state) {
-                    document.body.classList.add('reset-all-cursors');
-                    this.$el.classList.remove('cursor_default');
-                    this.$el.classList.remove('cursor_delete');
-                    this.$el.classList.remove('cursor_create');
-                    this.$el.classList.remove('cursor_select');
+            cursor_state: function (state) {
+                document.body.classList.add('reset-all-cursors');
+                this.$el.classList.remove('cursor_default');
+                this.$el.classList.remove('cursor_delete');
+                this.$el.classList.remove('cursor_create');
+                this.$el.classList.remove('cursor_select');
 
-                    if ( state.type === 'default') {
-                        this.$el.classList.add('cursor_default');
-                        document.body.classList.remove('reset-all-cursors');
-                    }
-                    if ( state.type === 'delete') {
-                        this.$el.classList.add('cursor_delete');
-                    }
-                    if ( state.type === 'create') {
-                        this.$el.classList.add('cursor_create');
-                    }
-                    if ( state.type === 'select') {
-                        this.$el.classList.add('cursor_select');
-                    }
-                },
-                deep: true
+                this.$el.classList.add('cursor_' + state.type);
+                if ( state.type === 'default') document.body.classList.remove('reset-all-cursors');
             }
         }
     }
@@ -579,6 +512,7 @@
                         </v-list>
                     </v-menu>
                     <v-divider class="mx-4" inset vertical></v-divider>
+                    <v-spacer></v-spacer>
                 </v-app-bar>
 
                 <!-- Body -->
@@ -595,46 +529,17 @@
                         
                         <!-- The center element allow us to create a smart camera that positions the elements without needed to re-render for each element -->
                         <div ref="gv_center" id="graph_center" :style="{ 'transform': 'translate(' + camera.x + 'px, ' + camera.y + 'px) scale(' + scale + ')'}">
+                            <!-- Elements -->
                             <component
-                                v-for="(item) in items"
-                                :is="item_comp"
-                                :key="'i'+item.id"
-                                :uid="'i'+item.id"
-                                :name="item.name"
-                                :index="item.index"
-                                :rect="item.rect"
-                                :data="item.data">
-                            </component> 
-                            <component
-                                v-for="(enum_type) in enum_types"
-                                :is="enum_type_comp"
-                                :key="'t'+enum_type.id"
-                                :uid="'t'+enum_type.id"
-                                :name="enum_type.name"
-                                :index="enum_type.index"
-                                :rect="enum_type.rect"
-                                :data="enum_type.data">
+                                v-for="(element, index) in elements"
+                                :is="components[element.component_id]"
+                                :key="index"
+                                :index="index"
+                                :id="element.id"
+                                :name="element.name"
+                                :data="element.data">
                             </component>
-                            <component
-                                v-for="(enum_c) in enums"
-                                :is="enum_comp"
-                                :key="'e'+enum_c.id"
-                                :uid="'e'+enum_c.id"
-                                :name="enum_c.name"
-                                :index="enum_c.index"
-                                :rect="enum_c.rect"
-                                :data="enum_c.data">
-                            </component> 
-                            <component
-                                v-for="(group) in groups"
-                                :is="group_comp"
-                                :key="'g'+group.id"
-                                :uid="'g'+group.id"
-                                :name="group.name"
-                                :index="group.index"
-                                :rect="group.rect"
-                                :data="group.data">
-                            </component>
+
                             <svg id="svg_viewport" ref="gv_lines">
                                 <defs>
                                     <marker id="black-arrow" markerWidth="5" markerHeight="5" refX="0" refY="5"
@@ -652,13 +557,12 @@
                                     </marker>
                                 </defs>
                                 <component
-                                    v-for="(line) in lines"
+                                    v-for="(line, index) in lines"
                                     :is="line_comp"
-                                    :key="line.line_uid"
-                                    :uid="line.line_uid" 
-                                    :src_info="line.src_info"
-                                    :dest_info="line.dest_info"
-                                    :settings="line.settings">
+                                    :key="index"
+                                    :src_point="window.graph_elements[line.from_index].from_position"
+                                    :dest_point="window.graph_elements[line.to_index].to_position"
+                                    :data="line.data">
                                 </component> 
                             </svg>
                         </div>

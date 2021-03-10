@@ -18,7 +18,6 @@
  * @author Sapir Shemer
  */
 
-
 // Contains:
 // Loader
 // Header

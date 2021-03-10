@@ -42,7 +42,6 @@
                         graph_view.$refs['item_builder'].open();
                         break;
                     case 'relation':
-                        graph_view.$refs['relation_builder'].open();
                         break;
                     case 'delete':
                         graph_view.$refs['item_builder'].open();

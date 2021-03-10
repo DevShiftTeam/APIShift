@@ -22,155 +22,102 @@
     // This shit is made for scripting
     module.exports = {
         mixins: [APIShift.API.getMixin('orm/graph_element')],
-        props: {
-            name: String,
-            data: Object
-        },
         data () {
             return {
                 drawer: null,
-                enum_types: [],
-                base_height: 0,
-                base_width: 0,
-                types: null,
+                occupied_width: 0,
+                occupied_height: 0,
+                init_height: 0,
+                init_width: 0
             }
         },
         created () {
-            var id = this.component_id;
-            var type = this.component_type;
-            var start_pos = { x: 0, y: 0};
-
-            this.expanded_functions.drag_start = (event) => {
-                start_pos = Object.assign({},this.$props.rect);
-            };
-            this.expanded_functions.drag = (event) => {
-            };
-            this.expanded_functions.drag_end = (event) => {
-                const enum_info = { id, type };
-                const items_infos = graph_view.items.map((i => { return { id: i.id , type: 'i' }}));
-                const groups_infos = graph_view.groups.map((i => { return { id: i.id , type: 'g' }}));
-
-                const elements_infos = [...items_infos, ...groups_infos];
-                for (const element_info of elements_infos) {
-                    if (graph_view.hittest(enum_info, element_info)) {
-
-                        // Element already connected 
-                        if (this.$props.data.connected.find ((element) => element.id + element.type === element_info.id + element_info.type)) return;
-
-                        // Create enum - item connection
-                        this.$props.data.connected.push(element_info); 
-                        graph_view.create_line(this.component_info, element_info, {enum_to_item: element_info.type === 'i', enum_to_group: element_info.type === 'g'});
-
-                        // Move to back origin place 
-                        this.$props.rect.x = start_pos.x;
-                        this.$props.rect.y = start_pos.y;
-                        break;
-                    }
-                }
-
-            };
+            window.graph_elements[this.$props.index] = this;
+            this.expanded_functions.drag_start = this.drag_start_addition;
+            this.expanded_functions.drag = this.drag_addition;
         }, 
         mounted () {
-            let id = this.component_id;
-            let type = this.component_type;
-            
-            this.base_height = this.$el.offsetHeight;
-            this.base_width = this.$el.offsetWidth;
+            this.init_height = this.$el.offsetHeight * 3;
+            this.init_width = -1;
 
-            // Align enum types to element
-            this.align_types();
-
-            // Mount lines to connected elements 
-            this.$props.data.connected.forEach((element) => {
-                graph_view.create_line({id, type}, {id: element.id, type: element.type}, {enum_to_item: true});
-            });
-
-            // General z_index for Enum's
-            this.z_index = 10;
+            // Set enum size and type positions
+            this.reset_enum_sizes();
+            this.reset_type_position();
         },
         methods: {
-            align_types (set_rect = false) {
-                var accumulated_height = this.base_height;
-                var accumulated_width = this.base_width;
-
-                // Move attached types
-                for (const type of this.get_types()) {
-                    accumulated_width = Math.max(accumulated_width, type.rect.width + 14 /* Padding */); 
-                    type.rect.x = this.x_pos + (accumulated_width - type.rect.width) / 2;
-                    type.rect.y = this.$props.rect.y + accumulated_height;
-                    accumulated_height += type.rect.height;
+            drag_start_addition: function(event) {
+                // Bring types to front of enum
+                for(let type in this.$props.data.types) {
+                    let type_id = this.$props.data.types[type];
+                    let index = graph_view.elements.findIndex((elem) => elem.id == type_id && elem.component_id == 2);
+                    graph_view.bring_to_front(index);
                 }
-                this.$props.rect.height = accumulated_height + 7 /* Padding */;
-                this.$props.rect.width = accumulated_width; 
             },
-
-            get_types() {
-                // Get type list from data and cache it for next usage
-                if (!this.types) this.types = this.$props.data.types.map((type_info) => graph_view.enum_types.find(t => t.id === type_info.id));
-                return this.types;
+            drag_addition: function(event) {
+                this.reset_type_position();
             },
-            on_delete() {
-                let id = this.component_id;
+            reset_enum_sizes: function() {
+                this.occupied_height = this.init_height;
+                this.occupied_width = this.init_width;
 
-                // Delete connected lines 
-                this.get_lines().forEach(line => {
-                    graph_view.delete_line(line.src_info, line.dest_info);
-                });
+                // Get all type objects connected to this enum & calculate height & max width
+                for(let type in this.$props.data.types) {
+                    // Find type index
+                    let type_id = this.$props.data.types[type];
+                    let index = graph_view.elements.findIndex((elem) => elem.id == type_id && elem.component_id == 2);
 
-                // Detach connected types 
-                for (const type of this.get_types()) {
-                    type.data.enum_id = null;
+                    // Calculate width & height
+                    let rect = window.graph_elements[index].get_rect();
+                    window.graph_elements[index].attached_enum = this.$props.index;
+                    this.occupied_height += rect.height + 7;
+                    if(this.occupied_width - 14 < rect.width) this.occupied_width = rect.width + 14; // 14 for 7 pixel padding at each side
                 }
-
-                // Finnaly remove element from screen
-                graph_view.enums = graph_view.enums.filter((enums) => enums.id !== id);
-                delete graph_view.lookup_table['e'][id];
             },
-            render_needed () {
+            reset_type_position: function() {
+                // Move types with enum & update their z-index to heigher than enum
+                let current_position_height = this.$props.data.position.y + this.init_height;
+
+                for(let type in this.$props.data.types) {
+                    let type_id = this.$props.data.types[type];
+                    let index = graph_view.elements.findIndex((elem) => elem.id == type_id && elem.component_id == 2);
+
+                    graph_view.elements[index].data.position.y = current_position_height;
+                    graph_view.elements[index].data.position.x
+                        = this.$props.data.position.x + (this.occupied_width / 2) - (window.graph_elements[index].get_rect().width / 2);
+
+                    graph_view.bring_to_front(index);
+                    current_position_height += window.graph_elements[index].get_rect().height + 7;
+                }
             }
-            
         },
         computed: {
-
-        },
-        watch: {
-            '$props.rect.x': function() {
-                this.align_types();
-            },
-            '$props.rect.y': function() {
-                this.align_types();
-            },
-            '$props.data.types': function() {
-                this.types = null;
-                this.align_types();
+            sizes: function() {
+                return {
+                    'width': this.occupied_width == -1 ? 'auto' : this.occupied_width + 'px',
+                    'height': this.occupied_height + 'px'
+                };
             }
         }
     }
 </script>
 
 <template>
-    <div class="enum" color="#8789ff" :class="{ ghost_mode }"
-        :style="transformation"
-        @pointerdown.prevent="drag_start"
-        @contextmenu.prevent="on_context"
-        @pointerup.prevent="drag_end">
-        <v-row style="padding-left: 7px; padding-right: 7px;">
-            <v-col >
+        <div class="enum" color="#8789ff"
+            :style="[transformation, sizes]"
+            @pointerdown.prevent="drag_start"
+            @contextmenu.prevent="on_context"
+            @pointerup.prevent="drag_end">
                 <v-avatar left class="enum_type darken-4 red" >E</v-avatar>
-                <div style="display: inline;">{{ name || 'N' }}</div>
-            </v-col>
-        </v-row>
-        <div class="enum_types" :style="{'height': `${rect.height - base_height}px`, 'width': `${rect.width }px`}"></div>
-    </div>
+                <div style="display: inline;">{{ name }}</div>
+        </div>
 </template>
 
 <style scoped>
+
 /* Please style this crap, with style */
 .enum_type {
     text-align: center;
     display: inline;
-      justify-content: center;
-
     padding-left: 7px;
     padding-right: 7px;
 }
@@ -178,18 +125,14 @@
 .enum {
     border: solid white 1px;
     border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    padding: 5px;
+    display: inline-block;
     position: absolute;
-    cursor: copy;
+    cursor: copy ;
     background: #8789ff;
     box-shadow: 50px 50px 50px rgba(255, 242, 94, 0); /* Removing weird trace on chrome */
 }
 
-.enum.highlight {
-
-}
 .enum.ghost_mode {
     opacity: 0.7;
 }

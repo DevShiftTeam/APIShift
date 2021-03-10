@@ -46,7 +46,6 @@
                         graph_view.$refs['item_builder'].build('item');
                         break;
                     case 'add-relation':
-                        graph_view.relation_builder(null, null, 1);
                         break;
                     case 'delete-element':
                         graph_view.cursor_state = {type: "delete"};

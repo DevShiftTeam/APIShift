@@ -78,12 +78,11 @@
                         types: [ 1, 2 ]
                     }},
 
-                    /**
                     // Groups
                     { id: 1, component_id: 4, name: 'group', data: {
-                        elements: [ 1, 2, 3 ]
-                    }},
-                    */
+                        elements: [ 1, 2, 3 ],
+                        parent: 0
+                    }}
                 ],
                 points: [], 
                 lookup_table: { 'i': [], 't': [], 'e': [], 'g': []},

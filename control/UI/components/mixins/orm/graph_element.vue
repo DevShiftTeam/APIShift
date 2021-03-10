@@ -24,7 +24,6 @@
     module.exports = {
         data() {
             return {
-                type: 'graph_element',
                 // This elements adds functionallity to drag events in needed
                 expanded_functions: {
                     'drag_start': (event) => {},
@@ -32,7 +31,8 @@
                     'drag_end': (event) => {}
                 },
                 is_dragging: false,
-                ghost_mode: false
+                ghost_mode: false,
+                init_position: { x: 0, y: 0}
             }
         },
         props: {
@@ -46,7 +46,7 @@
                 graph_view.update_graph_position();
 
                 // Get position when drag started
-                window.init_position = Object.assign({} ,this.$props.data.position);
+                this.init_position = Object.assign({} ,this.$props.data.position);
                 window.init_pointer = {
                     x: event.clientX,
                     y: event.clientY
@@ -66,8 +66,8 @@
             },
             drag (event) {
                 this.$props.data.position = {
-                    x: window.init_position.x + ((event.clientX - window.init_pointer.x) / graph_view.scale),
-                    y: window.init_position.y + ((event.clientY - window.init_pointer.y) / graph_view.scale)
+                    x: this.init_position.x + ((event.clientX - window.init_pointer.x) / graph_view.scale),
+                    y: this.init_position.y + ((event.clientY - window.init_pointer.y) / graph_view.scale)
                 };
 
                 // Call additional function if set
@@ -109,17 +109,6 @@
             move_by (dx, dy) {
                 this.$props.rect.x += dx;
                 this.$props.rect.y += dy;
-            },
-            get_group () {
-                if (!this.group) {
-                    let {type, id} = this.component_info;
-                    graph_view.groups.forEach((group) =>  {
-                        if (group.data.contained_elements.find((element) => element.id === id && element.type === type)) {
-                            this.group = { id: group.id, type: group.type };
-                        }
-                    });
-                }
-                return this.group;
             },
             // Update lines explicitilly 
             update_lines () {

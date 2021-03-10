@@ -25,13 +25,14 @@
         data () {
             return {
                 drawer: null,
-                group_container: null,
+                group_index: -1,
                 selected: false,
                 element_sizes: {}
             }
         },
         created () {
             window.graph_elements[this.$props.index] = this;
+            this.expanded_functions.drag = this.drag_addition;
         }, 
         mounted () {
             let rect = this.$el.getBoundingClientRect();
@@ -70,6 +71,10 @@
             }
         },
         methods: {
+            drag_addition: function() {
+                if(this.group_index != -1 && !(window.graph_elements[this.group_index].is_dragging))
+                    window.graph_elements[this.group_index].update_group_size();
+            },
             get_enums () {
                 if (!this.enums) this.enums = graph_view.enums.filter(e => e.data.connected.find(connected => connected.type + connected.id === this.uid));
                 return this.enums;

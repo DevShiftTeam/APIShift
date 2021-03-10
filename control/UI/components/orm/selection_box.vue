@@ -100,7 +100,7 @@
                     this.ds.x += 5;
                     graph_view.move_camera_by(5, 0);
                 }
-                if (mouse.x > graph_view.init_rect.width - 20 ) {
+                if (mouse.x > window.graph_position.width - 20 ) {
                     this.ds.x += -5;
                     graph_view.move_camera_by(-5, 0);
                 }
@@ -108,7 +108,7 @@
                     this.ds.y += 5;
                     graph_view.move_camera_by(0, 5);
                 }
-                if (mouse.y > graph_view.init_rect.height - 20 ) {
+                if (mouse.y > window.graph_position.height - 20 ) {
                     this.ds.y += -5;
                     graph_view.move_camera_by(0, -5);
                 }

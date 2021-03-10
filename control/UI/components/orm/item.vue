@@ -43,7 +43,7 @@
         },
         methods: {
             drag_addition: function() {
-                if(this.group_index != -1 && !(window.graph_elements[this.group_index].is_dragging))
+                if(this.group_index != -1)
                     window.graph_elements[this.group_index].update_group_size();
             },
             get_enums () {

@@ -140,6 +140,9 @@
                 this.$props.data.position.y = rect.y;
                 this.occupied_width = rect.x_end - rect.x;
                 this.occupied_height = rect.y_end - rect.y;
+
+                // Update parent
+                if(this.parent_group_index != -1) window.graph_elements[this.parent_group_index].update_group_size();
             },
             drag_start_addition: function(event) {
                 // Initialize all elements

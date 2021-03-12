@@ -40,11 +40,41 @@
                 width: rect.width,
                 height: rect.height
             };
+
+            let from_index = 
+                graph_view.elements.findIndex((elem) => elem.id == this.$props.data.from && (elem.component_id == 0 || elem.component_id == 1));
+            let to_index =
+                graph_view.elements.findIndex((elem) => elem.id == this.$props.data.to && (elem.component_id == 0 || elem.component_id == 1));
+
+            // Create line from item to this
+            if(this.$props.data.from !== undefined) {
+                window.graph_view.lines.push({
+                    from_index: from_index,
+                    to_index: this.$props.index,
+                    data: {
+                        is_curvy: true,
+                        is_stroked: false
+                    }
+                });
+            }
+
+            // Create line from this to item
+            if(this.$props.data.to !== undefined) {
+                window.graph_view.lines.push({
+                    from_index: this.$props.index,
+                    to_index: to_index,
+                    data: {
+                        is_curvy: true,
+                        is_stroked: false
+                    }
+                });
+            }
         },
         methods: {
             drag_addition: function() {
-                if(this.group_index != -1)
+                if(this.group_index != -1) {
                     window.graph_elements[this.group_index].update_group_size();
+                }
             },
             get_enums () {
                 if (!this.enums) this.enums = graph_view.enums.filter(e => e.data.connected.find(connected => connected.type + connected.id === this.uid));
@@ -108,7 +138,7 @@
         @pointerdown.prevent="drag_start"
         @contextmenu.prevent="on_context"
         @pointerup.prevent="drag_end">
-            <v-avatar left class="item_type darken-4 blue">I</v-avatar>
+            <v-avatar left class="item_type darken-4 purple">R</v-avatar>
             <div style="display: inline;">{{ name }}</div>
     </div>
 </template>

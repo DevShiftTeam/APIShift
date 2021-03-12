@@ -26,7 +26,7 @@ namespace APIShift\Core;
  */
 class Configurations {
     /**
-     * When true system acts as though itshould be installed, false otehrwise
+     * When true system acts as though it should be installed, false otherwise
      */
     const INSTALLED = false;
 

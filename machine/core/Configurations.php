@@ -26,9 +26,9 @@ namespace APIShift\Core;
  */
 class Configurations {
     /**
-     * When true system acts as though itshould be installed, false otehrwise
+     * When true system acts as though it should be installed, false otherwise
      */
-    const INSTALLED = true;
+    const INSTALLED = false;
 
     /**
      * Database login info
@@ -37,7 +37,7 @@ class Configurations {
     const DB_PORT = 3306;
     const DB_USER = "root";
     const DB_PASS = "";
-    const DB_NAME = "apishift";
+    const DB_NAME = "";
     const DB_TYPE = "MySQL";
 
     /**

@@ -32,7 +32,6 @@
         },
         created () {
             window.graph_elements[this.$props.index] = this;
-            this.expanded_functions.drag = this.drag_addition;
         }, 
         mounted () {
             let rect = this.$el.getBoundingClientRect();
@@ -40,6 +39,8 @@
                 width: rect.width,
                 height: rect.height
             };
+            this.expanded_functions.drag = this.drag_addition;
+            graph_view.elements_loaded++;
         },
         methods: {
             drag_addition: function() {

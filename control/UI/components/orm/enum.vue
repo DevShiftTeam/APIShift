@@ -39,12 +39,14 @@
         mounted () {
             this.init_height = this.$el.offsetHeight * 3;
             this.init_width = -1;
-
-            // Set enum size and type positions
-            this.reset_enum_sizes();
-            this.reset_type_position();
+            graph_view.elements_loaded++;
         },
         methods: {
+            all_loaded: function() {
+                // Set enum size and type positions
+                this.reset_enum_sizes();
+                this.reset_type_position();
+            },
             drag_start_addition: function(event) {
                 // Bring types to front of enum
                 for(let type in this.$props.data.types) {

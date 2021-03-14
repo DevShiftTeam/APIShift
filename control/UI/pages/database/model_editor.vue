@@ -55,6 +55,7 @@
                         to: 4,
                         type: 0
                     }},
+                    
                     // Relations
                     { id: 4, component_id: 1, name: "UserPosts", data: {
                             position: { x: 220, y: 200 },
@@ -140,7 +141,8 @@
                         return this.id; 
                     }
                 },
-                cursor_state: {type: "default"}
+                cursor_state: {type: "default"},
+                elements_loaded: 0
             }
         },
         created () {
@@ -486,6 +488,11 @@
 
                 this.$el.classList.add('cursor_' + state.type);
                 if ( state.type === 'default') document.body.classList.remove('reset-all-cursors');
+            },
+            elements_loaded: function(val) {
+                if(val == this.elements.length)
+                    for(let index in window.graph_elements)
+                        if(window.graph_elements[index].all_loaded !== undefined) window.graph_elements[index].all_loaded();
             }
         }
     }

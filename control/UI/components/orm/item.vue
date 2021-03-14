@@ -44,8 +44,10 @@
         },
         methods: {
             drag_addition: function() {
-                if(this.group_index != -1)
+                if(this.group_index != -1) {
+                    window.graph_elements[this.group_index].bring_to_front();
                     window.graph_elements[this.group_index].update_group_size();
+                }
             },
             get_enums () {
                 if (!this.enums) this.enums = graph_view.enums.filter(e => e.data.connected.find(connected => connected.type + connected.id === this.uid));

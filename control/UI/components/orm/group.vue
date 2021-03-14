@@ -86,6 +86,9 @@
 
                 for(let elem in this.element_indicies)
                     graph_view.bring_to_front(this.element_indicies[elem]);
+                    
+                for(let elem in this.group_indicies)
+                    window.graph_elements[this.group_indicies[elem]].bring_to_front();
             },
             update_group_size () {
                 let rect = {};
@@ -270,6 +273,7 @@
     pointer-events: none;
     opacity: 0.5;
     background:#aad6ff;
+    z-index: -1;
 }
 
 .group.selected {

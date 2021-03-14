@@ -40,7 +40,7 @@ class AdminList
     {
         $data_to_load = [];
         if(DatabaseManager::fetchInto("main", $data_to_load, "SELECT * FROM `admin_users`") === false)
-                Status::message(Status::ERROR, "Couldn't retrieve `databasesgit a` from DB");
+                Status::message(Status::ERROR, "Couldn't retrieve `admin_users` from DB");
         
         Status::message(Status::SUCCESS, $data_to_load);
     }
@@ -51,15 +51,17 @@ class AdminList
     public static function createAdmin()
     {
         // Name is required
-        if(!isset($_POST['name'])) Status::message(Status::ERROR, "At least specify a name");
-        if(!isset($_POST['path'])) Status::message(Status::ERROR, "At least specify a path");
-        if(!isset($_POST['icon'])) Status::message(Status::ERROR, "At least specify a icon");
-        if(!isset($_POST['parent'])) Status::message(Status::ERROR, "At least specify a parent");
+        if(!isset($_POST['username'])) Status::message(Status::ERROR, "At least specify a name");
+        if(!isset($_POST['password'])) Status::message(Status::ERROR, "At least specify a password");
 
-        // Add the session state
-        $res = DatabaseManager::query("main",
-            "INSERT INTO `admin_users` (name, path, icon, parent) VALUES (:name, :path, :icon, :parent)", $_POST);
-        if(!$res) Status::message(Status::ERROR, "Couldn't insert into the DB");
+        $add_admin = DatabaseManager::query("main",
+            "INSERT INTO `admin_users` (username, password, created) VALUES (:username, :password, NOW())",
+            [
+                "username" => $_POST['username'],
+                "password" => password_hash($_POST['password'], PASSWORD_BCRYPT)
+            ]
+        );
+        if(!$add_admin) Status::message(Status::ERROR, "Couldn't insert into the DB");
 
         // Refresh Cache to apply changes
         CacheManager::loadDefaults(true);
@@ -69,19 +71,23 @@ class AdminList
     /**
      * Edit a admin
      */
-    public static function editPage()
+    public static function editAdmin()
     {
-        if(!isset($_POST['id'])) Status::message(Status::ERROR, "Didn't set element to modify");
-        // Construct Query string
-        $qstr = [];
-        foreach($_POST as $key => $value) {
-            if($key == 'id') continue;
-            $qstr[] = $key . " = " . ":" . $key;
-        }
-        $qstr = implode(", ", $qstr);
+        if(!isset($_POST['username'])) Status::message(Status::ERROR, "Didn't set user to modify");
+        if(!isset($_POST['new_username'])) Status::message(Status::ERROR, "Didn't set user to modify");
+        if(!isset($_POST['password'])) Status::message(Status::ERROR, "Didn't set password to modify");
+
+
+        // Admin params to update
+        $admin = array(
+            "username" => $_POST['username'],
+            "new_username" => $_POST['new_username'],
+            "password" => password_hash($_POST['password'], PASSWORD_BCRYPT)
+        );
+
 
         // Update the data
-        $res = DatabaseManager::query("main", "UPDATE `admin_pages` SET " . $qstr . " WHERE id = :id", $_POST);
+        $res = DatabaseManager::query("main", "UPDATE `admin_users` SET username = :new_username, password = :password WHERE username = :username", $admin); 
         if(!$res) Status::message(Status::ERROR, "Couldn't update the DB");
 
         // Refresh Cache to apply changes
@@ -91,11 +97,11 @@ class AdminList
     /**
      * Remove a page .
      */
-    public static function removePage()
+    public static function removeAdmin()
     {
         if(!isset($_POST['id'])) Status::message(Status::ERROR, "Didn't set element to remove");
         // Remove the element
-        $res = DatabaseManager::query("main", "DELETE FROM `admin_pages` WHERE id = :id", $_POST);
+        $res = DatabaseManager::query("main", "DELETE FROM `admin_users` WHERE id = :id", $_POST);
         if(!$res) Status::message(Status::ERROR, "Couldn't update the DB");
 
         // Refresh Cache to apply changes

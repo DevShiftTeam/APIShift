@@ -101,6 +101,7 @@ use DateTime;
         self::initialize();
 
         // Load frequently used data by the system to cache
+        self::getTable('admin_users', $refresh, 0, 'id', false);
         self::getTable('session_states', $refresh);
         self::getTable('session_state_structures', $refresh, 0, 'state', false);
         self::getTable('statuses', $refresh);
@@ -118,8 +119,9 @@ use DateTime;
         self::getTable('request_authorization', $refresh);
         self::getTable('inputs', $refresh);
         self::getTable('input_values', $refresh, 0, 'id', false);
-        CacheManager::getTable('databases', $refresh, 0, 'name', false);
-        DatabaseManager::$connections_metadata = CacheManager::get('databases'); // Get all databases
+        self::getTable('databases', $refresh, 0, 'name', false);
+
+        foreach(self::get('databases') as $key => $db_data) DatabaseManager::$connections_metadata[$key] = $db_data[0];
     }
 
     /**

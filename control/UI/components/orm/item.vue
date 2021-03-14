@@ -32,7 +32,6 @@
         },
         created () {
             window.graph_elements[this.$props.index] = this;
-            this.expanded_functions.drag = this.drag_addition;
         }, 
         mounted () {
             let rect = this.$el.getBoundingClientRect();
@@ -40,8 +39,14 @@
                 width: rect.width,
                 height: rect.height
             };
+            this.expanded_functions.drag = this.drag_addition;
+            graph_view.elements_loaded++;
         },
         methods: {
+            drag_start_addition: function() {
+                if(this.group_index != -1)
+                    window.graph_elements[this.group_index].bring_to_front();
+            },
             drag_addition: function() {
                 if(this.group_index != -1)
                     window.graph_elements[this.group_index].update_group_size();

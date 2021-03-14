@@ -36,8 +36,10 @@
             this.expanded_functions.drag_start = this.drag_start_addition;
             this.expanded_functions.drag = this.drag_addition;
             this.expanded_functions.drag_end = this.drag_end_addition;
+            graph_view.elements_loaded++;
         },
         methods: {
+            all_loaded: function() { },
             drag_start_addition: function(event) {
                 // Remove from attached enum
                 if(this.attached_enum != -1) {

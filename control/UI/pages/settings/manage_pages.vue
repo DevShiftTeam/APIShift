@@ -55,32 +55,34 @@
             updatePages: function() {
                 APIShift.API.request("Admin\\Settings\\PageList", "getPagesList", {}, function (response) {
                     if(response.status == APIShift.API.status_codes.SUCCESS) {
-                        pholder.page_list = Object.assign([], response.data);
+                        let page_list = Object.assign([], response.data);
                         
-                        for(let page in pholder.page_list) {
+                        for(let page in page_list) {
                             // Render default value for missing icons
-                            if (!pholder.page_list[page].icon) pholder.page_list[page].icon = '-';
+                            if (!page_list[page].icon) page_list[page].icon = '-';
 
                             // Check if parent calculated
-                            if(pholder.page_list[page].path_calcualted !== undefined) continue;
+                            if(page_list[page].path_calcualted !== undefined) continue;
 
                             // Caclculate full path using parents
-                            let current_parrent = pholder.page_list[page].parent;
-                            pholder.page_list[page].modified_path = pholder.page_list[page].path;
+                            let current_parrent = page_list[page].parent;
+                            page_list[page].modified_path = page_list[page].path;
                             
                             while(current_parrent != 0) {
                                 // Find element - binary search preferrable
-                                let parent_page = pholder.page_list.find((page) => page.id == current_parrent);
+                                let parent_page = page_list.find((page) => page.id == current_parrent);
                                 // Add path
-                                pholder.page_list[page].modified_path = parent_page.path + "/" + pholder.page_list[page].modified_path;
+                                page_list[page].modified_path = parent_page.path + "/" + page_list[page].modified_path;
                                 // Move to next parent
                                 if(parent_page.path_calcualted !== undefined) break;
                                 current_parrent = parent_page.parent;
                             }
 
                             // Add calculated notice
-                            pholder.page_list[page].path_calcualted = true;
+                            page_list[page].path_calcualted = true;
                         }
+
+                        pholder.page_list = page_list;
                     } else {
                         APIShift.API.notify(response.data, "error");
                     }
@@ -106,8 +108,7 @@
             },
             save: function() {
                 if(this.in_edit.name === ""
-                    || this.in_edit.path === ""
-                    || this.in_edit.icon === "") {
+                    || this.in_edit.path === "") {
                     APIShift.API.notify("Please fill in valid data", 'warning');
                     return;
                 }
@@ -222,8 +223,8 @@
                                     <v-col cols="12" sm="6" md="6">
                                         <v-select
                                         v-model="in_edit.parent"
-                                        :items="[{id: 0, path: 'No Parent'}].concat(page_list)"
-                                        item-text="path"
+                                        :items="[{id: 0, modified_path: 'No Parent'}].concat(page_list)"
+                                        item-text="modified_path"
                                         item-value="id"
                                         label="Parent"
                                         required

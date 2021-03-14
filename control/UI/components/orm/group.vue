@@ -53,6 +53,15 @@
         },
         methods: {
             all_loaded: function() {
+                // Determine new calculated rect & bounds
+                this.update_indicies();
+                this.update_group_size();
+                if(this.parent_group_index != -1) window.graph_elements[this.parent_group_index].update_group_size();
+            },
+            update_indicies: function() {
+                this.element_indicies = [];
+                this.group_indicies = [];
+
                 // Get all element indicies
                 for(let elem in this.$props.data.elements) {
                     let item_id = this.$props.data.elements[elem];
@@ -71,10 +80,6 @@
                     window.graph_elements[grp_index].parent_group_index = this.$props.index;
                     this.group_indicies.push(grp_index);
                 }
-
-                // Determine new calculated rect & bounds
-                this.update_group_size();
-                if(this.parent_group_index != -1) window.graph_elements[this.parent_group_index].update_group_size();
             },
             bring_to_front: function() {
                 graph_view.bring_to_front(this.$props.index);

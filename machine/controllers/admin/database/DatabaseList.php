@@ -40,7 +40,7 @@ class DatabaseList
     {
         $data_to_load = [];
         if(DatabaseManager::fetchInto("main", $data_to_load, "SELECT * FROM `databases`") === false)
-                Status::message(Status::ERROR, "Couldn't retrieve `databasesgit a` from DB");
+                Status::message(Status::ERROR, "Couldn't retrieve `databases` from DB");
         
         Status::message(Status::SUCCESS, $data_to_load);
     }

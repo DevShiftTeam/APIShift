@@ -120,7 +120,8 @@ use DateTime;
         self::getTable('inputs', $refresh);
         self::getTable('input_values', $refresh, 0, 'id', false);
         self::getTable('databases', $refresh, 0, 'name', false);
-        DatabaseManager::$connections_metadata = self::get('databases'); // Get all databases
+
+        foreach(self::get('databases') as $key => $db_data) DatabaseManager::$connections_metadata[$key] = $db_data[0];
     }
 
     /**

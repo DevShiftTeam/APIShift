@@ -107,7 +107,7 @@
                 });
 
                 this.is_creating = false;
-                this.edit_dialog = false;
+                this.edit_dialog = false;   
                 return;
             },
             editDatabase: function(database) {

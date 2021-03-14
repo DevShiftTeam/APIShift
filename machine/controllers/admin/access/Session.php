@@ -47,7 +47,7 @@ class Session {
             $res[$counter] = $val;
             $res[$counter]['id'] = $key;
             $res[$counter]['task_name'] = $tasks[$val['auth_task']]['name'];
-            $res[$counter]['input_name'] = $inputs[$val['auth_input']]['name'];
+            if($val['auth_input'] != "") $res[$counter]['input_name'] = $inputs[$val['auth_input']]['name'];
             foreach($res[$counter] as &$cell) if($cell == null) $cell = "";
             $counter++;
         }

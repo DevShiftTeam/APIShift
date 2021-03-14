@@ -546,7 +546,7 @@
                                 :name="element.name"
                                 :data="element.data">
                             </component>
-                        
+
                             <component
                                 v-for="(line, index) in lines"
                                 :key="index"
@@ -556,7 +556,6 @@
                                 :data="line.data">
                             </component>
                         </div>
-
                         <component ref="s_box" 
                             :is="selection_comp"
                             :uid="'s0'"

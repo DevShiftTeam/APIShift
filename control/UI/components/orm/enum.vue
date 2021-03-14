@@ -37,12 +37,12 @@
             this.expanded_functions.drag = this.drag_addition;
         }, 
         mounted () {
-            this.init_height = this.$el.offsetHeight * 3;
-            this.init_width = -1;
             graph_view.elements_loaded++;
         },
         methods: {
             all_loaded: function() {
+                this.init_height = this.$el.offsetHeight * 3;
+                this.init_width = -1;
                 // Set enum size and type positions
                 this.reset_enum_sizes();
                 this.reset_type_position();

@@ -57,7 +57,7 @@ module.exports = {
 </script>
 
 <template>
-    <svg :style="{ 'z-index': src_ref.data.z_index > dest_ref.data.z_index ? dest_ref.data.z_index - 1 : src_ref.data.z_index - 1}" style="position: absolute; overflow: visible" width="1px" height="1px">
+    <svg :style="{ 'z-index': src_ref.data.z_index > dest_ref.data.z_index ? dest_ref.data.z_index - 1 : src_ref.data.z_index - 1}" style="position: absolute; overflow: visible; width: 1px; height: 1px;">
         <defs>
             <marker id="black-arrow" markerWidth="5" markerHeight="5" refX="0" refY="5"
             viewBox="0 0 10 10" orient="auto-start-reverse" style="opacity: 0.85">

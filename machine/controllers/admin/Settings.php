@@ -126,7 +126,7 @@ class Settings {
 
         }
         
-        Status::message(Status::SUCCESS, "Exported succesfully");
+        Status::message(Status::SUCCESS, $res);
     }
 
     /**

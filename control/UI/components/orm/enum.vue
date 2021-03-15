@@ -79,6 +79,8 @@
                 // Move types with enum & update their z-index to heigher than enum
                 let current_position_height = this.$props.data.position.y + this.init_height;
 
+                graph_view.bring_to_front(this.$props.index);
+                
                 for(let type in this.$props.data.types) {
                     let type_id = this.$props.data.types[type];
                     let index = graph_view.elements.findIndex((elem) => elem.id == type_id && elem.component_id == 2);

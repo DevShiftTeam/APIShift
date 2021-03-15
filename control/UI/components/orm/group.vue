@@ -28,8 +28,8 @@
                 init_width: 0,
                 occupied_width: 0,
                 occupied_height: 0,
-                element_indicies: [],
-                group_indicies: [],
+                element_indices: [],
+                group_indices: [],
                 parent_group_index: -1,
                 selected: false
             }
@@ -54,48 +54,57 @@
         methods: {
             all_loaded: function() {
                 // Determine new calculated rect & bounds
-                this.update_indicies();
+                this.update_indices();
                 this.update_group_size();
                 if(this.parent_group_index != -1) window.graph_elements[this.parent_group_index].update_group_size();
-            },
-            update_indicies: function() {
-                this.element_indicies = [];
-                this.group_indicies = [];
 
-                // Get all element indicies
+                this.bring_to_front();
+            },
+            update_indices: function() {
+                this.element_indices = [];
+                this.group_indices = [];
+
+                // Get all element indices
                 for(let elem in this.$props.data.elements) {
                     let item_id = this.$props.data.elements[elem];
                     let index = graph_view.elements.findIndex(el => el.id === item_id && (el.component_id == 1 || el.component_id == 0));
                     if(index == -1) continue;
                     window.graph_elements[index].group_index = this.$props.index;
-                    this.element_indicies.push(index);
+                    this.element_indices.push(index);
                     graph_view.bring_to_front(index);
                 }
 
-                // Get all group indicies
+                // Get all group indices
                 for(let grp_index in graph_view.elements) {
                     if(graph_view.elements[grp_index].component_id != 4 || graph_view.elements[grp_index].data.parent != this.$props.id)
                         continue;
                     window.graph_elements[grp_index].bring_to_front();
                     window.graph_elements[grp_index].parent_group_index = this.$props.index;
-                    this.group_indicies.push(grp_index);
+                    this.group_indices.push(grp_index);
                 }
             },
-            bring_to_front: function() {
+            bring_to_front: function(ignore_parent = false) {
+                // If father present then call only the father's function
+                if(this.parent_group_index != -1 && !ignore_parent)
+                {
+                    window.graph_elements[this.parent_group_index].bring_to_front();
+                    return;
+                }
+
                 graph_view.bring_to_front(this.$props.index);
 
-                for(let elem in this.element_indicies)
-                    graph_view.bring_to_front(this.element_indicies[elem]);
+                for(let elem in this.element_indices)
+                    graph_view.bring_to_front(this.element_indices[elem]);
                     
-                for(let elem in this.group_indicies)
-                    window.graph_elements[this.group_indicies[elem]].bring_to_front();
+                for(let elem in this.group_indices)
+                    window.graph_elements[this.group_indices[elem]].bring_to_front(true);
             },
             update_group_size () {
                 let rect = {};
 
                 // Calculate size via elements
-                for(let elem in this.element_indicies) {
-                    let index = this.element_indicies[elem];
+                for(let elem in this.element_indices) {
+                    let index = this.element_indices[elem];
 
                     // Get first rect
                     let temp_rect = window.graph_elements[index].get_rect();
@@ -120,8 +129,8 @@
                 }
 
                 // Calculate size via sub_groups
-                for(let grp in this.group_indicies) {
-                    let index = this.group_indicies[grp];
+                for(let grp in this.group_indices) {
+                    let index = this.group_indices[grp];
 
                     // Get first rect
                     let temp_rect = window.graph_elements[index].get_rect();
@@ -155,16 +164,18 @@
                 if(this.parent_group_index != -1) window.graph_elements[this.parent_group_index].update_group_size();
             },
             drag_start_addition: function(event) {
+                if(this.parent_group_index != -1) window.graph_elements[this.parent_group_index].bring_to_front();
+
                 // Initialize all elements
-                for(let elem in this.element_indicies) {
-                    let index = this.element_indicies[elem];
+                for(let elem in this.element_indices) {
+                    let index = this.element_indices[elem];
                     graph_view.bring_to_front(index);
                     window.graph_elements[index].init_position = Object.assign({}, window.graph_elements[index].data.position);
                 }
 
                 // Initialize all sub-groups
-                for(let sub_group in this.group_indicies)
-                    window.graph_elements[this.group_indicies[sub_group]].drag_start(event);
+                for(let sub_group in this.group_indices)
+                    window.graph_elements[this.group_indices[sub_group]].drag_start(event);
                 
                 graph_view.drag_handler = this.drag;
             },
@@ -173,12 +184,12 @@
                     window.graph_elements[this.parent_group_index].update_group_size();
 
                 // Drag all elements
-                for(let elem in this.element_indicies)
-                    window.graph_elements[this.element_indicies[elem]].drag(event);
+                for(let elem in this.element_indices)
+                    window.graph_elements[this.element_indices[elem]].drag(event);
 
                 // Drag all sub groups
-                for(let sub_group in this.group_indicies)
-                    window.graph_elements[this.group_indicies[sub_group]].drag(event);
+                for(let sub_group in this.group_indices)
+                    window.graph_elements[this.group_indices[sub_group]].drag(event);
             },
             get_rect: function() {
                 return {

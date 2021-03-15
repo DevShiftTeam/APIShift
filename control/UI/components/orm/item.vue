@@ -39,6 +39,7 @@
                 width: rect.width,
                 height: rect.height
             };
+            this.expanded_functions.drag_start = this.drag_start_addition;
             this.expanded_functions.drag = this.drag_addition;
             graph_view.elements_loaded++;
         },

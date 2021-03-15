@@ -33,7 +33,8 @@
                     APIShift.API.getComponent('orm/relation', true),
                     APIShift.API.getComponent('orm/enum_type', true),
                     APIShift.API.getComponent('orm/enum', true),
-                    APIShift.API.getComponent('orm/group', true)
+                    APIShift.API.getComponent('orm/group', true),
+                    APIShift.API.getComponent('orm/point', true)
 
                 ],
                 line_comp: APIShift.API.getComponent('orm/line', true),
@@ -51,7 +52,6 @@
                     },
                     { id: 3, component_id: 1, name: "Testers", data: {
                         position: { x: 20, y: 0 },
-                        from: 1,
                         to: 4,
                         type: 0
                     }},
@@ -142,7 +142,8 @@
                     }
                 },
                 cursor_state: {type: "default"},
-                elements_loaded: 0
+                elements_loaded: 0,
+                first_load: false
             }
         },
         created () {
@@ -490,9 +491,12 @@
                 if ( state.type === 'default') document.body.classList.remove('reset-all-cursors');
             },
             elements_loaded: function(val) {
-                if(val == this.elements.length)
+                if(val == this.elements.length && !this.first_load)
+                {
                     for(let index in window.graph_elements)
                         if(window.graph_elements[index].all_loaded !== undefined) window.graph_elements[index].all_loaded();
+                    this.first_load = true;
+                }
             }
         }
     }

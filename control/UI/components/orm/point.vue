@@ -23,50 +23,72 @@
     module.exports = {
         mixins: [APIShift.API.getMixin('orm/graph_element')],
         props: {
-            name: String,
         },
         data () {
             return {
                 drawer: null,
+                hittable_hovered: -1
             }
         },
         created () {
-            const self = this;
-            var id = parseInt(this.uid.substring(1));
-            this.expanded_functions.drag_start = (event) => {
-                let enum_id = graph_view.enum_types.find(e => {return e.id === id});
-                const parent_enum = graph_view.$refs['e'+enum_id.enum_id];
-
-                if (parent_enum) {
-                    parent_enum.detach_type(id); 
-                }
-            };
-            this.expanded_functions.drag = (event) => {
-                const enum_elements = graph_view.$el.querySelectorAll('.enum');
-                for (const enum_el of enum_elements) {
-                    // TODO: Hightlight enum
-                    // if (graph_view.hittest(self.uid, enum_el.ref)) {
-                    // }
-                }
-            };
-            this.expanded_functions.drag_end = (event) => {
-                const enum_elements = graph_view.$el.querySelectorAll('.enum');
-
-                for (const enum_el of enum_elements) {
-                    if (graph_view.hittest(self.uid, enum_el.ref)) {
-                        let enum_instance = graph_view.$refs[enum_el.ref];
-                        enum_instance.attach_type(id);  
-                        break;
-                    }
-                }
-            };
+            window.graph_elements[this.$props.index] = this;
         }, 
         mounted () {
+            let rect = this.$el.getBoundingClientRect();
+            this.element_sizes = {
+                width: rect.width,
+                height: rect.height
+            };
+            
+            this.expanded_functions.drag_end = (event) => {
+                let element_found = -1, z_index = 0;
+                
+                for(let index in [...graph_view.elements.keys()]) {
+                    let cmp_id = graph_view.elements[index].component_id;
+                    // Skip non-item nor relations
+                    if(window.graph_elements[index] === undefined || (cmp_id != 0 && cmp_id != 1 && cmp_id != 4))
+                        continue;
+                    
+                    // Check collisions
+                    if(graph_view.collision_check(this.get_rect(), window.graph_elements[index].get_rect())
+                    && window.graph_elements[index].data.z_index > z_index) {
+                        z_index = window.graph_elements[index].data.z_index;
 
+                        // Handle groug collision - a special case
+                        if (graph_view.elements[index].component_id === 4 ) {
+                                let group_rect = {
+                                    x: graph_view.elements[index].data.position.x,
+                                    y: graph_view.elements[index].data.position.y + graph_elements[index].get_rect().height - graph_elements[index].init_height,
+                                    height: graph_elements[index].init_height,
+                                    width: graph_elements[index].get_rect().width
+                                };
+                                if(graph_view.collision_check(this.get_rect(), group_rect)) console.log('Group collision');;
+                        } else 
+                            element_found = index;
+                    }
+                }
+
+                this.hittable_hovered = element_found;
+            };
+
+            graph_view.elements_loaded++;
         },
         methods: {
-            render_needed () {
+            
+        },
+        computed: {
+            from_position: function() {
+                return {
+                    x: this.$props.data.position.x + this.element_sizes.width,
+                    y: this.$props.data.position.y + this.element_sizes.height / 2
+                };
             },
+            to_position: function() {
+                return {
+                    x: this.$props.data.position.x,
+                    y: this.$props.data.position.y + this.element_sizes.height / 2
+                };
+            }
         }
     }
 </script>
@@ -83,13 +105,15 @@
 /* Please style this crap, with style */
 
 .point {
-    border: solid white 1px;
+    /* border: solid black 1px; */
+    height: 10px;
+    width: 10px;
     border-radius: 10px;
     padding: 5px;
     display: inline-block;
     position: absolute;
     cursor: copy ;
-    background: #8789ff;
+    background: gray;
     box-shadow: 50px 50px 50px rgba(255, 242, 94, 0); /* Removing weird trace on chrome */
 }
 

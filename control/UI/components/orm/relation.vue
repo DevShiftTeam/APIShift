@@ -27,7 +27,8 @@
                 drawer: null,
                 group_index: -1,
                 selected: false,
-                element_sizes: {}
+                element_sizes: {},
+                point_indices: []
             }
         },
         created () {
@@ -45,38 +46,62 @@
         },
         methods: {
             all_loaded: function() {
-                let from_index = 
-                    graph_view.elements.findIndex((elem) => elem.id == this.$props.data.from && (elem.component_id == 0 || elem.component_id == 1));
-                let to_index =
-                    graph_view.elements.findIndex((elem) => elem.id == this.$props.data.to && (elem.component_id == 0 || elem.component_id == 1));
+                // Step 1: Determine from and to & fill missing points
+                let from_index = this.$props.data.from !== undefined ?
+                    graph_view.elements.findIndex((elem) => elem.id == this.$props.data.from && (elem.component_id == 0 || elem.component_id == 1))
+                    :
+                    this.create_point(); // Create & attach point near relation
+                
+                let to_index = this.$props.data.to !== undefined ?
+                    graph_view.elements.findIndex((elem) => elem.id == this.$props.data.to && (elem.component_id == 0 || elem.component_id == 1))
+                    :
+                    this.create_point(false); // Create & attach point near relation
+                
+                // Step 2: Create lines
+                window.graph_view.lines.push({
+                    from_index: from_index,
+                    to_index: this.$props.index,
+                    data: {
+                        is_curvy: true,
+                        is_stroked: false
+                    }
+                });
+                
+                window.graph_view.lines.push({
+                    from_index: this.$props.index,
+                    to_index: to_index,
+                    data: {
+                        is_curvy: true,
+                        is_stroked: false
+                    }
+                });
+                
+                
+            },
+            create_point: function(is_left = true) {
+                let my_rect = this.get_rect();
 
-                // Create line from item to this
-                if(this.$props.data.from !== undefined) {
-                    window.graph_view.lines.push({
-                        from_index: from_index,
-                        to_index: this.$props.index,
-                        data: {
-                            is_curvy: true,
-                            is_stroked: false
+                graph_view.elements.push(
+                    { id: 0, component_id: 5, name: '', data:
+                        {
+                            position: {
+                                x: is_left ? my_rect.x - 20 : my_rect.x + my_rect.width + 20,
+                                y: my_rect.y + my_rect.height / 2
+                            },
+                            z_index: graph_view.elements.length,
+                            parent_relation: this.$props.index
                         }
-                    });
-                }
-
-                // Create line from this to item
-                if(this.$props.data.to !== undefined) {
-                    window.graph_view.lines.push({
-                        from_index: this.$props.index,
-                        to_index: to_index,
-                        data: {
-                            is_curvy: true,
-                            is_stroked: false
-                        }
-                    });
-                }
+                    }
+                );
+                let ret_index = graph_view.elements.length - 1;
+                this.point_indices.push(ret_index);
+                return ret_index;
             },
             drag_start_addition: function() {
-                if(this.group_index != -1)
+                if(this.group_index != -1) {
                     window.graph_elements[this.group_index].bring_to_front();
+                    graph_view.bring_to_front(this.$props.index);
+                }
             },
             drag_addition: function() {
                 if(this.group_index != -1)

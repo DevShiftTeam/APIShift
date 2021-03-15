@@ -281,6 +281,8 @@
     position: absolute;
 }
 .group_container {
+    height: 0;
+    width: 0;
     pointer-events: none;
     opacity: 0.5;
     background:#aad6ff;

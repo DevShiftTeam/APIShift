@@ -57,6 +57,8 @@
                 this.update_indicies();
                 this.update_group_size();
                 if(this.parent_group_index != -1) window.graph_elements[this.parent_group_index].update_group_size();
+
+                this.bring_to_front();
             },
             update_indicies: function() {
                 this.element_indicies = [];
@@ -81,14 +83,21 @@
                     this.group_indicies.push(grp_index);
                 }
             },
-            bring_to_front: function() {
+            bring_to_front: function(ignore_parent = false) {
+                // If father present then call only the father's function
+                if(this.parent_group_index != -1 && !ignore_parent)
+                {
+                    window.graph_elements[this.parent_group_index].bring_to_front();
+                    return;
+                }
+
                 graph_view.bring_to_front(this.$props.index);
 
                 for(let elem in this.element_indicies)
                     graph_view.bring_to_front(this.element_indicies[elem]);
                     
                 for(let elem in this.group_indicies)
-                    window.graph_elements[this.group_indicies[elem]].bring_to_front();
+                    window.graph_elements[this.group_indicies[elem]].bring_to_front(true);
             },
             update_group_size () {
                 let rect = {};
@@ -155,6 +164,8 @@
                 if(this.parent_group_index != -1) window.graph_elements[this.parent_group_index].update_group_size();
             },
             drag_start_addition: function(event) {
+                if(this.parent_group_index != -1) window.graph_elements[this.parent_group_index].bring_to_front();
+
                 // Initialize all elements
                 for(let elem in this.element_indicies) {
                     let index = this.element_indicies[elem];

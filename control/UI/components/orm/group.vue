@@ -223,6 +223,18 @@
             },
         },
         computed: {
+            from_position: function() {
+                return {
+                    x: this.$props.data.position.x + this.occupied_width,
+                    y: this.$props.data.position.y + (this.occupied_height + this.init_height) / 2
+                };
+            },
+            to_position: function() {
+                return {
+                    x: this.$props.data.position.x,
+                    y: this.$props.data.position.y + (this.occupied_height + this.init_height) / 2
+                };
+            },
             sizes () {
                 return {
                     width: this.occupied_width + 'px',

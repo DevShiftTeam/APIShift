@@ -50,13 +50,13 @@
                             position: { x: 120, y: 50 }
                         }
                     },
-                    { id: 3, component_id: 1, name: "Testers", data: {
-                        position: { x: 20, y: 0 },
-                        to: 4,
-                        type: 0
-                    }},
                     
                     // Relations
+                    { id: 3, component_id: 1, name: "Testers", data: {
+                        position: { x: 20, y: 0 },
+                        to: 5,
+                        type: 0
+                    }},
                     { id: 4, component_id: 1, name: "UserPosts", data: {
                             position: { x: 220, y: 200 },
                             from: 1,
@@ -83,13 +83,13 @@
                     }},
 
                     // Groups
-                    { id: 1, component_id: 4, name: 'group', data: {
+                    { id: 5, component_id: 4, name: 'group', data: {
                         elements: [ 1, 2, 3 ],
                         parent: 0
                     }},
-                    { id: 2, component_id: 4, name: 'group', data: {
+                    { id: 6, component_id: 4, name: 'group', data: {
                         elements: [ 4 ],
-                        parent: 1
+                        parent: 5
                     }}
                 ],
                 points: [], 
@@ -554,6 +554,7 @@
                             <component
                                 v-for="(line, index) in lines"
                                 :key="index"
+                                :index="index"
                                 :is="line_comp"
                                 :src_ref="window.graph_elements[line.from_index]"
                                 :dest_ref="window.graph_elements[line.to_index]"

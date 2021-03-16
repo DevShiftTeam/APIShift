@@ -28,7 +28,8 @@
                 group_index: -1,
                 selected: false,
                 element_sizes: {},
-                point_indices: []
+                point_indices: [],
+                line_indices: []
             }
         },
         created () {
@@ -48,12 +49,12 @@
             all_loaded: function() {
                 // Step 1: Determine from and to & fill missing points
                 let from_index = this.$props.data.from !== undefined ?
-                    graph_view.elements.findIndex((elem) => elem.id == this.$props.data.from && (elem.component_id == 0 || elem.component_id == 1))
+                    graph_view.elements.findIndex((elem) => elem.id == this.$props.data.from && (elem.component_id == 0 || elem.component_id == 1 || elem.component_id == 4))
                     :
                     this.create_point(); // Create & attach point near relation
                 
                 let to_index = this.$props.data.to !== undefined ?
-                    graph_view.elements.findIndex((elem) => elem.id == this.$props.data.to && (elem.component_id == 0 || elem.component_id == 1))
+                    graph_view.elements.findIndex((elem) => elem.id == this.$props.data.to && (elem.component_id == 0 || elem.component_id == 1 || elem.component_id == 4))
                     :
                     this.create_point(false); // Create & attach point near relation
                 
@@ -63,36 +64,50 @@
                     to_index: this.$props.index,
                     data: {
                         is_curvy: true,
-                        is_stroked: false
+                        is_stroked: false,
+                        is_rel_source: false
                     }
                 });
+                this.line_indices.push(window.graph_view.lines.length - 1);
                 
                 window.graph_view.lines.push({
                     from_index: this.$props.index,
                     to_index: to_index,
                     data: {
                         is_curvy: true,
-                        is_stroked: false
+                        is_stroked: false,
+                        is_rel_source: true
                     }
                 });
-                
-                
+                this.line_indices.push(window.graph_view.lines.length - 1);
             },
-            create_point: function(is_left = true) {
+            create_point: function(is_left = true, position = null) {
                 let my_rect = this.get_rect();
 
-                graph_view.elements.push(
-                    { id: 0, component_id: 5, name: '', data:
-                        {
-                            position: {
-                                x: is_left ? my_rect.x - 20 : my_rect.x + my_rect.width + 20,
-                                y: my_rect.y + my_rect.height / 2
-                            },
-                            z_index: graph_view.elements.length,
-                            parent_relation: this.$props.index
+                if(position == null) {
+                    graph_view.elements.push(
+                        { id: 0, component_id: 5, name: '', data:
+                            {
+                                position: {
+                                    x: is_left ? my_rect.x - 20 : my_rect.x + my_rect.width + 20,
+                                    y: my_rect.y + my_rect.height / 2
+                                },
+                                z_index: graph_view.elements.length,
+                                parent_relation: this.$props.index
+                            }
                         }
-                    }
-                );
+                    );
+                } else {
+                    graph_view.elements.push(
+                        { id: 0, component_id: 5, name: '', data:
+                            {
+                                position: position,
+                                z_index: graph_view.elements.length,
+                                parent_relation: this.$props.index
+                            }
+                        }
+                    );
+                }
                 let ret_index = graph_view.elements.length - 1;
                 this.point_indices.push(ret_index);
                 return ret_index;

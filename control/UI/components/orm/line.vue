@@ -31,12 +31,68 @@ module.exports = {
     src_ref: Object,
     dest_ref: Object,
     data: Object,
+    index: Number
   },
   data() {
-    return {};
+    return {
+    }
+  },
+  created () {
   },
   methods: {
-    pointer_down() {},
+    pointer_down(event) {
+      // Find point
+      let obj_holder = this.src_ref;
+
+      if(obj_holder.im_a_point === undefined) {
+          obj_holder = this.dest_ref;
+
+          if(obj_holder.im_a_point === undefined) {
+            let graph_center_rect = graph_view.$el.querySelector('#graph_center').getBoundingClientRect();
+
+            // If a relation then create a point
+            if(this.$props.data.is_rel_source !== undefined) {
+              let rel_holder = this.data.is_rel_source ? this.src_ref : this.dest_ref;
+              graph_view.elements.push({
+                id: 0, name: '', component_id: 5, data: {
+                  position: {
+                      x: (event.clientX - graph_center_rect.x - 5 /* Point height / 2 */) / graph_view.scale,
+                      y: (event.clientY - graph_center_rect.y - 5 /* Point width / 2 */) / graph_view.scale
+                  },
+                  z_index: graph_view.elements.length,
+                  parent_relation: rel_holder.index
+                }
+              });
+
+              // Scheduling task to the end of event-loop in order to prevent race conditions
+              let self = this;
+              setTimeout(() => {
+                if(self.data.is_rel_source) {
+                  rel_holder.data.to = undefined;
+                  graph_view.lines[this.index].to_index = graph_view.elements.length - 1;
+                }
+                else {
+                  rel_holder.data.from = undefined;
+                  graph_view.lines[this.index].from_index = graph_view.elements.length - 1;
+                }
+                
+                window.graph_elements[graph_view.elements.length - 1].drag_start(event);
+              });
+            }
+            else {
+              // Handle enum
+            }
+
+            return;
+          }
+      }
+
+      let graph_center_rect = graph_view.$el.querySelector('#graph_center').getBoundingClientRect();
+
+      obj_holder.data.position.x = (event.clientX - graph_center_rect.x) / graph_view.scale - obj_holder.get_rect().width / 2;
+      obj_holder.data.position.y = (event.clientY - graph_center_rect.y) / graph_view.scale - obj_holder.get_rect().height / 2;
+      obj_holder.drag_start(event);
+    },
   },
   computed: {
     // Just for testing
@@ -57,7 +113,7 @@ module.exports = {
 </script>
 
 <template>
-    <svg :style="{ 'z-index': src_ref.data.z_index > dest_ref.data.z_index ? dest_ref.data.z_index - 1 : src_ref.data.z_index - 1}" style="position: absolute; overflow: visible; width: 1px; height: 1px;">
+    <svg :style="{ 'z-index': this.src_ref.data.z_index > this.dest_ref.data.z_index ? this.dest_ref.data.z_index - 1 : this.src_ref.data.z_index - 1}" style="position: absolute; overflow: visible; width: 1px; height: 1px;">
         <defs>
             <marker id="black-arrow" markerWidth="5" markerHeight="5" refX="0" refY="5"
             viewBox="0 0 10 10" orient="auto-start-reverse" style="opacity: 0.85">
@@ -74,7 +130,7 @@ module.exports = {
             </marker>
         </defs> 
         <g>
-            <path @pointerdown="pointer_down" 
+            <path @pointerdown.prevent="pointer_down" 
                 :style="{ 'stroke-dasharray': `${this.$props.data.is_stroked ? '11,5' : 'none'}`}"
                 :d="path_data"
                 >

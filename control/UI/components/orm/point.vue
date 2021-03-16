@@ -27,7 +27,8 @@
         data () {
             return {
                 drawer: null,
-                hittable_hovered: -1
+                element_hovered: -1,
+                im_a_point: true
             }
         },
         created () {
@@ -41,7 +42,7 @@
             };
             
             this.expanded_functions.drag_end = (event) => {
-                let element_found = -1, z_index = 0;
+                let target_element = -1, z_index = 0;
                 
                 for(let index in [...graph_view.elements.keys()]) {
                     let cmp_id = graph_view.elements[index].component_id;
@@ -55,20 +56,20 @@
                         z_index = window.graph_elements[index].data.z_index;
 
                         // Handle groug collision - a special case
-                        if (graph_view.elements[index].component_id === 4 ) {
+                        if (graph_view.elements[index].component_id === 4) {
                                 let group_rect = {
                                     x: graph_view.elements[index].data.position.x,
                                     y: graph_view.elements[index].data.position.y + graph_elements[index].get_rect().height - graph_elements[index].init_height,
                                     height: graph_elements[index].init_height,
                                     width: graph_elements[index].get_rect().width
                                 };
-                                if(graph_view.collision_check(this.get_rect(), group_rect)) console.log('Group collision');;
+                                if(graph_view.collision_check(this.get_rect(), group_rect)) target_element = index;
                         } else 
-                            element_found = index;
+                            target_element = index;
                     }
                 }
 
-                this.hittable_hovered = element_found;
+                this.element_hovered = target_element;
             };
 
             graph_view.elements_loaded++;

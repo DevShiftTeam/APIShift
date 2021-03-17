@@ -28,13 +28,15 @@
                 occupied_width: 0,
                 occupied_height: 0,
                 init_height: 0,
-                init_width: 0
+                init_width: 0,
+                line_indices: []
             }
         },
         created () {
             window.graph_elements[this.$props.index] = this;
             this.expanded_functions.drag_start = this.drag_start_addition;
             this.expanded_functions.drag = this.drag_addition;
+            this.expanded_functions.drag_end = this.drag_end_addition;
         }, 
         mounted () {
             graph_view.elements_loaded++;
@@ -57,6 +59,27 @@
             },
             drag_addition: function(event) {
                 this.reset_type_position();
+            },
+            drag_end_addition: function (event) {
+                let target_element = -1, z_index = 0;
+
+                for(let index in [...graph_view.elements.keys()]) {
+                    let cmp_id = graph_view.elements[index].component_id;
+                    // Skip non-item nor relations & self or undefined
+                    if(window.graph_elements[index] === undefined || (cmp_id != 0 && cmp_id != 1 && cmp_id != 4))
+                        continue;
+                    
+                    // Check collisions
+                    if (window.graph_elements[index].data.z_index > z_index && graph_view.collision_check(this.get_rect(), window.graph_elements[index].get_rect())) {
+                        target_element = index;
+                        z_index = graph_view.elements[index].data.z_index;
+                    }
+                }
+
+
+                if (target_element !== -1) {
+                    this.create_line(target_element);
+                }
             },
             reset_enum_sizes: function() {
                 this.occupied_height = this.init_height;
@@ -92,6 +115,18 @@
                     graph_view.bring_to_front(index);
                     current_position_height += window.graph_elements[index].get_rect().height + 7;
                 }
+            },
+            create_line (element_index) {
+                window.graph_view.lines.push({
+                    from_index: this.$props.index,
+                    to_index: to_index,
+                    data: {
+                        is_curvy: false,
+                        is_stroked: true,
+                        enum_parent: this.$props.index
+                    }
+                });
+                this.line_indices.push(window.graph_view.lines.length - 1);
             }
         },
         computed: {
@@ -100,6 +135,9 @@
                     'width': this.occupied_width == -1 ? 'auto' : this.occupied_width + 'px',
                     'height': this.occupied_height + 'px'
                 };
+            },
+            line_indices: function () {
+                
             }
         }
     }

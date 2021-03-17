@@ -46,16 +46,15 @@
             graph_view.elements_loaded++;
         },
         methods: {
+            drag_start_addition: function (event) {
+
+            },
             drag_end_addition: function(event) {
                 let target_element = -1, z_index = 0;
 
-                // Initi element_hovered
-                this.element_hovered = -1;
-
-
                 for(let index in [...graph_view.elements.keys()]) {
                     let cmp_id = graph_view.elements[index].component_id;
-                    // Skip non-item nor relations
+                    // Skip non-item nor relations & self or undefined
                     if(window.graph_elements[index] === undefined || (cmp_id != 0 && cmp_id != 1 && cmp_id != 4))
                         continue;
                     
@@ -76,21 +75,22 @@
                         z_index = graph_view.elements[index].data.z_index;
                     }
                 }
-
-                this.element_hovered = target_element;
+                
+                // Drop on a connectable item 
+                if (target_element !== -1) window.graph_elements[this.$props.data.rel_index].connect_to_line(this.$props.data.is_left, target_element);
             }
         },
         computed: {
             from_position: function() {
                 return {
-                    x: this.$props.data.position.x + this.element_sizes.width,
-                    y: this.$props.data.position.y + this.element_sizes.height / 2
+                    x: this.$props.data.position.x + this.get_rect().width,
+                    y: this.$props.data.position.y + this.get_rect().height / 2
                 };
             },
             to_position: function() {
                 return {
                     x: this.$props.data.position.x,
-                    y: this.$props.data.position.y + this.element_sizes.height / 2
+                    y: this.$props.data.position.y + this.get_rect().height / 2
                 };
             }
         }

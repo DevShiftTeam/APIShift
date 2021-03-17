@@ -92,7 +92,6 @@
                         parent: 5
                     }}
                 ],
-                points: [], 
                 lookup_table: { 'i': [], 't': [], 'e': [], 'g': []},
                 lines: [
 
@@ -543,6 +542,7 @@
                             <!-- Elements -->
                             <component
                                 v-for="(element, index) in elements"
+                                v-show="!element.is_deleted"
                                 :is="components[element.component_id]"
                                 :key="index"
                                 :index="index"

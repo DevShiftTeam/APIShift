@@ -29,7 +29,8 @@
                 selected: false,
                 element_sizes: {},
                 point_indices: [],
-                line_indices: []
+                from_line_index: -1,
+                to_line_index: -1
             }
         },
         created () {
@@ -68,7 +69,7 @@
                         is_rel_source: false
                     }
                 });
-                this.line_indices.push(window.graph_view.lines.length - 1);
+                this.from_line_index = window.graph_view.lines.length - 1;
                 
                 window.graph_view.lines.push({
                     from_index: this.$props.index,
@@ -79,38 +80,44 @@
                         is_rel_source: true
                     }
                 });
-                this.line_indices.push(window.graph_view.lines.length - 1);
+                this.to_line_index = window.graph_view.lines.length - 1;
             },
-            create_point: function(is_left = true, position = null) {
+            create_point: function(is_left = true, position = null, is_deleted = false) {
                 let my_rect = this.get_rect();
 
-                if(position == null) {
-                    graph_view.elements.push(
-                        { id: 0, component_id: 5, name: '', data:
-                            {
-                                position: {
-                                    x: is_left ? my_rect.x - 20 : my_rect.x + my_rect.width + 20,
-                                    y: my_rect.y + my_rect.height / 2
-                                },
-                                z_index: graph_view.elements.length,
-                                parent_relation: this.$props.index
-                            }
-                        }
-                    );
-                } else {
-                    graph_view.elements.push(
-                        { id: 0, component_id: 5, name: '', data:
-                            {
-                                position: position,
-                                z_index: graph_view.elements.length,
-                                parent_relation: this.$props.index
-                            }
-                        }
-                    );
-                }
+                graph_view.elements.push(
+                    { id: 0, component_id: 5, name: '', data:
+                        {
+                            position: position ? position : {
+                                x: is_left ? my_rect.x - 20 : my_rect.x + my_rect.width + 20,
+                                y: my_rect.y + my_rect.height / 2
+                            },
+                            z_index: graph_view.elements.length,
+                            rel_index: this.$props.index,
+                            is_left
+                        },
+                        is_deleted
+                    }
+                );
+
                 let ret_index = graph_view.elements.length - 1;
                 this.point_indices.push(ret_index);
                 return ret_index;
+            },
+            connect_to_line: function(is_from_or_to, element_index) {
+                if(element_index == this.$props.index) return;
+                
+                // Change from
+                if (is_from_or_to === true) {
+                    this.$props.data.from = graph_view.elements[element_index].id;
+                    graph_view.$set(graph_view.elements[graph_view.lines[this.from_line_index].from_index], 'is_deleted', true);
+                    graph_view.lines[this.from_line_index].from_index = element_index;
+                } // Change to 
+                else if (is_from_or_to === false) {
+                    this.$props.data.to = graph_view.elements[element_index].id;
+                    graph_view.$set(graph_view.elements[graph_view.lines[this.to_line_index].to_index], 'is_deleted', true);
+                    graph_view.lines[this.to_line_index].to_index = element_index;
+                }
             },
             drag_start_addition: function() {
                 if(this.group_index != -1) {
@@ -123,7 +130,7 @@
                 graph_view.bring_to_front(this.$props.index);
 
             },
-            drag_addition: function() {
+            drag_addition: function(event) {
                 if(this.group_index != -1)
                     window.graph_elements[this.group_index].update_group_size();
             },

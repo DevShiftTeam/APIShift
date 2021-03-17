@@ -53,18 +53,19 @@ module.exports = {
             // If a relation then create a point
             if(this.$props.data.is_rel_source !== undefined) {
               let rel_holder = this.data.is_rel_source ? this.src_ref : this.dest_ref;
-              let point_index = rel_holder.create_point(this.data.is_rel_source, {
-                x: (event.clientX - graph_center_rect.x) / graph_view.scale - 5,
-                y: (event.clientY - graph_center_rect.y) / graph_view.scale - 5
-              });
-
+              let point_index = rel_holder.create_point(!this.data.is_rel_source, {
+                x: 0,
+                y: 0
+              }, true);
 
               // Scheduling task to the end of event-loop in order to prevent race conditions
               let self = this;
               setTimeout(() => {
                 let point_ref = window.graph_elements[point_index];
-                point_ref.data.position.x = (event.clientX - graph_center_rect.x) / graph_view.scale - point_ref.get_rect().width / 2;
-                point_ref.data.position.y = (event.clientY - graph_center_rect.y) / graph_view.scale - point_ref.get_rect().height / 2;
+                console.log(point_ref.get_rect());
+                point_ref.data.position.x = (event.clientX - graph_center_rect.x ) / graph_view.scale - 5;
+                point_ref.data.position.y = (event.clientY - graph_center_rect.y ) / graph_view.scale - 5;
+                window.graph_view.elements[point_index].is_deleted = false;
                 if(self.data.is_rel_source) {
                   rel_holder.data.to = undefined;
                   graph_view.lines[this.index].to_index = graph_view.elements.length - 1;

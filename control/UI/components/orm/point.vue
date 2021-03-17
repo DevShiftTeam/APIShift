@@ -41,9 +41,18 @@
                 height: rect.height
             };
             
-            this.expanded_functions.drag_end = (event) => {
+            this.expanded_functions.drag_end = this.drag_end_addition;
+
+            graph_view.elements_loaded++;
+        },
+        methods: {
+            drag_end_addition: function(event) {
                 let target_element = -1, z_index = 0;
-                
+
+                // Initi element_hovered
+                this.element_hovered = -1;
+
+
                 for(let index in [...graph_view.elements.keys()]) {
                     let cmp_id = graph_view.elements[index].component_id;
                     // Skip non-item nor relations
@@ -51,31 +60,25 @@
                         continue;
                     
                     // Check collisions
-                    if(graph_view.collision_check(this.get_rect(), window.graph_elements[index].get_rect())
-                    && window.graph_elements[index].data.z_index > z_index) {
-                        z_index = window.graph_elements[index].data.z_index;
-
-                        // Handle groug collision - a special case
-                        if (graph_view.elements[index].component_id === 4) {
-                                let group_rect = {
-                                    x: graph_view.elements[index].data.position.x,
-                                    y: graph_view.elements[index].data.position.y + graph_elements[index].get_rect().height - graph_elements[index].init_height,
-                                    height: graph_elements[index].init_height,
-                                    width: graph_elements[index].get_rect().width
-                                };
-                                if(graph_view.collision_check(this.get_rect(), group_rect)) target_element = index;
-                        } else 
+                    if (graph_view.elements[index].component_id === 4) {
+                        let group_rect = {
+                            x: graph_view.elements[index].data.position.x,
+                            y: graph_view.elements[index].data.position.y + graph_elements[index].get_rect().height - graph_elements[index].init_height,
+                            height: graph_elements[index].init_height,
+                            width: graph_elements[index].get_rect().width
+                        };
+                        if(window.graph_elements[index].data.z_index > z_index && graph_view.collision_check(this.get_rect(), group_rect)) {
                             target_element = index;
+                            z_index = graph_view.elements[index].data.z_index;
+                        }
+                    } else if (window.graph_elements[index].data.z_index > z_index && graph_view.collision_check(this.get_rect(), window.graph_elements[index].get_rect())) {
+                        target_element = index;
+                        z_index = graph_view.elements[index].data.z_index;
                     }
                 }
 
                 this.element_hovered = target_element;
-            };
-
-            graph_view.elements_loaded++;
-        },
-        methods: {
-            
+            }
         },
         computed: {
             from_position: function() {

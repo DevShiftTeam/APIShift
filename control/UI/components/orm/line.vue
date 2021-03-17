@@ -53,20 +53,18 @@ module.exports = {
             // If a relation then create a point
             if(this.$props.data.is_rel_source !== undefined) {
               let rel_holder = this.data.is_rel_source ? this.src_ref : this.dest_ref;
-              graph_view.elements.push({
-                id: 0, name: '', component_id: 5, data: {
-                  position: {
-                      x: (event.clientX - graph_center_rect.x - 5 /* Point height / 2 */) / graph_view.scale,
-                      y: (event.clientY - graph_center_rect.y - 5 /* Point width / 2 */) / graph_view.scale
-                  },
-                  z_index: graph_view.elements.length,
-                  parent_relation: rel_holder.index
-                }
+              let point_index = rel_holder.create_point(this.data.is_rel_source, {
+                x: (event.clientX - graph_center_rect.x) / graph_view.scale - 5,
+                y: (event.clientY - graph_center_rect.y) / graph_view.scale - 5
               });
+
 
               // Scheduling task to the end of event-loop in order to prevent race conditions
               let self = this;
               setTimeout(() => {
+                let point_ref = window.graph_elements[point_index];
+                point_ref.data.position.x = (event.clientX - graph_center_rect.x) / graph_view.scale - point_ref.get_rect().width / 2;
+                point_ref.data.position.y = (event.clientY - graph_center_rect.y) / graph_view.scale - point_ref.get_rect().height / 2;
                 if(self.data.is_rel_source) {
                   rel_holder.data.to = undefined;
                   graph_view.lines[this.index].to_index = graph_view.elements.length - 1;
@@ -75,8 +73,7 @@ module.exports = {
                   rel_holder.data.from = undefined;
                   graph_view.lines[this.index].from_index = graph_view.elements.length - 1;
                 }
-                
-                window.graph_elements[graph_view.elements.length - 1].drag_start(event);
+                point_ref.drag_start(event);
               });
             }
             else {
@@ -91,7 +88,8 @@ module.exports = {
 
       obj_holder.data.position.x = (event.clientX - graph_center_rect.x) / graph_view.scale - obj_holder.get_rect().width / 2;
       obj_holder.data.position.y = (event.clientY - graph_center_rect.y) / graph_view.scale - obj_holder.get_rect().height / 2;
-      obj_holder.drag_start(event);
+
+      obj_holder.drag_start(event); 
     },
   },
   computed: {

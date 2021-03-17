@@ -115,8 +115,13 @@
             drag_start_addition: function() {
                 if(this.group_index != -1) {
                     window.graph_elements[this.group_index].bring_to_front();
-                    graph_view.bring_to_front(this.$props.index);
                 }
+                this.point_indices.forEach(p => {
+                    graph_view.bring_to_front(p);
+                });
+
+                graph_view.bring_to_front(this.$props.index);
+
             },
             drag_addition: function() {
                 if(this.group_index != -1)

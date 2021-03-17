@@ -123,7 +123,21 @@
                     width: this.$el.offsetWidth,
                     height: this.$el.offsetHeight
                 };
-            }
+            },
+            /**
+             * Test whether 2 graph elements hit each other on the graph.
+             * @param {Object} size_object_1
+             * @param {Object} size_object_2
+             * @returns {Boolean} 
+             */
+            collision_check: function(size_object_1, size_object_2){
+                return (
+                    size_object_1.x < size_object_2.x + size_object_2.width &&
+                    size_object_1.x > size_object_2.x - size_object_1.width &&
+                    size_object_1.y < size_object_2.y + size_object_2.height &&
+                    size_object_1.y > size_object_2.y - size_object_1.height
+                );
+            },
         },
         computed: {
             // Rendered transformation (coordinates and scale) 

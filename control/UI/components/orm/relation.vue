@@ -176,14 +176,14 @@
         computed: {
             from_position: function() {
                 return {
-                    x: this.$props.data.position.x + this.element_sizes.width,
-                    y: this.$props.data.position.y + this.element_sizes.height / 2
+                    x: this.$props.data.position.x + this.get_rect().width,
+                    y: this.$props.data.position.y + this.get_rect().height / 2
                 };
             },
             to_position: function() {
                 return {
                     x: this.$props.data.position.x,
-                    y: this.$props.data.position.y + this.element_sizes.height / 2
+                    y: this.$props.data.position.y + this.get_rect().height / 2
                 };
             }
         }

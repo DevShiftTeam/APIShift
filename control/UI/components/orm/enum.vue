@@ -76,9 +76,18 @@
                     }
                 }
 
+                // Collision with a collidable element happended
+                if (target_element !== -1 && !this.$props.data.connected.find(id => id === graph_view.elements[target_element]?.id)) {
+                    let graph_rect = graph_view.$el.querySelector('#graph_center').getBoundingClientRect();
 
-                if (target_element !== -1) {
+                    // Create line & update data 
                     this.create_line(target_element);
+                    this.$props.data.connected.push(graph_view.elements[target_element].id);
+
+                    // Move enum back to origin position
+                    this.$props.data.position.x += (window.init_pointer.x - event.clientX) / graph_view.scale;
+                    this.$props.data.position.y += (window.init_pointer.y - event.clientY) / graph_view.scale;
+                    this.reset_type_position();
                 }
             },
             reset_enum_sizes: function() {
@@ -119,7 +128,7 @@
             create_line (element_index) {
                 window.graph_view.lines.push({
                     from_index: this.$props.index,
-                    to_index: to_index,
+                    to_index: element_index,
                     data: {
                         is_curvy: false,
                         is_stroked: true,
@@ -130,6 +139,18 @@
             }
         },
         computed: {
+            from_position: function() {
+                return {
+                    x: this.$props.data.position.x + this.occupied_width,
+                    y: this.$props.data.position.y + (this.occupied_height + this.init_height) / 2
+                };
+            },
+            to_position: function() {
+                return {
+                    x: this.$props.data.position.x,
+                    y: this.$props.data.position.y + (this.occupied_height + this.init_height) / 2
+                };
+            },
             sizes: function() {
                 return {
                     'width': this.occupied_width == -1 ? 'auto' : this.occupied_width + 'px',

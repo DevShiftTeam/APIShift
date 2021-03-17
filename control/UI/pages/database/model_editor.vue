@@ -79,7 +79,8 @@
                     // Enums
                     { id: 1, component_id: 3, name: 'enum1', data: {
                         position: {x: 200, y: 200},
-                        types: [ 1, 2 ]
+                        types: [ 1, 2 ],
+                        connected: []
                     }},
 
                     // Groups

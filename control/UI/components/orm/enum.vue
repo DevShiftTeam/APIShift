@@ -25,7 +25,7 @@
         data () {
             return {
                 drawer: null,
-                occupied_width: 0,
+                occupied_width: -1,
                 occupied_height: 0,
                 init_height: 0,
                 init_width: 0,
@@ -40,11 +40,17 @@
         }, 
         mounted () {
             graph_view.elements_loaded++;
+
+            if(graph_view.first_load) {
+                this.all_loaded();
+                graph_view.bring_to_front(this.$props.index);
+            }
         },
         methods: {
             all_loaded: function() {
                 this.init_height = this.$el.offsetHeight * 3;
                 this.init_width = -1;
+
                 // Set enum size and type positions
                 this.reset_enum_sizes();
                 this.reset_type_position();
@@ -66,7 +72,7 @@
                 for(let index in [...graph_view.elements.keys()]) {
                     let cmp_id = graph_view.elements[index].component_id;
                     // Skip non-item nor relations & self or undefined
-                    if(window.graph_elements[index] === undefined || (cmp_id != 0 && cmp_id != 1 && cmp_id != 4))
+                    if(window.graph_elements[index] === undefined || (cmp_id != 0 && cmp_id != 1 && cmp_id != 4) || graph_view.elements[index].is_deleted)
                         continue;
                     
                     // Check collisions
@@ -136,30 +142,53 @@
                     }
                 });
                 this.line_indices.push(window.graph_view.lines.length - 1);
+            },
+            on_delete () {
+                // Detach attached types
+                for(let type in this.$props.data.types) {
+                    let type_id = this.$props.data.types[type];
+                    let index = graph_view.elements.findIndex((elem) => elem.id == type_id && elem.component_id == 2);
+                    window.graph_elements[index].attached_enum = -1;
+                }
+
+                // Delete lines from graph
+                this.line_indices = this.line_indices.filter(line_index => {
+                    graph_view.$set(graph_view.lines[line_index], 'is_deleted', true);
+                });
+
+                // Delete element from graph
+                graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);
+            },
+            remove_connection (id) {
+                let element_index = graph_view.elements.findIndex(element => element.id == id && (element.component_id == 0 || element.component_id == 1 || element.component_id == 4));
+
+                // Delete line to connected element
+                let line_indices = [];
+                this.line_indices.forEach(line_index => {
+                    if (graph_view.lines[line_index].to_index == element_index)
+                        graph_view.$set(graph_view.lines[line_index], 'is_deleted', true);
+                    else
+                        line_indices.push(line_index);
+                });
+                this.line_indices = line_indices;
+
+                // Remove conection from internal data
+                this.$props.data.connected = this.$props.data.connected.filter(connected_id => connected_id != id);
             }
         },
         computed: {
             from_position: function() {
                 return {
-                    x: this.$props.data.position.x + this.occupied_width,
-                    y: this.$props.data.position.y + (this.occupied_height + this.init_height) / 2
-                };
-            },
-            to_position: function() {
-                return {
-                    x: this.$props.data.position.x,
-                    y: this.$props.data.position.y + (this.occupied_height + this.init_height) / 2
+                    x: this.$props.data.position.x + Math.max(this.occupied_width, this.$el.offsetWidth) / 2,
+                    y: this.$props.data.position.y + (this.occupied_height) / 2
                 };
             },
             sizes: function() {
                 return {
-                    'width': this.occupied_width == -1 ? 'auto' : this.occupied_width + 'px',
+                    'min-width': this.occupied_width == -1 ? 'auto' : this.occupied_width + 'px',
                     'height': this.occupied_height + 'px'
                 };
             },
-            line_indices: function () {
-                
-            }
         }
     }
 </script>

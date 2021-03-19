@@ -44,7 +44,13 @@
                 width: rect.width,
                 height: rect.height
             };
+
             graph_view.elements_loaded++;
+            if(graph_view.first_load) {
+                this.all_loaded();
+                graph_view.bring_to_front(this.$props.index);
+            }
+
         },
         methods: {
             all_loaded: function() {
@@ -59,76 +65,87 @@
                     :
                     this.create_point(false); // Create & attach point near relation
                 
-                // Step 2: Create lines
-                window.graph_view.lines.push({
-                    from_index: from_index,
-                    to_index: this.$props.index,
-                    data: {
-                        is_curvy: true,
-                        is_stroked: false,
-                        is_rel_source: false
-                    }
-                });
-                this.from_line_index = window.graph_view.lines.length - 1;
-                
-                window.graph_view.lines.push({
-                    from_index: this.$props.index,
-                    to_index: to_index,
-                    data: {
-                        is_curvy: true,
-                        is_stroked: false,
-                        is_rel_source: true
-                    }
-                });
-                this.to_line_index = window.graph_view.lines.length - 1;
+                setTimeout(()=>{
+                    // Step 2: Create lines
+                    window.graph_view.lines.push({
+                        from_index: from_index,
+                        to_index: this.$props.index,
+                        data: {
+                            is_curvy: true,
+                            is_stroked: false,
+                            is_rel_source: false
+                        }
+                    });
+                    this.from_line_index = window.graph_view.lines.length - 1;
+                    
+                    window.graph_view.lines.push({
+                        from_index: this.$props.index,
+                        to_index: to_index,
+                        data: {
+                            is_curvy: true,
+                            is_stroked: false,
+                            is_rel_source: true
+                        }
+                    });
+                    this.to_line_index = window.graph_view.lines.length - 1;
+                })
             },
             create_point: function(is_left = true, position = null, is_deleted = false) {
                 let my_rect = this.get_rect();
 
-                graph_view.elements.push(
-                    { id: 0, component_id: 5, name: '', data:
-                        {
-                            position: position ? position : {
-                                x: is_left ? my_rect.x - 20 : my_rect.x + my_rect.width + 20,
-                                y: my_rect.y + my_rect.height / 2
-                            },
-                            z_index: graph_view.elements.length,
-                            rel_index: this.$props.index,
-                            is_left
+                let point = 
+                { 
+                    id: 0, component_id: 5, name: '',
+                    data:
+                    {
+                        position: position ? position : {
+                            x: is_left ? my_rect.x - 20 : my_rect.x + my_rect.width + 20,
+                            y: my_rect.y + my_rect.height / 2
                         },
-                        is_deleted
-                    }
-                );
+                        z_index: graph_view.elements.length+1,
+                        rel_index: this.$props.index,
+                        is_left
+                    },
+                    is_deleted
+                }
 
-                let ret_index = graph_view.elements.length - 1;
-                this.point_indices.push(ret_index);
-                return ret_index;
+                graph_view.elements.push(
+                    point
+                );
+                this.point_indices.push(graph_view.elements.length - 1);
+
+                // this.point_indices.push(ret_index);
+                return graph_view.elements.length - 1;
             },
-            connect_to_line: function(is_from_or_to, element_index) {
+            connect_to_line: function(is_from_or_to, element_index, to_delete = true) {
                 if(element_index == this.$props.index) return;
                 
                 // Change from
                 if (is_from_or_to === true) {
                     this.$props.data.from = graph_view.elements[element_index].id;
-                    graph_view.$set(graph_view.elements[graph_view.lines[this.from_line_index].from_index], 'is_deleted', true);
-                    graph_view.lines[this.from_line_index].from_index = element_index;
+                    setTimeout(() => {
+                        if (to_delete) graph_view.$set(graph_view.elements[graph_view.lines[this.from_line_index].from_index], 'is_deleted', true);
+                        graph_view.lines[this.from_line_index].from_index = element_index;
+                    });
                 } // Change to 
                 else if (is_from_or_to === false) {
                     this.$props.data.to = graph_view.elements[element_index].id;
-                    graph_view.$set(graph_view.elements[graph_view.lines[this.to_line_index].to_index], 'is_deleted', true);
-                    graph_view.lines[this.to_line_index].to_index = element_index;
+                    setTimeout(() => {
+                        if (to_delete) graph_view.$set(graph_view.elements[graph_view.lines[this.to_line_index].to_index], 'is_deleted', true);
+                        graph_view.lines[this.to_line_index].to_index = element_index;
+                    });
                 }
             },
             drag_start_addition: function() {
                 if(this.group_index != -1) {
                     window.graph_elements[this.group_index].bring_to_front();
                 }
+
+                // Align z-index of self & points
+                graph_view.bring_to_front(this.$props.index);
                 this.point_indices.forEach(p => {
                     graph_view.bring_to_front(p);
                 });
-
-                graph_view.bring_to_front(this.$props.index);
-
             },
             drag_addition: function(event) {
                 if(this.group_index != -1)
@@ -138,39 +155,60 @@
                 if (!this.enums) this.enums = graph_view.enums.filter(e => e.data.connected.find(connected => connected.type + connected.id === this.uid));
                 return this.enums;
             },
+            remove_connection (id) {
+                let self = this;
+                let element_index = graph_view.elements.findIndex(element => element.id == id && (element.component_id == 0 || element.component_id == 1 || element.component_id == 4));
+                if (id == this.$props.data.from) {
+                    let point_index = this.create_point(true, window.graph_elements[element_index].from_position);
+                    this.connect_to_line(true, point_index, false);
+                }
+                if (id == this.$props.data.to) { 
+                    let point_index = this.create_point(false, window.graph_elements[element_index].to_position);
+                    this.connect_to_line(false, point_index, false);
+                }
+            },
             on_delete() {
-                // Delete lines from the graph & connected relations recursivly
-                this.get_lines().forEach(line => {
-                    let to_instance = graph_view.$refs[line.dest_info.type + line.dest_info.id];
-                    let from_instance = graph_view.$refs[line.src_info.type + line.src_info.id];
-                    
-                    graph_view.delete_line(line.src_info, line.dest_info);
+                let my_id = graph_view.elements[this.$props.index].id;
 
-                    if (line.settings.item_to_relation && !this.is_relation) {
-                        let relation = to_instance;
-                        relation.on_delete();
-                    } else if (line.settings.relation_to_item && !this.is_relation) {
-                        let relation = from_instance;
-                        relation.on_delete(); 
+                // Iterate through enums
+                let enums = graph_view.elements.filter((el) => {
+                    return el.component_id == 3;
+                });
+
+
+                // Infer connected enums indices
+                let enums_indices = [];
+                enums.forEach((e) => {
+                    if (e.data.connected.find(i => i == my_id)) {
+                        let enum_index = graph_view.elements.findIndex(el => el.id == e.id && el.component_id == 3); 
+                        return enums_indices.push(enum_index);
                     }
                 });
 
-                // Remove item connection from enum
-                this.get_enums().forEach(e => {    
-                        e.data.connected = e.data.connected.filter( connected => connected.type + connected.id !== this.uid);
-                    }
-                );
-                
-                // Delete element from the graph
-                let id = this.component_id;
-                graph_view.items = graph_view.items.filter((item) => item.id !== id);
-                delete graph_view.lookup_table['i'][id];
+                // Remove connection from connected enums
+                enums_indices.forEach(enum_index => {
+                    window.graph_elements[enum_index].remove_connection(my_id);
+                });
+            
+                // Delete connected lines
+                graph_view.$set(graph_view.lines[this.from_line_index], 'is_deleted', true);
+                graph_view.$set(graph_view.lines[this.to_line_index], 'is_deleted', true);
 
-                // Remove element from group and recalculate group boundries if exists
-                if (this.get_group()) {
-                    let group_instance = graph_view.$refs['g' + this.get_group().id];
-                    this.get_group().data.contained_elements = this.get_group().data.contained_elements.filter((element) => element.id !== id);
+                // Delete connected points
+                this.point_indices.forEach(point_index => {
+                    graph_view.$set(graph_view.elements[point_index], 'is_deleted', true);
+                });
+
+                // Remove from owning group
+                if (this.group_index !== -1) 
+                {
+                    window.graph_elements[this.group_index].data.elements = window.graph_elements[this.group_index].data.elements.filter(id => id != my_id);
+                    window.graph_elements[this.group_index].update_indices();
+                    window.graph_elements[this.group_index].update_group_size();
                 }
+
+                // Delete element from graph
+                graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);    
             }
         },
         computed: {

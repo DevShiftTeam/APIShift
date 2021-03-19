@@ -37,6 +37,11 @@
             this.expanded_functions.drag = this.drag_addition;
             this.expanded_functions.drag_end = this.drag_end_addition;
             graph_view.elements_loaded++;
+
+            if(graph_view.first_load) {
+                this.all_loaded();
+                graph_view.bring_to_front(this.$props.index);
+            }
         },
         methods: {
             all_loaded: function() { },
@@ -60,7 +65,7 @@
                 
                 for(let index in [...graph_view.elements.keys()]) {
                     // Skip non-enums
-                    if(window.graph_elements[index] === undefined || graph_view.elements[index].component_id != 3)
+                    if(window.graph_elements[index] === undefined || graph_view.elements[index].component_id != 3 || graph_view.elements[index].is_deleted)
                         continue;
                     
                     // Check collisions

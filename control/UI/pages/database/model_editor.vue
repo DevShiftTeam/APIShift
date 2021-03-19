@@ -122,6 +122,8 @@
                         x: 0, y: 0, width: 0, height: 0
                     }
                 },
+                side_menu_actions: [
+                ],
                 scroll_manager: {
                     id: null,
                     interval: 20,
@@ -143,7 +145,9 @@
                 },
                 cursor_state: {type: "default"},
                 elements_loaded: 0,
-                first_load: false
+                first_load: false,
+                action_selected: false,
+                current_action: () => {}
             }
         },
         created () {
@@ -151,6 +155,162 @@
             window.graph_elements = {};
             window.graph_view = this;
 
+            this.side_menu_actions = [
+                    {
+                        starter: () => {
+                            graph_view.cursor_state = {type: "create", component_id: 0};
+                            graph_view.current_action = () => {
+                                let last_id = 1;
+
+                                for(let el_index in graph_view.elements) {
+                                    let el = graph_view.elements[el_index];
+                                    if((el.component_id == 1 || el.component_id != 0 || el.component_id == 4) && last_id < el.id)
+                                        last_id = el.id;
+                                };
+
+                                graph_view.elements.push({
+                                    id: last_id + 1, component_id: 0, name: "Item", data: {
+                                        position: window.mouse_on_graph,
+                                        z_index: 0
+                                    }
+                                });
+                            }
+                        },
+                        icon: 'mdi-plus',
+                        text: "Add Item" 
+                    },
+                    {
+                        starter: () => {
+                            graph_view.cursor_state = { type: "create", component_id: 1 };
+                            graph_view.current_action = () => {
+                                let last_id = 1;
+
+                                for(let el_index in graph_view.elements) {
+                                    let el = graph_view.elements[el_index];
+                                    if((el.component_id == 1 || el.component_id != 0 || el.component_id == 4) && last_id < el.id)
+                                        last_id = el.id;
+                                };
+
+                                graph_view.elements.push({
+                                    id: last_id + 1, component_id: 1, name: "Relation", data: {
+                                        position: window.mouse_on_graph,
+                                        type: 0,
+                                        z_index: 0
+                                    }
+                                });
+                                
+                            };
+                        },
+                        icon: 'mdi-arrow-right',
+                        text: "Add Relation" 
+                    },
+                    {
+                        starter: () => {
+                            graph_view.cursor_state = {type: "delete"};
+                            graph_view.current_action = (event) =>{
+                                let pointer_rect = {
+                                    x: window.mouse_on_graph.x,
+                                    y: window.mouse_on_graph.y,
+                                    height: 10, 
+                                    width: 10
+                                };
+                                let target_element = -1, z_index = 0;
+
+                                for(let index in [...graph_view.elements.keys()]) {
+                                    let cmp_id = graph_view.elements[index].component_id;
+
+                                    // Skip undefined or deleted
+                                    if(window.graph_elements[index] === undefined || window.graph_elements[index].is_deleted)
+                                        continue;
+                                    
+                                    // Check collisions
+                                    if (window.graph_elements[index].data.z_index > z_index && graph_view.collision_check(pointer_rect, window.graph_elements[index].get_rect())) {
+                                        target_element = index;
+                                        z_index = graph_view.elements[index].data.z_index;
+                                    }
+                                }
+                                
+                                // Delete targeted element
+                                if (target_element !== -1) window.graph_elements[target_element].on_delete();
+                            };
+                        },
+                        icon: 'mdi-delete-outline',
+                        text: "Delete Tool" 
+                    },
+                    {
+                        starter: () => {
+                            graph_view.cursor_state = {type: "create", data: 3};
+                            graph_view.current_action = () => {
+                                let last_id = 1;
+
+                                for(let el_index in graph_view.elements) {
+                                    let el = graph_view.elements[el_index];
+                                    if((el.component_id == 3) && last_id < el.id)
+                                        last_id = el.id;
+                                };
+
+                                graph_view.elements.push({
+                                    id: last_id + 1, component_id: 3, name: "Enum", data: {
+                                        position: window.mouse_on_graph,
+                                        types: [],
+                                        connected: [],
+                                        z_index: 0
+                                    }
+                                });
+                            };
+                        },
+                        icon: 'fas fa-cubes',
+                        text: "Add Enum" 
+                    }, 
+                    {
+                        starter: () => {
+                            graph_view.cursor_state = {type: "create", data: 2};
+                            graph_view.current_action = () => {
+                                let last_id = 1;
+
+                                for(let el_index in graph_view.elements) {
+                                    let el = graph_view.elements[el_index];
+                                    if((el.component_id == 2) && last_id < el.id)
+                                        last_id = el.id;
+                                };
+
+                                graph_view.elements.push({
+                                    id: last_id + 1, component_id: 2, name: "Type", data: {
+                                        position: window.mouse_on_graph,
+                                        z_index: 0
+                                    }
+                                });
+                            }
+                        },
+                        icon: 'fas fa-cube',
+                        text: "Add Enum Type"
+                    },
+                    {
+                        starter: () => {
+                            graph_view.cursor_state = {type: "select"};
+                            graph_view.current_action = action;
+                        },
+                        action: (event) =>{
+                            let last_id = 0;
+
+                            for(let el_index in graph_view.elements) {
+                                let el = graph_view.elements[el_index];
+                                if((el.component_id == 1 || el.component_id != 0 || el.component_id == 4) && last_id < el.id)
+                                    last_id = el.id;
+                            };
+
+                            graph_view.elements.push({
+                                id: last_id + 1, component_id: 5, name: "Group", data: {
+                                    position: window.mouse_on_graph,
+                                    elements: [],
+                                    z_index: 0
+                                }
+                            });
+                        },
+                        icon: 'fa-object-group', 
+                        text: "Add Group" 
+                    }
+                ];
             // Set initial z-index
             for(var index in this.elements) this.$set(this.elements[index].data, 'z_index', parseInt(index) + 1);
         },
@@ -163,11 +323,11 @@
             window.removeEventListener('keydown', this.key_down);
         },
         methods: {
-            bring_to_front: function(element_id) {
+            bring_to_front: function(element_index) {
                 // Ignore if in front
-                if(this.elements[element_id].data.z_index !== undefined && this.elements[element_id].data.z_index == this.elements.length) return;
+                if(this.elements[element_index].data.z_index !== undefined && this.elements[element_index].data.z_index == this.elements.length) return;
 
-                let current_z_index = this.elements[element_id].data.z_index;
+                let current_z_index = this.elements[element_index].data.z_index;
 
                 // Bring other elements to back
                 for(let index in this.elements)
@@ -176,7 +336,7 @@
                 
 
                 // Bring to front
-                this.elements[element_id].data.z_index = this.elements.length;
+                this.elements[element_index].data.z_index = this.elements.length;
                 app.$refs.navigator.updateIndex(this.elements.length + 1);
                 app.$refs.footer.updateIndex(this.elements.length + 1);
                 window.holder.updateIndex(this.elements.length + 1);
@@ -217,32 +377,18 @@
                     y: event.clientY
                 };
                 this.init_camera = Object.assign({}, this.camera);
-            
                 let cursor_state = Object.assign({}, this.cursor_state);
-                if (cursor_state.type === 'select') {
-                    graph_view.$refs['s_box'].start_select(event);
-                }
-                if (cursor_state.type === 'create') {
+
+                if(this.current_action != graph_view.empty_function) {
+                    // Generic code
                     // Determine pointer position in respect to graph transformation
                     let center_rect = document.getElementById('graph_center').getBoundingClientRect();
                     let mouse = { x: window.init_pointer.x - graph_position.x, y: window.init_pointer.y - graph_position.y };
                     let differential = { x: center_rect.x - graph_position.x, y: center_rect.y - graph_position.y};
-                    let t_mouse = { x: (mouse.x-differential.x) / this.scale, y: (mouse.y - differential.y) / this.scale};
-
-                    if (cursor_state.data === 'add-enum') {
-                        graph_view.create_element_on_runtime('enum', 
-                        {
-                            data: { connected: [], types: []},
-                            rect: {...t_mouse, width: 0, height: 0}
-                        });
-                    }
-                    if (cursor_state.data === 'add-enum-type') {
-                        graph_view.create_element_on_runtime('enum-type', 
-                        { 
-                            data: {enum_id: null},
-                            rect: {...t_mouse, width: 0, height: 0}
-                        });
-                    }
+                    window.mouse_on_graph = { x: (mouse.x-differential.x) / this.scale, y: (mouse.y - differential.y) / this.scale};
+        
+                    this.current_action();
+                    return;
                 }
 
                 // Proceeds only if not dragging any other object
@@ -310,6 +456,10 @@
             pointer_up(event) {
                 this.tap_counter = 0;
 
+
+                // Empty current action
+                this.current_action = graph_view.empty_function;
+
                 if (this.cursor_state.type === 'select') {
                     graph_view.$refs['s_box'].end_select();
                 }
@@ -328,6 +478,7 @@
                     x: event.clientX - window.graph_position.x,
                     y: event.clientY - window.graph_position.y
                 }
+
                 // Middle of graph camera
                 let mid = {
                     x: rect.x + rect.width / 2 - window.graph_position.x,
@@ -351,7 +502,49 @@
                 this.camera.x += (window.init_pointer.x - mid.x) * (1 - change);
                 this.camera.y += (window.init_pointer.y - mid.y) * (1 - change);
             },
-            key_down (event){
+            // create_element_
+            mutations_handler(nth_step) {
+                // Go up on stack
+                if (this.mutation_manager.curr_step < nth_step && nth_step < this.mutation_manager.stack.length) {
+                    while (this.mutation_manager.curr_step < nth_step) {
+                        // Extract data mutation
+                        let mutation = JSON.parse(JSON.stringify(this.mutation_manager.stack[this.mutation_manager.curr_step]));
+
+                        // Iterate mutation steps 
+                        while (mutation.length) {
+                            let sub_mutation = mutation.pop();
+                            sub_mutation.qwe
+                        }
+                        // Update current step
+                        this.mutation_manager.curr_step++;
+                    }
+                }
+                // Go down on stack
+                else if (nth_step < this.mutation_manager.curr_step && nth_step >= 0) {
+                    
+                }
+                if (revert) {
+                    this.mutation_manager[this.mutation_step]
+                }
+            },
+            add_mutation (timestamp, commands) {
+                
+            },
+            /** Function that stupidly execute mutation */
+            execute_mutation (timestamp) {
+                let commands = this.mutations[timestamp];
+                commands.forEach((command) => {
+                    switch (command.type) {
+                        case 'create':
+                            command.
+                            break;
+                    
+                        default:
+                            break;
+                    }
+                });
+            },
+            key_down (event) {
                 if (event.code === 'KeyG') {
                     // Determine contained elements
                     let contained_elements = [];
@@ -536,7 +729,11 @@
                         @pointerup="pointer_up"
                         @pointercancel="pointer_up"
                         :style="{ 'overflow' : 'hidden' }">
-                        <component ref="side_menu" :is="side_menu_comp"></component>
+                        <component ref="side_menu"
+                            :is="side_menu_comp"
+                            :actions="side_menu_actions"
+                        >
+                        </component>
                         
                         <!-- The center element allow us to create a smart camera that positions the elements without needed to re-render for each element -->
                         <div ref="gv_center" id="graph_center" :style="{ 'transform': 'translate(' + camera.x + 'px, ' + camera.y + 'px) scale(' + scale + ')'}">
@@ -555,6 +752,7 @@
                             <component
                                 v-for="(line, index) in lines"
                                 :key="index"
+                                v-show="!line.is_deleted"
                                 :index="index"
                                 :is="line_comp"
                                 :src_ref="window.graph_elements[line.from_index]"

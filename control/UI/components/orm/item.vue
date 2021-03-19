@@ -42,6 +42,10 @@
             this.expanded_functions.drag_start = this.drag_start_addition;
             this.expanded_functions.drag = this.drag_addition;
             graph_view.elements_loaded++;
+
+            if(graph_view.first_load) {
+                graph_view.bring_to_front(this.$props.index);
+            }
         },
         methods: {
             drag_start_addition: function() {
@@ -54,56 +58,83 @@
                 if(this.group_index != -1)
                     window.graph_elements[this.group_index].update_group_size();
             },
-            get_enums () {
-                if (!this.enums) this.enums = graph_view.enums.filter(e => e.data.connected.find(connected => connected.type + connected.id === this.uid));
-                return this.enums;
-            },
-            on_delete() {
-                // Delete lines from the graph & connected relations recursivly
-                this.get_lines().forEach(line => {
-                    let to_instance = graph_view.$refs[line.dest_info.type + line.dest_info.id];
-                    let from_instance = graph_view.$refs[line.src_info.type + line.src_info.id];
-                    
-                    graph_view.delete_line(line.src_info, line.dest_info);
+            get_connected_enums () {
+                let my_id = graph_view.elements[this.$props.index].id;
 
-                    if (line.settings.item_to_relation && !this.is_relation) {
-                        let relation = to_instance;
-                        relation.on_delete();
-                    } else if (line.settings.relation_to_item && !this.is_relation) {
-                        let relation = from_instance;
-                        relation.on_delete(); 
+                // Iterate through enums
+                let enums = graph_view.elements.filter((el) => {
+                    return el.component_id == 3 && !el.is_deleted;;
+                });
+
+
+                // Infer connected enums indices
+                let enums_indices = [];
+                enums.forEach((e) => {
+                    if (e.data.connected.find(i => i == my_id)) {
+                        let enum_index = graph_view.elements.findIndex(el => el.id == e.id && el.component_id == 3); 
+                        return enums_indices.push(enum_index);
                     }
                 });
 
-                // Remove item connection from enum
-                this.get_enums().forEach(e => {    
-                        e.data.connected = e.data.connected.filter( connected => connected.type + connected.id !== this.uid);
-                    }
-                );
-                
-                // Delete element from the graph
-                let id = this.component_id;
-                graph_view.items = graph_view.items.filter((item) => item.id !== id);
-                delete graph_view.lookup_table['i'][id];
+                return enums_indices;
+            },
+            get_connected_relations () {
+                let my_id = graph_view.elements[this.$props.index].id;
 
-                // Remove element from group and recalculate group boundries if exists
-                if (this.get_group()) {
-                    let group_instance = graph_view.$refs['g' + this.get_group().id];
-                    this.get_group().data.contained_elements = this.get_group().data.contained_elements.filter((element) => element.id !== id);
+                // Iterate through enums
+                let relations = graph_view.elements.filter((el) => {
+                    return el.component_id == 1 && !el.is_deleted;;
+                });
+
+
+                // Infer connected enums indices
+                let relations_indices = [];
+                relations.forEach((rel) => {
+                    if (rel.data.to == my_id || rel.data.from == my_id) {
+                        let rel_index = graph_view.elements.findIndex(el => el.id == rel.id && el.component_id == 1); 
+                        return relations_indices.push(rel_index);
+                    }
+                });
+
+                return relations_indices;
+            },
+            on_delete() {
+                let my_id = graph_view.elements[this.$props.index].id;
+
+                // Remove connection from connected enums
+                this.get_connected_enums().forEach(enum_index => {
+                    window.graph_elements[enum_index].remove_connection(my_id);
+                });
+
+                // Remove relation connection form item
+                this.get_connected_relations().forEach(rel_index => {
+                    window.graph_elements[rel_index].remove_connection(my_id);
+                });
+
+                // Remove from owning group
+                if (this.group_index !== -1) 
+                {
+                    window.graph_elements[this.group_index].data.elements = window.graph_elements[this.group_index].data.elements.filter(id => id != my_id);
+                    window.graph_elements[this.group_index].update_indices();
+                    window.graph_elements[this.group_index].update_group_size();
                 }
+
+                // Removing element from screen
+                graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);
+
             }
         },
         computed: {
             from_position: function() {
                 return {
-                    x: this.$props.data.position.x + this.element_sizes.width,
-                    y: this.$props.data.position.y + this.element_sizes.height / 2
+                    x: this.$props.data.position.x + this.get_rect().width,
+                    y: this.$props.data.position.y + this.get_rect().height / 2
                 };
             },
             to_position: function() {
                 return {
                     x: this.$props.data.position.x,
-                    y: this.$props.data.position.y + this.element_sizes.height / 2
+                    y: this.$props.data.position.y + this.get_rect().height / 2
                 };
             }
         }

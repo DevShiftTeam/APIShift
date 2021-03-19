@@ -52,10 +52,11 @@
                     y: event.clientY
                 };
 
-                graph_view.bring_to_front(this.$props.index);
-
                 // Delete element on delete state
-                if (graph_view.cursor_state.type === 'delete') return;
+                if (graph_view.cursor_state.type == "delete") return;
+
+                // Bring to front
+                graph_view.bring_to_front(this.$props.index);
 
                 // Update drag function
                 graph_view.drag_handler = this.drag;

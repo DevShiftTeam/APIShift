@@ -62,8 +62,8 @@ module.exports = {
               let self = this;
               setTimeout(() => {
                 let point_ref = window.graph_elements[point_index];
-                point_ref.data.position.x = (event.clientX - graph_center_rect.x ) / graph_view.scale - 5;
-                point_ref.data.position.y = (event.clientY - graph_center_rect.y ) / graph_view.scale - 5;
+                point_ref.data.position.x = (event.clientX - graph_center_rect.x) / graph_view.scale - 5;
+                point_ref.data.position.y = (event.clientY - graph_center_rect.y) / graph_view.scale - 5;
                 window.graph_view.elements[point_index].is_deleted = false;
                 
                 if(self.data.is_rel_source) {

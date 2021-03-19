@@ -16,7 +16,7 @@
      * See the License for the specific language governing permissions and
      * limitations under the License.
      * 
-     * @author Sapir Shemer
+     * @author Ilan Dazanashvili
      */
     
     // This shit is made for scripting
@@ -93,20 +93,18 @@
                 this.enum_hovered = -1;
             },
             on_delete() {
-                let id = this.component_id;
+                let my_id = graph_view.elements[this.$props.index].id;
 
-                // Detach type from enum 
-                if(this.$props.data.enum_id) this.remove_from_enum();
-                
-                // Finally remove element from screen
-                graph_view.enum_types = graph_view.enum_types.filter((enum_type) => enum_type.id !== id);
-                delete graph_view.lookup_table['t'][id];
-            }
-        },
-        computed: {
-            enum_parent () {
-                var enum_id = this.$props.data.enum_id;
-                return graph_view.enums.find((enum_) => enum_.id === enum_id);
+
+                // Reset enum sizes
+                if (this.attached_enum != -1) {
+                    window.graph_elements[this.attached_enum].data.types = window.graph_elements[this.attached_enum].data.types.filter(id => id !== my_id);
+                    window.graph_elements[this.attached_enum].reset_enum_sizes();
+                    window.graph_elements[this.attached_enum].reset_type_position();
+                }
+
+                // Removing element from screen
+                graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);
             }
         }
     }

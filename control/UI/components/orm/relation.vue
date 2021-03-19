@@ -167,12 +167,12 @@
                     this.connect_to_line(false, point_index, false);
                 }
             },
-            on_delete() {
+            get_connected_enums () {
                 let my_id = graph_view.elements[this.$props.index].id;
 
                 // Iterate through enums
                 let enums = graph_view.elements.filter((el) => {
-                    return el.component_id == 3;
+                    return el.component_id == 3 && !el.is_deleted;;
                 });
 
 
@@ -185,9 +185,42 @@
                     }
                 });
 
-                // Remove connection from connected enums
-                enums_indices.forEach(enum_index => {
+                return enums_indices;
+            },
+            get_connected_relations () {
+                let my_id = graph_view.elements[this.$props.index].id;
+
+                // Iterate through enums
+                let relations = graph_view.elements.filter((el) => {
+                    return el.component_id == 1 && !el.is_deleted;;
+                });
+
+
+                // Infer connected enums indices
+                let relations_indices = [];
+                relations.forEach((rel) => {
+                    if (rel.data.to == my_id || rel.data.from == my_id) {
+                        let rel_index = graph_view.elements.findIndex(el => el.id == rel.id && el.component_id == 1); 
+                        return relations_indices.push(rel_index);
+                    }
+                });
+
+                return relations_indices;
+            },
+            on_delete() {
+                let my_id = graph_view.elements[this.$props.index].id;
+
+                // Mark element as deleted
+                graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);    
+
+                 // Remove connection from connected enums
+                this.get_connected_enums().forEach(enum_index => {
                     window.graph_elements[enum_index].remove_connection(my_id);
+                });
+
+                // Remove relation connection from item
+                this.get_connected_relations().forEach(rel_index => {
+                    window.graph_elements[rel_index].remove_connection(my_id);
                 });
             
                 // Delete connected lines
@@ -206,9 +239,6 @@
                     window.graph_elements[this.group_index].update_indices();
                     window.graph_elements[this.group_index].update_group_size();
                 }
-
-                // Delete element from graph
-                graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);    
             }
         },
         computed: {

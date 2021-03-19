@@ -81,12 +81,13 @@
 
                 // Get all group indices
                 for(let grp_index in graph_view.elements) {
-                    if(graph_view.elements[grp_index].component_id != 4 || graph_view.elements[grp_index].data.parent != this.$props.id || window.graph_elements[grp_index].is_deleted)
+                    if(graph_view.elements[grp_index].component_id != 4 || graph_view.elements[grp_index].data.parent != this.$props.id || graph_view.elements[grp_index].is_deleted)
                         continue;
                     window.graph_elements[grp_index].parent_group_index = this.$props.index;
                     this.group_indices.push(grp_index);
                 };
 
+                console.log(this.group_indices);
                 // Delete group if empty 
                 if (this.element_indices.length + this.group_indices.length === 0) this.on_delete();
             },
@@ -252,6 +253,10 @@
             on_delete () {
                 let my_id = graph_view.elements[this.$props.index].id;
 
+
+                // Marking as deleted
+                graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);
+
                 // Remove connection from connected enums
                 this.get_connected_enums().forEach(enum_index => {
                     window.graph_elements[enum_index].remove_connection(my_id);
@@ -262,6 +267,11 @@
                     window.graph_elements[rel_index].remove_connection(my_id);
                 });
 
+                // Detach inner elements
+
+                // Detach inner groups
+
+
                 // Remove from owning group
                 if (this.parent_group_index !== -1) 
                 {
@@ -269,9 +279,6 @@
                     window.graph_elements[this.parent_group_index].update_indices();
                     window.graph_elements[this.parent_group_index].update_group_size();
                 }
-
-                // Removing element from screen
-                graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);
             },
         },
         computed: {

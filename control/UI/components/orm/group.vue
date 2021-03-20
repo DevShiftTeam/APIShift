@@ -73,7 +73,7 @@
                 // Get all element indices
                 for(let elem in this.$props.data.elements) {
                     let item_id = this.$props.data.elements[elem];
-                    let index = graph_view.elements.findIndex(el => el.id === item_id && (el.component_id == 1 || el.component_id == 0));
+                    let index = graph_view.elements.findIndex(el => el.id === item_id && (el.component_id == 1 || el.component_id == 0) && !el.is_deleted);
                     if(index == -1) continue;
                     window.graph_elements[index].group_index = this.$props.index;
                     this.element_indices.push(index);
@@ -87,7 +87,6 @@
                     this.group_indices.push(grp_index);
                 };
 
-                console.log(this.group_indices);
                 // Delete group if empty 
                 if (this.element_indices.length + this.group_indices.length === 0) this.on_delete();
             },
@@ -252,9 +251,8 @@
             },
             on_delete () {
                 let my_id = graph_view.elements[this.$props.index].id;
-
-
-                // Marking as deleted
+                
+                // Mark as deleted
                 graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);
 
                 // Remove connection from connected enums
@@ -268,9 +266,12 @@
                 });
 
                 // Detach inner elements
+                for(let elem in this.element_indices)
+                     window.graph_elements[this.element_indices[elem]].group_index = -1;
 
                 // Detach inner groups
-
+                for(let elem in this.group_indices)
+                    window.graph_elements[this.group_indices[elem]].parent_group_index = -1;
 
                 // Remove from owning group
                 if (this.parent_group_index !== -1) 

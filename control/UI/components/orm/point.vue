@@ -78,7 +78,8 @@
                 
                 // Drop on a connectable item 
                 if (target_element !== -1) window.graph_elements[this.$props.data.rel_index].connect_to_line(this.$props.data.is_left, target_element);
-            }
+            },
+            on_delete () {}
         },
         computed: {
             from_position: function() {

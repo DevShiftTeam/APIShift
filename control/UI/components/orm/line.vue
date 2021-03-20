@@ -96,6 +96,8 @@ module.exports = {
   computed: {
     // Just for testing
     path_data() {
+        if (graph_view.lines[this.$props.index].is_deleted) return;
+        
         let src_point = this.src_ref.from_position;
         let dest_point = this.dest_ref.to_position;
 

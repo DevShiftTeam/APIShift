@@ -211,8 +211,8 @@
                                 let pointer_rect = {
                                     x: window.mouse_on_graph.x,
                                     y: window.mouse_on_graph.y,
-                                    height: 10, 
-                                    width: 10
+                                    height: 5, 
+                                    width: 5
                                 };
                                 let target_element = -1, z_index = 0;
 

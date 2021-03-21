@@ -22,7 +22,7 @@
     //TODO: Design better z-index system.
     module.exports = {
         props: {
-            data: Object
+            rect: Object
         },
         data () {
             return {
@@ -32,13 +32,14 @@
                     width: 0,
                     height: 0
                 },
-                selectables: null, // Should be represented as {Info, Rect}
+                selectables: null, 
                 ds: { x: 0, y: 0 },
                 last_event: null,
-                graph_position: { x: 0, y: 0 }
+                graph_rect: { x: 0, y: 0 }
             }
         },
         created () {
+            graph_view['selection_box'] = this;
         },
         mounted () {
 
@@ -46,45 +47,74 @@
         methods: {
             start_select (event) {
                 this.init_pointer   = Object.assign({}, { x: event.clientX, y: event.clientY }); 
-                this.graph_position = Object.assign({}, window.graph_position); 
+                this.graph_position = document.getElementById('graph_view').getBoundingClientRect();
 
                 // Set graph view drag handler
                 graph_view.drag_handler = this.on_select; 
                 
+                window.mouse_on_graph
+
                 // Start graph view scroll manager and pass handler 
-                graph_view.scroll_manager.start(this.on_scroll, 20);
+                // graph_view.scroll_manager.start(this.on_scroll, 20);
 
                 this.last_event = event;
             },
             on_select (event) {
-                this.set_rect(event);
+                this.$props.rect.width  = Math.abs(event.clientX - this.ds.x - this.init_pointer.x);
+                this.$props.rect.height = Math.abs(event.clientY - this.ds.y - this.init_pointer.y);
 
-                let cmp_rects = function(rect1, rect2){
-                    return !(
-                        ((rect1.y + rect1.height) < (rect2.y)) ||
-                        (rect1.y > (rect2.y + rect2.height)) ||
-                        ((rect1.x + rect1.width) < rect2.x) ||
-                        (rect1.x > (rect2.x + rect2.width))
-                    );
+                // Calcultate left-most position
+                this.$props.rect.x = event.clientX > this.init_pointer.x + this.ds.x ? 
+                    this.init_pointer.x - this.graph_position.x + this.ds.x 
+                    : 
+                    this.init_pointer.x - this.graph_position.x + this.ds.x - this.$props.rect.width;
+
+                // Calculate top-most position
+                this.$props.rect.y = event.clientY > this.init_pointer.y + this.ds.y ? 
+                    this.init_pointer.y - this.graph_position.y + this.ds.y 
+                    : 
+                    this.init_pointer.y - this.graph_position.y + this.ds.y - this.$props.rect.height;
+
+                let my_rect = this.$el.getBoundingClientRect();
+                for (const index in graph_view.elements) {
+                    let element = window.graph_elements[index];
+                    if ((element.component_id != 0 || element.component_id != 1 || element.component_id != 4) && element.is_deleted) continue;
+
+                    let el_rect = element.$el.getBoundingClientRect();     
+
+                    if (graph_view.elements[index].component_id === 4) {
+                        let group_rect = {
+                            x: graph_view.elements[index].data.position.x,
+                            y: graph_view.elements[index].data.position.y + element.get_rect().height - element.init_height,
+                            height: element.init_height,
+                            width: element.get_rect().width
+                        };                     
+                        if (graph_view.collision_check(my_rect,group_rect))
+                            element.selected = true;
+                        else
+                            element.selected = false;
+                    }
                 }
 
-
-                this.get_selectables().forEach(({info, rect}) => {
-                    if (cmp_rects(this.rect, rect)) {
-                        if (!graph_view.$refs[info.type+info.id].get_group()) graph_view.$refs[info.type+info.id].selected = true;
-                    } else {
-                        graph_view.$refs[info.type+info.id].selected = false;
-                    }
-                });
-
-                this.last_event = event;
             },
             end_select () {
-                this.rect.x = -Number.MAX_SAFE_INTEGER;
-                this.rect.y  = -Number.MAX_SAFE_INTEGER;
+                this.$props.rect.x = -Number.MAX_SAFE_INTEGER;
+                this.$props.rect.y  = -Number.MAX_SAFE_INTEGER;
                 this.ds = Object.assign({}, {x: 0, y: 0});
                 graph_view.cursor_state = Object.assign({}, {type: 'default'});
 
+                for (const index in graph_view.elements) {
+                    let element = window.graph_elements[index];
+                    if (!element.is_selected) continue;
+
+                    let el_rect = element.$el.getBoundingClientRect();                    
+                    if (!element.is_selected) {
+                        element.selected = true;
+                    } else { 
+                        element.selected = false;
+                    }
+                }
+                
                 // Stop scroll handler
                 graph_view.scroll_manager.stop();
 
@@ -92,8 +122,7 @@
             },
             on_scroll () { 
                 // If drag hasnt occured yet - no change in position
-                if (this.rect.x === this.rect.y) return;
-
+                if (this.$props.rect.x === this.$props.rect.y) return;
 
                 let mouse = { x: this.last_event.pageX - window.graph_position.x, y: this.last_event.pageY - window.graph_position.y };
                 if (mouse.x < 20) {
@@ -115,33 +144,16 @@
                 this.set_rect(this.last_event);
             },
             set_rect(event) {
-                this.rect.width  = Math.abs(event.clientX - this.ds.x - this.init_pointer.x);
-                this.rect.height = Math.abs(event.clientY - this.ds.y - this.init_pointer.y);
-
-                let calcLeft, calcTop;
-                if (event.clientX > this.init_pointer.x + this.ds.x) {
-                    calcLeft = this.init_pointer.x - graph_position.x + this.ds.x;
-                } else {
-                    calcLeft = this.init_pointer.x - graph_position.x + this.ds.x - this.rect.width; 
-                };
-
-                if (event.clientY > this.init_pointer.y + this.ds.y) {
-                    calcTop = this.init_pointer.y - graph_position.y + this.ds.y;
-                } else {
-                    calcTop = this.init_pointer.y - graph_position.y + this.ds.y - this.rect.height; 
-                }
-
-                this.rect.x = calcLeft;
-                this.rect.y = calcTop;
             },
 
             get_selectables () {
                 if(!this.selectables) {
-                    const items = graph_view.items.map(item => {
+                    const items = graph_view.elements.filter(item => {
                         let info = {type: 'i', id: item.id};
                         let rect = graph_view.inverse_transformation(info);
                         return {info,rect};
                     });
+
                     const groups = graph_view.groups.map(item => {
                         let info = {type: 'g', id: item.id};
                         let rect = graph_view.inverse_transformation(info);
@@ -156,10 +168,10 @@
         computed: {
             transformation () {
                 return {
-                    top: `${this.rect.y}px`,
-                    left:  `${this.rect.x}px`,
-                    height:`${this.rect.height}px`,
-                    width:`${this.rect.width}px`,
+                    top: `${this.$props.rect.y}px`,
+                    left:  `${this.$props.rect.x }px`,
+                    height:`${this.$props.rect.height}px`,
+                    width:`${this.$props.rect.width}px`,
                     'z-index':  1000
                 }
             }
@@ -170,7 +182,9 @@
 <template>
     <div class="s_box" color="#8789ff"
         :style="transformation"
-        >
+        @pointerup="end_select"> 
+        <div class="wrapper"></div>
+    </div>
     
 </template>
 
@@ -182,5 +196,11 @@
     transform-origin: 0 0;
     border: dotted white 1px;
     background: rgba(255,255,255,0.1);
+}
+.wrapper {
+    position: absolute;
+    height: 120%;
+    width: 120%;
+    opacity: 0;
 }
 </style>

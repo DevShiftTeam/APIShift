@@ -147,13 +147,14 @@
                 elements_loaded: 0,
                 first_load: false,
                 action_selected: false,
-                current_action: () => {}
+                current_action: window.empty_function
             }
         },
         created () {
             // Store this object with a global reference
             window.graph_elements = {};
             window.graph_view = this;
+            this.current_action = window.empty_function;
 
             this.side_menu_actions = [
                     {
@@ -288,24 +289,25 @@
                     {
                         starter: () => {
                             graph_view.cursor_state = {type: "select"};
-                            graph_view.current_action = action;
-                        },
-                        action: (event) =>{
-                            let last_id = 0;
+                            graph_view.current_action = (event) =>{
+                                let last_id = 0;
 
-                            for(let el_index in graph_view.elements) {
-                                let el = graph_view.elements[el_index];
-                                if((el.component_id == 1 || el.component_id != 0 || el.component_id == 4) && last_id < el.id)
-                                    last_id = el.id;
+                                graph_view['selection_box'].start_select(event);
+
+                                // for(let el_index in graph_view.elements) {
+                                //     let el = graph_view.elements[el_index];
+                                //     if((el.component_id == 1 || el.component_id != 0 || el.component_id == 4) && last_id < el.id)
+                                //         last_id = el.id;
+                                // };
+
+                                // graph_view.elements.push({
+                                //     id: last_id + 1, component_id: 5, name: "Group", data: {
+                                //         position: window.mouse_on_graph,
+                                //         elements: [],
+                                //         z_index: 0
+                                //     }
+                                // });
                             };
-
-                            graph_view.elements.push({
-                                id: last_id + 1, component_id: 5, name: "Group", data: {
-                                    position: window.mouse_on_graph,
-                                    elements: [],
-                                    z_index: 0
-                                }
-                            });
                         },
                         icon: 'fa-object-group', 
                         text: "Add Group" 
@@ -317,10 +319,6 @@
         mounted () {
             this.update_graph_position();
 
-            window.addEventListener('keydown', this.key_down);
-        },
-        beforeDestroy () {
-            window.removeEventListener('keydown', this.key_down);
         },
         methods: {
             bring_to_front: function(element_index) {
@@ -379,15 +377,16 @@
                 this.init_camera = Object.assign({}, this.camera);
                 let cursor_state = Object.assign({}, this.cursor_state);
 
-                if(this.current_action != graph_view.empty_function) {
+                if(this.current_action != window.empty_function) {
                     // Generic code
                     // Determine pointer position in respect to graph transformation
                     let center_rect = document.getElementById('graph_center').getBoundingClientRect();
                     let mouse = { x: window.init_pointer.x - graph_position.x, y: window.init_pointer.y - graph_position.y };
                     let differential = { x: center_rect.x - graph_position.x, y: center_rect.y - graph_position.y};
+
                     window.mouse_on_graph = { x: (mouse.x-differential.x) / this.scale, y: (mouse.y - differential.y) / this.scale};
         
-                    this.current_action();
+                    this.current_action(event);
                     return;
                 }
 
@@ -458,12 +457,8 @@
 
 
                 // Empty current action
-                this.current_action = graph_view.empty_function;
-
-                if (this.cursor_state.type === 'select') {
-                    graph_view.$refs['s_box'].end_select();
-                }
-
+                this.current_action = window.empty_function;
+                
                 if(this.cursor_state.data !== 'add-relation') this.cursor_state = Object.assign({}, {type: 'default'});
                 // Reset drag event to none
                 this.drag_handler = window.empty_function;
@@ -543,20 +538,6 @@
                             break;
                     }
                 });
-            },
-            key_down (event) {
-                if (event.code === 'KeyG') {
-                    // Determine contained elements
-                    let contained_elements = [];
-                    this.groups.forEach(group => {
-                        let group_instance = graph_view.$refs[`g${group.id}`];
-                        if (group_instance.selected) {
-                            contained_elements.push({ type: 'g', id: group.id });
-                            group_instance.selected = false;
-                        }
-                    });
-                    graph_view.create_element_on_runtime('group', {name: 'Group', rect: {x: 0, y: 0, height: 0, width: 0}, data: {contained_elements}})
-                }                
             },
             move_camera_by (dx, dy) {
                 this.camera.x += dx;
@@ -762,7 +743,6 @@
                         </div>
                         <component ref="s_box" 
                             :is="selection_comp"
-                            :uid="'s0'"
                             :rect="selection_box.rect">
                         </component>
                     </div>

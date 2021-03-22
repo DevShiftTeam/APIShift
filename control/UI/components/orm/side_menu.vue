@@ -34,6 +34,7 @@
         methods: {
             run_handler: function(func_handler) {
                 this.show_side_menu = false;
+                graph_view.drag_end_lock = true;
                 func_handler();
             },
             toggleDarkTheme: function() {

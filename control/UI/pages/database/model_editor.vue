@@ -116,6 +116,7 @@
                     x: 0,
                     y: 0
                 },
+                drag_end_lock: false,
                 selection_active: false,
                 side_menu_actions: [],
                 scroll_manager: {
@@ -348,7 +349,8 @@
 
                 if(this.current_action != window.empty_function) {
                     // Determine pointer position in respect to graph transformation
-                    window.mouse_on_graph = { x: (window.init_pointer.x - graph_position.x - this.camera.x) / this.scale, y: (window.init_pointer.y - graph_position.y - this.camera.y) / this.scale};
+                    let camera_rect = document.querySelector('#graph_center').getBoundingClientRect();
+                    window.mouse_on_graph = { x: (window.init_pointer.x - camera_rect.x) / (this.scale), y: (window.init_pointer.y - camera_rect.y) / (this.scale)};
                     this.current_action(event);
                     return;
                 }
@@ -418,6 +420,9 @@
             pointer_up(event) {
                 this.tap_counter = 0;
                 
+                // Release drag end lock
+                this.drag_end_lock = false;
+
                 // Empty current action
                 this.current_action = window.empty_function;
 

@@ -75,6 +75,8 @@
                 this.expanded_functions.drag(event);
             },
             drag_end (event) {
+                if (graph_view.drag_end_lock) return;
+                
                 graph_view.scroll_manager.stop();
 
                 // Reset drag function

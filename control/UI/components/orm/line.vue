@@ -41,6 +41,8 @@ module.exports = {
   },
   methods: {
     pointer_down(event) {
+      if(graph_view.drag_end_lock) return;
+      
       // Find point
       let obj_holder = this.src_ref;
 

@@ -117,11 +117,7 @@
                     x: 0,
                     y: 0
                 },
-                selection_box: {
-                    rect: {
-                        x: 0, y: 0, width: 0, height: 0
-                    }
-                },
+                selection_active: false,
                 side_menu_actions: [
                 ],
                 scroll_manager: {
@@ -290,23 +286,7 @@
                         starter: () => {
                             graph_view.cursor_state = {type: "select"};
                             graph_view.current_action = (event) =>{
-                                let last_id = 0;
-
                                 graph_view['selection_box'].start_select(event);
-
-                                // for(let el_index in graph_view.elements) {
-                                //     let el = graph_view.elements[el_index];
-                                //     if((el.component_id == 1 || el.component_id != 0 || el.component_id == 4) && last_id < el.id)
-                                //         last_id = el.id;
-                                // };
-
-                                // graph_view.elements.push({
-                                //     id: last_id + 1, component_id: 5, name: "Group", data: {
-                                //         position: window.mouse_on_graph,
-                                //         elements: [],
-                                //         z_index: 0
-                                //     }
-                                // });
                             };
                         },
                         icon: 'fa-object-group', 
@@ -460,6 +440,9 @@
                 this.current_action = window.empty_function;
                 
                 if(this.cursor_state.data !== 'add-relation') this.cursor_state = Object.assign({}, {type: 'default'});
+
+                // graph_view.$refs['s_box'].is_shown = false;
+
                 // Reset drag event to none
                 this.drag_handler = window.empty_function;
 
@@ -651,7 +634,38 @@
             }
         },
         computed: {
-
+            min_x: function () {
+                let min_x = Number.MAX_SAFE_INTEGER;
+                for (const index in this.elements) {
+                    if (graph_view[index].is_deleted) continue;
+                    min_x = Math.min(min_x, graph_view[index].position.x);
+                }
+                return min_x;
+            },
+            max_x: function () {
+                let max_x = Number.MIN_SAFE_INTEGER;
+                for (const index in this.elements) {
+                    if (graph_view[index].is_deleted) continue;
+                    max_x = Math.max(max_x, graph_view[index].position.x);
+                }
+                return max_x;
+            },
+            min_y: function () {
+                let min_y = Number.MAX_SAFE_INTEGER;
+                for (const index in this.elements) {
+                    if (graph_view[index].is_deleted) continue;
+                    min_y = Math.min(min_y, graph_view[index].position.y);
+                }
+                return min_y;
+            },
+            max_y: function () {
+                let max_y = Number.MIN_SAFE_INTEGER;
+                for (const index in this.elements) {
+                    if (graph_view[index].is_deleted) continue;
+                    max_y = Math.max(min_x, graph_view[index].position.x);
+                }
+                return max_y;
+            }
         },
         watch: {
             cursor_state: function (state) {
@@ -742,8 +756,8 @@
                             </component>
                         </div>
                         <component ref="s_box" 
-                            :is="selection_comp"
-                            :rect="selection_box.rect">
+                            v-show="selection_active"
+                            :is="selection_comp">
                         </component>
                     </div>
                 </div>

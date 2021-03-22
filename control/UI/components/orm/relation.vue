@@ -26,7 +26,7 @@
             return {
                 drawer: null,
                 group_index: -1,
-                selected: false,
+                is_selected: false,
                 element_sizes: {},
                 point_indices: [],
                 from_line_index: -1,
@@ -259,13 +259,13 @@
 </script>
 
 <template>
-    <div class="item" :class="{ selected , ghost_mode }" color="#8789ff"
+    <div class="item" :class="{ is_selected , ghost_mode }" color="#8789ff"
         :style="transformation"
         @pointerdown.prevent="drag_start"
         @contextmenu.prevent="on_context"
         @pointerup.prevent="drag_end">
             <v-avatar left class="item_type darken-4 purple">R</v-avatar>
-            <div style="display: inline;">{{ name }}</div>
+            <div style="display: inline;">{{ id }}</div>
     </div>
 </template>
 
@@ -289,7 +289,7 @@
     box-shadow: 50px 50px 50px rgba(255, 242, 94, 0); /* Removing weird trace on chrome */
 }
 
-.item.selected {
+.item.is_selected  {
     border: dashed white 2px;
     padding: 4px;
 }

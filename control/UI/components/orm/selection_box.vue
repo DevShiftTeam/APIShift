@@ -22,24 +22,23 @@
     //TODO: Design better z-index system.
     module.exports = {
         props: {
-            rect: Object
+            // rect: Object,
+            data: Object
         },
         data () {
             return {
                 rect: {
-                    x:  -Number.MAX_SAFE_INTEGER,
-                    y:  -Number.MAX_SAFE_INTEGER,
+                    x:  0,
+                    y:  0,
                     width: 0,
                     height: 0
                 },
-                selectables: null, 
                 ds: { x: 0, y: 0 },
-                last_event: null,
-                graph_rect: { x: 0, y: 0 }
+                graph_position: { x: 0, y: 0 }
             }
         },
         created () {
-            graph_view['selection_box'] = this;
+            graph_view.selection_box = this;
         },
         mounted () {
 
@@ -52,77 +51,122 @@
                 // Set graph view drag handler
                 graph_view.drag_handler = this.on_select; 
                 
-                window.mouse_on_graph
-
                 // Start graph view scroll manager and pass handler 
                 // graph_view.scroll_manager.start(this.on_scroll, 20);
 
-                this.last_event = event;
+                window.addEventListener('pointerup', this.end_select);
+                window.addEventListener('pointercancel', this.end_select);
+                
             },
             on_select (event) {
-                this.$props.rect.width  = Math.abs(event.clientX - this.ds.x - this.init_pointer.x);
-                this.$props.rect.height = Math.abs(event.clientY - this.ds.y - this.init_pointer.y);
+                this.rect.width  = Math.abs(event.clientX - this.ds.x - this.init_pointer.x);
+                this.rect.height = Math.abs(event.clientY - this.ds.y - this.init_pointer.y);
+                graph_view.selection_active = true;   
 
                 // Calcultate left-most position
-                this.$props.rect.x = event.clientX > this.init_pointer.x + this.ds.x ? 
+                this.rect.x = event.clientX > this.init_pointer.x + this.ds.x ? 
                     this.init_pointer.x - this.graph_position.x + this.ds.x 
                     : 
-                    this.init_pointer.x - this.graph_position.x + this.ds.x - this.$props.rect.width;
+                    this.init_pointer.x - this.graph_position.x + this.ds.x - this.rect.width;
 
                 // Calculate top-most position
-                this.$props.rect.y = event.clientY > this.init_pointer.y + this.ds.y ? 
+                this.rect.y = event.clientY > this.init_pointer.y + this.ds.y ? 
                     this.init_pointer.y - this.graph_position.y + this.ds.y 
                     : 
-                    this.init_pointer.y - this.graph_position.y + this.ds.y - this.$props.rect.height;
+                    this.init_pointer.y - this.graph_position.y + this.ds.y - this.rect.height;
 
-                let my_rect = this.$el.getBoundingClientRect();
+                // Show element
+                let my_rect = this.$el.getBoundingClientRect(), grp_indices = [];
                 for (const index in graph_view.elements) {
-                    let element = window.graph_elements[index];
-                    if ((element.component_id != 0 || element.component_id != 1 || element.component_id != 4) && element.is_deleted) continue;
+                    let element = graph_view.elements[index];
 
-                    let el_rect = element.$el.getBoundingClientRect();     
+                    if (!(element.component_id == 0 || element.component_id == 1 || element.component_id == 4) || element.is_deleted) continue;
 
-                    if (graph_view.elements[index].component_id === 4) {
-                        let group_rect = {
-                            x: graph_view.elements[index].data.position.x,
-                            y: graph_view.elements[index].data.position.y + element.get_rect().height - element.init_height,
-                            height: element.init_height,
-                            width: element.get_rect().width
-                        };                     
-                        if (graph_view.collision_check(my_rect,group_rect))
-                            element.selected = true;
+                    let el_rect = window.graph_elements[index].$el.getBoundingClientRect();     
+                    if (element.component_id === 4) {
+                        let group_rect = window.graph_elements[index].$el.querySelector('#group_info').getBoundingClientRect();
+                        if (graph_view.collision_check(my_rect,group_rect)) {
+                            window.graph_elements[index].is_selected  = true;
+                            for (let grp_index of window.graph_elements[index].group_indices) {
+                                grp_indices.push(grp_index);
+                            }
+                            for (let el_index of window.graph_elements[index].element_indices) {
+                                window.graph_elements[el_index].is_selected = false;
+                            }
+                        }
                         else
-                            element.selected = false;
+                            window.graph_elements[index].is_selected  = false;
                     }
+                    else if (graph_view.collision_check(my_rect,el_rect)) 
+                        window.graph_elements[index].is_selected  = true;
+                    else 
+                        window.graph_elements[index].is_selected  = false;
                 }
 
+                // Deselected nested groups in selected groups
+                for (const grp_index of grp_indices) {
+                    window.graph_elements[grp_index].is_selected  = false;
+                }
             },
             end_select () {
-                this.$props.rect.x = -Number.MAX_SAFE_INTEGER;
-                this.$props.rect.y  = -Number.MAX_SAFE_INTEGER;
                 this.ds = Object.assign({}, {x: 0, y: 0});
                 graph_view.cursor_state = Object.assign({}, {type: 'default'});
 
+                let selected_indices = [];
                 for (const index in graph_view.elements) {
                     let element = window.graph_elements[index];
-                    if (!element.is_selected) continue;
+                    if (!element.is_selected) continue
+                    selected_indices.push(index);
+                }
 
-                    let el_rect = element.$el.getBoundingClientRect();                    
-                    if (!element.is_selected) {
-                        element.selected = true;
-                    } else { 
-                        element.selected = false;
+                let accumulated_group_index = 0;
+                for (const index of selected_indices) {
+                    accumulated_group_index += graph_elements[index].parent_group_index || 0 + graph_elements[index].group_index || 0;
+                }
+
+                if(selected_indices.length > 0) {
+                    let common_group_index = (graph_elements[selected_indices[0]].group_index || 0) + (graph_elements[selected_indices[0]].parent_group_index || 0);
+                    let is_same_group = accumulated_group_index / selected_indices.length == common_group_index;
+                    if (is_same_group) {
+                        let last_id = -1, id_list = selected_indices.map(index => graph_view.elements[index].id);
+                        for(let index in graph_view.elements) {
+                            let el = graph_view.elements[index];
+                            if((el.component_id == 1 || el.component_id == 0 || el.component_id == 4) && last_id < el.id)
+                                last_id = el.id;
+                        };
+                        
+                        for (let grp_index of selected_indices) {
+                            if (graph_view.elements[grp_index].component_id == 4) graph_view.elements[grp_index].data.parent = last_id + 1;
+                        }
+
+                        graph_view.elements.push({
+                            id: last_id + 1, component_id: 4, name: "Group", data: {
+                                position: window.mouse_on_graph,
+                                elements: id_list,
+                                parent: common_group_index != -1 ? graph_view.elements[common_group_index].id : 0,
+                                z_index: graph_view.elements.length + 1
+                            }
+                        });
                     }
                 }
-                
+
                 // Stop scroll handler
                 graph_view.scroll_manager.stop();
 
-                this.selectables = null;
+                // Deselect all selected elements
+                for(let index of selected_indices) {     
+                    window.graph_elements[index].is_selected = false;
+                }
+
+                // Fold selection box  
+                window.removeEventListener('pointerup', this.end_select);
+                window.removeEventListener('pointercancel', this.end_select);           
+                graph_view.selection_active = false;   
+                this.is_shown = false;
             },
             on_scroll () { 
                 // If drag hasnt occured yet - no change in position
-                if (this.$props.rect.x === this.$props.rect.y) return;
+                if (this.rect.x === this.rect.y) return;
 
                 let mouse = { x: this.last_event.pageX - window.graph_position.x, y: this.last_event.pageY - window.graph_position.y };
                 if (mouse.x < 20) {
@@ -141,37 +185,17 @@
                     this.ds.y += -5;
                     graph_view.move_camera_by(0, -5);
                 }
-                this.set_rect(this.last_event);
             },
             set_rect(event) {
             },
-
-            get_selectables () {
-                if(!this.selectables) {
-                    const items = graph_view.elements.filter(item => {
-                        let info = {type: 'i', id: item.id};
-                        let rect = graph_view.inverse_transformation(info);
-                        return {info,rect};
-                    });
-
-                    const groups = graph_view.groups.map(item => {
-                        let info = {type: 'g', id: item.id};
-                        let rect = graph_view.inverse_transformation(info);
-                        return {info,rect};
-                    });
-
-                    this.selectables = [...items, ...groups];
-                }
-                return this.selectables;
-            }
         }, 
         computed: {
             transformation () {
                 return {
-                    top: `${this.$props.rect.y}px`,
-                    left:  `${this.$props.rect.x }px`,
-                    height:`${this.$props.rect.height}px`,
-                    width:`${this.$props.rect.width}px`,
+                    top: `${this.rect.y}px`,
+                    left:  `${this.rect.x}px`,
+                    height:`${this.rect.height}px`,
+                    width:`${this.rect.width}px`,
                     'z-index':  1000
                 }
             }
@@ -180,9 +204,8 @@
 </script>
 
 <template>
-    <div class="s_box" color="#8789ff"
-        :style="transformation"
-        @pointerup="end_select"> 
+    <div class="s_box" color="#8789ff" :style="transformation"
+        @pointerup.prevent="end_select"> 
         <div class="wrapper"></div>
     </div>
     
@@ -199,8 +222,9 @@
 }
 .wrapper {
     position: absolute;
-    height: 120%;
-    width: 120%;
+
+    height: 100vh;
+    width: 100vw;
     opacity: 0;
 }
 </style>

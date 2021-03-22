@@ -31,7 +31,7 @@
                 element_indices: [],
                 group_indices: [],
                 parent_group_index: -1,
-                selected: false
+                is_selected: false
             }
         },
         created () {
@@ -51,18 +51,28 @@
             this.init_width = rect.width;
             graph_view.elements_loaded++;
 
-
+            // Remove common elements of parent groups
+            this.parent_group_index = graph_view.elements.findIndex(el => el.id == this.$props.data.parent && el.component_id == 4);
+            if (this.parent_group_index != -1)
+                graph_view.elements[this.parent_group_index].data.elements = graph_view.elements[this.parent_group_index].data.elements
+                                                                            .filter (elem => this.$props.data.elements.indexOf(elem) < 0);
+            
             if(graph_view.first_load) {
                 this.all_loaded();
                 this.bring_to_front();
             }
+
+
         },
         methods: {
             all_loaded: function() {
                 // Determine new calculated rect & bounds
                 this.update_indices();
                 this.update_group_size();
-                if(this.parent_group_index != -1) window.graph_elements[this.parent_group_index].update_group_size();
+                if(this.parent_group_index != -1) { 
+                    window.graph_elements[this.parent_group_index].update_indices();
+                    window.graph_elements[this.parent_group_index].update_group_size();
+                }
 
                 this.bring_to_front();
             },
@@ -88,7 +98,7 @@
                 };
 
                 // Delete group if empty 
-                if (this.element_indices.length + this.group_indices.length === 0) this.on_delete();
+                if (this.element_indices.length + this.group_indices.length === 0) this.on_delete();    
             },
             bring_to_front: function(ignore_parent = false) {
                 // If father present then call only the father's function
@@ -171,6 +181,7 @@
                 if(this.parent_group_index != -1) window.graph_elements[this.parent_group_index].update_group_size();
             },
             drag_start_addition: function(event) {
+                // console.log(window.graph_elements[this.parent_group_index]);
                 if(this.parent_group_index != -1) window.graph_elements[this.parent_group_index].bring_to_front();
 
                 // Initialize all elements
@@ -266,20 +277,25 @@
                 });
 
                 // Detach inner elements
-                for(let elem in this.element_indices)
-                     window.graph_elements[this.element_indices[elem]].group_index = -1;
+                for(let elem in this.element_indices) {
+                    window.graph_elements[this.element_indices[elem]].group_index = -1;
+                }
 
                 // Detach inner groups
-                for(let elem in this.group_indices)
+                for(let elem in this.group_indices) {
+                    graph_view.elements[this.group_indices[elem]].data.parent = this.$props.data.parent;
                     window.graph_elements[this.group_indices[elem]].parent_group_index = -1;
+                }
 
-                // Remove from owning group
+
+                // Add group elements to owning group's elements
                 if (this.parent_group_index !== -1) 
                 {
-                    window.graph_elements[this.parent_group_index].data.elements = window.graph_elements[this.parent_group_index].data.elements.filter(id => id != my_id);
+                    graph_view.elements[this.parent_group_index].data.elements = [...window.graph_elements[this.parent_group_index].data.elements, ...this.$props.data.elements];
                     window.graph_elements[this.parent_group_index].update_indices();
                     window.graph_elements[this.parent_group_index].update_group_size();
                 }
+
             },
         },
         computed: {
@@ -307,7 +323,7 @@
 
 <template>
     <div class="group" color="#8789ff"
-        :style="transformation" :class="{ selected }"
+        :style="transformation" :class="{ is_selected }"
         @pointerdown.prevent="drag_start"
         @contextmenu.prevent="on_context"
         @pointerup.prevent="drag_end"
@@ -316,9 +332,9 @@
 
         </div>
 
-        <div class="group_info">
+        <div id="group_info">
             <v-avatar left class="group_type darken-4 green">G</v-avatar>
-            <div style="display: inline;">{{ name }}</div>
+            <div style="display: inline;">{{ id }}</div>
         </div>
     </div>
 </template>
@@ -343,7 +359,7 @@
     box-shadow: 50px 50px 50px rgba(255, 242, 94, 0); /* Removing weird trace on chrome */
 }
 
-.group_info {
+#group_info {
     background: #8789ff;
     border-bottom-left-radius: 9px;
     border-bottom-right-radius: 9px;
@@ -361,7 +377,7 @@
     z-index: -1;
 }
 
-.group.selected {
+.group.is_selected {
     outline: dashed white 2px;
 }
 </style>

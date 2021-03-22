@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: mysql_web:3306
--- Generation Time: Mar 22, 2021 at 01:22 PM
+-- Generation Time: Mar 22, 2021 at 02:07 PM
 -- Server version: 8.0.23
 -- PHP Version: 7.4.15
 
@@ -321,6 +321,17 @@ CREATE TABLE `items` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `item_enums`
+--
+
+CREATE TABLE `item_enums` (
+  `item_id` int NOT NULL,
+  `enum_id` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `laguages`
 --
 
@@ -358,20 +369,20 @@ CREATE TABLE `orm_graph_elements` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `orm_graph_elemet_types`
+-- Table structure for table `orm_graph_element_types`
 --
 
-CREATE TABLE `orm_graph_elemet_types` (
+CREATE TABLE `orm_graph_element_types` (
   `id` int NOT NULL,
-  `name` varchar(50) NOT NULL,
+  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `component_index` int NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `orm_graph_elemet_types`
+-- Dumping data for table `orm_graph_element_types`
 --
 
-INSERT INTO `orm_graph_elemet_types` (`id`, `name`, `component_index`) VALUES
+INSERT INTO `orm_graph_element_types` (`id`, `name`, `component_index`) VALUES
 (1, 'item', 0),
 (2, 'relation', 1),
 (3, 'enum_type', 2),
@@ -494,9 +505,7 @@ CREATE TABLE `session_states` (
 --
 
 INSERT INTO `session_states` (`id`, `name`, `inactive_timeout`, `active_timeout`, `auth_task`, `parent`, `auth_input`) VALUES
-(1, 'ADMIN_STATE', 600, 0, 1, 0, NULL),
-(2, 'User', 0, 0, NULL, 0, NULL),
-(3, 'Premium', 0, 0, NULL, 0, NULL);
+(1, 'ADMIN_STATE', 600, 0, 1, 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -707,6 +716,12 @@ ALTER TABLE `items`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `item_enums`
+--
+ALTER TABLE `item_enums`
+  ADD PRIMARY KEY (`item_id`,`enum_id`);
+
+--
 -- Indexes for table `laguages`
 --
 ALTER TABLE `laguages`
@@ -725,9 +740,9 @@ ALTER TABLE `orm_graph_elements`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `orm_graph_elemet_types`
+-- Indexes for table `orm_graph_element_types`
 --
-ALTER TABLE `orm_graph_elemet_types`
+ALTER TABLE `orm_graph_element_types`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -921,9 +936,9 @@ ALTER TABLE `orm_graph_elements`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `orm_graph_elemet_types`
+-- AUTO_INCREMENT for table `orm_graph_element_types`
 --
-ALTER TABLE `orm_graph_elemet_types`
+ALTER TABLE `orm_graph_element_types`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --

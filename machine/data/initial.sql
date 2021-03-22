@@ -65,15 +65,6 @@ CREATE TABLE `admin_users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `admin_users`
---
-
-INSERT INTO `admin_users` (`id`, `username`, `password`, `created`) VALUES
-(1, 'admin', '$2y$10$u4K7M74ZP5gotxKagTB6l.W/EL6kvYYW43KkSkQUrwuFOIt.vdsMO', '2021-03-14 10:35:12');
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `connections`
 --
 

@@ -44,9 +44,53 @@ class ORMGraph
         if(!isset($orm_graphs[$_POST['graph_id']])) Status::message(Status::ERROR, "Graph not found, was it deleted?");
 
         // Constrcut elements object
-        $elements = [];
+        $orm_graph_elements = [];
+        DatabaseManager::fetchInto("main", $orm_graph_elements, 
+            "SELECT `orm_graph_elements`.*, `orm_graph_element_types`.component_index as component_id FROM `orm_graph_elements` WHERE graph_id = :graph_id INNER JOIN `orm_graph_element_types` ON `orm_graph_element_types`.id = `orm_graph_elements`.type",
+            [ 'graph_id' => $_POST['graph_id'] ]);
+        
+        // Structure the elements in a manner that is easier for the UI
+        foreach($orm_graph_elements as $element) {
+            $element['data'] = [];
+            $element['data']['position'] = [
+                'x' => $element['position_x'],
+                'y' => $element['position_y']
+            ];
+            $element['data']['z_index'] = $element['z_index'];
 
-        Status::message(Status::SUCCESS, $elements);
+            unset($element['position_x']);
+            unset($element['position_y']);
+            unset($element['z_index']);
+
+            switch($element['type']) {
+                case 2: // Relation
+                    // Get connected items
+                    $relations = CacheManager::get('relations');
+                    if(isset($relations[$element['element_id']])) {
+                        $element['data']['to'] = $relations[$element['element_id']]['to'];
+                        $element['data']['from'] = $relations[$element['element_id']]['from'];
+                    }
+                    break;
+                case 4: // Enum
+                    // Get connected items & types
+                    $element['data']['types'] = CacheManager::get('enum_types')[$element['element_id']];
+                    $element['data']['connected'] = CacheManager::get('item_enums')[$element['element_id']];
+                    break;
+                case 5: // Group
+                    // Get connected items
+                    $items = CacheManager::get('items');
+                    $element['data']['elements'] = [];
+
+                    foreach(array_keys($items) as $item_id)
+                        if($items[$item_id]['parent'] == $element['element_id']) 
+                            $element['data']['elements'][] = $item_id;
+                    break;
+            }
+
+            unset($element['element_id']);
+        }
+
+        Status::message(Status::SUCCESS, $orm_graph_elements);
     }
 
     public static function set() {

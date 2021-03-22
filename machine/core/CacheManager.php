@@ -120,6 +120,12 @@ use DateTime;
         self::getTable('inputs', $refresh);
         self::getTable('input_values', $refresh, 0, 'id', false);
         self::getTable('databases', $refresh, 0, 'name', false);
+        self::getTable('items', $refresh, 0, 'id', false);
+        self::getTable('relations', $refresh, 0, 'id', false);
+        self::getTable('relation_types', $refresh, 0, 'id', false);
+        self::getTable('enums', $refresh, 0, 'id', false);
+        self::getTable('enum_types', $refresh, 0, 'enum_id', false);
+        self::getTable('item_enums', $refresh, 0, 'enum_id', false);
 
         foreach(self::get('databases') as $key => $db_data) DatabaseManager::$connections_metadata[$key] = $db_data[0];
     }

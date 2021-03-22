@@ -85,12 +85,10 @@
 
                     // Groups
                     { id: 5, component_id: 4, name: 'group', data: {
-                        elements: [ 1, 2, 3 ],
-                        parent: 0
+                        elements: [ 1, 2, 4, 6 ]
                     }},
                     { id: 6, component_id: 4, name: 'group', data: {
-                        elements: [ 4 ],
-                        parent: 5
+                        elements: [ 4 ]
                     }}
                 ],
                 lines: [

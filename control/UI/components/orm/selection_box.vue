@@ -32,22 +32,14 @@
                     y:  0,
                     width: 0,
                     height: 0
-                },
-                ds: { x: 0, y: 0 },
-                graph_position: { x: 0, y: 0 }
+                }
             }
         },
         created () {
-            graph_view.selection_box = this;
-        },
-        mounted () {
-
+            window.selection_box = this;
         },
         methods: {
             start_select (event) {
-                this.init_pointer   = Object.assign({}, { x: event.clientX, y: event.clientY }); 
-                this.graph_position = document.getElementById('graph_view').getBoundingClientRect();
-
                 // Set graph view drag handler
                 graph_view.drag_handler = this.on_select; 
                 
@@ -59,21 +51,21 @@
                 
             },
             on_select (event) {
-                this.rect.width  = Math.abs(event.clientX - this.ds.x - this.init_pointer.x);
-                this.rect.height = Math.abs(event.clientY - this.ds.y - this.init_pointer.y);
+                this.rect.width  = Math.abs(event.clientX - window.init_pointer.x);
+                this.rect.height = Math.abs(event.clientY - window.init_pointer.y);
                 graph_view.selection_active = true;   
 
                 // Calcultate left-most position
-                this.rect.x = event.clientX > this.init_pointer.x + this.ds.x ? 
-                    this.init_pointer.x - this.graph_position.x + this.ds.x 
+                this.rect.x = event.clientX > window.init_pointer.x ? 
+                    window.init_pointer.x - window.graph_position.x
                     : 
-                    this.init_pointer.x - this.graph_position.x + this.ds.x - this.rect.width;
+                    window.init_pointer.x - window.graph_position.x - this.rect.width;
 
                 // Calculate top-most position
-                this.rect.y = event.clientY > this.init_pointer.y + this.ds.y ? 
-                    this.init_pointer.y - this.graph_position.y + this.ds.y 
+                this.rect.y = event.clientY > window.init_pointer.y ? 
+                    window.init_pointer.y - window.graph_position.y
                     : 
-                    this.init_pointer.y - this.graph_position.y + this.ds.y - this.rect.height;
+                    window.init_pointer.y - window.graph_position.y - this.rect.height;
 
                 // Show element
                 let my_rect = this.$el.getBoundingClientRect(), grp_indices = [];
@@ -109,7 +101,6 @@
                 }
             },
             end_select () {
-                this.ds = Object.assign({}, {x: 0, y: 0});
                 graph_view.cursor_state = Object.assign({}, {type: 'default'});
 
                 let selected_indices = [];
@@ -196,7 +187,7 @@
                     left:  `${this.rect.x}px`,
                     height:`${this.rect.height}px`,
                     width:`${this.rect.width}px`,
-                    'z-index':  1000
+                    'z-index':  graph_view.elements.length + 1
                 }
             }
         },

@@ -93,7 +93,6 @@
                         parent: 5
                     }}
                 ],
-                lookup_table: { 'i': [], 't': [], 'e': [], 'g': []},
                 lines: [
 
                 ],
@@ -118,8 +117,7 @@
                     y: 0
                 },
                 selection_active: false,
-                side_menu_actions: [
-                ],
+                side_menu_actions: [],
                 scroll_manager: {
                     id: null,
                     interval: 20,
@@ -139,7 +137,7 @@
                         return this.id; 
                     }
                 },
-                cursor_state: {type: "default"},
+                cursor_state: "auto",
                 elements_loaded: 0,
                 first_load: false,
                 action_selected: false,
@@ -155,9 +153,9 @@
             this.side_menu_actions = [
                     {
                         starter: () => {
-                            graph_view.cursor_state = {type: "create", component_id: 0};
+                            graph_view.cursor_state = "create";
                             graph_view.current_action = () => {
-                                let last_id = 1;
+                                let last_id = 0;
 
                                 for(let el_index in graph_view.elements) {
                                     let el = graph_view.elements[el_index];
@@ -168,7 +166,7 @@
                                 graph_view.elements.push({
                                     id: last_id + 1, component_id: 0, name: "Item", data: {
                                         position: window.mouse_on_graph,
-                                        z_index: 0
+                                        z_index: graph_view.elements.length
                                     }
                                 });
                             }
@@ -178,7 +176,7 @@
                     },
                     {
                         starter: () => {
-                            graph_view.cursor_state = { type: "create", component_id: 1 };
+                            graph_view.cursor_state = "create";
                             graph_view.current_action = () => {
                                 let last_id = 1;
 
@@ -192,10 +190,9 @@
                                     id: last_id + 1, component_id: 1, name: "Relation", data: {
                                         position: window.mouse_on_graph,
                                         type: 0,
-                                        z_index: 0
+                                        z_index: graph_view.elements.length
                                     }
                                 });
-                                
                             };
                         },
                         icon: 'mdi-arrow-right',
@@ -203,25 +200,21 @@
                     },
                     {
                         starter: () => {
-                            graph_view.cursor_state = {type: "delete"};
-                            graph_view.current_action = (event) =>{
-                                let pointer_rect = {
-                                    x: window.mouse_on_graph.x,
-                                    y: window.mouse_on_graph.y,
-                                    height: 5, 
-                                    width: 5
-                                };
+                            graph_view.cursor_state = "delete";
+                            graph_view.current_action = (event) => {
                                 let target_element = -1, z_index = 0;
 
                                 for(let index in [...graph_view.elements.keys()]) {
-                                    let cmp_id = graph_view.elements[index].component_id;
-
                                     // Skip undefined or deleted
                                     if(window.graph_elements[index] === undefined || window.graph_elements[index].is_deleted)
                                         continue;
                                     
                                     // Check collisions
-                                    if (window.graph_elements[index].data.z_index > z_index && graph_view.collision_check(pointer_rect, window.graph_elements[index].get_rect())) {
+                                    let obj_rect = window.graph_elements[index].get_rect();
+                                    if (window.graph_elements[index].data.z_index > z_index && (
+                                        obj_rect.x < window.mouse_on_graph.x && obj_rect.x + obj_rect.width > window.mouse_on_graph.x
+                                        && obj_rect.y < window.mouse_on_graph.y && obj_rect.y + obj_rect.height > window.mouse_on_graph.y
+                                    )) {
                                         target_element = index;
                                         z_index = graph_view.elements[index].data.z_index;
                                     }
@@ -236,7 +229,7 @@
                     },
                     {
                         starter: () => {
-                            graph_view.cursor_state = {type: "create", data: 3};
+                            graph_view.cursor_state = "create";
                             graph_view.current_action = () => {
                                 let last_id = 1;
 
@@ -251,7 +244,7 @@
                                         position: window.mouse_on_graph,
                                         types: [],
                                         connected: [],
-                                        z_index: 0
+                                        z_index: graph_view.elements.length
                                     }
                                 });
                             };
@@ -261,7 +254,7 @@
                     }, 
                     {
                         starter: () => {
-                            graph_view.cursor_state = {type: "create", data: 2};
+                            graph_view.cursor_state = "create";
                             graph_view.current_action = () => {
                                 let last_id = 1;
 
@@ -274,7 +267,7 @@
                                 graph_view.elements.push({
                                     id: last_id + 1, component_id: 2, name: "Type", data: {
                                         position: window.mouse_on_graph,
-                                        z_index: 0
+                                        z_index: graph_view.elements.length
                                     }
                                 });
                             }
@@ -284,10 +277,8 @@
                     },
                     {
                         starter: () => {
-                            graph_view.cursor_state = {type: "select"};
-                            graph_view.current_action = (event) =>{
-                                graph_view['selection_box'].start_select(event);
-                            };
+                            graph_view.cursor_state = "crosshair";
+                            graph_view.current_action = window.selection_box.start_select;
                         },
                         icon: 'fa-object-group', 
                         text: "Add Group" 
@@ -298,7 +289,6 @@
         },
         mounted () {
             this.update_graph_position();
-
         },
         methods: {
             bring_to_front: function(element_index) {
@@ -355,17 +345,10 @@
                     y: event.clientY
                 };
                 this.init_camera = Object.assign({}, this.camera);
-                let cursor_state = Object.assign({}, this.cursor_state);
 
                 if(this.current_action != window.empty_function) {
-                    // Generic code
                     // Determine pointer position in respect to graph transformation
-                    let center_rect = document.getElementById('graph_center').getBoundingClientRect();
-                    let mouse = { x: window.init_pointer.x - graph_position.x, y: window.init_pointer.y - graph_position.y };
-                    let differential = { x: center_rect.x - graph_position.x, y: center_rect.y - graph_position.y};
-
-                    window.mouse_on_graph = { x: (mouse.x-differential.x) / this.scale, y: (mouse.y - differential.y) / this.scale};
-        
+                    window.mouse_on_graph = { x: (window.init_pointer.x - graph_position.x - this.camera.x) / this.scale, y: (window.init_pointer.y - graph_position.y - this.camera.y) / this.scale};
                     this.current_action(event);
                     return;
                 }
@@ -434,19 +417,15 @@
             },
             pointer_up(event) {
                 this.tap_counter = 0;
-
-
+                
                 // Empty current action
                 this.current_action = window.empty_function;
-                
-                if(this.cursor_state.data !== 'add-relation') this.cursor_state = Object.assign({}, {type: 'default'});
-
-                // graph_view.$refs['s_box'].is_shown = false;
 
                 // Reset drag event to none
                 this.drag_handler = window.empty_function;
 
                 this.scroll_manager.stop();
+                graph_view.cursor_state = "auto";
             },
             wheel (event) {
                 // Update graph position
@@ -480,83 +459,13 @@
                 this.camera.x += (window.init_pointer.x - mid.x) * (1 - change);
                 this.camera.y += (window.init_pointer.y - mid.y) * (1 - change);
             },
-            // create_element_
-            mutations_handler(nth_step) {
-                // Go up on stack
-                if (this.mutation_manager.curr_step < nth_step && nth_step < this.mutation_manager.stack.length) {
-                    while (this.mutation_manager.curr_step < nth_step) {
-                        // Extract data mutation
-                        let mutation = JSON.parse(JSON.stringify(this.mutation_manager.stack[this.mutation_manager.curr_step]));
-
-                        // Iterate mutation steps 
-                        while (mutation.length) {
-                            let sub_mutation = mutation.pop();
-                            sub_mutation.qwe
-                        }
-                        // Update current step
-                        this.mutation_manager.curr_step++;
-                    }
-                }
-                // Go down on stack
-                else if (nth_step < this.mutation_manager.curr_step && nth_step >= 0) {
-                    
-                }
-                if (revert) {
-                    this.mutation_manager[this.mutation_step]
-                }
-            },
-            add_mutation (timestamp, commands) {
-                
-            },
-            /** Function that stupidly execute mutation */
-            execute_mutation (timestamp) {
-                let commands = this.mutations[timestamp];
-                commands.forEach((command) => {
-                    switch (command.type) {
-                        case 'create':
-                            command.
-                            break;
-                    
-                        default:
-                            break;
-                    }
-                });
-            },
             move_camera_by (dx, dy) {
                 this.camera.x += dx;
                 this.camera.y += dy;
             },
-            /**
-             * Create new element on screen according to params.
-             * @param {String} type The type to show
-             * @param {Object} properties Unique element properties to set
-             */
-            create_element_on_runtime (type, properties = {}) { 
-                const common = { name: properties.name, 
-                                index: graph_view.front_z_index, 
-                                rect: { ...properties.rect }, 
-                                data: properties.data };
-                
-                if (type === 'item') {
-                    let item_id = Math.max(...graph_view.items.map(i => i.id),0) + 1;
-                    graph_view.items.push({...common, id: item_id});
-                }
-                if (type === 'enum') {
-                    let enum_id = Math.max(...graph_view.enums.map(e => e.id),0) + 1;
-                    graph_view.enums.push({...common, id: enum_id});
-                }
-                if (type === 'enum-type') {
-                    let enum_type_id = Math.max(...graph_view.enum_types.map(t => t.id),0) + 1;
-                    graph_view.enum_types.push({...common, id: enum_type_id});
-                }
-                if (type === 'group') {
-                    let group_id = Math.max(...graph_view.groups.map(g => g.id),0) + 1;
-                    graph_view.groups.push({...common, id: group_id });
-                }
-            },
             // Update graph position
             update_graph_position() {
-                let rect = this.$el.getBoundingClientRect();
+                let rect = document.getElementById('graph_view').getBoundingClientRect();
                 // Stores the current position of the graph on the screen
                 window.graph_position = {
                     x: rect.x,
@@ -578,106 +487,9 @@
                     size_object_1.y < size_object_2.y + size_object_2.height &&
                     size_object_1.y > size_object_2.y - size_object_1.height
                 );
-            },
-            /**
-             * Function that gets Info about an element and calucaltes its absolute position relative to the graph.
-             * @param {Info} info
-             * @returns {Rect} 
-             */
-            // TODO: Calculate rect mathematically
-            inverse_transformation (info) { 
-                let revert_rect = {
-                    x: 0,
-                    y: 0,
-                    width: 0,
-                    height: 0,
-                }
-
-                const instance = this.$refs[info.type + info.id];
-                if (instance) {
-                    const el_rect = instance.$el.getBoundingClientRect();
-                    revert_rect = {
-                        x: el_rect.x - window.graph_position.x,
-                        y: el_rect.y - window.graph_position.y,
-                        width: el_rect.width,
-                        height: el_rect.height,
-                    }
-                }
-                return revert_rect;
-            },
-            /**
-             * Function that gets element's Info and returns the corresponding Element.
-             * The function uses simple caching mechanism for faster Element lookup (O(1) instead of 0(n)).
-             * @param {Info} info
-             * @returns {Element} 
-             */
-            get_element_by_info (info) {
-                if(!this.lookup_table[info.type][info.id]) {
-                    switch (info.type) {
-                        case 'i':
-                            this.lookup_table['i'][info.id] = graph_view.items.find((i) => i.id === info.id);
-                            break;
-                        case 'e':
-                            this.lookup_table['e'][info.id] = graph_view.enums.find((e) => e.id === info.id);
-                            break;
-                        case 't':
-                            this.lookup_table['t'][info.id] = graph_view.enum_types.find((t) => t.id === info.id);
-                            break;
-                        case 'g':
-                            this.lookup_table['g'][info.id] = graph_view.groups.find((g) => g.id === info.id);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                return this.lookup_table[info.type][info.id];
-            }
-        },
-        computed: {
-            min_x: function () {
-                let min_x = Number.MAX_SAFE_INTEGER;
-                for (const index in this.elements) {
-                    if (graph_view[index].is_deleted) continue;
-                    min_x = Math.min(min_x, graph_view[index].position.x);
-                }
-                return min_x;
-            },
-            max_x: function () {
-                let max_x = Number.MIN_SAFE_INTEGER;
-                for (const index in this.elements) {
-                    if (graph_view[index].is_deleted) continue;
-                    max_x = Math.max(max_x, graph_view[index].position.x);
-                }
-                return max_x;
-            },
-            min_y: function () {
-                let min_y = Number.MAX_SAFE_INTEGER;
-                for (const index in this.elements) {
-                    if (graph_view[index].is_deleted) continue;
-                    min_y = Math.min(min_y, graph_view[index].position.y);
-                }
-                return min_y;
-            },
-            max_y: function () {
-                let max_y = Number.MIN_SAFE_INTEGER;
-                for (const index in this.elements) {
-                    if (graph_view[index].is_deleted) continue;
-                    max_y = Math.max(min_x, graph_view[index].position.x);
-                }
-                return max_y;
             }
         },
         watch: {
-            cursor_state: function (state) {
-                document.body.classList.add('reset-all-cursors');
-                this.$el.classList.remove('cursor_default');
-                this.$el.classList.remove('cursor_delete');
-                this.$el.classList.remove('cursor_create');
-                this.$el.classList.remove('cursor_select');
-
-                this.$el.classList.add('cursor_' + state.type);
-                if ( state.type === 'default') document.body.classList.remove('reset-all-cursors');
-            },
             elements_loaded: function(val) {
                 if(val == this.elements.length && !this.first_load)
                 {
@@ -723,7 +535,7 @@
                         @pointerdown="pointer_down"
                         @pointerup="pointer_up"
                         @pointercancel="pointer_up"
-                        :style="{ 'overflow' : 'hidden' }">
+                        :style="{ 'cursor' : cursor_state }">
                         <component ref="side_menu"
                             :is="side_menu_comp"
                             :actions="side_menu_actions"
@@ -769,6 +581,10 @@
 /* Please style this crap, with style */
 
 /* Disables all cursor overrides when body has this class. */
+#graph_view {
+    overflow: hidden;
+}
+
 #graph_view, #graph_center {
     position: relative;
     width: 100%;

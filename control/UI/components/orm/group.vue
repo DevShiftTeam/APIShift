@@ -334,7 +334,7 @@
 
         <div id="group_info">
             <v-avatar left class="group_type darken-4 green">G</v-avatar>
-            <div style="display: inline;">{{ id }}</div>
+            <div style="display: inline;">{{ name }}</div>
         </div>
     </div>
 </template>

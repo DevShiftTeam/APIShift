@@ -61,9 +61,6 @@
                 if (!event.target.closest('#context_menu_primary')) {
                     graph_view.context_menu.is_active = false;
                 }
-            },
-            mouseleave() {
-                console.log('asd');
             }
         }
     }

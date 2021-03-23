@@ -29,7 +29,6 @@
         data () {
             return {
                 hovered_index: -1,
-                is_shown: true
             }
         },
         created () {

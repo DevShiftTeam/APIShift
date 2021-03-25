@@ -42,7 +42,7 @@ module.exports = {
   methods: {
     pointer_down(event) {
       if(graph_view.drag_end_lock) return;
-      
+
       // Find point
       let obj_holder = this.src_ref;
 
@@ -89,8 +89,8 @@ module.exports = {
 
       let graph_center_rect = graph_view.$el.querySelector('#graph_center').getBoundingClientRect();
 
-      obj_holder.data.position.x = (event.clientX - graph_center_rect.x) / graph_view.scale - obj_holder.get_rect().width / 2;
-      obj_holder.data.position.y = (event.clientY - graph_center_rect.y) / graph_view.scale - obj_holder.get_rect().height / 2;
+      obj_holder.data.position.x = (event.clientX - graph_center_rect.x) / graph_view.scale - obj_holder.get_rect.width / 2;
+      obj_holder.data.position.y = (event.clientY - graph_center_rect.y) / graph_view.scale - obj_holder.get_rect.height / 2;
 
       obj_holder.drag_start(event); 
     },

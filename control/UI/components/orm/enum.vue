@@ -76,7 +76,7 @@
                         continue;
                     
                     // Check collisions
-                    if (window.graph_elements[index].data.z_index > z_index && graph_view.collision_check(this.get_rect(), window.graph_elements[index].get_rect())) {
+                    if (window.graph_elements[index].data.z_index > z_index && graph_view.collision_check(this.get_rect, window.graph_elements[index].get_rect)) {
                         target_element = index;
                         z_index = graph_view.elements[index].data.z_index;
                     }
@@ -107,7 +107,7 @@
                     let index = graph_view.elements.findIndex((elem) => elem.id == type_id && elem.component_id == 2);
 
                     // Calculate width & height
-                    let rect = window.graph_elements[index].get_rect();
+                    let rect = window.graph_elements[index].get_rect;
                     window.graph_elements[index].attached_enum = this.$props.index;
                     this.occupied_height += rect.height + 7;
                     if(this.occupied_width - 14 < rect.width) this.occupied_width = rect.width + 14; // 14 for 7 pixel padding at each side
@@ -125,10 +125,10 @@
 
                     graph_view.elements[index].data.position.y = current_position_height;
                     graph_view.elements[index].data.position.x
-                        = this.$props.data.position.x + (this.occupied_width / 2) - (window.graph_elements[index].get_rect().width / 2);
+                        = this.$props.data.position.x + (this.occupied_width / 2) - (window.graph_elements[index].get_rect.width / 2);
 
                     graph_view.bring_to_front(index);
-                    current_position_height += window.graph_elements[index].get_rect().height + 7;
+                    current_position_height += window.graph_elements[index].get_rect.height + 7;
                 }
             },
             create_line (element_index) {
@@ -174,6 +174,33 @@
 
                 // Remove conection from internal data
                 this.$props.data.connected = this.$props.data.connected.filter(connected_id => connected_id != id);
+            },
+            on_context_addition () {
+                graph_view.context_menu.actions = [
+                    {
+                        starter: () => {
+                            this.is_edit_mode = true;
+                            graph_view.context_menu.is_active = false;
+                        },
+                        name: 'Edit',
+                        icon: 'mdi-pencil',
+                    },
+                    {
+                        starter: () => {
+                            graph_view.context_menu.is_active = false;
+                        },
+                        name: 'Duplicate',
+                        icon: 'mdi-content-duplicate',
+                    },
+                    {
+                        starter: () => {
+                            this.on_delete();
+                            graph_view.context_menu.is_active = false;
+                        },
+                        name: 'Delete',
+                        icon: 'mdi-delete-outline',
+                    },
+                ]
             }
         },
         computed: {
@@ -198,9 +225,16 @@
             :style="[transformation, sizes]"
             @pointerdown.prevent="drag_start"
             @contextmenu.prevent="on_context"
+            @dblclick.prevent="is_edit_mode = true"
             @pointerup.prevent="drag_end">
                 <v-avatar left class="enum_type darken-4 red" >E</v-avatar>
-                <div style="display: inline;">{{ name }}</div>
+                <div 
+                    @input="on_input"
+                    @blur="on_blur" 
+                    :contenteditable="is_edit_mode"
+                    style="display: inline-block;">
+                        {{name}}
+                <div>
         </div>
 </template>
 

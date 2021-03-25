@@ -32,7 +32,9 @@
                 },
                 is_dragging: false,
                 ghost_mode: false,
-                init_position: { x: 0, y: 0}
+                ui_refresher: 0,
+                init_position: { x: 0, y: 0},
+                is_edit_mode: false
             }
         },
         props: {
@@ -76,7 +78,7 @@
             },
             drag_end (event) {
                 if (graph_view.drag_end_lock) return;
-                
+
                 graph_view.scroll_manager.stop();
 
                 // Reset drag function
@@ -85,6 +87,16 @@
 
                 // Call additional function if set
                 this.expanded_functions.drag_end(event);
+            },
+            on_context (event) {
+                graph_view.context_menu.target = this;
+                graph_view.context_menu.position = {
+                    x: event.clientX - graph_position.x,
+                    y: event.clientY - graph_position.y,
+                };
+                graph_view.context_menu.is_active = true;
+
+                this.on_context_addition ();
             },
             on_scroll () {
                 if (!this.is_dragging) return;
@@ -113,34 +125,34 @@
                 this.$props.rect.x += dx;
                 this.$props.rect.y += dy;
             },
-            // Update lines explicitilly 
-            update_lines () {
-                this.get_lines().forEach(line => {
-                    graph_view.$refs[line.line_uid].update();
+            on_input (event) {
+                // Trim text
+                event.target.textContent = event.target.textContent.replace(/^\s+|\s+$/g, '');
+
+                // Refresh view dependencies
+                this.ui_refresher++;
+                setTimeout(() => {
+                    if (this.group_index && this.group_index != -1) window.graph_elements[this.group_index].update_group_size();
+                    if (this.parent_group_index && this.parent_group_index != -1) window.graph_elements[this.parent_group_index].update_group_size();
                 });
+
+                // Blur on enter key press
+                if (event.inputType === "insertParagraph") this.on_blur(event);
+
+                // Call additional functionallity if set
+                if (this.on_input_addition) this.on_input_addition();
             },
-            get_rect: function() {
-                return {
-                    x: this.$props.data.position.x,
-                    y: this.$props.data.position.y,
-                    width: this.$el.offsetWidth,
-                    height: this.$el.offsetHeight
-                };
+            on_blur (event) {
+                // Disable edit
+                this.is_edit_mode = false;
+
+                // Render white space as default value
+                if (event.target.innerText == '') event.target.innerText = ' ';
+
+                // Change model value
+                graph_view.elements[this.$props.index].name = event.target.textContent;
             },
-            /**
-             * Test whether 2 graph elements hit each other on the graph.
-             * @param {Object} size_object_1
-             * @param {Object} size_object_2
-             * @returns {Boolean} 
-             */
-            collision_check: function(size_object_1, size_object_2){
-                return (
-                    size_object_1.x < size_object_2.x + size_object_2.width &&
-                    size_object_1.x > size_object_2.x - size_object_1.width &&
-                    size_object_1.y < size_object_2.y + size_object_2.height &&
-                    size_object_1.y > size_object_2.y - size_object_1.height
-                );
-            },
+
         },
         computed: {
             // Rendered transformation (coordinates and scale) 
@@ -148,6 +160,28 @@
                 return  {
                     transform: `translate(${this.$props.data.position.x}px,${this.$props.data.position.y}px)`,
                     'z-index': this.$props.data.z_index
+                }
+            },
+            get_rect: function() {
+                this.ui_refresher;
+                return {
+                    x: this.$props.data.position.x,
+                    y: this.$props.data.position.y,
+                    width: this.$el.offsetWidth,
+                    height: this.$el.offsetHeight
+                };
+            }
+        },
+        watch: {
+            is_edit_mode (newVal) {
+                // Focus input on edit
+                if (newVal) {
+                    let input = this.$el.querySelector('[contenteditable]');
+                    setTimeout(
+                        () => {
+                            input.focus();
+                        }
+                    );
                 }
             }
         }

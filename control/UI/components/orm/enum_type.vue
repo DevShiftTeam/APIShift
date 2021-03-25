@@ -69,7 +69,7 @@
                         continue;
                     
                     // Check collisions
-                    if(graph_view.collision_check(this.get_rect(), window.graph_elements[index].get_rect())
+                    if(graph_view.collision_check(this.get_rect, window.graph_elements[index].get_rect)
                     && window.graph_elements[index].data.z_index > z_index) {
                         z_index = window.graph_elements[index].data.z_index;
                         enum_found = index;
@@ -105,6 +105,33 @@
 
                 // Removing element from screen
                 graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);
+            },
+            on_context_addition () {
+                graph_view.context_menu.actions = [
+                    {
+                        starter: () => {
+                            this.is_edit_mode = true;
+                            graph_view.context_menu.is_active = false;
+                        },
+                        name: 'Edit',
+                        icon: 'mdi-pencil',
+                    },
+                    {
+                        starter: () => {
+                            graph_view.context_menu.is_active = false;
+                        },
+                        name: 'Duplicate',
+                        icon: 'mdi-content-duplicate',
+                    },
+                    {
+                        starter: () => {
+                            this.on_delete();
+                            graph_view.context_menu.is_active = false;
+                        },
+                        name: 'Delete',
+                        icon: 'mdi-delete-outline',
+                    },
+                ]
             }
         }
     }
@@ -115,9 +142,16 @@
         :style="transformation" 
         @pointerdown.prevent="drag_start"
         @contextmenu.prevent="on_context"
+        @dblclick.prevent="is_edit_mode = true"
         @pointerup.prevent="drag_end">
             <v-avatar left class="type_type darken-4 grey">T</v-avatar>
-            <div style="display: inline;">{{ name }}</div>
+            <div 
+                @input="on_input"
+                @blur="is_edit_mode = false" 
+                :contenteditable="is_edit_mode"
+                style="display: inline-block;">
+                    {{name}}
+            <div>
     </div>
 </template>
 

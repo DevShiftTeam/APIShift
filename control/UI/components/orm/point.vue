@@ -62,15 +62,15 @@
                     if (graph_view.elements[index].component_id === 4) {
                         let group_rect = {
                             x: graph_view.elements[index].data.position.x,
-                            y: graph_view.elements[index].data.position.y + graph_elements[index].get_rect().height - graph_elements[index].init_height,
+                            y: graph_view.elements[index].data.position.y + graph_elements[index].get_rect.height - graph_elements[index].init_height,
                             height: graph_elements[index].init_height,
-                            width: graph_elements[index].get_rect().width
+                            width: graph_elements[index].get_rect.width
                         };
-                        if(window.graph_elements[index].data.z_index > z_index && graph_view.collision_check(this.get_rect(), group_rect)) {
+                        if(window.graph_elements[index].data.z_index > z_index && graph_view.collision_check(this.get_rect, group_rect)) {
                             target_element = index;
                             z_index = graph_view.elements[index].data.z_index;
                         }
-                    } else if (window.graph_elements[index].data.z_index > z_index && graph_view.collision_check(this.get_rect(), window.graph_elements[index].get_rect())) {
+                    } else if (window.graph_elements[index].data.z_index > z_index && graph_view.collision_check(this.get_rect, window.graph_elements[index].get_rect)) {
                         target_element = index;
                         z_index = graph_view.elements[index].data.z_index;
                     }
@@ -79,19 +79,19 @@
                 // Drop on a connectable item 
                 if (target_element !== -1) window.graph_elements[this.$props.data.rel_index].connect_to_line(this.$props.data.is_left, target_element);
             },
-            on_delete () {}
+            on_delete () {},
         },
         computed: {
             from_position: function() {
                 return {
-                    x: this.$props.data.position.x + this.get_rect().width,
-                    y: this.$props.data.position.y + this.get_rect().height / 2
+                    x: this.$props.data.position.x + this.get_rect.width,
+                    y: this.$props.data.position.y + this.get_rect.height / 2
                 };
             },
             to_position: function() {
                 return {
                     x: this.$props.data.position.x,
-                    y: this.$props.data.position.y + this.get_rect().height / 2
+                    y: this.$props.data.position.y + this.get_rect.height / 2
                 };
             }
         }

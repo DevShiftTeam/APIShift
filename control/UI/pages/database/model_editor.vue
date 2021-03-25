@@ -40,6 +40,7 @@
                 line_comp: APIShift.API.getComponent('orm/line', true),
                 selection_comp: APIShift.API.getComponent('orm/selection_box', true),
                 side_menu_comp: APIShift.API.getComponent('orm/side_menu', true),
+                context_menu_comp: APIShift.API.getComponent('orm/context_menu',true),
                 elements: [
                     // Items
                     { id: 1, component_id: 0, name: "Users", data: {
@@ -119,6 +120,11 @@
                 drag_end_lock: false,
                 selection_active: false,
                 side_menu_actions: [],
+                context_menu: {
+                    actions: [],
+                    position: { x: 0, y: 0 },
+                    is_active: false
+                },
                 scroll_manager: {
                     id: null,
                     interval: 20,
@@ -142,7 +148,7 @@
                 elements_loaded: 0,
                 first_load: false,
                 action_selected: false,
-                current_action: window.empty_function
+                current_action: window.empty_function,
             }
         },
         created () {
@@ -151,21 +157,16 @@
             window.graph_view = this;
             this.current_action = window.empty_function;
 
+            this.context_menu.actions = [
+    
+            ];
             this.side_menu_actions = [
                     {
                         starter: () => {
                             graph_view.cursor_state = "create";
                             graph_view.current_action = () => {
-                                let last_id = 0;
-
-                                for(let el_index in graph_view.elements) {
-                                    let el = graph_view.elements[el_index];
-                                    if((el.component_id == 1 || el.component_id != 0 || el.component_id == 4) && last_id < el.id)
-                                        last_id = el.id;
-                                };
-
                                 graph_view.elements.push({
-                                    id: last_id + 1, component_id: 0, name: "Item", data: {
+                                    id: 0, component_id: 0, name: "Item", data: {
                                         position: window.mouse_on_graph,
                                         z_index: graph_view.elements.length
                                     }
@@ -179,16 +180,8 @@
                         starter: () => {
                             graph_view.cursor_state = "create";
                             graph_view.current_action = () => {
-                                let last_id = 1;
-
-                                for(let el_index in graph_view.elements) {
-                                    let el = graph_view.elements[el_index];
-                                    if((el.component_id == 1 || el.component_id != 0 || el.component_id == 4) && last_id < el.id)
-                                        last_id = el.id;
-                                };
-
                                 graph_view.elements.push({
-                                    id: last_id + 1, component_id: 1, name: "Relation", data: {
+                                    id: 0, component_id: 1, name: "Relation", data: {
                                         position: window.mouse_on_graph,
                                         type: 0,
                                         z_index: graph_view.elements.length
@@ -211,7 +204,7 @@
                                         continue;
                                     
                                     // Check collisions
-                                    let obj_rect = window.graph_elements[index].get_rect();
+                                    let obj_rect = window.graph_elements[index].get_rect;
                                     if (window.graph_elements[index].data.z_index > z_index && (
                                         obj_rect.x < window.mouse_on_graph.x && obj_rect.x + obj_rect.width > window.mouse_on_graph.x
                                         && obj_rect.y < window.mouse_on_graph.y && obj_rect.y + obj_rect.height > window.mouse_on_graph.y
@@ -232,16 +225,8 @@
                         starter: () => {
                             graph_view.cursor_state = "create";
                             graph_view.current_action = () => {
-                                let last_id = 1;
-
-                                for(let el_index in graph_view.elements) {
-                                    let el = graph_view.elements[el_index];
-                                    if((el.component_id == 3) && last_id < el.id)
-                                        last_id = el.id;
-                                };
-
                                 graph_view.elements.push({
-                                    id: last_id + 1, component_id: 3, name: "Enum", data: {
+                                    id: 0, component_id: 3, name: "Enum", data: {
                                         position: window.mouse_on_graph,
                                         types: [],
                                         connected: [],
@@ -257,16 +242,8 @@
                         starter: () => {
                             graph_view.cursor_state = "create";
                             graph_view.current_action = () => {
-                                let last_id = 1;
-
-                                for(let el_index in graph_view.elements) {
-                                    let el = graph_view.elements[el_index];
-                                    if((el.component_id == 2) && last_id < el.id)
-                                        last_id = el.id;
-                                };
-
                                 graph_view.elements.push({
-                                    id: last_id + 1, component_id: 2, name: "Type", data: {
+                                    id: 0, component_id: 2, name: "Type", data: {
                                         position: window.mouse_on_graph,
                                         z_index: graph_view.elements.length
                                     }
@@ -350,6 +327,7 @@
                 if(this.current_action != window.empty_function) {
                     // Determine pointer position in respect to graph transformation
                     let camera_rect = document.querySelector('#graph_center').getBoundingClientRect();
+                    
                     window.mouse_on_graph = { x: (window.init_pointer.x - camera_rect.x) / (this.scale), y: (window.init_pointer.y - camera_rect.y) / (this.scale)};
                     this.current_action(event);
                     return;
@@ -365,6 +343,9 @@
                 this.camera.y = this.init_camera.y + event.clientY - window.init_pointer.y;
             },
             pointer_scale (event) {
+                // De-activate context menu if present
+                this.context_menu.is_active = false;
+
                 this.update_graph_position();
                 let rect = document.getElementById('graph_center').getBoundingClientRect();
                 // Calculate center
@@ -433,6 +414,9 @@
                 graph_view.cursor_state = "auto";
             },
             wheel (event) {
+                // De-activate context menu if present
+                this.context_menu.is_active = false;
+
                 // Update graph position
                 this.update_graph_position();
                 let rect = document.getElementById('graph_center').getBoundingClientRect();
@@ -492,6 +476,9 @@
                     size_object_1.y < size_object_2.y + size_object_2.height &&
                     size_object_1.y > size_object_2.y - size_object_1.height
                 );
+            },
+            on_save() {
+
             }
         },
         watch: {
@@ -529,6 +516,7 @@
                     </v-menu>
                     <v-divider class="mx-4" inset vertical></v-divider>
                     <v-spacer></v-spacer>
+                    <v-btn @click="on_save">SAVE</v-btn>
                 </v-app-bar>
 
                 <!-- Body -->
@@ -540,6 +528,7 @@
                         @pointerdown="pointer_down"
                         @pointerup="pointer_up"
                         @pointercancel="pointer_up"
+                        @contextmenu.prevent="window.empty_function"
                         :style="{ 'cursor' : cursor_state }">
                         <component ref="side_menu"
                             :is="side_menu_comp"
@@ -575,6 +564,12 @@
                         <component ref="s_box" 
                             v-show="selection_active"
                             :is="selection_comp">
+                        </component>
+                        <component ref="c_menu"
+                            v-show="context_menu.is_active"
+                            :actions="context_menu.actions"
+                            :position="context_menu.position"
+                            :is="context_menu_comp"> 
                         </component>
                     </div>
                 </div>
@@ -626,4 +621,22 @@
     cursor: inherit !important;
 }
 
+.ge_text {
+    display: inline-block;
+  width: fit-content; 
+
+    padding: 0;
+}
+.ge_text input {
+    width: fit-content;
+    padding: 0;
+}
+
+.ge_text .v-text-field__details {
+    min-height: 0px;
+}
+
+.ge_text .v-text-field__details .v-messages{
+    min-height: 0px;
+}
 </style>

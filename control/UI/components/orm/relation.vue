@@ -77,6 +77,7 @@
                         }
                     });
                     this.from_line_index = window.graph_view.lines.length - 1;
+                    // console.log(window.graph_lines[this.from_line_index]);
                     
                     window.graph_view.lines.push({
                         from_index: this.$props.index,
@@ -88,7 +89,10 @@
                         }
                     });
                     this.to_line_index = window.graph_view.lines.length - 1;
-                })
+                });
+            },
+            create_arrow_head: function() {
+
             },
             create_point: function(is_left = true, position = null, is_deleted = false) {
                 let my_rect = this.get_rect;

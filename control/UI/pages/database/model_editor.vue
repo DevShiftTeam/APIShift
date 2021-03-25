@@ -62,7 +62,7 @@
                             position: { x: 220, y: 200 },
                             from: 1,
                             to: 2,
-                            type: 0
+                            type: 1
                         }
                     },
                     
@@ -154,6 +154,7 @@
         created () {
             // Store this object with a global reference
             window.graph_elements = {};
+            window.graph_lines = {};
             window.graph_view = this;
             this.current_action = window.empty_function;
 
@@ -550,6 +551,7 @@
                                 :data="element.data">
                             </component>
 
+                            <!-- Lines -->
                             <component
                                 v-for="(line, index) in lines"
                                 :key="index"

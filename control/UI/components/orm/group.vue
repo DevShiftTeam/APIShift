@@ -181,7 +181,6 @@
                 if(this.parent_group_index != -1) window.graph_elements[this.parent_group_index].update_group_size();
             },
             drag_start_addition: function(event) {
-                // console.log(window.graph_elements[this.parent_group_index]);
                 if(this.parent_group_index != -1) window.graph_elements[this.parent_group_index].bring_to_front();
 
                 // Initialize all elements
@@ -304,7 +303,8 @@
                     },
                     {
                         starter: () => {
-
+                            this.on_delete();
+                            graph_view.context_menu.is_active = false;
                         },
                         name: 'Delete',
                         icon: 'mdi-delete-outline',
@@ -325,7 +325,7 @@
                 return {
                     x: this.$props.data.position.x,
                     y: this.$props.data.position.y,
-                    width: Math.max(this.occupied_width, this.init_width),
+                    width: this.occupied_width,
                     height: this.occupied_height + 24,
                 };
             },
@@ -343,8 +343,8 @@
             },
             sizes () {
                 return {
-                    minWidth: Math.max(this.occupied_width) + 'px',
-                    height: (this.occupied_height) + 'px',
+                    minWidth: this.occupied_width + 'px',
+                    height: this.occupied_height + 'px',
                 }
             } 
         },
@@ -361,11 +361,11 @@
         <div class="group_container" :style="sizes">
         </div>
 
-        <div id="group_info" ref="data">
+        <div id="group_info" ref="data"
+            @contextmenu="on_context">
             <v-avatar class="group_type darken-4 green" style="height: initial; min-width: initial; width: initial;">G</v-avatar>
             <div style="margin-left: 5px; line-height: 1;"
                 @input="on_input"
-                @contextmenu="on_context"
                 @blur="on_blur" 
                 :contenteditable="is_edit_mode">
                     {{name}}

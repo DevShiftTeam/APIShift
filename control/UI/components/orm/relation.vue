@@ -77,7 +77,6 @@
                         }
                     });
                     this.from_line_index = window.graph_view.lines.length - 1;
-                    // console.log(window.graph_lines[this.from_line_index]);
                     
                     window.graph_view.lines.push({
                         from_index: this.$props.index,

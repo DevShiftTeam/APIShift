@@ -34,7 +34,8 @@
                 ghost_mode: false,
                 ui_refresher: 0,
                 init_position: { x: 0, y: 0},
-                is_edit_mode: false
+                is_edit_mode: false,
+                mouse_pos: {}
             }
         },
         props: {
@@ -54,24 +55,25 @@
                     y: event.clientY
                 };
 
-                // Delete element on delete state
-                if (graph_view.cursor_state.type == "delete") return;
-
                 // Bring to front
                 graph_view.bring_to_front(this.$props.index);
 
                 // Update drag function
                 graph_view.drag_handler = this.drag;
-                this.is_dragging = true;
+
+                // Activate scroll functionallity
+                if(!graph_view.scroll_manager.is_running()) graph_view.scroll_manager.start(this.on_scroll, 20);
 
                 // Call additional function if set
                 this.expanded_functions.drag_start(event);
             },
             drag (event) {
+                this.mouse_pos = { x: event.pageX - window.graph_position.x, y: event.pageY - window.graph_position.y};
                 this.$props.data.position = {
                     x: this.init_position.x + ((event.clientX - window.init_pointer.x) / graph_view.scale),
                     y: this.init_position.y + ((event.clientY - window.init_pointer.y) / graph_view.scale)
                 };
+                this.is_dragging = true;
 
                 // Call additional function if set
                 this.expanded_functions.drag(event);
@@ -100,30 +102,33 @@
             },
             on_scroll () {
                 if (!this.is_dragging) return;
-
-                let mouse = { x: this.last_event.pageX - window.graph_position.x, y: this.last_event.pageY - window.graph_position.y };
-                if (mouse.x < 20) {
-                    this.move_by(-5 / graph_view.scale, 0);
+                
+                if (this.mouse_pos.x < 20) {
+                    this.move_by(-5 / graph_view.scale , 0);
                     graph_view.move_camera_by(5 , 0);
                 }
-                if (mouse.x > window.graph_position.width - 20 ) {
+                if (this.mouse_pos.x > window.graph_position.width - 20 ) {
                     this.move_by(5 / graph_view.scale , 0);
                     graph_view.move_camera_by(-5 , 0);
                 }
-                if (mouse.y < 20) {
+                if (this.mouse_pos.y < 20) {
                     this.move_by(0, -5 / graph_view.scale);
                     graph_view.move_camera_by(0, 5 );
                 }
-                if (mouse.y > window.graph_position.height - 20 ) {
+                if (this.mouse_pos.y > window.graph_position.height - 20 ) {
                     this.move_by(0, 5 / graph_view.scale);
                     graph_view.move_camera_by(0, -5 );
                 }
-
-                this.expanded_functions.drag(this.last_event);
             },
             move_by (dx, dy) {
-                this.$props.rect.x += dx;
-                this.$props.rect.y += dy;
+                this.init_position.x += dx;
+                this.init_position.y += dy;
+
+                this.$props.data.position.x += dx;
+                this.$props.data.position.y += dy;
+
+                // Call additional function if set
+                this.expanded_functions.drag(event);
             },
             on_input (event) {
                 // Trim text

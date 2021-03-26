@@ -130,8 +130,10 @@
                     interval: 20,
                     params: [],
                     cb: window.empty_function,
+                    position_function(time) {
+                        return 
+                    },
                     start: function(cb, interval) {
-                        if (this.is_running) this.stop();
                         if (cb) this.cb = cb;
                         if (interval) this.iv = interval;
                         this.id = window.setInterval(this.cb, this.interval);
@@ -141,7 +143,7 @@
                         this.id = null;
                     },
                     is_running: function () {
-                        return this.id; 
+                        return !!this.id; 
                     }
                 },
                 cursor_state: "auto",

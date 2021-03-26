@@ -150,19 +150,11 @@ module.exports = {
 <template>
     <svg :style="{ 'z-index': this.src_ref.data.z_index > this.dest_ref.data.z_index ? this.dest_ref.data.z_index - 1 : this.src_ref.data.z_index - 1}" style="position: absolute; overflow: visible; width: 1px; height: 1px;">
         <defs>
-            <marker id='head' orient='auto' markerWidth='2' markerHeight='4'
-                    refX='1' refY='2'>
-              <path d='M0,0 V4 L2,2 Z' fill='red' />
-            </marker>
-            <marker id="many-arrow-head" markerWidth="4" markerHeight="5" refX="5.5" refY="5" 
+            <marker @pointerdown.prevent="pointer_down" id="many-arrow-head" markerWidth="4" markerHeight="5" refX="5.5" refY="5" 
             viewBox="0 0 10 10" orient="auto-start-reverse">
                 <path d="M 0 0 L 10 5 L 0 10 z" />
             </marker>
-            <marker id="arrow" markerWidth="10" markerHeight="10" refX="1" refY="3" orient="auto" markerUnits="strokeWidth"
-            @click="console.log('aaa')" >
-                <path d="M0,0 L0,6 L9,3 z" fill="rgba(255,0,0,0.9)" onclick="console.log('aaa')"/>
-            </marker>
-            <marker id="one-arrow-head" viewBox="0 0 55.752 55.752" refX="32" refY="27" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
+            <marker @pointerdown.prevent="pointer_down" id="one-arrow-head" viewBox="0 0 55.752 55.752" refX="32" refY="27" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
                 <path d="M43.006,23.916c-0.28-0.282-0.59-0.52-0.912-0.727L20.485,1.581c-2.109-2.107-5.527-2.108-7.637,0.001   c-2.109,2.108-2.109,5.527,0,7.637l18.611,18.609L12.754,46.535c-2.11,2.107-2.11,5.527,0,7.637c1.055,1.053,2.436,1.58,3.817,1.58   s2.765-0.527,3.817-1.582l21.706-21.703c0.322-0.207,0.631-0.444,0.912-0.727c1.08-1.08,1.598-2.498,1.574-3.912   C44.605,26.413,44.086,24.993,43.006,23.916z"/>
             </marker>
         </defs> 

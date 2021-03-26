@@ -282,7 +282,6 @@
                     window.graph_elements[this.parent_group_index].update_indices();
                     window.graph_elements[this.parent_group_index].update_group_size();
                 }
-
             },
             on_context_addition () {
                 graph_view.context_menu.actions = [
@@ -318,6 +317,16 @@
                 this.init_width = info_el.querySelector('[contenteditable').offsetWidth + info_el.querySelector('.v-avatar').offsetWidth + 8;
 
                 this.update_group_size();
+            },
+            move_by (dx,dy) {
+
+                // Move by all elements
+                for(let elem in this.element_indices)
+                    window.graph_elements[this.element_indices[elem]].move_by(dx, dy);
+
+                // Move all sub groups
+                 for(let sub_group in this.group_indices)
+                     window.graph_elements[this.group_indices[sub_group]].move_by(dx, dy);
             }
         },
         computed: {

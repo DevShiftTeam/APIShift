@@ -32,7 +32,8 @@
                     y:  0,
                     width: 0,
                     height: 0
-                }
+                },
+                last_event: {},
             }
         },
         created () {
@@ -44,61 +45,22 @@
                 graph_view.drag_handler = this.on_select; 
                 
                 // Start graph view scroll manager and pass handler 
-                // graph_view.scroll_manager.start(this.on_scroll, 20);
+                if(!graph_view.scroll_manager.is_running()) graph_view.scroll_manager.start(this.on_scroll, 20);
 
                 window.addEventListener('pointerup', this.end_select);
                 window.addEventListener('pointercancel', this.end_select);
                 
             },
             on_select (event) {
-                this.rect.width  = Math.abs(event.clientX - window.init_pointer.x);
-                this.rect.height = Math.abs(event.clientY - window.init_pointer.y);
+                // Calculate rect boundries
+                this.set_rect(event);
+
+                // Memorize event
+                this.last_event = event;
+
+                // Set flag
                 graph_view.selection_active = true;   
 
-                // Calcultate left-most position
-                this.rect.x = event.clientX > window.init_pointer.x ? 
-                    window.init_pointer.x - window.graph_position.x
-                    : 
-                    window.init_pointer.x - window.graph_position.x - this.rect.width;
-
-                // Calculate top-most position
-                this.rect.y = event.clientY > window.init_pointer.y ? 
-                    window.init_pointer.y - window.graph_position.y
-                    : 
-                    window.init_pointer.y - window.graph_position.y - this.rect.height;
-
-                // Show element
-                let my_rect = this.$el.getBoundingClientRect(), grp_indices = [];
-                for (const index in graph_view.elements) {
-                    let element = graph_view.elements[index];
-
-                    if (!(element.component_id == 0 || element.component_id == 1 || element.component_id == 4) || element.is_deleted) continue;
-
-                    let el_rect = window.graph_elements[index].$el.getBoundingClientRect();     
-                    if (element.component_id === 4) {
-                        let group_rect = window.graph_elements[index].$el.querySelector('#group_info').getBoundingClientRect();
-                        if (graph_view.collision_check(my_rect,group_rect)) {
-                            window.graph_elements[index].is_selected  = true;
-                            for (let grp_index of window.graph_elements[index].group_indices) {
-                                grp_indices.push(grp_index);
-                            }
-                            for (let el_index of window.graph_elements[index].element_indices) {
-                                window.graph_elements[el_index].is_selected = false;
-                            }
-                        }
-                        else
-                            window.graph_elements[index].is_selected  = false;
-                    }
-                    else if (graph_view.collision_check(my_rect,el_rect)) 
-                        window.graph_elements[index].is_selected  = true;
-                    else 
-                        window.graph_elements[index].is_selected  = false;
-                }
-
-                // Deselected nested groups in selected groups
-                for (const grp_index of grp_indices) {
-                    window.graph_elements[grp_index].is_selected  = false;
-                }
             },
             end_select () {
                 graph_view.cursor_state = Object.assign({}, {type: 'default'});
@@ -153,31 +115,78 @@
                 window.removeEventListener('pointerup', this.end_select);
                 window.removeEventListener('pointercancel', this.end_select);           
                 graph_view.selection_active = false;   
-                this.is_shown = false;
             },
             on_scroll () { 
-                // If drag hasnt occured yet - no change in position
-                if (this.rect.x === this.rect.y) return;
+                // Irrelevant pre drag
+                if (!graph_view.selection_active) return;
 
-                let mouse = { x: this.last_event.pageX - window.graph_position.x, y: this.last_event.pageY - window.graph_position.y };
-                if (mouse.x < 20) {
-                    this.ds.x += 5;
+                if (this.last_event.clientX - window.graph_position.x < 20) {
+                    window.init_pointer.x += 5;
                     graph_view.move_camera_by(5, 0);
                 }
-                if (mouse.x > window.graph_position.width - 20 ) {
-                    this.ds.x += -5;
+                if (this.last_event.clientX - window.graph_position.x > window.graph_position.width - 20 ) {
+                    window.init_pointer.x -= 5;
                     graph_view.move_camera_by(-5, 0);
                 }
-                if (mouse.y < 20) {
-                    this.ds.y += 5;
+                if (this.last_event.clientY - window.graph_position.y < 20) {
+                    window.init_pointer.y += 5;
                     graph_view.move_camera_by(0, 5);
                 }
-                if (mouse.y > window.graph_position.height - 20 ) {
-                    this.ds.y += -5;
+                if (this.last_event.clientY - window.graph_position.y > window.graph_position.height - 20 ) {
+                    window.init_pointer.y -= 5;
                     graph_view.move_camera_by(0, -5);
                 }
+
+                this.set_rect(this.last_event);
             },
             set_rect(event) {
+                this.rect.width  = Math.abs(event.clientX - window.init_pointer.x);
+                this.rect.height = Math.abs(event.clientY - window.init_pointer.y);
+
+                // Calcultate left-most position
+                this.rect.x = event.clientX > window.init_pointer.x ? 
+                    window.init_pointer.x - window.graph_position.x
+                    : 
+                    window.init_pointer.x - window.graph_position.x - this.rect.width;
+
+                // Calculate top-most position
+                this.rect.y =  event.clientY > window.init_pointer.y ? 
+                    window.init_pointer.y - window.graph_position.y
+                    : 
+                    window.init_pointer.y - window.graph_position.y - this.rect.height;
+
+                // Show element
+                let my_rect = this.$el.getBoundingClientRect(), grp_indices = [];
+                for (const index in graph_view.elements) {
+                    let element = graph_view.elements[index];
+
+                    if (!(element.component_id == 0 || element.component_id == 1 || element.component_id == 4) || element.is_deleted) continue;
+
+                    let el_rect = window.graph_elements[index].$el.getBoundingClientRect();     
+                    if (element.component_id === 4) {
+                        let group_rect = window.graph_elements[index].$el.querySelector('#group_info').getBoundingClientRect();
+                        if (graph_view.collision_check(my_rect,group_rect)) {
+                            window.graph_elements[index].is_selected  = true;
+                            for (let grp_index of window.graph_elements[index].group_indices) {
+                                grp_indices.push(grp_index);
+                            }
+                            for (let el_index of window.graph_elements[index].element_indices) {
+                                window.graph_elements[el_index].is_selected = false;
+                            }
+                        }
+                        else
+                            window.graph_elements[index].is_selected  = false;
+                    }
+                    else if (graph_view.collision_check(my_rect,el_rect)) 
+                        window.graph_elements[index].is_selected  = true;
+                    else 
+                        window.graph_elements[index].is_selected  = false;
+                }
+
+                // Deselected nested groups in selected groups
+                for (const grp_index of grp_indices) {
+                    window.graph_elements[grp_index].is_selected  = false;
+                }
             },
         }, 
         computed: {

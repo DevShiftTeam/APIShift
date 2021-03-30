@@ -38,11 +38,15 @@ module.exports = {
     }
   },
   created () {
+    window.graph_lines[this.$props.index] = this;
   },
   methods: {
+    create_arrow (type = 0, to_dest = false) {
+      console.log('asd');
+    },
     pointer_down(event) {
       if(graph_view.drag_end_lock) return;
-      
+
       // Find point
       let obj_holder = this.src_ref;
 
@@ -89,8 +93,8 @@ module.exports = {
 
       let graph_center_rect = graph_view.$el.querySelector('#graph_center').getBoundingClientRect();
 
-      obj_holder.data.position.x = (event.clientX - graph_center_rect.x) / graph_view.scale - obj_holder.get_rect().width / 2;
-      obj_holder.data.position.y = (event.clientY - graph_center_rect.y) / graph_view.scale - obj_holder.get_rect().height / 2;
+      obj_holder.data.position.x = (event.clientX - graph_center_rect.x) / graph_view.scale - obj_holder.get_rect.width / 2;
+      obj_holder.data.position.y = (event.clientY - graph_center_rect.y) / graph_view.scale - obj_holder.get_rect.height / 2;
 
       obj_holder.drag_start(event); 
     },
@@ -100,17 +104,45 @@ module.exports = {
     path_data() {
         if (graph_view.lines[this.$props.index].is_deleted) return;
         
-        let src_point = this.src_ref.from_position;
-        let dest_point = this.dest_ref.to_position;
+        let src_point = {
+          x: this.src_ref.from_position.x + !!this.marker_start*5,
+          y: this.src_ref.from_position.y
+        };
 
+        let dest_point = {
+          x: this.dest_ref.to_position.x - !!this.marker_end*5,
+          y: this.dest_ref.to_position.y
+        };
+  
         const bezierWeight = 0.675; // Amount to offset control points
 
-        const dx = Math.abs(src_point.x - dest_point.x) * bezierWeight * this.$props.data.is_curvy;
+        const dx = Math.abs(src_point.x - dest_point.x ) * bezierWeight * this.$props.data.is_curvy;
         const c1 = { x: src_point.x + dx, y: src_point.y };
-        const c2 = { x: dest_point.x - dx, y: dest_point.y };
+        const c2 = { x: dest_point.x - dx , y: dest_point.y };
 
-        return `M ${src_point.x - 5} ${src_point.y} C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${dest_point.x} ${dest_point.y}`;
+        return `M ${src_point.x} ${src_point.y} C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${dest_point.x } ${dest_point.y}`;
     },
+    marker_end () {
+      if (!this.$props.data.is_rel_source) return;
+
+      // One-to-One 
+      if (this.$props.src_ref.data.type == 0) {
+        return 'url(#one-arrow-head)';
+      }
+      // One-to-Many or Many-to-Many
+      return 'url(#many-arrow-head)';
+
+    },
+    marker_start () {
+      if (this.$props.data.is_rel_source !== false) return;
+
+      // One-to-One or One-to-Many 
+      if (this.$props.dest_ref.data.type == 0 || this.$props.dest_ref.data.type == 1) {
+        return 'url(#one-arrow-head)';
+      }
+      // Many-to-Many
+      return 'url(#many-arrow-head)';
+    }
   }
 };
 </script>
@@ -118,37 +150,36 @@ module.exports = {
 <template>
     <svg :style="{ 'z-index': this.src_ref.data.z_index > this.dest_ref.data.z_index ? this.dest_ref.data.z_index - 1 : this.src_ref.data.z_index - 1}" style="position: absolute; overflow: visible; width: 1px; height: 1px;">
         <defs>
-            <marker id="black-arrow" markerWidth="5" markerHeight="5" refX="0" refY="5"
-            viewBox="0 0 10 10" orient="auto-start-reverse" style="opacity: 0.85">
+            <marker @pointerdown.prevent="pointer_down" id="many-arrow-head" markerWidth="4" markerHeight="5" refX="5.5" refY="5" 
+            viewBox="0 0 10 10" orient="auto-start-reverse">
                 <path d="M 0 0 L 10 5 L 0 10 z" />
             </marker>
-            <marker id="arrow" markerWidth="10" markerHeight="10" refX="10" refY="3" orient="auto" markerUnits="strokeWidth">
-                <path d="M0,0 L0,6 L9,3 z" fill="rgba(255,0,0,0.9)" />
-            </marker>
-            <marker id="arrow1" viewBox="0 0 492.004 492.004" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-                <path d="M382.678,226.804L163.73,7.86C158.666,2.792,151.906,0,144.698,0s-13.968,2.792-19.032,7.86l-16.124,16.12
-                c-10.492,10.504-10.492,27.576,0,38.064L293.398,245.9l-184.06,184.06c-5.064,5.068-7.86,11.824-7.86,19.028
-                c0,7.212,2.796,13.968,7.86,19.04l16.124,16.116c5.068,5.068,11.824,7.86,19.032,7.86s13.968-2.792,19.032-7.86L382.678,265
-                c5.076-5.084,7.864-11.872,7.848-19.088C390.542,238.668,387.754,231.884,382.678,226.804z"/>
+            <marker @pointerdown.prevent="pointer_down" id="one-arrow-head" viewBox="0 0 55.752 55.752" refX="32" refY="27" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
+                <path d="M43.006,23.916c-0.28-0.282-0.59-0.52-0.912-0.727L20.485,1.581c-2.109-2.107-5.527-2.108-7.637,0.001   c-2.109,2.108-2.109,5.527,0,7.637l18.611,18.609L12.754,46.535c-2.11,2.107-2.11,5.527,0,7.637c1.055,1.053,2.436,1.58,3.817,1.58   s2.765-0.527,3.817-1.582l21.706-21.703c0.322-0.207,0.631-0.444,0.912-0.727c1.08-1.08,1.598-2.498,1.574-3.912   C44.605,26.413,44.086,24.993,43.006,23.916z"/>
             </marker>
         </defs> 
         <g>
             <path @pointerdown.prevent="pointer_down" 
                 :style="{ 'stroke-dasharray': `${this.$props.data.is_stroked ? '11,5' : 'none'}`}"
                 :d="path_data"
+                :marker-end="marker_end"
+                :marker-start="marker_start"
                 >
             </path>
-            <!-- <polygon points="0 0, 10 3.5, 0 7" /> -->
+            
         </g>
     </svg>
 </template>
 
 <style scoped>
 /* Please style this crap, with style */
-path {
+g > path {
   fill: none;
   stroke: dodgerblue;
   stroke-width: 4;
   cursor: pointer;
+}
+path {
+    fill: dodgerblue;
 }
 </style>

@@ -66,7 +66,6 @@
                     return el.component_id == 3 && !el.is_deleted;;
                 });
 
-
                 // Infer connected enums indices
                 let enums_indices = [];
                 enums.forEach((e) => {
@@ -122,19 +121,46 @@
                 // Removing element from screen
                 graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);
 
+            },
+            on_context_addition () {
+                graph_view.context_menu.actions = [
+                    {
+                        starter: () => {
+                            this.is_edit_mode = true;
+                            graph_view.context_menu.is_active = false;
+                        },
+                        name: 'Edit',
+                        icon: 'mdi-pencil',
+                    },
+                    {
+                        starter: () => {
+
+                        },
+                        name: 'Duplicate',
+                        icon: 'mdi-content-duplicate',
+                    },
+                    {
+                        starter: () => {
+                            this.on_delete();
+                            graph_view.context_menu.is_active = false;
+                        },
+                        name: 'Delete',
+                        icon: 'mdi-delete-outline',
+                    },
+                ]
             }
         },
         computed: {
             from_position: function() {
                 return {
-                    x: this.$props.data.position.x + this.get_rect().width,
-                    y: this.$props.data.position.y + this.get_rect().height / 2
+                    x: this.$props.data.position.x + this.get_rect.width,
+                    y: this.$props.data.position.y + this.get_rect.height / 2
                 };
             },
             to_position: function() {
                 return {
                     x: this.$props.data.position.x,
-                    y: this.$props.data.position.y + this.get_rect().height / 2
+                    y: this.$props.data.position.y + this.get_rect.height / 2
                 };
             }
         }
@@ -144,11 +170,18 @@
 <template>
     <div class="item" :class="{ is_selected , ghost_mode }" color="#8789ff"
         :style="transformation"
-        @pointerdown.prevent="drag_start"
+        @pointerdown="drag_start"
         @contextmenu.prevent="on_context"
+        @dblclick.prevent="is_edit_mode = true"
         @pointerup.prevent="drag_end">
             <v-avatar left class="item_type darken-4 blue">I</v-avatar>
-            <div style="display: inline;">{{ name }}</div>
+            <div 
+            @input="on_input"
+            @blur="on_blur" 
+            :contenteditable="is_edit_mode"
+            style="display: inline-block;">
+                {{name}}
+            <div>
     </div>
 </template>
 
@@ -178,5 +211,10 @@
 }
 .type.ghost_mode {
     opacity: 0.7;
+}
+
+.user-input {
+    overflow-y: auto;
+    max-width: auto;
 }
 </style>

@@ -88,10 +88,13 @@
                         }
                     });
                     this.to_line_index = window.graph_view.lines.length - 1;
-                })
+                });
+            },
+            create_arrow_head: function() {
+
             },
             create_point: function(is_left = true, position = null, is_deleted = false) {
-                let my_rect = this.get_rect();
+                let my_rect = this.get_rect;
 
                 let point = 
                 { 
@@ -114,7 +117,6 @@
                 );
                 this.point_indices.push(graph_view.elements.length - 1);
 
-                // this.point_indices.push(ret_index);
                 return graph_view.elements.length - 1;
             },
             connect_to_line: function(is_from_or_to, element_index, to_delete = true) {
@@ -239,19 +241,81 @@
                     window.graph_elements[this.group_index].update_indices();
                     window.graph_elements[this.group_index].update_group_size();
                 }
+            },
+            on_context_addition () {
+                graph_view.context_menu.actions = [
+                    {
+                        starter: () => {
+                            this.is_edit_mode = true;
+                            graph_view.context_menu.is_active = false;
+                        },
+                        name: 'Edit',
+                        icon: 'mdi-pencil',
+                    },
+                    {
+                        starter: () => {
+
+                            graph_view.context_menu.is_active = false;
+                        },
+                        name: 'Duplicate',
+                        icon: 'mdi-content-duplicate',
+                    },
+                    {
+                        starter: () => {
+
+                            graph_view.context_menu.is_active = false;
+                        },
+                        actions: [
+                            {
+                                starter: () => {
+
+                                    graph_view.context_menu.is_active = false;
+                                },
+                                name: 'One-to-One',
+                                icon: 'mdi-relation-one-to-one',
+                            },
+                            {
+                                starter: () => {
+                                    graph_view.context_menu.is_active = false;
+
+                                },
+                                name: 'One-to-Many',
+                                icon: 'mdi-relation-one-to-many',
+                            },
+                            {
+                                starter: () => {
+                                    
+                                    graph_view.context_menu.is_active = false;
+                                },
+                                name: 'Many-to-Many',
+                                icon: 'mdi-relation-one-to-one'
+                            }
+                    ],
+                        name: 'Relate',
+                        icon: 'mdi-transit-connection-variant',
+                    },
+                    {
+                        starter: () => {
+                            this.on_delete();
+                            graph_view.context_menu.is_active = false;
+                        },
+                        name: 'Delete',
+                        icon: 'mdi-delete-outline',
+                    },
+                ]
             }
         },
         computed: {
             from_position: function() {
                 return {
-                    x: this.$props.data.position.x + this.get_rect().width,
-                    y: this.$props.data.position.y + this.get_rect().height / 2
+                    x: this.$props.data.position.x + this.get_rect.width,
+                    y: this.$props.data.position.y + this.get_rect.height / 2
                 };
             },
             to_position: function() {
                 return {
                     x: this.$props.data.position.x,
-                    y: this.$props.data.position.y + this.get_rect().height / 2
+                    y: this.$props.data.position.y + this.get_rect.height / 2
                 };
             }
         }
@@ -263,10 +327,18 @@
         :style="transformation"
         @pointerdown.prevent="drag_start"
         @contextmenu.prevent="on_context"
-        @pointerup.prevent="drag_end">
+        @dblclick.prevent="is_edit_mode = true"
+        @pointerup.prevent="drag_end"
+        >
             <v-avatar left class="item_type darken-4 purple">R</v-avatar>
-            <div style="display: inline;">{{ name }}</div>
-    </div>
+            <div 
+                @input="on_input"
+                @blur="on_blur" 
+                :contenteditable="is_edit_mode"
+                style="display: inline-block;">
+                    {{name}}
+            <div>
+        </div>
 </template>
 
 <style scoped>
@@ -296,4 +368,5 @@
 .type.ghost_mode {
     opacity: 0.7;
 }
+
 </style>

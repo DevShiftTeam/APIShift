@@ -118,13 +118,13 @@
             },
             update_group_size () {
                 let rect = {};
-
+                
                 // Calculate size via elements
                 for(let elem in this.element_indices) {
                     let index = this.element_indices[elem];
 
                     // Get first rect
-                    let temp_rect = window.graph_elements[index].get_rect();
+                    let temp_rect = window.graph_elements[index].get_rect;
 
                     if(rect.x === undefined) {
                         rect.x = temp_rect.x;
@@ -150,7 +150,7 @@
                     let index = this.group_indices[grp];
 
                     // Get first rect
-                    let temp_rect = window.graph_elements[index].get_rect();
+                    let temp_rect = window.graph_elements[index].get_rect;
 
                     if(rect.x === undefined) {
                         rect.x = temp_rect.x;
@@ -174,14 +174,13 @@
                 // Update rect data 
                 this.$props.data.position.x = rect.x;
                 this.$props.data.position.y = rect.y;
-                this.occupied_width = rect.x_end - rect.x;
+                this.occupied_width = Math.max(rect.x_end - rect.x, this.init_width);
                 this.occupied_height = rect.y_end - rect.y;
 
                 // Update parent
                 if(this.parent_group_index != -1) window.graph_elements[this.parent_group_index].update_group_size();
             },
             drag_start_addition: function(event) {
-                // console.log(window.graph_elements[this.parent_group_index]);
                 if(this.parent_group_index != -1) window.graph_elements[this.parent_group_index].bring_to_front();
 
                 // Initialize all elements
@@ -208,17 +207,6 @@
                 // Drag all sub groups
                 for(let sub_group in this.group_indices)
                     window.graph_elements[this.group_indices[sub_group]].drag(event);
-            },
-            get_rect: function() {
-                return {
-                    x: this.$props.data.position.x,
-                    y: this.$props.data.position.y,
-                    width: this.occupied_width,
-                    height: this.occupied_height + 24
-                };
-            },
-            on_context () {
-                
             },
             get_connected_enums () {
                 let my_id = graph_view.elements[this.$props.index].id;
@@ -287,7 +275,6 @@
                     window.graph_elements[this.group_indices[elem]].parent_group_index = -1;
                 }
 
-
                 // Add group elements to owning group's elements
                 if (this.parent_group_index !== -1) 
                 {
@@ -295,10 +282,62 @@
                     window.graph_elements[this.parent_group_index].update_indices();
                     window.graph_elements[this.parent_group_index].update_group_size();
                 }
-
             },
+            on_context_addition () {
+                graph_view.context_menu.actions = [
+                    {
+                        starter: () => {
+                            this.is_edit_mode = true;
+                            graph_view.context_menu.is_active = false;
+                        },
+                        name: 'Edit',
+                        icon: 'mdi-pencil',
+                    },
+                    {
+                        starter: () => {
+
+                        },
+                        name: 'Duplicate',
+                        icon: 'mdi-content-duplicate',
+                    },
+                    {
+                        starter: () => {
+                            this.on_delete();
+                            graph_view.context_menu.is_active = false;
+                        },
+                        name: 'Delete',
+                        icon: 'mdi-delete-outline',
+                    },
+                ]
+            },
+            on_input_addition () {
+                // Re-compute base width & height length
+                let info_el = this.$el.querySelector("#group_info");
+                this.init_height = info_el.offsetHeight;
+                this.init_width = info_el.querySelector('[contenteditable').offsetWidth + info_el.querySelector('.v-avatar').offsetWidth + 8;
+
+                this.update_group_size();
+            },
+            move_by (dx,dy) {
+
+                // Move by all elements
+                for(let elem in this.element_indices)
+                    window.graph_elements[this.element_indices[elem]].move_by(dx, dy);
+
+                // Move all sub groups
+                 for(let sub_group in this.group_indices)
+                     window.graph_elements[this.group_indices[sub_group]].move_by(dx, dy);
+            }
         },
         computed: {
+            get_rect: function() {
+                return {
+                    x: this.$props.data.position.x,
+                    y: this.$props.data.position.y,
+                    width: this.occupied_width,
+                    height: this.occupied_height + 24,
+                };
+            },
             from_position: function() {
                 return {
                     x: this.$props.data.position.x + this.occupied_width ,
@@ -313,11 +352,11 @@
             },
             sizes () {
                 return {
-                    width: this.occupied_width + 'px',
-                    height: (this.occupied_height + 24) + 'px'
+                    minWidth: this.occupied_width + 'px',
+                    height: this.occupied_height + 'px',
                 }
-            }
-        }
+            } 
+        },
     }
 </script>
 
@@ -325,16 +364,21 @@
     <div class="group" color="#8789ff"
         :style="transformation" :class="{ is_selected }"
         @pointerdown.prevent="drag_start"
-        @contextmenu.prevent="on_context"
+        @dblclick.prevent="is_edit_mode = true"
         @pointerup.prevent="drag_end"
         >
         <div class="group_container" :style="sizes">
-
         </div>
 
-        <div id="group_info">
-            <v-avatar left class="group_type darken-4 green">G</v-avatar>
-            <div style="display: inline;">{{ name }}</div>
+        <div id="group_info" ref="data"
+            @contextmenu="on_context">
+            <v-avatar class="group_type darken-4 green" style="height: initial; min-width: initial; width: initial;">G</v-avatar>
+            <div style="margin-left: 5px; line-height: 1;"
+                @input="on_input"
+                @blur="on_blur" 
+                :contenteditable="is_edit_mode">
+                    {{name}}
+            <div>
         </div>
     </div>
 </template>
@@ -350,23 +394,35 @@
 }
 
 .group {
+    min-width: 10ch;
     border: solid white 1px;
     border-radius: 10px;
     display: flex;
-    flex-direction: column-reverse;
+    flex-direction: column;
     position: absolute;
     cursor: copy;
     box-shadow: 50px 50px 50px rgba(255, 242, 94, 0); /* Removing weird trace on chrome */
 }
 
+.item_type {
+    text-align: center;
+    display: inline;
+    padding-left: 7px;
+    padding-right: 7px;
+}
+
+
+
 #group_info {
-    background: #8789ff;
-    border-bottom-left-radius: 9px;
-    border-bottom-right-radius: 9px;
-    padding-right: 5px;
-    padding-left: 5px;
+    display: inline-flex;
+    border: solid white 1px;
+    border-radius: 10px;
+    padding: 1px;
+    bottom: 0;
     width: 100%;
-    position: absolute;
+    cursor: copy;
+    background: #8789ff;
+    box-shadow: 50px 50px 50px rgba(255, 242, 94, 0); /* Removing weird trace on chrome */
 }
 .group_container {
     height: 0;

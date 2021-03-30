@@ -35,6 +35,7 @@
 
             // Load necessary comonents
             APIShift.API.getMixin('orm/graph_element', true);
+            APIShift.API.getMixin('orm/editable_element', true);
         },
         beforeRouteUpdate (to, from, next) {
             if(to.path == '/database' || to.path == '/database/') this.is_main_page = true;

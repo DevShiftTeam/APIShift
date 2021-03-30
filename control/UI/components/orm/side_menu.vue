@@ -21,50 +21,21 @@
 
     module.exports = {
         props: {
+            actions: Array,
         },
         data () {
             return {
                 drawer: 0,
                 show_side_menu: false,
-                actions: [ {name: 'add-item', icon: 'mdi-plus', text: "Add Item"},
-                    {name: 'add-relation', icon: 'mdi-arrow-right', text: "Add Relation"},
-                    {name: 'delete-element', icon: 'mdi-delete-outline', text: "Delete Tool"},
-                    {name:'add-enum', icon: 'fas fa-cubes', text: "Add Enum"}, 
-                    {name:'add-enum-type', icon: 'fas fa-cube', text: "Add Enum Type"},
-                    {name:'add-group', icon: 'fa-object-group', text: "Add Group"}]
             }
         },
         created () {
         },
-        mounted () {
-            
-        },
         methods: {
-            action_creator(action_name) {
-                switch (action_name) {
-                    case 'add-item':
-                        graph_view.$refs['item_builder'].build('item');
-                        break;
-                    case 'add-relation':
-                        graph_view.relation_builder(null, null, 1);
-                        break;
-                    case 'delete-element':
-                        graph_view.cursor_state = {type: "delete"};
-                        break;
-                    case 'add-enum':
-                        graph_view.cursor_state = {type: "create", data: 'add-enum'};
-                        break;
-                    case 'add-enum-type':
-                        graph_view.cursor_state = {type: "create", data: 'add-enum-type'};
-                        break;
-                    case 'add-group':
-                        graph_view.cursor_state = {type: "select"};
-                        break;
-                    default:
-                        break;
-                }
-
+            run_handler: function(func_handler) {
                 this.show_side_menu = false;
+                graph_view.drag_end_lock = true;
+                func_handler();
             },
             toggleDarkTheme: function() {
                 window.app.$vuetify.theme.dark = !(window.app.$vuetify.theme.dark);
@@ -84,7 +55,7 @@
                 <v-list dense>
                     <v-tooltip top v-for="action in actions" :key="action.name">
                         <template #activator="{ on }">
-                            <v-list-item link @click="action_creator(action.name)" v-on="on">
+                            <v-list-item link @click="run_handler(action.starter)" v-on="on">
                                 <v-list-item-action>
                                     <v-icon>{{ action.icon }}</v-icon>
                                 </v-list-item-action>

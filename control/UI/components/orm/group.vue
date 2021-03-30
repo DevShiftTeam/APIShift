@@ -24,139 +24,361 @@
         mixins: [APIShift.API.getMixin('orm/graph_element')],
         data () {
             return {
-                base_height: 0,
-                base_width: 0,
-                selected: false,
-                inner_elements: [] // Represents contained element objects
+                init_height: 0,
+                init_width: 0,
+                occupied_width: 0,
+                occupied_height: 0,
+                element_indices: [],
+                group_indices: [],
+                parent_group_index: -1,
+                is_selected: false
             }
         },
         created () {
-            const self = this;
-            this.expanded_functions.drag_start = (event) => {
+            window.graph_elements[this.$props.index] = this;
 
-            };
-            this.expanded_functions.drag = (event) => {
+            if(this.$props.data.position === undefined) {
+                this.$set(this.$props.data, 'position', { x: 0, y: 0 });
+            }
 
-            };
-            this.expanded_functions.drag_end = (event) => {
-
-            };
+            this.expanded_functions.drag_start = this.drag_start_addition;
+            this.expanded_functions.drag = this.drag_addition;
         },
         mounted () {
             // Determine initial rect pre bounding setup
             let rect = this.$el.getBoundingClientRect();
-            this.base_height = rect.height;
-            this.base_width = rect.width;
+            this.init_height = rect.height;
+            this.init_width = rect.width;
+            graph_view.elements_loaded++;
 
-            // Determine new calculated rect & bounds 
-            this.set_elements();
-            this.set_rect();
+            // Remove common elements of parent groups
+            this.parent_group_index = graph_view.elements.findIndex(el => el.id == this.$props.data.parent && el.component_id == 4);
+            if (this.parent_group_index != -1)
+                graph_view.elements[this.parent_group_index].data.elements = graph_view.elements[this.parent_group_index].data.elements
+                                                                            .filter (elem => this.$props.data.elements.indexOf(elem) < 0);
             
-            let group_info = this.get_group();
-            if (group_info) {
-                console.log();
-                this.z_index = graph_view.$refs[group_info.type + group_info.id] - 1;
+            if(graph_view.first_load) {
+                this.all_loaded();
+                this.bring_to_front();
             }
-            // Watch for changes 
-            this.$watch('inner_elements', this.set_rect, {deep: true});
+
+
         },
         methods: {
-            set_elements () {
-                this.inner_elements = [];
-                // Set inner elements rect's and watch them later on using vue reactivity 
-                this.$props.data.contained_elements.forEach((element) => {
-                    if (element.type === 'i') this.inner_elements.push(graph_view.items.find((item) => item.id === element.id));
-                    if (element.type === 'g') 
-                    {
-                        this.inner_elements.push(graph_view.groups.find((group) => group.id === element.id));
-                        console.log(graph_view.$refs['g' + element.id]);
-                        graph_view.$refs['g' + element.id].z_index = 1000;
+            all_loaded: function() {
+                // Determine new calculated rect & bounds
+                this.update_indices();
+                this.update_group_size();
+                if(this.parent_group_index != -1) { 
+                    window.graph_elements[this.parent_group_index].update_indices();
+                    window.graph_elements[this.parent_group_index].update_group_size();
+                }
+
+                this.bring_to_front();
+            },
+            update_indices: function() {
+                this.element_indices = [];
+                this.group_indices = [];
+
+                // Get all element indices
+                for(let elem in this.$props.data.elements) {
+                    let item_id = this.$props.data.elements[elem];
+                    let index = graph_view.elements.findIndex(el => el.id === item_id && (el.component_id == 1 || el.component_id == 0) && !el.is_deleted);
+                    if(index == -1) continue;
+                    window.graph_elements[index].group_index = this.$props.index;
+                    this.element_indices.push(index);
+                }
+
+                // Get all group indices
+                for(let grp_index in graph_view.elements) {
+                    if(graph_view.elements[grp_index].component_id != 4 || graph_view.elements[grp_index].data.parent != this.$props.id || graph_view.elements[grp_index].is_deleted)
+                        continue;
+                    window.graph_elements[grp_index].parent_group_index = this.$props.index;
+                    this.group_indices.push(grp_index);
+                };
+
+                // Delete group if empty 
+                if (this.element_indices.length + this.group_indices.length === 0) this.on_delete();    
+            },
+            bring_to_front: function(ignore_parent = false) {
+                // If father present then call only the father's function
+                if(this.parent_group_index != -1 && !ignore_parent)
+                {
+                    window.graph_elements[this.parent_group_index].bring_to_front();
+                    return;
+                }
+
+                graph_view.bring_to_front(this.$props.index);
+
+                for(let elem in this.element_indices)
+                    graph_view.bring_to_front(this.element_indices[elem]);
+                    
+                for(let elem in this.group_indices)
+                    window.graph_elements[this.group_indices[elem]].bring_to_front(true);
+            },
+            update_group_size () {
+                let rect = {};
+                
+                // Calculate size via elements
+                for(let elem in this.element_indices) {
+                    let index = this.element_indices[elem];
+
+                    // Get first rect
+                    let temp_rect = window.graph_elements[index].get_rect;
+
+                    if(rect.x === undefined) {
+                        rect.x = temp_rect.x;
+                        rect.y = temp_rect.y;
+                        rect.x_end = temp_rect.x + temp_rect.width;
+                        rect.y_end = temp_rect.y + temp_rect.height;
                     }
-                });
+                    else {
+                        // Get start of group
+                        if(rect.x > temp_rect.x) rect.x = temp_rect.x;
+                        if(rect.y > temp_rect.y) rect.y = temp_rect.y;
 
-                // Delete groups of less than 1 elements 
-                if(this.inner_elements.length <= 1) this.on_delete();
-            }, 
-            set_rect () {
-                // Determine bounds 
-                let min_x = Math.min(...this.inner_elements.map((element) => element.rect.x));
-                let min_y = Math.min(...this.inner_elements.map((element) => element.rect.y));
-                let max_x = Math.max(...this.inner_elements.map((element) => element.rect.x + element.rect.width));
-                let max_y = Math.max(...this.inner_elements.map((element) => element.rect.y + element.rect.height));
+                        // Get end of group
+                        if(rect.x_end < temp_rect.x + temp_rect.width)
+                            rect.x_end = temp_rect.x + temp_rect.width;
+                        if(rect.y_end < temp_rect.y + temp_rect.height)
+                            rect.y_end = temp_rect.y + temp_rect.height;
+                    }
+                }
 
+                // Calculate size via sub_groups
+                for(let grp in this.group_indices) {
+                    let index = this.group_indices[grp];
+
+                    // Get first rect
+                    let temp_rect = window.graph_elements[index].get_rect;
+
+                    if(rect.x === undefined) {
+                        rect.x = temp_rect.x;
+                        rect.y = temp_rect.y;
+                        rect.x_end = temp_rect.x + temp_rect.width;
+                        rect.y_end = temp_rect.y + temp_rect.height;
+                    }
+                    else {
+                        // Get start of group
+                        if(rect.x > temp_rect.x) rect.x = temp_rect.x;
+                        if(rect.y > temp_rect.y) rect.y = temp_rect.y;
+
+                        // Get end of group
+                        if(rect.x_end < temp_rect.x + temp_rect.width)
+                            rect.x_end = temp_rect.x + temp_rect.width;
+                        if(rect.y_end < temp_rect.y + temp_rect.height)
+                            rect.y_end = temp_rect.y + temp_rect.height;
+                    }
+                }
 
                 // Update rect data 
-                this.$props.rect.x = min_x;
-                this.$props.rect.y = min_y;
-                this.$props.rect.width = max_x - min_x;
-                this.$props.rect.height = max_y - min_y + this.base_height;
+                this.$props.data.position.x = rect.x;
+                this.$props.data.position.y = rect.y;
+                this.occupied_width = Math.max(rect.x_end - rect.x, this.init_width);
+                this.occupied_height = rect.y_end - rect.y;
+
+                // Update parent
+                if(this.parent_group_index != -1) window.graph_elements[this.parent_group_index].update_group_size();
             },
-            on_context () {
+            drag_start_addition: function(event) {
+                if(this.parent_group_index != -1) window.graph_elements[this.parent_group_index].bring_to_front();
+
+                // Initialize all elements
+                for(let elem in this.element_indices) {
+                    let index = this.element_indices[elem];
+                    graph_view.bring_to_front(index);
+                    window.graph_elements[index].init_position = Object.assign({}, window.graph_elements[index].data.position);
+                }
+
+                // Initialize all sub-groups
+                for(let sub_group in this.group_indices)
+                    window.graph_elements[this.group_indices[sub_group]].drag_start(event);
                 
+                graph_view.drag_handler = this.drag;
             },
-            move_by (dx, dy) {
-                this.$props.data.contained_elements.forEach((element) => {
-                    let uid = element.type + element.id;
-                    graph_view.$refs[uid].move_by(dx, dy);
+            drag_addition: function(event) {
+                if(this.parent_group_index != -1 && !(window.graph_elements[this.parent_group_index].is_dragging))
+                    window.graph_elements[this.parent_group_index].update_group_size();
+
+                // Drag all elements
+                for(let elem in this.element_indices)
+                    window.graph_elements[this.element_indices[elem]].drag(event);
+
+                // Drag all sub groups
+                for(let sub_group in this.group_indices)
+                    window.graph_elements[this.group_indices[sub_group]].drag(event);
+            },
+            get_connected_enums () {
+                let my_id = graph_view.elements[this.$props.index].id;
+
+                // Iterate through enums
+                let enums = graph_view.elements.filter((el) => {
+                    return el.component_id == 3 && !el.is_deleted;;
                 });
+
+
+                // Infer connected enums indices
+                let enums_indices = [];
+                enums.forEach((e) => {
+                    if (e.data.connected.find(i => i == my_id)) {
+                        let enum_index = graph_view.elements.findIndex(el => el.id == e.id && el.component_id == 3); 
+                        return enums_indices.push(enum_index);
+                    }
+                });
+
+                return enums_indices;
             },
-            get_enums () {
-                if (!this.enums) this.enums = graph_view.enums.filter(e => e.data.connected.find(connected => connected.type + connected.id === this.uid));
-                return this.enums;
+            get_connected_relations () {
+                let my_id = graph_view.elements[this.$props.index].id;
+
+                // Iterate through enums
+                let relations = graph_view.elements.filter((el) => {
+                    return el.component_id == 1 && !el.is_deleted;
+                });
+
+
+                // Infer connected enums indices
+                let relations_indices = [];
+                relations.forEach((rel) => {
+                    if (rel.data.to == my_id || rel.data.from == my_id) {
+                        let rel_index = graph_view.elements.findIndex(el => el.id == rel.id && el.component_id == 1); 
+                        return relations_indices.push(rel_index);
+                    }
+                });
+
+                return relations_indices;
             },
             on_delete () {
-                let id = this.component_id;
-
-
-                // Delete lines from the graph & connected relations recursivly
-                this.get_lines().forEach(line => {
-                    graph_view.delete_line(line.src_info, line.dest_info);
-                });
+                let my_id = graph_view.elements[this.$props.index].id;
                 
-                // Remove item connection from enum
-                this.get_enums().forEach(e => {    
-                        e.data.connected = e.data.connected.filter( connected => connected.type + connected.id !== this.uid);
-                    }
-                );
+                // Mark as deleted
+                graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);
 
-                // Delete element from the graph
-                graph_view.groups = graph_view.groups.filter((group) => group.id !== id);
-                delete graph_view.lookup_table['g'][id];
+                // Remove connection from connected enums
+                this.get_connected_enums().forEach(enum_index => {
+                    window.graph_elements[enum_index].remove_connection(my_id);
+                });
+
+                // Remove relation connection form item
+                this.get_connected_relations().forEach(rel_index => {
+                    window.graph_elements[rel_index].remove_connection(my_id);
+                });
+
+                // Detach inner elements
+                for(let elem in this.element_indices) {
+                    window.graph_elements[this.element_indices[elem]].group_index = -1;
+                }
+
+                // Detach inner groups
+                for(let elem in this.group_indices) {
+                    graph_view.elements[this.group_indices[elem]].data.parent = this.$props.data.parent;
+                    window.graph_elements[this.group_indices[elem]].parent_group_index = -1;
+                }
+
+                // Add group elements to owning group's elements
+                if (this.parent_group_index !== -1) 
+                {
+                    graph_view.elements[this.parent_group_index].data.elements = [...window.graph_elements[this.parent_group_index].data.elements, ...this.$props.data.elements];
+                    window.graph_elements[this.parent_group_index].update_indices();
+                    window.graph_elements[this.parent_group_index].update_group_size();
+                }
             },
-        }, 
-        watch: {
-            '$props.data.contained_elements': function() {
-                this.set_elements();
-                this.set_rect();
+            on_context_addition () {
+                graph_view.context_menu.actions = [
+                    {
+                        starter: () => {
+                            this.is_edit_mode = true;
+                            graph_view.context_menu.is_active = false;
+                        },
+                        name: 'Edit',
+                        icon: 'mdi-pencil',
+                    },
+                    {
+                        starter: () => {
+
+                        },
+                        name: 'Duplicate',
+                        icon: 'mdi-content-duplicate',
+                    },
+                    {
+                        starter: () => {
+                            this.on_delete();
+                            graph_view.context_menu.is_active = false;
+                        },
+                        name: 'Delete',
+                        icon: 'mdi-delete-outline',
+                    },
+                ]
+            },
+            on_input_addition () {
+                // Re-compute base width & height length
+                let info_el = this.$el.querySelector("#group_info");
+                this.init_height = info_el.offsetHeight;
+                this.init_width = info_el.querySelector('[contenteditable').offsetWidth + info_el.querySelector('.v-avatar').offsetWidth + 8;
+
+                this.update_group_size();
+            },
+            move_by (dx,dy) {
+
+                // Move by all elements
+                for(let elem in this.element_indices)
+                    window.graph_elements[this.element_indices[elem]].move_by(dx, dy);
+
+                // Move all sub groups
+                 for(let sub_group in this.group_indices)
+                     window.graph_elements[this.group_indices[sub_group]].move_by(dx, dy);
             }
         },
         computed: {
-            transformation () {
+            get_rect: function() {
                 return {
-                    transform: `translate(${this.$props.rect.x}px,${this.$props.rect.y}px)`,
-                    'z-index': 1
+                    x: this.$props.data.position.x,
+                    y: this.$props.data.position.y,
+                    width: this.occupied_width,
+                    height: this.occupied_height + 24,
+                };
+            },
+            from_position: function() {
+                return {
+                    x: this.$props.data.position.x + this.occupied_width ,
+                    y: this.$props.data.position.y + (this.occupied_height + this.init_height) / 2
+                };
+            },
+            to_position: function() {
+                return {
+                    x: this.$props.data.position.x,
+                    y: this.$props.data.position.y + (this.occupied_height + this.init_height) / 2
+                };
+            },
+            sizes () {
+                return {
+                    minWidth: this.occupied_width + 'px',
+                    height: this.occupied_height + 'px',
                 }
-            }
-        }
+            } 
+        },
     }
 </script>
 
 <template>
     <div class="group" color="#8789ff"
-        :style="transformation" :class="{ selected }"
+        :style="transformation" :class="{ is_selected }"
         @pointerdown.prevent="drag_start"
-        @contextmenu.prevent="on_context"
+        @dblclick.prevent="is_edit_mode = true"
         @pointerup.prevent="drag_end"
         >
-        
-        <div class="group_info">
-            <v-avatar left class="group_type darken-4 green">G</v-avatar>
-            <div style="display: inline;">{{ name }}</div>
+        <div class="group_container" :style="sizes">
         </div>
-        
-        <div class="group_container" 
-        :style="{'height': `${rect.height - base_height }px`, 'width': `${rect.width}px`}">
 
+        <div id="group_info" ref="data"
+            @contextmenu="on_context">
+            <v-avatar class="group_type darken-4 green" style="height: initial; min-width: initial; width: initial;">G</v-avatar>
+            <div style="margin-left: 5px; line-height: 1;"
+                @input="on_input"
+                @blur="on_blur" 
+                :contenteditable="is_edit_mode">
+                    {{name}}
+            <div>
         </div>
     </div>
 </template>
@@ -172,33 +394,46 @@
 }
 
 .group {
+    min-width: 10ch;
     border: solid white 1px;
     border-radius: 10px;
     display: flex;
-    flex-direction: column-reverse;
+    flex-direction: column;
     position: absolute;
-    cursor: copy ;
+    cursor: copy;
     box-shadow: 50px 50px 50px rgba(255, 242, 94, 0); /* Removing weird trace on chrome */
 }
 
-.group_info {
-    margin-top: 1px;
+.item_type {
+    text-align: center;
+    display: inline;
+    padding-left: 7px;
+    padding-right: 7px;
+}
+
+
+
+#group_info {
+    display: inline-flex;
+    border: solid white 1px;
+    border-radius: 10px;
+    padding: 1px;
+    bottom: 0;
+    width: 100%;
+    cursor: copy;
     background: #8789ff;
-    border-bottom-left-radius: 9px;
-    border-bottom-right-radius: 9px;
-    padding-right: 5px;
-    padding-left: 5px;
+    box-shadow: 50px 50px 50px rgba(255, 242, 94, 0); /* Removing weird trace on chrome */
 }
 .group_container {
+    height: 0;
+    width: 0;
     pointer-events: none;
-    opacity: 0;
+    opacity: 0.5;
+    background:#aad6ff;
+    z-index: -1;
 }
 
-.group.selected {
+.group.is_selected {
     outline: dashed white 2px;
-}
-
-.group.highlight {
-
 }
 </style>

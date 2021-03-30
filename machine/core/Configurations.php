@@ -26,7 +26,7 @@ namespace APIShift\Core;
  */
 class Configurations {
     /**
-     * When true system acts as though itshould be installed, false otehrwise
+     * When true system acts as though it should be installed, false otherwise
      */
     const INSTALLED = false;
 
@@ -35,7 +35,7 @@ class Configurations {
      */
     const DB_HOST = "127.0.0.1";
     const DB_PORT = 3306;
-    const DB_USER = "";
+    const DB_USER = "root";
     const DB_PASS = "";
     const DB_NAME = "";
     const DB_TYPE = "MySQL";

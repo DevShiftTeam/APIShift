@@ -28,52 +28,72 @@
             return {
                 drawer: null,
                 // Components
-                item_comp: APIShift.API.getComponent('orm/item', true),
-                enum_comp: APIShift.API.getComponent('orm/enum', true),
-                group_comp: APIShift.API.getComponent('orm/group', true),
-                enum_type_comp: APIShift.API.getComponent('orm/enum_type', true),
+                components: [
+                    APIShift.API.getComponent('orm/item', true),
+                    APIShift.API.getComponent('orm/relation', true),
+                    APIShift.API.getComponent('orm/enum_type', true),
+                    APIShift.API.getComponent('orm/enum', true),
+                    APIShift.API.getComponent('orm/group', true),
+                    APIShift.API.getComponent('orm/point', true)
+
+                ],
                 line_comp: APIShift.API.getComponent('orm/line', true),
                 selection_comp: APIShift.API.getComponent('orm/selection_box', true),
                 side_menu_comp: APIShift.API.getComponent('orm/side_menu', true),
-                items: [
-                    { name: "wait", id: 1, rect: { x: 20, y: 0, width: 0, height: 0 }, data: { is_relation: false } },
-                    { name: "haha", id: 2, rect: { x: 220, y: 200, width: 0, height: 0}, data: { is_relation: false } },
-                    { name: "rela", id: 3, rect: { x: 120, y: 50 , width: 0, height: 0}, data: {
-                        is_relation: true,
-                        from: { id: 1, type: 'i' },
-                        to: { id: 2, type: 'i' },
+                context_menu_comp: APIShift.API.getComponent('orm/context_menu',true),
+                elements: [
+                    // Items
+                    { id: 1, component_id: 0, name: "Users", data: {
+                            position: { x: 20, y: 0 }
+                        }
+                    },
+                    { id: 2, component_id: 0, name: "Posts", data: {
+                            position: { x: 120, y: 50 }
+                        }
+                    },
+                    
+                    // Relations
+                    { id: 3, component_id: 1, name: "Testers", data: {
+                        position: { x: 20, y: 0 },
+                        to: 5,
                         type: 0
-                    } }
-                ],  
-                enums: [
-                    { name: "Enum", id: 1, rect: { x: 50, y: 100, width: 0, height: 0},
-                        data: {
-                            types: [
-                                {id: 1}
-                            ],
-                            connected: [
-                                { type: 'i', id: 1 }
-                            ]
+                    }},
+                    { id: 4, component_id: 1, name: "UserPosts", data: {
+                            position: { x: 220, y: 200 },
+                            from: 1,
+                            to: 2,
+                            type: 1
+                        }
+                    },
+                    
+                    // Enum Types
+                    { id: 1, component_id: 2, name: 'test1', data: {
+                        position: {x: 100, y: 100}
+                    }},
+                    { id: 2, component_id: 2, name: 'testsdfs2', data: {
+                        position: {x: 100, y: 100}
+                    }},
+                    { id: 3, component_id: 2, name: '3testing', data: {
+                        position: {x: 100, y: 100}
+                    }},
+
+                    // Enums
+                    { id: 1, component_id: 3, name: 'enum1', data: {
+                        position: {x: 200, y: 200},
+                        types: [ 1, 2 ],
+                        connected: []
+                    }},
+
+                    // Groups
+                    { id: 5, component_id: 4, name: 'group', data: {
+                        elements: [ 1, 2, 3 ],
+                        parent: 0
+                    }},
+                    { id: 6, component_id: 4, name: 'group', data: {
+                        elements: [ 4 ],
+                        parent: 5
                     }}
                 ],
-                enum_types: [
-                    { name: 'Type', id: 1, rect: {  x: 100, y: 100, width: 0, height: 0}, data: { enum_id: 1 }},
-                    { name: 'Type', id: 2, rect: {  x: 200, y: 100, width: 0, height: 0}, data: { enum_id: null }}
-                ],
-                groups: [
-                    { 
-                        name: 'Group', id: 1, rect: { x: 0, y: 0, width: 0, height: 0},
-                        data: { 
-                            contained_elements: [
-                                {type: 'i', id: 1}, 
-                                {type: 'i', id: 2}, 
-                                {type: 'i', id: 3}
-                            ]
-                        }
-                    }
-                ],
-                points: [], 
-                lookup_table: { 'i': [], 't': [], 'e': [], 'g': []},
                 lines: [
 
                 ],
@@ -97,18 +117,23 @@
                     x: 0,
                     y: 0
                 },
-                selection_box: {
-                    rect: {
-                        x: 0, y: 0, width: 0, height: 0
-                    }
+                drag_end_lock: false,
+                selection_active: false,
+                side_menu_actions: [],
+                context_menu: {
+                    actions: [],
+                    position: { x: 0, y: 0 },
+                    is_active: false
                 },
                 scroll_manager: {
                     id: null,
                     interval: 20,
                     params: [],
                     cb: window.empty_function,
+                    position_function(time) {
+                        return 
+                    },
                     start: function(cb, interval) {
-                        if (this.is_running) this.stop();
                         if (cb) this.cb = cb;
                         if (interval) this.iv = interval;
                         this.id = window.setInterval(this.cb, this.interval);
@@ -118,36 +143,153 @@
                         this.id = null;
                     },
                     is_running: function () {
-                        return this.id; 
+                        return !!this.id; 
                     }
                 },
-                yes: null,
-                relation_factory: {from : 0, to : 0, type : 0},
-                void_point: { x: -Number.MAX_SAFE_INTEGER, y: -Number.MAX_SAFE_INTEGER },  
-                init_rect: {x:0, y:0},
-                cursor_state: {type: "default"}
+                cursor_state: "auto",
+                elements_loaded: 0,
+                first_load: false,
+                action_selected: false,
+                current_action: window.empty_function,
             }
         },
         created () {
             // Store this object with a global reference
+            window.graph_elements = {};
+            window.graph_lines = {};
             window.graph_view = this;
-            window.origin_position = {
-                x: 0,
-                y: 0
-            };
+            this.current_action = window.empty_function;
 
-            this.front_z_index = this.items.length;
+            this.context_menu.actions = [
+    
+            ];
+            this.side_menu_actions = [
+                    {
+                        starter: () => {
+                            graph_view.cursor_state = "create";
+                            graph_view.current_action = () => {
+                                graph_view.elements.push({
+                                    id: 0, component_id: 0, name: "Item", data: {
+                                        position: window.mouse_on_graph,
+                                        z_index: graph_view.elements.length
+                                    }
+                                });
+                            }
+                        },
+                        icon: 'mdi-plus',
+                        text: "Add Item" 
+                    },
+                    {
+                        starter: () => {
+                            graph_view.cursor_state = "create";
+                            graph_view.current_action = () => {
+                                graph_view.elements.push({
+                                    id: 0, component_id: 1, name: "Relation", data: {
+                                        position: window.mouse_on_graph,
+                                        type: 0,
+                                        z_index: graph_view.elements.length
+                                    }
+                                });
+                            };
+                        },
+                        icon: 'mdi-arrow-right',
+                        text: "Add Relation" 
+                    },
+                    {
+                        starter: () => {
+                            graph_view.cursor_state = "delete";
+                            graph_view.current_action = (event) => {
+                                let target_element = -1, z_index = 0;
+
+                                for(let index in [...graph_view.elements.keys()]) {
+                                    // Skip undefined or deleted
+                                    if(window.graph_elements[index] === undefined || window.graph_elements[index].is_deleted)
+                                        continue;
+                                    
+                                    // Check collisions
+                                    let obj_rect = window.graph_elements[index].get_rect;
+                                    if (window.graph_elements[index].data.z_index > z_index && (
+                                        obj_rect.x < window.mouse_on_graph.x && obj_rect.x + obj_rect.width > window.mouse_on_graph.x
+                                        && obj_rect.y < window.mouse_on_graph.y && obj_rect.y + obj_rect.height > window.mouse_on_graph.y
+                                    )) {
+                                        target_element = index;
+                                        z_index = graph_view.elements[index].data.z_index;
+                                    }
+                                }
+                                
+                                // Delete targeted element
+                                if (target_element !== -1) window.graph_elements[target_element].on_delete();
+                            };
+                        },
+                        icon: 'mdi-delete-outline',
+                        text: "Delete Tool" 
+                    },
+                    {
+                        starter: () => {
+                            graph_view.cursor_state = "create";
+                            graph_view.current_action = () => {
+                                graph_view.elements.push({
+                                    id: 0, component_id: 3, name: "Enum", data: {
+                                        position: window.mouse_on_graph,
+                                        types: [],
+                                        connected: [],
+                                        z_index: graph_view.elements.length
+                                    }
+                                });
+                            };
+                        },
+                        icon: 'fas fa-cubes',
+                        text: "Add Enum" 
+                    }, 
+                    {
+                        starter: () => {
+                            graph_view.cursor_state = "create";
+                            graph_view.current_action = () => {
+                                graph_view.elements.push({
+                                    id: 0, component_id: 2, name: "Type", data: {
+                                        position: window.mouse_on_graph,
+                                        z_index: graph_view.elements.length
+                                    }
+                                });
+                            }
+                        },
+                        icon: 'fas fa-cube',
+                        text: "Add Enum Type"
+                    },
+                    {
+                        starter: () => {
+                            graph_view.cursor_state = "crosshair";
+                            graph_view.current_action = window.selection_box.start_select;
+                        },
+                        icon: 'fa-object-group', 
+                        text: "Add Group" 
+                    }
+                ];
+            // Set initial z-index
+            for(var index in this.elements) this.$set(this.elements[index].data, 'z_index', parseInt(index) + 1);
         },
         mounted () {
-            this.init_rect = this.$el.getBoundingClientRect();
             this.update_graph_position();
-
-            window.addEventListener('keydown', this.key_down);
-        },
-        beforeDestroy () {
-            window.removeEventListener('keydown', this.key_down);
         },
         methods: {
+            bring_to_front: function(element_index) {
+                // Ignore if in front
+                if(this.elements[element_index].data.z_index !== undefined && this.elements[element_index].data.z_index == this.elements.length) return;
+
+                let current_z_index = this.elements[element_index].data.z_index;
+
+                // Bring other elements to back
+                for(let index in this.elements)
+                    if(this.elements[index].data.z_index > current_z_index)
+                        this.elements[index].data.z_index--;
+                
+
+                // Bring to front
+                this.elements[element_index].data.z_index = this.elements.length;
+                app.$refs.navigator.updateIndex(this.elements.length + 1);
+                app.$refs.footer.updateIndex(this.elements.length + 1);
+                window.holder.updateIndex(this.elements.length + 1);
+            },
             /**
              * User interactions
              */
@@ -162,11 +304,13 @@
 
                 // Handle mobile zooming
                 if(this.tap_counter === 2) {
+                    window.scale_factor = 1;
+                    window.scale_init = this.scale;
                     window.init_pointer_first = Object.assign({}, window.init_pointer);
                     window.init_pointer_second = {
                         x: event.clientX,
                         y: event.clientY
-                    }
+                    };
                     window.temp_pointer = {
                         x: (window.init_pointer_first.x + window.init_pointer_second.x) / 2 - window.graph_position.x,
                         y: (window.init_pointer_first.y + window.init_pointer_second.y) / 2 - window.graph_position.y
@@ -182,32 +326,14 @@
                     y: event.clientY
                 };
                 this.init_camera = Object.assign({}, this.camera);
-            
-                let cursor_state = Object.assign({}, this.cursor_state);
-                if (cursor_state.type === 'select') {
-                    graph_view.$refs['s_box'].start_select(event);
-                }
-                if (cursor_state.type === 'create') {
-                    // Determine pointer position in respect to graph transformation
-                    let center_rect = document.getElementById('graph_center').getBoundingClientRect();
-                    let mouse = { x: window.init_pointer.x - graph_position.x, y: window.init_pointer.y - graph_position.y };
-                    let differential = { x: center_rect.x - graph_position.x, y: center_rect.y - graph_position.y};
-                    let t_mouse = { x: (mouse.x-differential.x) / this.scale, y: (mouse.y - differential.y) / this.scale};
 
-                    if (cursor_state.data === 'add-enum') {
-                        graph_view.create_element_on_runtime('enum', 
-                        {
-                            data: { connected: [], types: []},
-                            rect: {...t_mouse, width: 0, height: 0}
-                        });
-                    }
-                    if (cursor_state.data === 'add-enum-type') {
-                        graph_view.create_element_on_runtime('enum-type', 
-                        { 
-                            data: {enum_id: null},
-                            rect: {...t_mouse, width: 0, height: 0}
-                        });
-                    }
+                if(this.current_action != window.empty_function) {
+                    // Determine pointer position in respect to graph transformation
+                    let camera_rect = document.querySelector('#graph_center').getBoundingClientRect();
+                    
+                    window.mouse_on_graph = { x: (window.init_pointer.x - camera_rect.x) / (this.scale), y: (window.init_pointer.y - camera_rect.y) / (this.scale)};
+                    this.current_action(event);
+                    return;
                 }
 
                 // Proceeds only if not dragging any other object
@@ -220,6 +346,9 @@
                 this.camera.y = this.init_camera.y + event.clientY - window.init_pointer.y;
             },
             pointer_scale (event) {
+                // De-activate context menu if present
+                this.context_menu.is_active = false;
+
                 this.update_graph_position();
                 let rect = document.getElementById('graph_center').getBoundingClientRect();
                 // Calculate center
@@ -255,13 +384,14 @@
 
                 // Update scale
                 let change = Math.sqrt(
-                        (new_diff.x * new_diff.x + new_diff.y * new_diff.y) / 
-                        (prev_diff.x * prev_diff.x + prev_diff.y * prev_diff.y) 
+                        (new_diff.x * new_diff.x + new_diff.y * new_diff.y) /
+                        (prev_diff.x * prev_diff.x + prev_diff.y * prev_diff.y)
                     );
-                let new_scale = this.scale * change;
+                window.scale_factor *= change;
+                let new_scale = window.scale_init * window.scale_factor;
         
                 // Keep the scale on bound
-                if (new_scale < 0.2 || new_scale > 2 ) {
+                if (new_scale < 0.2 || new_scale > 4 ) {
                     return;
                 }
                 this.scale = new_scale;
@@ -272,21 +402,24 @@
                 window.temp_pointer = Object.assign({}, window.init_pointer);
             },
             pointer_up(event) {
-                document.removeEventListener('pointerup', this.pointer_up);
-
                 this.tap_counter = 0;
+                
+                // Release drag end lock
+                this.drag_end_lock = false;
 
-                if (this.cursor_state.type === 'select') {
-                    graph_view.$refs['s_box'].end_select();
-                }
+                // Empty current action
+                this.current_action = window.empty_function;
 
-                if(this.cursor_state.data !== 'add-relation') this.cursor_state = Object.assign({}, {type: 'default'});
                 // Reset drag event to none
                 this.drag_handler = window.empty_function;
 
                 this.scroll_manager.stop();
+                graph_view.cursor_state = "auto";
             },
             wheel (event) {
+                // De-activate context menu if present
+                this.context_menu.is_active = false;
+
                 // Update graph position
                 this.update_graph_position();
                 let rect = document.getElementById('graph_center').getBoundingClientRect();
@@ -294,6 +427,7 @@
                     x: event.clientX - window.graph_position.x,
                     y: event.clientY - window.graph_position.y
                 }
+
                 // Middle of graph camera
                 let mid = {
                     x: rect.x + rect.width / 2 - window.graph_position.x,
@@ -308,7 +442,7 @@
                 let new_scale = this.scale * change;
                 
                 // Keep the scale on bound
-                if (new_scale < 0.2 || new_scale > 2 ) {
+                if (new_scale < 0.2 || new_scale > 4 ) {
                     return;
                 }
                 this.scale = new_scale;
@@ -317,242 +451,47 @@
                 this.camera.x += (window.init_pointer.x - mid.x) * (1 - change);
                 this.camera.y += (window.init_pointer.y - mid.y) * (1 - change);
             },
-            key_down (event){
-                if (event.code === 'KeyG') {
-                    // Determine contained elements
-                    let contained_elements = [];
-                    this.items.forEach(item => {
-                        let item_instance = graph_view.$refs[`i${item.id}`];
-                        if (item_instance.selected && item_instance.get_group() === null) {
-                            contained_elements.push({ type: 'i', id: item.id });
-                            item_instance.selected = false;
-                        }
-                    });
-                    this.groups.forEach(group => {
-                        let group_instance = graph_view.$refs[`g${group.id}`];
-                        if (group_instance.selected) {
-                            contained_elements.push({ type: 'g', id: group.id });
-                            group_instance.selected = false;
-                        }
-                    });
-                    graph_view.create_element_on_runtime('group', {name: 'Group', rect: {x: 0, y: 0, height: 0, width: 0}, data: {contained_elements}})
-                }                
-            },
             move_camera_by (dx, dy) {
                 this.camera.x += dx;
                 this.camera.y += dy;
             },
-            /**
-             * Control functions 
-             */
-            create_line ( src_info = { type: '', from_id: 0}, dest_info = {type: '', to_id: 0}, settings = {  }) {
-                    var line_uid, from_uid, to_uid;
-
-                    // String concatination 
-                    from_uid  = src_info.type + src_info.id;
-                    to_uid = dest_info.type + dest_info.id;
-
-                    // Line already in list 
-                    line_uid = `${from_uid}-${to_uid}`;
-                    if (graph_view.lines.find((l) => l.line_uid === line_uid)) return;
-
-                    // Add line to system 
-                    graph_view.lines.push({line_uid, src_info, dest_info, settings});
-            },
-            delete_line ( src_info = { type: '', from_id: 0}, dest_info = {type: '', to_id: 0} ) {  
-                    var line_uid, from_uid, to_uid;
-
-                    // String concatination 
-                    from_uid  = src_info.type + src_info.id;
-                    to_uid = dest_info.type + dest_info.id;
-
-                    // Line already in list 
-                    line_uid = `${from_uid}-${to_uid}`;
-
-                    // Queue deletion to next frame execution due to potential race conditions
-                    setTimeout(() => graph_view.lines = graph_view.lines.filter((line) =>  line.line_uid !== line_uid),0);
-            },
-            relation_builder ( relate_from = {}, relate_to = {}, relate_type) {
-                if (relate_from && Object.keys(relate_from) !== 0) {
-                    this.relation_factory['from'] = relate_from;    
-                }
-                if (relate_to && Object.keys(relate_to) !== 0) {
-                    this.relation_factory['to'] = relate_to;
-                }
-                if (relate_type) {
-                    this.relation_factory['type'] = relate_type;
-                }
-                
-                // All properties are set 
-                if (Object.values(this.relation_factory).every((v) => v)) {
-                    let from = { type: this.relation_factory.from.type , id: this.relation_factory.from.id };
-                    let to = { type: this.relation_factory.to.type , id: this.relation_factory.to.id };
-                    let type = this.relation_factory.type;
-
-                    let element_from = this.get_element_by_info(from);
-                    let element_to = this.get_element_by_info(to);
-
-                    let rect = {
-                        x: (element_from.rect.x + element_to.rect.x) / 2,
-                        y: (element_from.rect.y + element_to.rect.y) / 2,
-                        width: 0,
-                        height: 0 
-                    };
-
-                    // Reset factory and create new relation element
-                    this.relation_factory = {from: 0,to: 0,type: 0};
-                    this.cursor_state = Object.assign({}, { type: 'default' });
-                    this.create_element_on_runtime('item', { name: 'relation', rect , data: {is_relation: true,from, to, type}});
-
-                } else this.cursor_state = Object.assign({}, { type: 'create', data: 'add-relation'});
-                
-            },
-            /**
-             * Create new element on screen according to params.
-             * @param {String} type The type to show
-             * @param {Object} properties Unique element properties to set
-             */
-            create_element_on_runtime (type, properties = {}) { 
-                const common = { name: properties.name, 
-                                index: graph_view.front_z_index, 
-                                rect: { ...properties.rect }, 
-                                data: properties.data };
-                
-                if (type === 'item') {
-                    let item_id = Math.max(...graph_view.items.map(i => i.id),0) + 1;
-                    graph_view.items.push({...common, id: item_id});
-                }
-                if (type === 'enum') {
-                    let enum_id = Math.max(...graph_view.enums.map(e => e.id),0) + 1;
-                    graph_view.enums.push({...common, id: enum_id});
-                }
-                if (type === 'enum-type') {
-                    let enum_type_id = Math.max(...graph_view.enum_types.map(t => t.id),0) + 1;
-                    graph_view.enum_types.push({...common, id: enum_type_id});
-                }
-                if (type === 'group') {
-                    let group_id = Math.max(...graph_view.groups.map(g => g.id),0) + 1;
-                    graph_view.groups.push({...common, id: group_id });
-                }
-            },
             // Update graph position
             update_graph_position() {
-                let rect = this.$el.getBoundingClientRect();
+                let rect = document.getElementById('graph_view').getBoundingClientRect();
                 // Stores the current position of the graph on the screen
-                window.graph_position = { x: rect.x,
-                y: rect.y,
-                width: rect.width,
-                height: rect.height 
-                }
+                window.graph_position = {
+                    x: rect.x,
+                    y: rect.y,
+                    width: rect.width,
+                    height: rect.height
+                };
             },
             /**
              * Test whether 2 graph elements hit each other on the graph.
-             * @param {Info} info_1, @param {Info} info_2
+             * @param {Object} size_object_1
+             * @param {Object} size_object_2
              * @returns {Boolean} 
              */
-            hittest: function(info_1, info_2){
-
-                let element1 = this.get_element_by_info(info_1);
-                let element2 = this.get_element_by_info(info_2);
-                
-                if (!element1 || !element2) return null;
-
-                var rect1 = element1.rect;
-                var rect2 = element2.rect;
-
-                return !(
-                    ((rect1.y + rect1.height) < (rect2.y)) ||
-                    (rect1.y > (rect2.y + rect2.height)) ||
-                    ((rect1.x + rect1.width) < rect2.x) ||
-                    (rect1.x > (rect2.x + rect2.width))
+            collision_check: function(size_object_1, size_object_2){
+                return (
+                    size_object_1.x < size_object_2.x + size_object_2.width &&
+                    size_object_1.x > size_object_2.x - size_object_1.width &&
+                    size_object_1.y < size_object_2.y + size_object_2.height &&
+                    size_object_1.y > size_object_2.y - size_object_1.height
                 );
             },
-            /**
-             * Function that gets Info about an element and calucaltes its absolute position relative to the graph.
-             * @param {Info} info
-             * @returns {Rect} 
-             */
-            // TODO: Calculate rect mathematically
-            inverse_transformation (info) { 
-                let revert_rect = {
-                    x: 0,
-                    y: 0,
-                    width: 0,
-                    height: 0,
-                }
+            on_save() {
 
-                const instance = this.$refs[info.type + info.id];
-                if (instance) {
-                    const el_rect = instance.$el.getBoundingClientRect();
-                    revert_rect = {
-                        x: el_rect.x - window.graph_position.x,
-                        y: el_rect.y - window.graph_position.y,
-                        width: el_rect.width,
-                        height: el_rect.height,
-                    }
-                }
-                return revert_rect;
-            },
-            /**
-             * Function that gets element's Info and returns the corresponding Element.
-             * The function uses simple caching mechanism for faster Element lookup (O(1) instead of 0(n)).
-             * @param {Info} info
-             * @returns {Element} 
-             */
-            get_element_by_info (info) {
-                if(!this.lookup_table[info.type][info.id]) {
-                    switch (info.type) {
-                        case 'i':
-                            this.lookup_table['i'][info.id] = graph_view.items.find((i) => i.id === info.id);
-                            break;
-                        case 'e':
-                            this.lookup_table['e'][info.id] = graph_view.enums.find((e) => e.id === info.id);
-                            break;
-                        case 't':
-                            this.lookup_table['t'][info.id] = graph_view.enum_types.find((t) => t.id === info.id);
-                            break;
-                        case 'g':
-                            this.lookup_table['g'][info.id] = graph_view.groups.find((g) => g.id === info.id);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                return this.lookup_table[info.type][info.id];
             }
         },
-        computed: {
-
-        },
         watch: {
-            front_z_index: function(newValue) {
-                app.$refs.navigator.updateIndex(newValue + 1);
-                app.$refs.footer.updateIndex(newValue + 1);
-                window.holder.updateIndex(newValue + 1);
-            },
-            cursor_state: {
-                handler: function (state) {
-                    document.body.classList.add('reset-all-cursors');
-                    this.$el.classList.remove('cursor_default');
-                    this.$el.classList.remove('cursor_delete');
-                    this.$el.classList.remove('cursor_create');
-                    this.$el.classList.remove('cursor_select');
-
-                    if ( state.type === 'default') {
-                        this.$el.classList.add('cursor_default');
-                        document.body.classList.remove('reset-all-cursors');
-                    }
-                    if ( state.type === 'delete') {
-                        this.$el.classList.add('cursor_delete');
-                    }
-                    if ( state.type === 'create') {
-                        this.$el.classList.add('cursor_create');
-                    }
-                    if ( state.type === 'select') {
-                        this.$el.classList.add('cursor_select');
-                    }
-                },
-                deep: true
+            elements_loaded: function(val) {
+                if(val == this.elements.length && !this.first_load)
+                {
+                    for(let index in window.graph_elements)
+                        if(window.graph_elements[index].all_loaded !== undefined) window.graph_elements[index].all_loaded();
+                    this.first_load = true;
+                }
             }
         }
     }
@@ -579,6 +518,8 @@
                         </v-list>
                     </v-menu>
                     <v-divider class="mx-4" inset vertical></v-divider>
+                    <v-spacer></v-spacer>
+                    <v-btn @click="on_save">SAVE</v-btn>
                 </v-app-bar>
 
                 <!-- Body -->
@@ -590,82 +531,49 @@
                         @pointerdown="pointer_down"
                         @pointerup="pointer_up"
                         @pointercancel="pointer_up"
-                        :style="{ 'overflow' : 'hidden' }">
-                        <component ref="side_menu" :is="side_menu_comp"></component>
+                        @contextmenu.prevent="window.empty_function"
+                        :style="{ 'cursor' : cursor_state }">
+                        <component ref="side_menu"
+                            :is="side_menu_comp"
+                            :actions="side_menu_actions"
+                        >
+                        </component>
                         
                         <!-- The center element allow us to create a smart camera that positions the elements without needed to re-render for each element -->
                         <div ref="gv_center" id="graph_center" :style="{ 'transform': 'translate(' + camera.x + 'px, ' + camera.y + 'px) scale(' + scale + ')'}">
+                            <!-- Elements -->
                             <component
-                                v-for="(item) in items"
-                                :is="item_comp"
-                                :key="'i'+item.id"
-                                :uid="'i'+item.id"
-                                :name="item.name"
-                                :index="item.index"
-                                :rect="item.rect"
-                                :data="item.data">
-                            </component> 
-                            <component
-                                v-for="(enum_type) in enum_types"
-                                :is="enum_type_comp"
-                                :key="'t'+enum_type.id"
-                                :uid="'t'+enum_type.id"
-                                :name="enum_type.name"
-                                :index="enum_type.index"
-                                :rect="enum_type.rect"
-                                :data="enum_type.data">
+                                v-for="(element, index) in elements"
+                                v-show="!element.is_deleted"
+                                :is="components[element.component_id]"
+                                :key="index"
+                                :index="index"
+                                :id="element.id"
+                                :name="element.name"
+                                :data="element.data">
                             </component>
+
+                            <!-- Lines -->
                             <component
-                                v-for="(enum_c) in enums"
-                                :is="enum_comp"
-                                :key="'e'+enum_c.id"
-                                :uid="'e'+enum_c.id"
-                                :name="enum_c.name"
-                                :index="enum_c.index"
-                                :rect="enum_c.rect"
-                                :data="enum_c.data">
-                            </component> 
-                            <component
-                                v-for="(group) in groups"
-                                :is="group_comp"
-                                :key="'g'+group.id"
-                                :uid="'g'+group.id"
-                                :name="group.name"
-                                :index="group.index"
-                                :rect="group.rect"
-                                :data="group.data">
+                                v-for="(line, index) in lines"
+                                :key="index"
+                                v-show="!line.is_deleted"
+                                :index="index"
+                                :is="line_comp"
+                                :src_ref="window.graph_elements[line.from_index]"
+                                :dest_ref="window.graph_elements[line.to_index]"
+                                :data="line.data">
                             </component>
-                            <svg id="svg_viewport" ref="gv_lines">
-                                <defs>
-                                    <marker id="black-arrow" markerWidth="5" markerHeight="5" refX="0" refY="5"
-                                    viewBox="0 0 10 10" orient="auto-start-reverse" style="opacity: 0.85">
-                                        <path d="M 0 0 L 10 5 L 0 10 z" />
-                                    </marker>
-                                    <marker id="arrow" markerWidth="10" markerHeight="10" refX="10" refY="3" orient="auto" markerUnits="strokeWidth">
-                                        <path d="M0,0 L0,6 L9,3 z" fill="rgba(255,0,0,0.9)" />
-                                    </marker>
-                                    <marker id="arrow1" viewBox="0 0 492.004 492.004" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-                                        <path d="M382.678,226.804L163.73,7.86C158.666,2.792,151.906,0,144.698,0s-13.968,2.792-19.032,7.86l-16.124,16.12
-                                        c-10.492,10.504-10.492,27.576,0,38.064L293.398,245.9l-184.06,184.06c-5.064,5.068-7.86,11.824-7.86,19.028
-                                        c0,7.212,2.796,13.968,7.86,19.04l16.124,16.116c5.068,5.068,11.824,7.86,19.032,7.86s13.968-2.792,19.032-7.86L382.678,265
-                                        c5.076-5.084,7.864-11.872,7.848-19.088C390.542,238.668,387.754,231.884,382.678,226.804z"/>
-                                    </marker>
-                                </defs>
-                                <component
-                                    v-for="(line) in lines"
-                                    :is="line_comp"
-                                    :key="line.line_uid"
-                                    :uid="line.line_uid" 
-                                    :src_info="line.src_info"
-                                    :dest_info="line.dest_info"
-                                    :settings="line.settings">
-                                </component> 
-                            </svg>
                         </div>
                         <component ref="s_box" 
-                            :is="selection_comp"
-                            :uid="'s0'"
-                            :rect="selection_box.rect">
+                            v-show="selection_active"
+                            :is="selection_comp">
+                        </component>
+                        <component ref="c_menu"
+                            v-show="context_menu.is_active"
+                            :actions="context_menu.actions"
+                            :position="context_menu.position"
+                            :is="context_menu_comp"> 
                         </component>
                     </div>
                 </div>
@@ -677,6 +585,10 @@
 /* Please style this crap, with style */
 
 /* Disables all cursor overrides when body has this class. */
+#graph_view {
+    overflow: hidden;
+}
+
 #graph_view, #graph_center {
     position: relative;
     width: 100%;
@@ -713,4 +625,22 @@
     cursor: inherit !important;
 }
 
+.ge_text {
+    display: inline-block;
+  width: fit-content; 
+
+    padding: 0;
+}
+.ge_text input {
+    width: fit-content;
+    padding: 0;
+}
+
+.ge_text .v-text-field__details {
+    min-height: 0px;
+}
+
+.ge_text .v-text-field__details .v-messages{
+    min-height: 0px;
+}
 </style>

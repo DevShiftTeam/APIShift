@@ -24,84 +24,63 @@
     module.exports = {
         data() {
             return {
-                uid: '',
-                type: 'graph_element',
-                z_index: 0,
-                height: 0,
-                width: 0,
                 // This elements adds functionallity to drag events in needed
                 expanded_functions: {
                     'drag_start': (event) => {},
                     'drag': (event) => {},
                     'drag_end': (event) => {}
                 },
-                group: null,
-                last_event: null,
                 is_dragging: false,
-                ghost_mode: false
+                ghost_mode: false,
+                ui_refresher: 0,
+                init_position: { x: 0, y: 0},
+                is_edit_mode: false,
+                mouse_pos: {}
             }
-        },
-        created () {
-            this.z_index = this.$props.index;
-            graph_view.$refs[this.uid] = this;
-        },
-        mounted () {
-            this.$el.ref = this.uid;
-            this.rect.width  = this.$el.offsetWidth;
-            this.rect.height = this.$el.offsetHeight;
-
-            this.z_index = 5;
         },
         props: {
             name: String,
-            rect: Object,
             data: Object,
-            // Index - used for smart rendering
             index: Number,
-            // uid - used for global component reference
-            uid: String,
+            id: Number
         },
         methods: {
             drag_start (event) {
-                const self = this;
-
                 graph_view.update_graph_position();
 
                 // Get position when drag started
-                window.init_position = Object.assign({} ,this.$props.rect);
+                this.init_position = Object.assign({} ,this.$props.data.position);
+                window.init_pointer = {
+                    x: event.clientX,
+                    y: event.clientY
+                };
 
-                // Delete element on delete state
-                if (graph_view.cursor_state.type === 'delete') {
-                    this.on_delete();
-                    return;
-                }
+                // Bring to front
+                graph_view.bring_to_front(this.$props.index);
 
                 // Update drag function
                 graph_view.drag_handler = this.drag;
-                graph_view.front_z_index++;
-                this.$props.index = graph_view.front_z_index;
-                this.last_event = event;
-                this.is_dragging = false;
+
+                // Activate scroll functionallity
+                if(!graph_view.scroll_manager.is_running()) graph_view.scroll_manager.start(this.on_scroll, 20);
 
                 // Call additional function if set
                 this.expanded_functions.drag_start(event);
-
-
-                // Start graph view scroll manager and pass handler 
-                graph_view.scroll_manager.start(this.on_scroll, 20);
             },
             drag (event) {
-                let dx = (event.clientX - this.last_event.clientX) / graph_view.scale;
-                let dy = (event.clientY - this.last_event.clientY) / graph_view.scale;
-
-                this.move_by(dx, dy);
+                this.mouse_pos = { x: event.pageX - window.graph_position.x, y: event.pageY - window.graph_position.y};
+                this.$props.data.position = {
+                    x: this.init_position.x + ((event.clientX - window.init_pointer.x) / graph_view.scale),
+                    y: this.init_position.y + ((event.clientY - window.init_pointer.y) / graph_view.scale)
+                };
+                this.is_dragging = true;
 
                 // Call additional function if set
                 this.expanded_functions.drag(event);
-                this.last_event = event;
-                this.is_dragging = true;
             },
             drag_end (event) {
+                if (graph_view.drag_end_lock) return;
+
                 graph_view.scroll_manager.stop();
 
                 // Reset drag function
@@ -111,91 +90,104 @@
                 // Call additional function if set
                 this.expanded_functions.drag_end(event);
             },
+            on_context (event) {
+                graph_view.context_menu.target = this;
+                graph_view.context_menu.position = {
+                    x: event.clientX - graph_position.x,
+                    y: event.clientY - graph_position.y,
+                };
+                graph_view.context_menu.is_active = true;
+
+                this.on_context_addition ();
+            },
             on_scroll () {
                 if (!this.is_dragging) return;
-
-                let mouse = { x: this.last_event.pageX - window.graph_position.x, y: this.last_event.pageY - window.graph_position.y };
-                if (mouse.x < 20) {
-                    this.move_by(-5 / graph_view.scale, 0);
+                
+                if (this.mouse_pos.x < 20) {
+                    this.move_by(-5 / graph_view.scale , 0);
                     graph_view.move_camera_by(5 , 0);
                 }
-                if (mouse.x > graph_view.init_rect.width - 20 ) {
+                if (this.mouse_pos.x > window.graph_position.width - 20 ) {
                     this.move_by(5 / graph_view.scale , 0);
                     graph_view.move_camera_by(-5 , 0);
                 }
-                if (mouse.y < 20) {
+                if (this.mouse_pos.y < 20) {
                     this.move_by(0, -5 / graph_view.scale);
                     graph_view.move_camera_by(0, 5 );
                 }
-                if (mouse.y > graph_view.init_rect.height - 20 ) {
+                if (this.mouse_pos.y > window.graph_position.height - 20 ) {
                     this.move_by(0, 5 / graph_view.scale);
                     graph_view.move_camera_by(0, -5 );
                 }
-
-                this.expanded_functions.drag(this.last_event);
-            },
-            on_context (event) {
-                event.preventDefault();
-                console.log(event);
             },
             move_by (dx, dy) {
-                this.$props.rect.x += dx;
-                this.$props.rect.y += dy;
+                this.init_position.x += dx;
+                this.init_position.y += dy;
+
+                this.$props.data.position.x += dx;
+                this.$props.data.position.y += dy;
+
+                // Call additional function if set
+                this.expanded_functions.drag(event);
             },
-            get_lines () {
-                return graph_view.lines.filter((line) => (line.src_info.id === this.component_id & line.src_info.type === this.component_type ) 
-                                                || (line.dest_info.id === this.component_id & line.dest_info.type === this.component_type ) );
-            },
-            get_group () {
-                if (!this.group) {
-                    let {type, id} = this.component_info;
-                    graph_view.groups.forEach((group) =>  {
-                        if (group.data.contained_elements.find((element) => element.id === id && element.type === type)) {
-                            this.group = { id: group.id, type: group.type };
-                        }
-                    });
-                }
-                return this.group;
-            },
-            // Update lines explicitilly 
-            update_lines () {
-                this.get_lines().forEach(line => {
-                    graph_view.$refs[line.line_uid].update();
+            on_input (event) {
+                // Trim text
+                event.target.textContent = event.target.textContent.replace(/^\s+|\s+$/g, '');
+
+                // Refresh view dependencies
+                this.ui_refresher++;
+                setTimeout(() => {
+                    if (this.group_index && this.group_index != -1) window.graph_elements[this.group_index].update_group_size();
+                    if (this.parent_group_index && this.parent_group_index != -1) window.graph_elements[this.parent_group_index].update_group_size();
                 });
-            }, 
-            setIndex (index) {
-                this.$props.index = index;
+
+                // Blur on enter key press
+                if (event.inputType === "insertParagraph") this.on_blur(event);
+
+                // Call additional functionallity if set
+                if (this.on_input_addition) this.on_input_addition();
             },
-            on_delete () {
-                // Do Nothing
-            }
+            on_blur (event) {
+                // Disable edit
+                this.is_edit_mode = false;
+
+                // Render white space as default value
+                if (event.target.innerText == '') event.target.innerText = ' ';
+
+                // Change model value
+                graph_view.elements[this.$props.index].name = event.target.textContent;
+            },
+
         },
         computed: {
             // Rendered transformation (coordinates and scale) 
             transformation () {
                 return  {
-                    transform: `translate(${this.$props.rect.x}px,${this.$props.rect.y}px)`,
-                    minWidth: `${this.$props.rect.width}px`,
-                    minHeight: `${this.$props.rect.height}px`,
-                    'z-index': this.z_index + 5 // Base z-index for graph elements 
+                    transform: `translate(${this.$props.data.position.x}px,${this.$props.data.position.y}px)`,
+                    'z-index': this.$props.data.z_index
                 }
             },
-            // Exspose position info conveniently for external usage 
-            x_pos () {
-                return this.$props.rect.x;
-            },
-            y_pos () {
-                return this.$props.rect.y;
-            },
-            // Expose computed immutable local components-scope id 
-            component_id () {
-                return parseInt(this.uid.substring(1));
-            },
-            component_type () {
-                return this.uid[0];
-            },
-            component_info () {
-                return { id: this.component_id, type: this.component_type };
+            get_rect: function() {
+                this.ui_refresher;
+                return {
+                    x: this.$props.data.position.x,
+                    y: this.$props.data.position.y,
+                    width: this.$el.offsetWidth,
+                    height: this.$el.offsetHeight
+                };
+            }
+        },
+        watch: {
+            is_edit_mode (newVal) {
+                // Focus input on edit
+                if (newVal) {
+                    let input = this.$el.querySelector('[contenteditable]');
+                    setTimeout(
+                        () => {
+                            input.focus();
+                        }
+                    );
+                }
             }
         }
     };

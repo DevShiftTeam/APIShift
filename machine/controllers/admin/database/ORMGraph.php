@@ -22,6 +22,7 @@
 namespace APIShift\Controllers\Admin\Database;
 
 use APIShift\Controllers\Admin\Access\Database;
+use APIShift\Controllers\Admin\Data;
 use APIShift\Core\CacheManager;
 use APIShift\Core\DataManager;
 use APIShift\Core\DatabaseManager;
@@ -95,7 +96,26 @@ class ORMGraph
 
     public static function set() {
         // Store elements in database
+        if(!isset($_POST['graph_id'])) Status::message(Status::ERROR, "No graph ID specified");
+        // Set elements list as empty if elements where not defined
+         if(!isset($_POST['elements'])) $_POST['elements'] = [];
         
-        // Modify table data to fit new model
+        // TODO: Modify table data to fit new model
+
+        Status::message(Status::SUCCESS, "Graph updated successfully");
+    }
+
+    public static function create() {
+        if(!isset($_POST['name'])) Status::message(Status::ERROR, "No graph name specified");
+
+        // Create graph
+        $query_result = DatabaseManager::query("main", "INSERT INTO `orm_graphs` (name) VALUES (:name)", $_POST);
+        if(!$query_result) Status::message(Status::ERROR, "Couldn't create ORM graph in database");
+
+        // Return the graph ID to the user requested
+        $graph_data = [];
+        DatabaseManager::fetchInto("main", $graph_data, "SELECT id FROM `orm_graphs` WHERE name = :name", $_POST);
+        $graph_id = $graph_data[0]['id'];
+        Status::message(Status::SUCCESS, $graph_id);
     }
 }

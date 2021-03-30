@@ -57,8 +57,12 @@
                         }
                     }
                 ],
+                loader: {
+                    visible: false,
+                    mesasge: "",
+                    processes: 0
+                },
                 to_send: null,
-                is_busy: false,
                 is_checked: false,
                 database_list: [],
                 selected_db: 'main'
@@ -103,7 +107,6 @@
                         else {
                             APIShift.API.notify(response.data, 'error');
                         }
-                        gholder.is_busy = true;
                     });                    
                 }
                 else if (this.files.length > 0) {
@@ -116,7 +119,6 @@
                         else {
                             APIShift.API.notify(response.data, 'error');
                         }
-                        gholder.is_busy = true;
                     });
                 }
             },
@@ -140,7 +142,6 @@
                     else {
                         APIShift.API.notify(response.data, 'error');
                     }
-                    gholder.is_busy = true;
                 });
             },
             exportAsInitial: function () {
@@ -154,7 +155,6 @@
                     else {
                         APIShift.API.notify(response.data, 'error');
                     }
-                    gholder.is_busy = true;
                 });
             }
         },
@@ -201,7 +201,7 @@
             <!-- Import/Export Modal -->
             <v-dialog v-if="edit_dialog" v-model="edit_dialog" max-width="500px">
                 <v-card>
-                    <v-card-title><span class="headline"> {{ (is_importing ? "Import" : "Export") + " Database"}}</span></v-card-title>
+                    <v-card-title><span class="headline">{{ (is_importing ? "Import" : "Export") + " Database"}}</span></v-card-title>
                     <v-card-text>
                         <v-container>
                             <template v-if="is_importing">
@@ -215,7 +215,7 @@
                                     prepend-icon="mdi-paperclip"
                                     outlined
                                     accept=".sql"
-                                    :disabled="is_checked"
+                                    :disabled="is_checked || loader.visible"
                                     :show-size="1000">
                                 </v-file-input>
                             </template>
@@ -232,24 +232,26 @@
                                 <v-btn 
                                     v-if="is_importing" text
                                     @click="importDatabase()"
-                                    :disabled="files.length === 0 && !is_checked">
+                                    :disabled="(files.length === 0 && !is_checked) || loader.visible">
                                         Import
                                 </v-btn>
                                 <template v-if="!is_importing">
                                     <v-btn 
                                         text
-                                        @click="downloadDatabaseFile()">
+                                        @click="downloadDatabaseFile()"
+                                        :disabled="loader.visible">
                                             Download
                                     </v-btn>
                                     <v-btn 
                                         text
-                                        @click="exportAsInitial()">
+                                        @click="exportAsInitial()"
+                                        :disabled="loader.visible">
                                             Export As Initial
                                     </v-btn>
                                 </template>
                                 
                                 <v-spacer></v-spacer>
-                                <v-btn text @click="discard()">Cancel</v-btn>
+                                <v-btn text @click="discard()" :disabled="loader.visible">Cancel</v-btn>
                             </v-card-actions>
                         </v-container>
                     </v-card-text>

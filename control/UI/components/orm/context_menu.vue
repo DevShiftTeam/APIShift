@@ -19,84 +19,82 @@
      * @author Ilan Dazanashvili
      */
 
-    //TODO: Design better z-index system.
+
     module.exports = {
         props: {
-            data: Object
+            actions: Object,
+            position: Object,
+            is_sub_menu: Boolean
         },
         data () {
             return {
-
+                hovered_index: -1,
             }
         },
         created () {
+            if (!window.context_menu) window.context_menu = this;
         },
         mounted () {
-            graph_view.$refs['side_menu'] = this;
-
+            // Detect outside clicks and close context menu
+            if (!this.$props.is_sub_menu) {
+                window.addEventListener('pointerdown', this.window_pointer_down);
+            }
         },
-        methods: {
-            actionCreator(name) {
-                switch (name) {
-                    case 'item':
-                        graph_view.$refs['item_builder'].open();
-                        break;
-                    case 'relation':
-                        break;
-                    case 'delete':
-                        graph_view.$refs['item_builder'].open();
-                        break;
-                    case 'enum':
-                        graph_view.enums.push();
-                        break;
-                    case 'type':
-                        
-                        break;
-                    case 'group':
-                        
-                        break;
-                    default:
-                        break;
+        beforeDestroy() {
+            if (!this.$props.is_sub_menu) {
+                window.removeEventListener('pointerdown', this.window_pointer_down);
+                window.context_menu = undefined;
+            }
+        },
+        computed: {
+            transformation: function() {
+                return {
+                    top: `${this.$props.position.y}px`,
+                    left:  `${this.$props.position.x}px`,
+                    'z-index':  graph_view.elements.length + 1
                 }
             }
-        }, 
+        },
+        methods: {
+            window_pointer_down(event) {
+                if (!event.target.closest('#context_menu_primary')) {
+                    graph_view.context_menu.is_active = false;
+                }
+            }
+        }
     }
 </script>
 
 <template>
-    <div id="side_menu">
-        <div class="action" @click="actionCreator('item')"> 
-            item
-        </div>
-        <div class="action" @click="actionCreator('relation')">
-            relation
-        </div>
-        <div class="action" @click="actionCreator('delete')">
-            delete
-        </div>
-        <div class="action" @click="actionCreator('enum')">
-            enum
-        </div>
-        <div class="action" @click="actionCreator('type')">
-            type
-        </div> 
-        <div class="action" @click="actionCreator('group')">
-            group
-        </div>
-    </div>
-    
+    <v-list dense :id="is_sub_menu ? 'context_menu' : 'context_menu_primary'" :style="is_sub_menu ? {} : transformation">
+        <v-list-item v-for="(item,index) in actions"
+            :key="index"
+            @pointerover.prevent="hovered_index = index" 
+            @pointerleave="hovered_index = -1" 
+            @click.prevent="item.starter()">
+            <v-list-item-action>
+                <v-icon>{{item.icon}}</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+                <v-list-item-title>{{item.name}}</v-list-item-title>
+            </v-list-item-content>
+            <component v-if="hovered_index == index"
+                :is="graph_view.context_menu_comp"
+                :actions="item.actions"
+                :is_sub_menu="true">
+            </component> 
+        </v-list-item>
+    </v-list>
 </template>
 
 <style scoped>
 /* Please style this crap, with style */
 
-#side_menu {
+#context_menu, #context_menu_primary {
     position: absolute;
-    left: 50px;
-    top: 50px;
-    width: 50px;
-    height: 50px;
+    background: rgba(0, 0, 0, 0.85);
     transform-origin: 0 0;
-    background: red;
+    left: 100%;
+    top: 0%;
 }
 </style>

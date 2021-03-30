@@ -16,7 +16,7 @@
      * See the License for the specific language governing permissions and
      * limitations under the License.
      * 
-     * @author Sapir Shemer
+     * @author Ilan Dazanashvili
      */
     
     // This shit is made for scripting
@@ -37,6 +37,11 @@
             this.expanded_functions.drag = this.drag_addition;
             this.expanded_functions.drag_end = this.drag_end_addition;
             graph_view.elements_loaded++;
+
+            if(graph_view.first_load) {
+                this.all_loaded();
+                graph_view.bring_to_front(this.$props.index);
+            }
         },
         methods: {
             all_loaded: function() { },
@@ -60,11 +65,11 @@
                 
                 for(let index in [...graph_view.elements.keys()]) {
                     // Skip non-enums
-                    if(window.graph_elements[index] === undefined || graph_view.elements[index].component_id != 3)
+                    if(window.graph_elements[index] === undefined || graph_view.elements[index].component_id != 3 || graph_view.elements[index].is_deleted)
                         continue;
                     
                     // Check collisions
-                    if(graph_view.collision_check(this.get_rect(), window.graph_elements[index].get_rect())
+                    if(graph_view.collision_check(this.get_rect, window.graph_elements[index].get_rect)
                     && window.graph_elements[index].data.z_index > z_index) {
                         z_index = window.graph_elements[index].data.z_index;
                         enum_found = index;
@@ -88,20 +93,45 @@
                 this.enum_hovered = -1;
             },
             on_delete() {
-                let id = this.component_id;
+                let my_id = graph_view.elements[this.$props.index].id;
 
-                // Detach type from enum 
-                if(this.$props.data.enum_id) this.remove_from_enum();
-                
-                // Finally remove element from screen
-                graph_view.enum_types = graph_view.enum_types.filter((enum_type) => enum_type.id !== id);
-                delete graph_view.lookup_table['t'][id];
-            }
-        },
-        computed: {
-            enum_parent () {
-                var enum_id = this.$props.data.enum_id;
-                return graph_view.enums.find((enum_) => enum_.id === enum_id);
+
+                // Reset enum sizes
+                if (this.attached_enum != -1) {
+                    window.graph_elements[this.attached_enum].data.types = window.graph_elements[this.attached_enum].data.types.filter(id => id !== my_id);
+                    window.graph_elements[this.attached_enum].reset_enum_sizes();
+                    window.graph_elements[this.attached_enum].reset_type_position();
+                }
+
+                // Removing element from screen
+                graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);
+            },
+            on_context_addition () {
+                graph_view.context_menu.actions = [
+                    {
+                        starter: () => {
+                            this.is_edit_mode = true;
+                            graph_view.context_menu.is_active = false;
+                        },
+                        name: 'Edit',
+                        icon: 'mdi-pencil',
+                    },
+                    {
+                        starter: () => {
+                            graph_view.context_menu.is_active = false;
+                        },
+                        name: 'Duplicate',
+                        icon: 'mdi-content-duplicate',
+                    },
+                    {
+                        starter: () => {
+                            this.on_delete();
+                            graph_view.context_menu.is_active = false;
+                        },
+                        name: 'Delete',
+                        icon: 'mdi-delete-outline',
+                    },
+                ]
             }
         }
     }
@@ -112,9 +142,16 @@
         :style="transformation" 
         @pointerdown.prevent="drag_start"
         @contextmenu.prevent="on_context"
+        @dblclick.prevent="is_edit_mode = true"
         @pointerup.prevent="drag_end">
             <v-avatar left class="type_type darken-4 grey">T</v-avatar>
-            <div style="display: inline;">{{ name }}</div>
+            <div 
+                @input="on_input"
+                @blur="is_edit_mode = false" 
+                :contenteditable="is_edit_mode"
+                style="display: inline-block;">
+                    {{name}}
+            <div>
     </div>
 </template>
 

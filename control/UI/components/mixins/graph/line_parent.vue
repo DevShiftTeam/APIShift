@@ -24,6 +24,7 @@
         mixins: [APIShift.API.getMixin('graph/graph_element')],
         data() {
             return {
+                line_indices: [],
                 point_indices: [],
             }
         },
@@ -37,6 +38,7 @@
                     to_index: is_from ? to_index : this.$props.index,
                     data: { ...data, is_parent_source: is_from }
                 });
+                this.line_indices.push(window.graph_view.lines.length - 1);
 
                 return window.graph_view.lines.length - 1;
             },
@@ -72,7 +74,7 @@
                 if (replace_index == -1) {
                     let point_indices = [];
                     for (const line_index in graph_view.lines) 
-                        if ( graph_view.lines[line_index].from_index == current_index && graph_view.lines[line_index].to_index == this.$props.index || graph_view.lines[line_index].from_index == this.$props.index && graph_view.lines[line_index].to_index == current_index){
+                        if ( !graph_view.lines[line_index].data.is_parent_source && graph_view.lines[line_index].from_index == current_index && graph_view.lines[line_index].to_index == this.$props.index || graph_view.lines[line_index].data.is_parent_source && graph_view.lines[line_index].from_index == this.$props.index && graph_view.lines[line_index].to_index == current_index){
                             point_indices.push(this.create_point(!graph_view.lines[line_index].data.is_parent_source, window.graph_elements[current_index][!graph_view.lines[line_index].data.is_parent_source ? 'from_position' : 'to_position']));
                     }
                     setTimeout(() => point_indices.forEach(point_index => this.replace_connected(current_index, point_index)));

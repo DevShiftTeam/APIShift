@@ -24,7 +24,6 @@
 
     // This shit is made for scripting
     module.exports = {
-        mixins: [APIShift.API.getMixin('graph/graph_editor', true)],
         data () {
             return {
                 drawer: null,
@@ -36,9 +35,12 @@
                     APIShift.API.getComponent('orm/enum', true),
                     APIShift.API.getComponent('orm/group', true),
                     APIShift.API.getComponent('orm/point', true)
+
                 ],
                 line_comp: APIShift.API.getComponent('graph/line', true),
                 selection_comp: APIShift.API.getComponent('orm/selection_box', true),
+                side_menu_comp: APIShift.API.getComponent('graph/side_menu', true),
+                context_menu_comp: APIShift.API.getComponent('graph/context_menu',true),
                 elements: [
                     // Items
                     { id: 1, component_id: 0, name: "Users", data: {
@@ -159,7 +161,7 @@
             window.graph_view = this;
             this.current_action = window.empty_function;
 
-            console.log(APIShift.API.getMixin('graph/graph_element'));
+            console.log(APIShift.API.getMixin('graph/graph_editor', true));
             this.context_menu.actions = [
     
             ];
@@ -170,7 +172,7 @@
                             graph_view.current_action = () => {
                                 let highest_id = 0;
                                 for (const element of graph_view.elements) {
-                                    if (element.component_id != 0 && element.component_id != 1 && element.component_id != 4) continue;
+                                    if (element.component_id != 0 || element.component_id != 1 || element.component_id != 4) continue;
                                     if (element.id > highest_id) highest_id = element.id;
                                 }
 
@@ -557,11 +559,11 @@
                         @pointercancel="pointer_up"
                         @contextmenu.prevent="window.empty_function"
                         :style="{ 'cursor' : cursor_state }">
-                        <!-- <component ref="side_menu"
+                        <component ref="side_menu"
                             :is="side_menu_comp"
                             :actions="side_menu_actions"
                         >
-                        </component> -->
+                        </component>
                         
                         <!-- The center element allow us to create a smart camera that positions the elements without needed to re-render for each element -->
                         <div ref="gv_center" id="graph_center" :style="{ 'transform': 'translate(' + camera.x + 'px, ' + camera.y + 'px) scale(' + scale + ')'}">
@@ -580,7 +582,6 @@
                             <!-- Lines -->
                             <component
                                 v-for="(line, index) in lines"
-                                v-show="!line.is_deleted"
                                 :key="index"
                                 :index="index"
                                 :is="line_comp"
@@ -589,7 +590,7 @@
                                 :data="line.data">
                             </component>
                         </div>
-                        <!-- <component ref="s_box" 
+                        <component ref="s_box" 
                             v-show="selection_active"
                             :is="selection_comp">
                         </component>
@@ -598,7 +599,7 @@
                             :actions="context_menu.actions"
                             :position="context_menu.position"
                             :is="context_menu_comp"> 
-                        </component> -->
+                        </component>
                     </div>
                 </div>
             </v-card>

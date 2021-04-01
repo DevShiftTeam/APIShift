@@ -21,7 +21,7 @@
 
     // This shit is made for scripting
     module.exports = {
-        mixins: [APIShift.API.getMixin('orm/graph_element')],
+        mixins: [APIShift.API.getMixin('graph/graph_element')],
         data () {
             return {
                 drawer: null,

@@ -21,7 +21,7 @@
 
     // This shit is made for scripting
     module.exports = {
-        mixins: [APIShift.API.getMixin('orm/graph_element')],
+        mixins: [APIShift.API.getMixin('graph/graph_element')],
         data () {
             return {
                 drawer: null,
@@ -49,6 +49,7 @@
         },
         methods: {
             drag_start_addition: function() {
+                // console.log(APIShift.API.getMixin('graph/graph_element'));
                 if(this.group_index != -1) {
                     window.graph_elements[this.group_index].bring_to_front();
                     graph_view.bring_to_front(this.$props.index);
@@ -91,7 +92,7 @@
                 relations.forEach((rel) => {
                     if (rel.data.to == my_id || rel.data.from == my_id) {
                         let rel_index = graph_view.elements.findIndex(el => el.id == rel.id && el.component_id == 1); 
-                        return relations_indices.push(rel_index);
+                        relations_indices.push(rel_index);
                     }
                 });
 
@@ -105,9 +106,9 @@
                     window.graph_elements[enum_index].remove_connection(my_id);
                 });
 
-                // Remove relation connection form item
+                // Remove relation connection from item
                 this.get_connected_relations().forEach(rel_index => {
-                    window.graph_elements[rel_index].remove_connection(my_id);
+                    window.graph_elements[rel_index].replace_connected(this.$props.index, -1);
                 });
 
                 // Remove from owning group

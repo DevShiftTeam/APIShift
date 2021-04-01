@@ -23,7 +23,8 @@
     module.exports = {
         props: {
             // rect: Object,
-            data: Object
+            data: Object,
+            select_end_addition: Function
         },
         data () {
             return {

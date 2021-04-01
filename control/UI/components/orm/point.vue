@@ -21,7 +21,7 @@
     
     // This shit is made for scripting
     module.exports = {
-        mixins: [APIShift.API.getMixin('orm/graph_element')],
+        mixins: [APIShift.API.getMixin('graph/graph_element')],
         props: {
         },
         data () {
@@ -33,6 +33,7 @@
         },
         created () {
             window.graph_elements[this.$props.index] = this;
+            this.parent_index = this.$props.index;
         }, 
         mounted () {
             let rect = this.$el.getBoundingClientRect();
@@ -55,7 +56,7 @@
                 for(let index in [...graph_view.elements.keys()]) {
                     let cmp_id = graph_view.elements[index].component_id;
                     // Skip non-item nor relations & self or undefined
-                    if(window.graph_elements[index] === undefined || (cmp_id != 0 && cmp_id != 1 && cmp_id != 4) || graph_view.elements[index].is_deleted)
+                    if(window.graph_elements[index] === undefined || (cmp_id != 0 && cmp_id != 1 && cmp_id != 4) || this.$props.data.parent_index == index || graph_view.elements[index].is_deleted)
                         continue;
                     
                     // Check collisions
@@ -77,7 +78,7 @@
                 }
                 
                 // Drop on a connectable item 
-                if (target_element !== -1) window.graph_elements[this.$props.data.rel_index].connect_to_line(this.$props.data.is_left, target_element);
+                if (target_element !== -1) window.graph_elements[this.$props.data.parent_index].replace_connected(this.$props.index, target_element);
             },
             on_delete () {},
         },

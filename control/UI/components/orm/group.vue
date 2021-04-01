@@ -21,7 +21,7 @@
 
     //TODO: Design better z-index system.
     module.exports = {
-        mixins: [APIShift.API.getMixin('orm/graph_element')],
+        mixins: [APIShift.API.getMixin('graph/graph_element')],
         data () {
             return {
                 init_height: 0,
@@ -261,7 +261,7 @@
 
                 // Remove relation connection form item
                 this.get_connected_relations().forEach(rel_index => {
-                    window.graph_elements[rel_index].remove_connection(my_id);
+                    window.graph_elements[rel_index].replace_connected(this.$props.index, -1);
                 });
 
                 // Detach inner elements

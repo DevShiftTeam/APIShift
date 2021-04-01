@@ -21,7 +21,7 @@
 
     // This shit is made for scripting
     module.exports = {
-        mixins: [APIShift.API.getMixin('orm/graph_element')],
+        mixins: [APIShift.API.getMixin('graph/line_parent')],
         data () {
             return {
                 drawer: null,
@@ -35,6 +35,7 @@
         },
         created () {
             window.graph_elements[this.$props.index] = this;
+
         }, 
         mounted () {
             this.expanded_functions.drag = this.drag_addition;
@@ -59,84 +60,27 @@
                     graph_view.elements.findIndex((elem) => elem.id == this.$props.data.from && (elem.component_id == 0 || elem.component_id == 1 || elem.component_id == 4))
                     :
                     this.create_point(); // Create & attach point near relation
-                
+
                 let to_index = this.$props.data.to !== undefined ?
                     graph_view.elements.findIndex((elem) => elem.id == this.$props.data.to && (elem.component_id == 0 || elem.component_id == 1 || elem.component_id == 4))
                     :
                     this.create_point(false); // Create & attach point near relation
-                
-                setTimeout(()=>{
-                    // Step 2: Create lines
-                    window.graph_view.lines.push({
-                        from_index: from_index,
-                        to_index: this.$props.index,
-                        data: {
+
+
+                // Draw lines to elements
+                setTimeout(() => {
+                    this.from_line_index = this.create_line(from_index,{
                             is_curvy: true,
                             is_stroked: false,
-                            is_rel_source: false
-                        }
-                    });
-                    this.from_line_index = window.graph_view.lines.length - 1;
+                            is_interactive: true
+                    }, false);
                     
-                    window.graph_view.lines.push({
-                        from_index: this.$props.index,
-                        to_index: to_index,
-                        data: {
+                    this.to_line_index = this.create_line(to_index,{
                             is_curvy: true,
                             is_stroked: false,
-                            is_rel_source: true
-                        }
-                    });
-                    this.to_line_index = window.graph_view.lines.length - 1;
+                            is_interactive: true
+                    }, true);
                 });
-            },
-            create_arrow_head: function() {
-
-            },
-            create_point: function(is_left = true, position = null, is_deleted = false) {
-                let my_rect = this.get_rect;
-
-                let point = 
-                { 
-                    id: 0, component_id: 5, name: '',
-                    data:
-                    {
-                        position: position ? position : {
-                            x: is_left ? my_rect.x - 20 : my_rect.x + my_rect.width + 20,
-                            y: my_rect.y + my_rect.height / 2
-                        },
-                        z_index: graph_view.elements.length+1,
-                        rel_index: this.$props.index,
-                        is_left
-                    },
-                    is_deleted
-                }
-
-                graph_view.elements.push(
-                    point
-                );
-                this.point_indices.push(graph_view.elements.length - 1);
-
-                return graph_view.elements.length - 1;
-            },
-            connect_to_line: function(is_from_or_to, element_index, to_delete = true) {
-                if(element_index == this.$props.index) return;
-                
-                // Change from
-                if (is_from_or_to === true) {
-                    this.$props.data.from = graph_view.elements[element_index].id;
-                    setTimeout(() => {
-                        if (to_delete) graph_view.$set(graph_view.elements[graph_view.lines[this.from_line_index].from_index], 'is_deleted', true);
-                        graph_view.lines[this.from_line_index].from_index = element_index;
-                    });
-                } // Change to 
-                else if (is_from_or_to === false) {
-                    this.$props.data.to = graph_view.elements[element_index].id;
-                    setTimeout(() => {
-                        if (to_delete) graph_view.$set(graph_view.elements[graph_view.lines[this.to_line_index].to_index], 'is_deleted', true);
-                        graph_view.lines[this.to_line_index].to_index = element_index;
-                    });
-                }
             },
             drag_start_addition: function() {
                 if(this.group_index != -1) {
@@ -203,13 +147,24 @@
                 relations.forEach((rel) => {
                     if (rel.data.to == my_id || rel.data.from == my_id) {
                         let rel_index = graph_view.elements.findIndex(el => el.id == rel.id && el.component_id == 1); 
-                        return relations_indices.push(rel_index);
+                        relations_indices.push(rel_index);
                     }
                 });
 
                 return relations_indices;
             },
-            on_delete() {
+            replace_connected_expanded (current_index, replace_index) {
+                // Replace from point to non-point
+                if (graph_view.elements[current_index].component_id == 5 && graph_view.elements[replace_index].component_id != 5) {
+                    graph_view.elements[current_index].data.is_left ? this.$props.data.from = graph_view.elements[replace_index].id : this.$props.data.to = graph_view.elements[replace_index].id;
+                }
+                // Replace from non-point to point
+                if (graph_view.elements[current_index].component_id != 5 && graph_view.elements[replace_index].component_id == 5) {
+                    graph_view.elements[replace_index].data.is_left ? this.$props.data.from = undefined : this.$props.data.to = undefined;
+                }
+                // Replace from point to point - do nothing
+            },
+            on_delete_addition() {
                 let my_id = graph_view.elements[this.$props.index].id;
 
                 // Mark element as deleted
@@ -222,18 +177,9 @@
 
                 // Remove relation connection from item
                 this.get_connected_relations().forEach(rel_index => {
-                    window.graph_elements[rel_index].remove_connection(my_id);
+                    window.graph_elements[rel_index].replace_connected(this.$props.index, -1);
                 });
             
-                // Delete connected lines
-                graph_view.$set(graph_view.lines[this.from_line_index], 'is_deleted', true);
-                graph_view.$set(graph_view.lines[this.to_line_index], 'is_deleted', true);
-
-                // Delete connected points
-                this.point_indices.forEach(point_index => {
-                    graph_view.$set(graph_view.elements[point_index], 'is_deleted', true);
-                });
-
                 // Remove from owning group
                 if (this.group_index !== -1) 
                 {

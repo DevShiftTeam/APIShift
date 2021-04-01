@@ -24,6 +24,7 @@
 
     // This shit is made for scripting
     module.exports = {
+        mixins: [APIShift.API.getMixin('graph/graph_editor', true)],
         data () {
             return {
                 drawer: null,
@@ -161,7 +162,6 @@
             window.graph_view = this;
             this.current_action = window.empty_function;
 
-            console.log(APIShift.API.getMixin('graph/graph_editor', true));
             this.context_menu.actions = [
     
             ];

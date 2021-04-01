@@ -92,7 +92,6 @@
                     let line_index = graph_view.elements[replace_index].data.is_left ? graph_view.lines.findIndex(line => line.from_index == current_index && line.to_index == this.$props.index && !line.is_deleted)
                                     : graph_view.lines.findIndex(line => line.to_index == current_index && line.from_index == this.$props.index && !line.is_deleted);
 
-                    // console.log(line_index);
                     graph_view.elements[replace_index].data.is_left ? graph_view.lines[line_index].from_index = replace_index : graph_view.lines[line_index].to_index = replace_index;
                 }
                 // Replace from point to point - do nothing 

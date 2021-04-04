@@ -29,7 +29,6 @@
                     { title: "Data Model Editor", sub_title: "Create database schemas using a smart ORM", url: "/database/model_editor" }
                 ],
                 mixins_loaded: false,
-                mixins_loaded_lock: false
             }
         },
         beforeCreate () {
@@ -40,7 +39,6 @@
                 APIShift.API.getMixin('graph/graph_editor', true)
             ]).then(() => {
                 this.mixins_loaded = true;
-                setTimeout(() => this.mixins_loaded_lock = true);
             });
         },
         created() {
@@ -107,7 +105,7 @@
                     </div>
                 </div>
             </v-card>
-            <router-view v-if="!is_main_page && this.mixins_loaded_lock"></router-view>
+            <router-view v-if="!is_main_page && this.mixins_loaded"></router-view>
         </v-container>
     </v-main>
 </template>

@@ -194,7 +194,7 @@
                                 let highest_id = 0;
 
                                 for (const element of graph_view.elements) {
-                                    if (element.component_id != 0 && element.component_id != 1 && element.component_id != 4) continue;
+                                    if (element.component_id != 0 || element.component_id != 1 || element.component_id != 4) continue;
                                     if (element.id > highest_id) highest_id = element.id;
                                 }
 

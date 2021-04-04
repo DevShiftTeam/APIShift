@@ -17,16 +17,85 @@
      * limitations under the License.
      * 
      * @author Sapir Shemer
+     * @contributor Ilan Dazanashvili
      */
+
+    module.exports = {
+        data() {
+            return {
+                is_main_page: true,
+                sub_pages: [
+                    { title: "Procedural Editor", sub_title: "Create processes using a turing-complete chartflow.", url: "/logic/procedure_editor" }
+                ],
+                mixins_loaded: false,
+            }
+        },
+        beforeCreate () {
+            // Load necessary mixins
+            Promise.all([
+                APIShift.API.getMixin('graph/graph_element', true),
+                APIShift.API.getMixin('graph/line_parent', true),
+                APIShift.API.getMixin('graph/graph_editor', true)
+            ]).then(() => {
+                this.mixins_loaded = true;
+            });
+        },
+        created() {
+            this.is_main_page = app.$router.currentRoute.path === '/logic';
+            window.holder = this;
+        },
+        beforeRouteUpdate (to, from, next) {
+            if(to.path == '/logic' || to.path == '/logic/') this.is_main_page = true;
+            else this.is_main_page = false;
+            next();
+        },
+        methods: {
+            getPageTitle: function () {
+                if(app.$router.currentRoute.path === '/logic') return "Manage Logic";
+                for(let key in this.sub_pages) if(this.sub_pages[key].url == app.$router.currentRoute.path) return this.sub_pages[key].title;
+                return "Not Found";
+            },
+            updateIndex(new_index) {
+                this.index = new_index;
+            }
+        },
+    };
 </script>
 
 <template>
     <v-main>
         <v-container fluid fill-height>
-            <h1>Comming Soon! :)</h1>
+            <v-card v-if="is_main_page" class="mx-auto" width="90%" min-height="75%" elevation-2>
+
+                <!-- Body -->
+                <div class="overflow-box" v-bar>
+                    <div>
+                        <v-layout class="mx-auto" align-start justify-center row wrap>
+                            <v-card v-for="(item, key) in  sub_pages" :key="key" :to="item.url" class="page-card" elevation-4 outlined>
+                                <v-container>
+                                    <v-row justify="space-between">
+                                        <v-col>
+                                            <v-list-item-title>{{ item.title }}</v-list-item-title>
+                                            <v-list-item-subtitle>{{ item.sub_title }}</v-list-item-subtitle>
+                                        </v-col>
+                                    </v-row>
+                                </v-container>
+                            </v-card>
+                        </v-layout>
+                    </div>
+                </div>
+            </v-card>
+            <router-view v-show="!is_main_page && mixins_loaded"></router-view>
         </v-container>
     </v-main>
 </template>
 <style scoped>
+.page-card {
+    margin: 5px;
+    min-width: 500px;
+}
 
+.page-card:hover {
+    cursor: pointer;
+}
 </style>

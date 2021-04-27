@@ -71,7 +71,7 @@ The semantics of this document will follow the definitions mentioned in [Archite
   - [Control panel UI](#control-panel-ui)
 
 # Architecture Overview
-In this section we will give an overview of the definitions, components, connections between them and the data elements of the overall architecture. APIShift, through its architecture strives to not be bound to a specific API architecture (e.g. REST, SOAP), thus making it an abstract API that can be configured to follow any netwrok-based software architecture you want.
+In this section we will give an overview of the definitions, components, connections between them and the data elements of the overall architecture. APIShift, through its architecture strives to not be bound to a specific API architecture (e.g. REST, SOAP), thus making it an abstract API that can be configured to follow any network-based software architecture you want.
 
 We also want to keep our system as clean as possible from other complex technologies so that anyone can start working with it, and add whatever packages and technologies they want. You can use composer to add Symfony packages, Doctrine and more on your own.
 

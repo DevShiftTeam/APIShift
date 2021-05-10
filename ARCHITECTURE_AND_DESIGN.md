@@ -184,10 +184,10 @@ Each session state has a state structure, indicating how the data about the stat
    * _parent_ - id of the parent entry.
 
 #### Run-time
-The current session state is loaded into the `$_SESSION` array in PHP. The meta-data about the different states is stored in the cache under the key `session_states`. If no cache system is present, when when accessing data about session states, it will be loaded directly from the database. The system responsible for manipulating the session states is the [SessionState](#session-states-1).
+The current session state is loaded into the `$_SESSION` array in PHP. The meta-data about the different states is stored in the cache under the key `session_states`. If no cache system is present, when accessing data about session states, it will be loaded directly from the database. The system responsible for manipulating the session states is the [SessionState](#session-states-1).
 
 ### Tasks
-We encapsulate different processes as tasks, such that they can be called and attached to any other part of the system as authorization processes and more. A Task holds a collection of processes, and each process has a representation of the flow of data between different entries and function during runtime. This way we save "meta-data" about the operations we want to make, and encapsulate it under a "task". This kind of representation helps define processes using our control panel, and can be easily attached to other parts of the system.
+We encapsulate different processes as tasks, such that they can be called and attached to any other part of the system as authorization processes and more. A Task holds a collection of processes, and each process has a representation of the flow of data between different entries and function during runtime. This way we save "meta-data" about the operations we want to make, and encapsulate it under a "task". This kind of representation helps define processes using our control panel, and can be easily attached to other parts of the systema.
 
 #### Database
 * ___tasks___ - id-name collection of the different tasks.
@@ -206,7 +206,7 @@ We encapsulate different processes as tasks, such that they can be called and at
   * _to_type_ - Represents a connection node type of the output (defined below).
   * _to_ - Represents the ID of the output.
 * ___connection_types___ - A connection can represent a flow of data from one element to another (Flow), a function (Function), a predefined comparison rule (Rule) or another task (Task) or process (Process).
-* ___connection_node_types___ - A connection can hold different nodes, the from node represents the input node, and the to node represents the output node. Each node can be a sata entry (DataEntry) or source (DataSource), another connection's output (Connection) or a task (Task) or process (Process).
+* ___connection_node_types___ - A connection can hold different nodes, the from node represents the input node, and the to node represents the output node. Each node can be a data entry (DataEntry) or source (DataSource), another connection's output (Connection) or a task (Task) or process (Process).
 * ___inputs___ - A collection of ID-name pairs, each representing a set of value that are considered as task inputs. This kind of feature was created to reuse existing tasks with new data.
 * ___input_values___ - Represents the specific entries and sources that are used to take an input.
   * _id_ - Input collection ID (from `inputs` table).

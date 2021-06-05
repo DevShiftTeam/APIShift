@@ -52,6 +52,7 @@ Released under the Apache-2.0 license.
 ### Meet Our Team
  * [Sapir Shemer](https://github.com/LessComplexity) as the architect.
  * [Eran Bodokh](https://github.com/Bodokh) as the Front-End lead.
+ * [Ilan Dazanashvili](https://github.com/ilanbenyona-dev) as a key contributor.
 
 ## Installation
 ### On Local Machine

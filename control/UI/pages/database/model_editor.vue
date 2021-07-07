@@ -169,7 +169,7 @@
                             graph_view.cursor_state = "create";
                             graph_view.current_action = () => {
                                 graph_view.elements.push({
-                                    id: 0, component_id: 0, name: "Item", data: {
+                                    id: this.get_last_id(0) + 1, component_id: 0, name: "Item", data: {
                                         position: window.mouse_on_graph,
                                         z_index: graph_view.elements.length
                                     }
@@ -184,7 +184,7 @@
                             graph_view.cursor_state = "create";
                             graph_view.current_action = () => {
                                 graph_view.elements.push({
-                                    id: 0, component_id: 1, name: "Relation", data: {
+                                    id: this.get_last_id(1) + 1, component_id: 1, name: "Relation", data: {
                                         position: window.mouse_on_graph,
                                         type: 0,
                                         z_index: graph_view.elements.length
@@ -229,7 +229,7 @@
                             graph_view.cursor_state = "create";
                             graph_view.current_action = () => {
                                 graph_view.elements.push({
-                                    id: 0, component_id: 3, name: "Enum", data: {
+                                    id: this.get_last_id(3) + 1, component_id: 3, name: "Enum", data: {
                                         position: window.mouse_on_graph,
                                         types: [],
                                         connected: [],
@@ -246,7 +246,7 @@
                             graph_view.cursor_state = "create";
                             graph_view.current_action = () => {
                                 graph_view.elements.push({
-                                    id: 0, component_id: 2, name: "Type", data: {
+                                    id: this.get_last_id(2) + 1, component_id: 2, name: "Type", data: {
                                         position: window.mouse_on_graph,
                                         z_index: graph_view.elements.length
                                     }
@@ -479,6 +479,14 @@
                     size_object_1.y < size_object_2.y + size_object_2.height &&
                     size_object_1.y > size_object_2.y - size_object_1.height
                 );
+            },
+            get_last_id(component_id) {
+                let max_id = 0;
+                graph_view.elements.forEach(el => {
+                    if (el.component_id == component_id && max_id < el.id) 
+                        max_id = el.id;
+                });
+                return max_id;
             },
             on_save() {
 

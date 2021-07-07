@@ -31,6 +31,13 @@
         },
         created () {
             window.graph_elements[this.$props.index] = this;
+            
+            // Assign last id of type
+            graph_view.elements.forEach(el => {
+                if (el.data.type == this.$props.data.type && this.$props.data.id <= el.data.id) 
+                    this.$props.data.id = el.data.id;
+            });
+            this.$props.data.id += 1;
         }, 
         mounted () {
             this.expanded_functions.drag_start = this.drag_start_addition;
@@ -83,6 +90,7 @@
                 
                 // Add type to enum
                 this.attached_enum = this.enum_hovered;
+                console.log(this.$props.id);
                 window.graph_elements[this.attached_enum].data.types.push(this.$props.id);
 
                 // Reset enum sizes
@@ -150,7 +158,7 @@
                 @blur="is_edit_mode = false" 
                 :contenteditable="is_edit_mode"
                 style="display: inline-block;">
-                    {{name}}
+                    {{index}}
             <div>
     </div>
 </template>

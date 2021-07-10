@@ -34,9 +34,15 @@
                     APIShift.API.getComponent('orm/enum_type', true),
                     APIShift.API.getComponent('orm/enum', true),
                     APIShift.API.getComponent('orm/group', true),
-                    APIShift.API.getComponent('orm/point', true)
-
+                    APIShift.API.getComponent('graph/point', true)
                 ],
+                dialog: 0,
+                dialog_list: [
+                    APIShift.API.getComponent('orm/dialog/edit_dialog', true),
+                ],
+                dialog_open: false,
+                dialog_data: {},
+                in_edit: 0,
                 line_comp: APIShift.API.getComponent('orm/line', true),
                 selection_comp: APIShift.API.getComponent('orm/selection_box', true),
                 side_menu_comp: APIShift.API.getComponent('orm/side_menu', true),
@@ -576,6 +582,14 @@
                             :is="context_menu_comp"> 
                         </component>
                     </div>
+
+                    <!-- Dialog -->
+                    <component ref="dialog"
+                        v-if="dialog_open"
+                        :is="dialog_list[dialog]"
+                        :data="dialog_data"
+                    >
+                    </component>    
                 </div>
             </v-card>
         </v-container>

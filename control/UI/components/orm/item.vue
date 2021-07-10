@@ -122,12 +122,20 @@
                 graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);
 
             },
+            on_input_addition () {
+                if (this.group_index !== -1) 
+                    window.graph_elements[this.group_index].update_group_size();
+            },
             on_context_addition () {
                 graph_view.context_menu.actions = [
                     {
                         starter: () => {
-                            this.is_edit_mode = true;
+
                             graph_view.context_menu.is_active = false;
+                            graph_view.dialog_open = true;
+                            this.is_edit_mode = true;
+                            graph_view.in_edit = this.$props.index;
+                            graph_view.dialog = 0;
                         },
                         name: 'Edit',
                         icon: 'mdi-pencil',
@@ -162,6 +170,25 @@
                     x: this.$props.data.position.x,
                     y: this.$props.data.position.y + this.get_rect.height / 2
                 };
+            }
+        },
+        watch: {
+            '$props.name' () {
+                this.ui_refresher++;
+
+                // Update owning group size - running notice how i used plug 
+                let plug = setTimeout(
+                    () => {
+                        if (!plug) return;
+                        plug = null;
+
+                        // Critical part - runs only once due to the plugging mechaism provided and prevent reduant excecutions 
+                        if (this.parent_group_index !== -1) 
+                        {
+                            window.graph_elements[this.group_index].update_group_size();
+                        }
+                    }
+                );
             }
         }
     }

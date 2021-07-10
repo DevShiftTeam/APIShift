@@ -36,7 +36,8 @@
                 ui_refresher: 0,
                 init_position: { x: 0, y: 0},
                 is_edit_mode: false,
-                mouse_pos: {}
+                mouse_pos: {},
+                container_indices: []
             }
         },
         props: {
@@ -137,10 +138,6 @@
 
                 // Refresh view dependencies
                 this.ui_refresher++;
-                setTimeout(() => {
-                    if (this.group_index && this.group_index != -1) window.graph_elements[this.group_index].update_group_size();
-                    if (this.parent_group_index && this.parent_group_index != -1) window.graph_elements[this.parent_group_index].update_group_size();
-                });
 
                 // Blur on enter key press
                 if (event.inputType === "insertParagraph") this.on_blur(event);
@@ -189,7 +186,7 @@
                         }
                     );
                 }
-            }
+            },
         }
     };
 </script>

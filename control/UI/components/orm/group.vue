@@ -287,8 +287,10 @@
                 graph_view.context_menu.actions = [
                     {
                         starter: () => {
-                            this.is_edit_mode = true;
                             graph_view.context_menu.is_active = false;
+                            graph_view.dialog_open = true;
+                            graph_view.in_edit = this.$props.index;
+                            graph_view.dialog = 0;
                         },
                         name: 'Edit',
                         icon: 'mdi-pencil',
@@ -316,7 +318,13 @@
                 this.init_height = info_el.offsetHeight;
                 this.init_width = info_el.querySelector('[contenteditable').offsetWidth + info_el.querySelector('.v-avatar').offsetWidth + 8;
 
+                // Update rect
                 this.update_group_size();
+
+                // Update parent rect if set
+                if (this.parent_group_index != -1) 
+                    window.graph_elements[this.parent_group_index].update_group_size();
+
             },
             move_by (dx,dy) {
 
@@ -357,6 +365,28 @@
                 }
             } 
         },
+        '$props.name' () {
+            // Update owning group size
+            if (this.parent_group_index !== -1) 
+            {
+                window.graph_elements[this.group_index].update_group_size();
+            }
+        },
+        watch: {
+            '$props.name' () {
+                this.ui_refresher++;
+
+                setTimeout(
+                    () => {
+                        // Update owning group size
+                        if (this.parent_group_index !== -1) 
+                        {
+                            window.graph_elements[this.group_index].update_group_size();
+                        }
+                    }
+                );
+            }
+        }
     }
 </script>
 

@@ -44,7 +44,7 @@ module.exports = {
     pointer_down(event) {
       if(graph_view.drag_end_lock) return;
 
-      let obj_holder = this.$props.data.is_parent_source ? this.src_ref : this.dest_ref;
+      let obj_holder = this.$props.data.is_parent_left ? this.src_ref : this.dest_ref;
       obj_holder.on_line_click(event, this.$props.index);
     },
   },
@@ -53,16 +53,12 @@ module.exports = {
     path_data() {
         if (graph_view.lines[this.$props.index].is_deleted) return;
         
-        let src_point = {
-          x: this.src_ref.from_position.x + !!this.marker_start*5,
-          y: this.src_ref.from_position.y
-        };
+        let src_point = Object.assign({}, this.src_ref.from_position);
+        src_point.x += !!this.$props.data.marker_start*5;
 
-        let dest_point = {
-          x: this.dest_ref.to_position.x - !!this.marker_end*5,
-          y: this.dest_ref.to_position.y
-        };
-  
+        let dest_point = Object.assign({}, this.dest_ref.to_position);
+        dest_point.x -= !!this.$props.data.marker_end*5;
+
         const bezierWeight = 0.675; // Amount to offset control points
 
         const dx = Math.abs(src_point.x - dest_point.x ) * bezierWeight * this.$props.data.is_curvy;

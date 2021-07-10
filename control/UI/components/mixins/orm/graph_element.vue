@@ -17,7 +17,7 @@
      * limitations under the License.
      * 
      * @author Sapir Shemer
-     * @author Ilan Dazanashvili
+     * @contributor Ilan Dazanashvili
      */
 
 
@@ -155,7 +155,26 @@
                 // Change model value
                 graph_view.elements[this.$props.index].name = event.target.textContent;
             },
+            on_delete () {
+                // Step 1: Remove line_parent connections
+                setTimeout(() => {
+                    let line_parents_indices = new Set();
+                    graph_view.elements.forEach((element, index) => {
+                        if (element.is_deleted || !window.graph_elements[index].im_a_line_parent || index == this.$props.index) return;
 
+                        let line_element_map = window.graph_elements[index].get_line_element();
+                        let line_index = Object.keys(line_element_map).find(line_index => {
+                            return line_element_map[line_index] === this.$props.index;
+                        });
+                        if (line_index) window.graph_elements[index].remove_connection(this.$props.index);
+                    });      
+                });    
+                // Step 2: Mark element as deleted
+                graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);    
+
+                // Step 3: Excecute additional procedures if set
+                if (this.on_delete_addition) this.on_delete_addition();
+            }
         },
         computed: {
             // Rendered transformation (coordinates and scale) 

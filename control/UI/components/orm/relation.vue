@@ -70,8 +70,8 @@
                     this.from_line_index = this.create_line(from_index, {
                             is_curvy: true,
                             is_stroked: false,
+                            is_persistent: true,
                             marker_start: 'url(#many-arrow-head)',
-                            is_persistent: true
                         },
                         false
                     );
@@ -79,8 +79,8 @@
                     this.to_line_index = this.create_line(to_index, {
                             is_curvy: true,
                             is_stroked: false,
+                            is_persistent: true,
                             marker_end: 'url(#one-arrow-head)',
-                            is_persistent: true
                         },
                         true
                     );
@@ -143,77 +143,17 @@
                 if (!this.enums) this.enums = graph_view.enums.filter(e => e.data.connected.find(connected => connected.type + connected.id === this.uid));
                 return this.enums;
             },
-            delete_connected_expanded (element_index) {
+            delete_connected_addition (element_index) {
                 // Step 1: Update element data
                 let keys = ['from', 'to'];
                 keys.forEach(key => {
                     this.$props.data[key] = this.$props.data[key] == graph_view.elements[element_index].id ? -1 : this.$props.data[key];
                 })
             },
-            get_connected_enums () {
+            on_delete_addition() {
                 let my_id = graph_view.elements[this.$props.index].id;
 
-                // Iterate through enums
-                let enums = graph_view.elements.filter((el) => {
-                    return el.component_id == 3 && !el.is_deleted;;
-                });
-
-                // Infer connected enums indices
-                let enums_indices = [];
-                enums.forEach((e) => {
-                    if (e.data.connected.find(i => i == my_id)) {
-                        let enum_index = graph_view.elements.findIndex(el => el.id == e.id && el.component_id == 3); 
-                        return enums_indices.push(enum_index);
-                    }
-                });
-
-                return enums_indices;
-            },
-            get_connected_relations () {
-                let my_id = graph_view.elements[this.$props.index].id;
-
-                // Iterate through enums
-                let relations = graph_view.elements.filter((el) => {
-                    return el.component_id == 1 && !el.is_deleted;;
-                });
-
-                // Infer connected enums indices
-                let relations_indices = [];
-                relations.forEach((rel) => {
-                    if (rel.data.to == my_id || rel.data.from == my_id) {
-                        let rel_index = graph_view.elements.findIndex(el => el.id == rel.id && el.component_id == 1); 
-                        return relations_indices.push(rel_index);
-                    }
-                });
-
-                return relations_indices;
-            },
-            on_delete() {
-                let my_id = graph_view.elements[this.$props.index].id;
-
-                // Mark element as deleted
-                graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);    
-
-                 // Remove connection from connected enums
-                this.get_connected_enums().forEach(enum_index => {
-                    window.graph_elements[enum_index].delete_connected(this.index);
-                });
-
-                // Remove relation connection from item
-                this.get_connected_relations().forEach(rel_index => {
-                    window.graph_elements[rel_index].delete_connected(this.index);
-                });
-            
-                // Delete connected lines
-                graph_view.$set(graph_view.lines[this.from_line_index], 'is_deleted', true);
-                graph_view.$set(graph_view.lines[this.to_line_index], 'is_deleted', true);
-
-                // Delete connected points
-                this.point_indices.forEach(point_index => {
-                    graph_view.$set(graph_view.elements[point_index], 'is_deleted', true);
-                });
-
-                // Remove from owning group
+                // Step 1: Remove from owning group
                 if (this.group_index !== -1) 
                 {
                     window.graph_elements[this.group_index].data.elements = window.graph_elements[this.group_index].data.elements.filter(id => id != my_id);

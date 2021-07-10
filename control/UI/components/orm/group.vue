@@ -61,8 +61,6 @@
                 this.all_loaded();
                 this.bring_to_front();
             }
-
-
         },
         methods: {
             all_loaded: function() {
@@ -96,7 +94,7 @@
                     window.graph_elements[grp_index].parent_group_index = this.$props.index;
                     this.group_indices.push(grp_index);
                 };
-
+                
                 // Delete group if empty 
                 if (this.element_indices.length + this.group_indices.length === 0) this.on_delete();    
             },
@@ -208,72 +206,8 @@
                 for(let sub_group in this.group_indices)
                     window.graph_elements[this.group_indices[sub_group]].drag(event);
             },
-            get_connected_enums () {
+            on_delete_addition () {
                 let my_id = graph_view.elements[this.$props.index].id;
-
-                // Iterate through enums
-                let enums = graph_view.elements.filter((el) => {
-                    return el.component_id == 3 && !el.is_deleted;;
-                });
-
-
-                // Infer connected enums indices
-                let enums_indices = [];
-                enums.forEach((e) => {
-                    if (e.data.connected.find(i => i == my_id)) {
-                        let enum_index = graph_view.elements.findIndex(el => el.id == e.id && el.component_id == 3); 
-                        return enums_indices.push(enum_index);
-                    }
-                });
-
-                return enums_indices;
-            },
-            get_connected_relations () {
-                let my_id = graph_view.elements[this.$props.index].id;
-
-                // Iterate through enums
-                let relations = graph_view.elements.filter((el) => {
-                    return el.component_id == 1 && !el.is_deleted;
-                });
-
-
-                // Infer connected enums indices
-                let relations_indices = [];
-                relations.forEach((rel) => {
-                    if (rel.data.to == my_id || rel.data.from == my_id) {
-                        let rel_index = graph_view.elements.findIndex(el => el.id == rel.id && el.component_id == 1); 
-                        return relations_indices.push(rel_index);
-                    }
-                });
-
-                return relations_indices;
-            },
-            on_delete () {
-                let my_id = graph_view.elements[this.$props.index].id;
-                
-                // Mark as deleted
-                graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);
-
-                // Remove connection from connected enums
-                this.get_connected_enums().forEach(enum_index => {
-                    window.graph_elements[enum_index].remove_connection(my_id);
-                });
-
-                // Remove relation connection form item
-                this.get_connected_relations().forEach(rel_index => {
-                    window.graph_elements[rel_index].remove_connection(my_id);
-                });
-
-                // Detach inner elements
-                for(let elem in this.element_indices) {
-                    window.graph_elements[this.element_indices[elem]].group_index = -1;
-                }
-
-                // Detach inner groups
-                for(let elem in this.group_indices) {
-                    graph_view.elements[this.group_indices[elem]].data.parent = this.$props.data.parent;
-                    window.graph_elements[this.group_indices[elem]].parent_group_index = -1;
-                }
 
                 // Add group elements to owning group's elements
                 if (this.parent_group_index !== -1) 

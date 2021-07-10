@@ -563,7 +563,6 @@
                             <component
                                 v-for="(line, index) in lines"
                                 :key="index"
-                                v-show="!line.is_deleted"
                                 :index="index"
                                 :is="line_comp"
                                 :src_ref="window.graph_elements[line.from_index]"

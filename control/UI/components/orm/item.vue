@@ -16,7 +16,7 @@
      * See the License for the specific language governing permissions and
      * limitations under the License.
      * 
-     * @author Sapir Shemer
+     * @author Ilan Dazanashvili
      */
 
     // This shit is made for scripting
@@ -58,69 +58,16 @@
                 if(this.group_index != -1)
                     window.graph_elements[this.group_index].update_group_size();
             },
-            get_connected_enums () {
+            on_delete_addition() {
                 let my_id = graph_view.elements[this.$props.index].id;
 
-                // Iterate through enums
-                let enums = graph_view.elements.filter((el) => {
-                    return el.component_id == 3 && !el.is_deleted;;
-                });
-
-                // Infer connected enums indices
-                let enums_indices = [];
-                enums.forEach((e) => {
-                    if (e.data.connected.find(i => i == my_id)) {
-                        let enum_index = graph_view.elements.findIndex(el => el.id == e.id && el.component_id == 3); 
-                        return enums_indices.push(enum_index);
-                    }
-                });
-
-                return enums_indices;
-            },
-            get_connected_relations () {
-                let my_id = graph_view.elements[this.$props.index].id;
-
-                // Iterate through enums
-                let relations = graph_view.elements.filter((el) => {
-                    return el.component_id == 1 && !el.is_deleted;;
-                });
-
-
-                // Infer connected enums indices
-                let relations_indices = [];
-                relations.forEach((rel) => {
-                    if (rel.data.to == my_id || rel.data.from == my_id) {
-                        let rel_index = graph_view.elements.findIndex(el => el.id == rel.id && el.component_id == 1); 
-                        return relations_indices.push(rel_index);
-                    }
-                });
-
-                return relations_indices;
-            },
-            on_delete() {
-                let my_id = graph_view.elements[this.$props.index].id;
-
-                // Remove connection from connected enums
-                this.get_connected_enums().forEach(enum_index => {
-                    window.graph_elements[enum_index].remove_connection(my_id);
-                });
-
-                // Remove relation connection form item
-                this.get_connected_relations().forEach(rel_index => {
-                    window.graph_elements[rel_index].remove_connection(my_id);
-                });
-
-                // Remove from owning group
+                // Step 1: Remove from owning group
                 if (this.group_index !== -1) 
                 {
                     window.graph_elements[this.group_index].data.elements = window.graph_elements[this.group_index].data.elements.filter(id => id != my_id);
                     window.graph_elements[this.group_index].update_indices();
                     window.graph_elements[this.group_index].update_group_size();
                 }
-
-                // Removing element from screen
-                graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);
-
             },
             on_input_addition () {
                 if (this.group_index !== -1) 

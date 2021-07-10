@@ -38,7 +38,7 @@
                 window.graph_view.lines.push({
                     from_index: is_from ? this.$props.index : to_index,
                     to_index: is_from ? to_index : this.$props.index,
-                    data: { ...data, is_parent_source: is_from },
+                    data: { ...data, is_parent_left: is_from },
                     is_deleted
                 });
 
@@ -95,36 +95,37 @@
                 }
 
                 // Find / Create point
-                let is_parent_source = graph_view.lines[line_index].data.is_parent_source;
+                let is_parent_left = graph_view.lines[line_index].data.is_parent_left;
                 let element_index = this.get_line_element()[line_index];
-                let point_index = window.graph_elements[element_index].im_a_point ? element_index : this.create_point(!is_parent_source, mouse_image);
+                let point_index = window.graph_elements[element_index].im_a_point ? element_index : this.create_point(!is_parent_left, mouse_image);
 
                 // Assign point position and line ref
                 setTimeout(() => {
                     Object.assign(graph_view.elements[point_index].data.position, mouse_image);
                     
-                    graph_view.lines[line_index][is_parent_source ? 'to_index' : 'from_index'] = point_index;
+                    graph_view.lines[line_index][is_parent_left ? 'to_index' : 'from_index'] = point_index;
                     graph_elements[point_index].drag_start(event);
                 });
             },
             remove_connection (element_index) {
                 // Step 1: Create points / Delete line
                 let points_line = {};
-                Object.keys(this.get_line_element()).forEach(line_index => {
-                    // Ignore deleted lines
-                    if (graph_view.lines[line_index].is_deleted) 
+                let line_element_map = this.get_line_element();
+                Object.keys(line_element_map).forEach(line_index => {
+                    // Ignore deleted lines or not connected ones to element
+                    if (graph_view.lines[line_index].is_deleted || line_element_map[line_index] !== element_index) 
                         return;
-
+                    
                     // Create a point on line edge
                     if(graph_view.lines[line_index].data.is_persistent) {
                         // Determine line edge position
-                        let is_parent_source = graph_view.lines[line_index].data.is_parent_source;
-                        let point_pos = window.graph_elements[element_index][is_parent_source ? 'to_position' : 'from_position'];
-                        point_pos.x += graph_view.lines[line_index].data[`offsetLeft${is_parent_source ? 'Dest' : 'Src'}`];
-                        point_pos.y += graph_view.lines[line_index].data[`offsetTop${is_parent_source ? 'Dest' : 'Src'}`];
+                        let is_parent_left = graph_view.lines[line_index].data.is_parent_left;
+                        let point_pos = window.graph_elements[element_index][is_parent_left ? 'to_position' : 'from_position'];
+                        point_pos.x += graph_view.lines[line_index].data[`offsetLeft${is_parent_left ? 'Dest' : 'Src'}`] | 0;
+                        point_pos.y += graph_view.lines[line_index].data[`offsetTop${is_parent_left ? 'Dest' : 'Src'}`] | 0;
 
                         // Create point
-                        let point_index = this.create_point(!graph_view.lines[line_index].data.is_parent_source, point_pos);
+                        let point_index = this.create_point(!graph_view.lines[line_index].data.is_parent_left, point_pos);
                         points_line[point_index] = line_index;
                         return;
                     } 
@@ -137,35 +138,50 @@
                 setTimeout(() => {
                     Object.keys(points_line).forEach((point_index) => {
                         let line_index = points_line[point_index];
-                        graph_view.lines[line_index][is_parent_source ? 'to_index' : 'from_index'] = point_index;
+                        graph_view.lines[line_index][graph_view.elements[point_index].data.is_left ? 'from_index' : 'to_index'] = point_index;
                     });
                 });
 
                 // Step 3: Execute additional procedures
-                if (this.remove_connected_expanded)
-                    this.remove_connected_expanded(element_index);
+                if (this.remove_connected_addition)
+                    this.remove_connected_addition(element_index);
             }, 
             on_delete () {
-                // Delete lines
-                Object.keys(this.get_line_element()).forEach(line_index => {
-                    graph_view.$set(graph_view.lines[line_index], 'is_deleted', true);
-                });
+                // Step 1: Remove line_parent connections
+                setTimeout(() => {
+                    let line_parents_indices = new Set();
+                    graph_view.elements.forEach((element, index) => {
+                        if (element.is_deleted || !window.graph_elements[index].im_a_line_parent || index == this.$props.index) return;
 
-                // Delete points
-                Object.values(this.get_line_element()).forEach(element_index => {
+                        let line_element_map = window.graph_elements[index].get_line_element();
+                        let line_index = Object.keys(line_element_map).find(line_index => {
+                            return line_element_map[line_index] === this.$props.index;
+                        });
+                        if (line_index) window.graph_elements[index].remove_connection(this.$props.index);
+                    });      
+                });          
+
+                // Step 2: Delete points & lines
+                let line_element_map = this.get_line_element();
+                Object.keys(line_element_map).forEach(line_index => {
+                    let element_index = line_element_map[line_index];
                     if (window.graph_elements[element_index].im_a_point)
-                        graph_view.$set(graph_view.lines[line_index], 'is_deleted', true);
-                });
+                        graph_view.$set(graph_view.elements[element_index], 'is_deleted', true);
+                    graph_view.$set(graph_view.lines[line_index], 'is_deleted', true);
+                });  
 
-                // Call additional function if set
+                // Step 4: Excecute additional procedures if set
                 if (this.on_delete_addition) this.on_delete_addition();
+    
+                // Step 3: Mark element as deleted
+                graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);  
             },
             get_line_element () {
                 let get_line_element = {};
                 this.lines.forEach(line_index => {
                     if(graph_view.lines[line_index].is_deleted) 
                         return;
-                    get_line_element[line_index] = graph_view.lines[line_index].data.is_parent_source ? graph_view.lines[line_index].to_index : graph_view.lines[line_index].from_index;
+                    get_line_element[parseInt(line_index)] = graph_view.lines[line_index].data.is_parent_left ? graph_view.lines[line_index].to_index : graph_view.lines[line_index].from_index;
                 });
                 return get_line_element;
             }

@@ -21,7 +21,7 @@
     
     // This shit is made for scripting
     module.exports = {
-        mixins: [APIShift.API.getMixin('orm/graph_element')],
+        mixins: [APIShift.API.getMixin('graph/graph_element')],
         props: {
         },
         data () {
@@ -69,10 +69,12 @@
 
 <template>
     <div class="point" color="#8789ff"
+        style="display: flex; flex-direction: row;"
         :style="transformation" 
         @pointerdown.prevent="drag_start"
         @pointerup.prevent="drag_end"
         @pointercancel.prevent="drag_end">
+        {{index}}
     </div>
 </template>
 

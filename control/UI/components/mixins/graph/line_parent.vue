@@ -21,7 +21,7 @@
 
 
     module.exports = {
-        mixins: [APIShift.API.getMixin('orm/graph_element')],
+        mixins: [APIShift.API.getMixin('graph/graph_element')],
         data() {
             return {
                 lines: [],
@@ -88,24 +88,28 @@
             on_line_click (event, line_index) {
                 let graph_center_rect = graph_view.$el.querySelector('#graph_center').getBoundingClientRect();
 
-                // Calculate mouse position
-                let mouse_image = {
-                    x:  (event.clientX - graph_center_rect.x) / graph_view.scale - 5,
-                    y:  (event.clientY - graph_center_rect.y) / graph_view.scale - 5
-                }
+                    // Calculate mouse position
+                    let mouse_image = {
+                        x:  (event.clientX - graph_center_rect.x) / graph_view.scale - 5,
+                        y:  (event.clientY - graph_center_rect.y) / graph_view.scale - 5
+                    }
 
-                // Find / Create point
-                let is_parent_left = graph_view.lines[line_index].data.is_parent_left;
-                let element_index = this.get_line_element()[line_index];
-                let point_index = window.graph_elements[element_index].im_a_point ? element_index : this.create_point(!is_parent_left, mouse_image);
+                    // Find / Create point
+                    let is_parent_left = graph_view.lines[line_index].data.is_parent_left;
+                    let element_index = this.get_line_element()[line_index];
+                    let point_index = window.graph_elements[element_index].im_a_point ? parseInt(element_index) : this.create_point(!is_parent_left, mouse_image);
 
-                // Assign point position and line ref
-                setTimeout(() => {
-                    Object.assign(graph_view.elements[point_index].data.position, mouse_image);
-                    
-                    graph_view.lines[line_index][is_parent_left ? 'to_index' : 'from_index'] = point_index;
-                    graph_elements[point_index].drag_start(event);
-                });
+                    // Assign point position and line ref
+                    setTimeout(() => {
+                        graph_view.elements[point_index].data.position = {
+                            x: mouse_image.x,
+                            y: mouse_image.y
+                        }
+                        
+                        graph_view.lines[line_index][is_parent_left ? 'to_index' : 'from_index'] = point_index;
+                        graph_elements[point_index].drag_start(event);
+                    });
+                
             },
             remove_connection (element_index) {
                 // Step 1: Create points / Delete line

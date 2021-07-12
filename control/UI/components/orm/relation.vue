@@ -94,7 +94,7 @@
                 for(let index in [...graph_view.elements.keys()]) {
                     let cmp_id = graph_view.elements[index].component_id;
                     // Skip non-item nor relations & self or undefined
-                    if(window.graph_elements[index] === undefined || (cmp_id != 0 && cmp_id != 1 && cmp_id != 4) || graph_view.elements[index].is_deleted)
+                    if(window.graph_elements[index] === undefined || (cmp_id != 0 && cmp_id != 1 && cmp_id != 4) || index === this.$props.index || graph_view.elements[index].is_deleted)
                         continue;
                     
                     // Check collisions 
@@ -116,7 +116,7 @@
                 }
                 
                 // Drop on a connectable item 
-                if (target_element !== -1) {
+                if (target_element !== -1 && target_element !== this.$props.index) {
                     setTimeout(() => {
                         graph_view.$set(graph_view.elements[point_index], 'is_deleted', true);
                         graph_view.lines[line_index][graph_view.elements[point_index].data.is_left ? 'from_index' : 'to_index'] = target_element;

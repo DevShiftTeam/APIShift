@@ -69,12 +69,10 @@
 
 <template>
     <div class="point" color="#8789ff"
-        style="display: flex; flex-direction: row;"
         :style="transformation" 
         @pointerdown.prevent="drag_start"
         @pointerup.prevent="drag_end"
         @pointercancel.prevent="drag_end">
-        {{index}}
     </div>
 </template>
 

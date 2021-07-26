@@ -30,6 +30,12 @@
             }
         },
         created () {
+            // Construct additional functions and generate runtime warnings on an improper use
+            ['on_point_drag_end', 'remove_connection'].forEach(val => {
+                this.expanded_functions[val] = () => {
+                    console.warn(`Expanded function ${val} not implemented`);
+                }
+            })
         },
         methods: {
             create_line (to_index, data, is_from = false, is_deleted = false) {
@@ -60,7 +66,6 @@
                         },
                         z_index: graph_view.elements.length+1,
                         parent_index: this.$props.index,
-                        drag_end_func: this.on_point_drag_end,
                         is_left
                     },
                     is_deleted
@@ -75,42 +80,18 @@
             on_point_drag_end (event, point_index) {
                 let line_index = graph_view.lines.findIndex(line => (line.to_index == this.$props.index && line.from_index == point_index) || (line.from_index == this.$props.index && line.to_index == point_index));
 
-                // Delete line if not presistent 
+                // Step 1 - Delete un-presistent (point,line) tuple
                 if (!graph_view.lines[line_index].data.is_persistent) {
                     graph_view.$set(graph_view.lines[line_index], 'is_deleted', true);
                     graph_view.$set(graph_view.elements[point_index], 'is_deleted', true);
                 }
 
-                if (this.on_point_drag_end_addition) 
-                    this.on_point_drag_end_addition(event, point_index);
-
+                // Step 2 - Execute additional procedures
+                this.expanded_functions.on_point_drag_end(event, point_index);
             },
-            on_line_click (event, line_index) {
-                let graph_center_rect = graph_view.$el.querySelector('#graph_center').getBoundingClientRect();
-
-                    // Calculate mouse position
-                    let mouse_image = {
-                        x:  (event.clientX - graph_center_rect.x) / graph_view.scale - 5,
-                        y:  (event.clientY - graph_center_rect.y) / graph_view.scale - 5
-                    }
-
-                    // Find / Create point
-                    let is_parent_left = graph_view.lines[line_index].data.is_parent_left;
-                    let element_index = this.get_line_element()[line_index];
-                    let point_index = window.graph_elements[element_index].im_a_point ? parseInt(element_index) : this.create_point(!is_parent_left, mouse_image);
-
-                    // Assign point position and line ref
-                    setTimeout(() => {
-                        graph_view.elements[point_index].data.position = {
-                            x: mouse_image.x,
-                            y: mouse_image.y
-                        }
-                        
-                        graph_view.lines[line_index][is_parent_left ? 'to_index' : 'from_index'] = point_index;
-                        graph_elements[point_index].drag_start(event);
-                    });
-                
-            },
+            /**
+             * Remove connection from a connected element
+             */
             remove_connection (element_index) {
                 // Step 1: Create points / Delete line
                 let points_line = {};
@@ -147,8 +128,7 @@
                 });
 
                 // Step 3: Execute additional procedures
-                if (this.remove_connected_addition)
-                    this.remove_connected_addition(element_index);
+                this.expanded_functions.remove_connection(element_index);
             }, 
             on_delete () {
                 // Step 1: Remove line_parent connections
@@ -174,12 +154,15 @@
                     graph_view.$set(graph_view.lines[line_index], 'is_deleted', true);
                 });  
 
-                // Step 4: Excecute additional procedures if set
-                if (this.on_delete_addition) this.on_delete_addition();
+                // Step 3: Excecute additional procedures if set
+                this.expanded_functions.on_delete();
     
-                // Step 3: Mark element as deleted
+                // Step 4: Mark element as deleted
                 graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);  
             },
+            /**
+             * Map each connected line to a {line_index: element_index} form and construct them to an object
+             */
             get_line_element () {
                 let get_line_element = {};
                 this.lines.forEach(line_index => {

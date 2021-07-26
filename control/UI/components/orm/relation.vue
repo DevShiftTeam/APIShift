@@ -35,6 +35,12 @@
         },
         created () {
             window.graph_elements[this.$props.index] = this;
+
+            // Construct expanded functions
+            this.expanded_functions['on_point_drag_end'] = this.on_point_drag_end_addition;
+            this.expanded_functions['remove_connection'] = this.remove_connection_addition;
+            this.expanded_functions['on_context'] = this.on_context_addition;
+            this.expanded_functions['on_delete'] = this.on_delete_addition;
         }, 
         mounted () {
             this.expanded_functions.drag = this.drag_addition;
@@ -143,7 +149,7 @@
                 if (!this.enums) this.enums = graph_view.enums.filter(e => e.data.connected.find(connected => connected.type + connected.id === this.uid));
                 return this.enums;
             },
-            delete_connected_addition (element_index) {
+            remove_connection_addition (element_index) {
                 // Step 1: Update element data
                 let keys = ['from', 'to'];
                 keys.forEach(key => {

@@ -32,8 +32,10 @@
         },
         created () {
             window.graph_elements[this.$props.index] = this;
+
+            // Bind parent drag end controller to function
             this.expanded_functions.drag_end = (event) => {
-                this.$props.data.drag_end_func(event, this.$props.index);
+                window.graph_elements[this.$props.data.parent_index].on_point_drag_end(event, this.$props.index);
             };
         }, 
         mounted () {

@@ -29,7 +29,8 @@
                 expanded_functions: {
                     'drag_start': (event) => {},
                     'drag': (event) => {},
-                    'drag_end': (event) => {}
+                    'drag_end': (event) => {},
+                    'on_delete': (event) => {}
                 },
                 is_dragging: false,
                 ghost_mode: false,

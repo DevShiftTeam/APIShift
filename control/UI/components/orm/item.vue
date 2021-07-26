@@ -32,6 +32,9 @@
         },
         created () {
             window.graph_elements[this.$props.index] = this;
+
+            // Construct expanded functions
+            this.expanded_functions.on_context = this.on_context_addition;
         }, 
         mounted () {
             let rect = this.$el.getBoundingClientRect();

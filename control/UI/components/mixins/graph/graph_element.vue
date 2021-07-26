@@ -29,15 +29,15 @@
                 expanded_functions: {
                     'drag_start': (event) => {},
                     'drag': (event) => {},
-                    'drag_end': (event) => {}
+                    'drag_end': (event) => {},
+                    'on_delete': () => {},
+                    'on_context': () => {}
                 },
                 is_dragging: false,
                 ghost_mode: false,
-                ui_refresher: 0,
                 init_position: { x: 0, y: 0},
                 is_edit_mode: false,
                 mouse_pos: {},
-                container_indices: []
             }
         },
         props: {
@@ -93,14 +93,18 @@
                 this.expanded_functions.drag_end(event);
             },
             on_context (event) {
+                // Step 1 - Bind context to target
                 graph_view.context_menu.target = this;
                 graph_view.context_menu.position = {
                     x: event.clientX - graph_position.x,
                     y: event.clientY - graph_position.y,
                 };
+
+                // Step 2 - activate context on view
                 graph_view.context_menu.is_active = true;
 
-                this.on_context_addition ();
+                // Step 3 - excecute additional procedures
+                this.expanded_functions.on_context ();
             },
             on_scroll () {
                 if (!this.is_dragging) return;
@@ -156,7 +160,7 @@
                 graph_view.elements[this.$props.index].name = event.target.textContent;
             },
             on_delete () {
-                // Step 1: Remove line_parent connections
+                // Step 1: Find connected line_parents & remove connections.
                 setTimeout(() => {
                     let line_parents_indices = new Set();
                     graph_view.elements.forEach((element, index) => {
@@ -166,14 +170,16 @@
                         let line_index = Object.keys(line_element_map).find(line_index => {
                             return line_element_map[line_index] === this.$props.index;
                         });
-                        if (line_index) window.graph_elements[index].remove_connection(this.$props.index);
+
+                        if (line_index != null) 
+                            window.graph_elements[index].remove_connection(this.$props.index);
                     });      
                 });    
                 // Step 2: Mark element as deleted
                 graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);    
 
                 // Step 3: Excecute additional procedures if set
-                if (this.on_delete_addition) this.on_delete_addition();
+                this.expanded_functions.on_delete();
             }
         },
         computed: {

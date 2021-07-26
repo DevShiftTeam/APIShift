@@ -44,8 +44,29 @@ module.exports = {
     pointer_down(event) {
       if(graph_view.drag_end_lock) return;
 
-      let obj_holder = this.$props.data.is_parent_left ? this.src_ref : this.dest_ref;
-      obj_holder.on_line_click(event, this.$props.index);
+      let parent_ref = this.$props.data.is_parent_left ? this.src_ref : this.dest_ref;
+      let graph_center_rect = graph_view.$el.querySelector('#graph_center').getBoundingClientRect();
+
+      // Calculate mouse position
+      let mouse_image = {
+          x:  (event.clientX - graph_center_rect.x) / graph_view.scale - 5,
+          y:  (event.clientY - graph_center_rect.y) / graph_view.scale - 5
+      }
+
+      // Find / Create point
+      let element_index = parent_ref.get_line_element()[this.$props.index];
+      let point_index = window.graph_elements[element_index].im_a_point ? parseInt(element_index) : parent_ref.create_point(!this.$props.data.is_parent_left, mouse_image);
+
+      // Assign point position and line ref
+      setTimeout(() => {
+          graph_view.elements[point_index].data.position = {
+              x: mouse_image.x,
+              y: mouse_image.y
+          }
+          
+          graph_view.lines[this.$props.index][this.$props.data.is_parent_left ? 'to_index' : 'from_index'] = point_index;
+          graph_elements[point_index].drag_start(event);
+      });
     },
   },
   computed: {

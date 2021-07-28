@@ -249,16 +249,6 @@
                     y: this.$props.data.position.y + this.get_rect.height / 2
                 };
             }
-        },
-        watch: {
-            '$props.name' () {
-                this.ui_refresher++;
-                // Update owning group size
-                if (this.group_index !== -1) 
-                {
-                    window.graph_elements[this.group_index].update_group_size();
-                }
-            }
         }
     }
 </script>

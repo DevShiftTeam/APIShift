@@ -34,9 +34,7 @@
             window.graph_elements[this.$props.index] = this;
 
             // Bind parent drag end controller to function
-            this.expanded_functions.drag_end = (event) => {
-                window.graph_elements[this.$props.data.parent_index].on_point_drag_end(event, this.$props.index);
-            };
+            this.expanded_functions.drag_end = this.drag_end_additional;
         }, 
         mounted () {
             let rect = this.$el.getBoundingClientRect();
@@ -47,7 +45,10 @@
             graph_view.elements_loaded++;
         },
         methods: {
-            // Do noting
+            drag_end_additional (event) {
+                window.graph_elements[this.$props.data.parent_index].on_point_drag_end(event, this.$props.index);
+            },
+            // Do nothing
             on_delete () {
                 
             },

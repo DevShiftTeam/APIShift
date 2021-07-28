@@ -123,23 +123,6 @@
             }
         },
         watch: {
-            '$props.name' () {
-                this.ui_refresher++;
-
-                // Update owning group size - running notice how i used plug 
-                let plug = setTimeout(
-                    () => {
-                        if (!plug) return;
-                        plug = null;
-
-                        // Critical part - runs only once due to the plugging mechaism provided and prevent reduant excecutions 
-                        if (this.parent_group_index !== -1) 
-                        {
-                            window.graph_elements[this.group_index].update_group_size();
-                        }
-                    }
-                );
-            }
         }
     }
 </script>

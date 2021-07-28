@@ -25,8 +25,6 @@
         data() {
             return {
                 lines: [],
-                line_connector_map: {}, 
-                im_a_line_parent: true,
             }
         },
         created () {
@@ -35,7 +33,7 @@
                 this.expanded_functions[val] = () => {
                     console.warn(`Expanded function ${val} not implemented`);
                 }
-            })
+            });
         },
         methods: {
             create_line (to_index, data, is_from = false, is_deleted = false) {

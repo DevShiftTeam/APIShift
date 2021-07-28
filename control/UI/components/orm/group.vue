@@ -307,19 +307,6 @@
             }
         },
         watch: {
-            '$props.name' () {
-                this.ui_refresher++;
-
-                setTimeout(
-                    () => {
-                        // Update owning group size
-                        if (this.parent_group_index !== -1) 
-                        {
-                            window.graph_elements[this.group_index].update_group_size();
-                        }
-                    }
-                );
-            }
         }
     }
 </script>

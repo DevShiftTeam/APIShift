@@ -37,6 +37,7 @@
                 ghost_mode: false,
                 init_position: { x: 0, y: 0},
                 is_edit_mode: false,
+                ui_refresher: 0,
                 mouse_pos: {},
             }
         },
@@ -142,7 +143,7 @@
 
                 // Refresh view dependencies
                 this.ui_refresher++;
-
+                
                 // Blur on enter key press
                 if (event.inputType === "insertParagraph") this.on_blur(event);
 

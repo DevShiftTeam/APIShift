@@ -20,7 +20,7 @@
      */
 
 
-    module.exports = window.line_parent = {
+    module.exports = {
         mixins: [APIShift.API.getMixin('graph/graph_element')],
         data() {
             return {

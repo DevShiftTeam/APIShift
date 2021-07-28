@@ -21,7 +21,7 @@
 
 
     // Container is an abstraction of an element that keeps proportions of its contained elements under transformations
-    module.exports = window.container = {
+    module.exports = {
         mixins: [APIShift.API.getMixin('graph/graph_element')],
         data() {
             return {

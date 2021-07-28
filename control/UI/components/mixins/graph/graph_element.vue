@@ -21,7 +21,7 @@
      */
 
 
-    module.exports = window.graph_element = {
+    module.exports = {
         data() {
             return {
                 // This elements adds functionallity to drag events in needed

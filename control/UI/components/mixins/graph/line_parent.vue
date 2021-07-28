@@ -20,10 +20,11 @@
      */
 
 
-    module.exports = {
+    module.exports = window.line_parent = {
         mixins: [APIShift.API.getMixin('graph/graph_element')],
         data() {
             return {
+                im_a_line_parent: true,
                 lines: [],
             }
         },

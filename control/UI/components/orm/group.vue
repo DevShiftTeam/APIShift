@@ -21,7 +21,7 @@
 
     //TODO: Design better z-index system.
     module.exports = {
-        mixins: [APIShift.API.getMixin('graph/graph_element')],
+        mixins: [APIShift.API.getMixin('graph/graph_element'), APIShift.API.getMixin('graph/container_element') ],
         data () {
             return {
                 init_height: 0,
@@ -43,6 +43,8 @@
 
             this.expanded_functions.drag_start = this.drag_start_addition;
             this.expanded_functions.drag = this.drag_addition;
+            this.expanded_functions.update_indices = this.update_indices_additional;
+            this.expanded_functions.update_size = this.update_group_size;
         },
         mounted () {
             // Determine initial rect pre bounding setup
@@ -52,7 +54,7 @@
             graph_view.elements_loaded++;
 
             // Remove common elements of parent groups
-            this.parent_group_index = graph_view.elements.findIndex(el => el.id == this.$props.data.parent && el.component_id == 4);
+            this.container_index = this.parent_group_index = graph_view.elements.findIndex(el => el.id == this.$props.data.parent && el.component_id == 4);
             if (this.parent_group_index != -1)
                 graph_view.elements[this.parent_group_index].data.elements = graph_view.elements[this.parent_group_index].data.elements
                                                                             .filter (elem => this.$props.data.elements.indexOf(elem) < 0);
@@ -74,7 +76,7 @@
 
                 this.bring_to_front();
             },
-            update_indices: function() {
+            update_indices_additional: function() {
                 this.element_indices = [];
                 this.group_indices = [];
 
@@ -83,7 +85,7 @@
                     let item_id = this.$props.data.elements[elem];
                     let index = graph_view.elements.findIndex(el => el.id === item_id && (el.component_id == 1 || el.component_id == 0) && !el.is_deleted);
                     if(index == -1) continue;
-                    window.graph_elements[index].group_index = this.$props.index;
+                    window.graph_elements[index].container_index = window.graph_elements[index].group_index = this.$props.index;
                     this.element_indices.push(index);
                 }
 
@@ -91,7 +93,7 @@
                 for(let grp_index in graph_view.elements) {
                     if(graph_view.elements[grp_index].component_id != 4 || graph_view.elements[grp_index].data.parent != this.$props.id || graph_view.elements[grp_index].is_deleted)
                         continue;
-                    window.graph_elements[grp_index].parent_group_index = this.$props.index;
+                    window.graph_elements[grp_index].container_index = window.graph_elements[grp_index].parent_group_index = this.$props.index;
                     this.group_indices.push(grp_index);
                 };
                 
@@ -218,7 +220,7 @@
                 }
             },
             on_context_addition () {
-                graph_view.context_menu.actions = [
+                graph_view.contextmenu.actions = [
                     {
                         starter: () => {
                             graph_view.context_menu.is_active = false;
@@ -261,7 +263,6 @@
 
             },
             move_by (dx,dy) {
-
                 // Move by all elements
                 for(let elem in this.element_indices)
                     window.graph_elements[this.element_indices[elem]].move_by(dx, dy);
@@ -298,13 +299,6 @@
                     height: this.occupied_height + 'px',
                 }
             } 
-        },
-        '$props.name' () {
-            // Update owning group size
-            if (this.parent_group_index !== -1) 
-            {
-                window.graph_elements[this.group_index].update_group_size();
-            }
         },
         watch: {
         }

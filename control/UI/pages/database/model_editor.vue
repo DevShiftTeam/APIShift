@@ -28,25 +28,33 @@
             return {
                 drawer: null,
                 // Components
-                components: [
-                    APIShift.API.getComponent('orm/item', true),
-                    APIShift.API.getComponent('orm/relation', true),
-                    APIShift.API.getComponent('orm/enum_type', true),
-                    APIShift.API.getComponent('orm/enum', true),
-                    APIShift.API.getComponent('orm/group', true),
-                    APIShift.API.getComponent('graph/point', true)
-                ],
+                components: {
+                    elements: [
+                        APIShift.API.getComponent('orm/item', true),
+                        APIShift.API.getComponent('orm/relation', true),
+                        APIShift.API.getComponent('orm/enum_type', true),
+                        APIShift.API.getComponent('orm/enum', true),
+                        APIShift.API.getComponent('orm/group', true),
+                        APIShift.API.getComponent('graph/point', true)
+                    ],
+                    line: APIShift.API.getComponent('orm/line', true),
+                    selection: APIShift.API.getComponent('orm/selection_box', true),
+                    side_menu: APIShift.API.getComponent('orm/side_menu', true),
+                    context_menu: APIShift.API.getComponent('orm/context_menu',true),
+                    dialog: APIShift.API.getComponent('graph/dialog/edit_dialog', true),
+                },
+                mixins: {},
                 dialog: 0,
-                dialog_list: [
-                    APIShift.API.getComponent('orm/dialog/edit_dialog', true),
-                ],
                 dialog_open: false,
                 dialog_data: {},
                 in_edit: 0,
-                line_comp: APIShift.API.getComponent('orm/line', true),
-                selection_comp: APIShift.API.getComponent('orm/selection_box', true),
-                side_menu_comp: APIShift.API.getComponent('orm/side_menu', true),
-                context_menu_comp: APIShift.API.getComponent('orm/context_menu',true),
+                contextmenu: {
+                    is_active: false,
+                    position: {
+                        
+                    },
+                    actions: [],
+                },
                 elements: [
                     // Items
                     { id: 1, component_id: 0, name: "Users", data: {
@@ -540,7 +548,7 @@
                         @contextmenu.prevent="window.empty_function"
                         :style="{ 'cursor' : cursor_state }">
                         <component ref="side_menu"
-                            :is="side_menu_comp"
+                            :is="components.side_menu"
                             :actions="side_menu_actions"
                         >
                         </component>
@@ -551,7 +559,7 @@
                             <component
                                 v-for="(element, index) in elements"
                                 v-show="!element.is_deleted"
-                                :is="components[element.component_id]"
+                                :is="components.elements[element.component_id]"
                                 :key="index"
                                 :index="index"
                                 :id="element.id"
@@ -564,7 +572,7 @@
                                 v-for="(line, index) in lines"
                                 :key="index"
                                 :index="index"
-                                :is="line_comp"
+                                :is="components.line"
                                 :src_ref="window.graph_elements[line.from_index]"
                                 :dest_ref="window.graph_elements[line.to_index]"
                                 :data="line.data">
@@ -572,20 +580,20 @@
                         </div>
                         <component ref="s_box" 
                             v-show="selection_active"
-                            :is="selection_comp">
+                            :is="components.selection">
                         </component>
                         <component ref="c_menu"
-                            v-show="context_menu.is_active"
-                            :actions="context_menu.actions"
-                            :position="context_menu.position"
-                            :is="context_menu_comp"> 
+                            v-show="contextmenu.is_active"
+                            :actions="contextmenu.actions"
+                            :position="contextmenu.position"
+                            :is="components.context_menu"> 
                         </component>
                     </div>
 
                     <!-- Dialog -->
                     <component ref="dialog"
                         v-if="dialog_open"
-                        :is="dialog_list[dialog]"
+                        :is="components.dialog"
                         :data="dialog_data"
                     >
                     </component>    

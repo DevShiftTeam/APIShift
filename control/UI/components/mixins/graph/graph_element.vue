@@ -21,8 +21,7 @@
      */
 
 
-    module.exports = {
-
+    module.exports = window.graph_element = {
         data() {
             return {
                 // This elements adds functionallity to drag events in needed
@@ -39,6 +38,7 @@
                 is_edit_mode: false,
                 ui_refresher: 0,
                 mouse_pos: {},
+                container_index: -1
             }
         },
         props: {
@@ -94,15 +94,14 @@
                 this.expanded_functions.drag_end(event);
             },
             on_context (event) {
-                // Step 1 - Bind context to target
-                graph_view.context_menu.target = this;
-                graph_view.context_menu.position = {
+                // Step 1 - Set contextmenu position pre-renderation
+                graph_view.contextmenu.position = {
                     x: event.clientX - graph_position.x,
                     y: event.clientY - graph_position.y,
                 };
 
-                // Step 2 - activate context on view
-                graph_view.context_menu.is_active = true;
+                // Step 2 - Render context menu
+                graph_view.contextmenu.is_active = true;
 
                 // Step 3 - excecute additional procedures
                 this.expanded_functions.on_context ();
@@ -181,6 +180,19 @@
 
                 // Step 3: Excecute additional procedures if set
                 this.expanded_functions.on_delete();
+            },
+            refresh_dependencies () {
+                // Step 1: Update cached get_rect dependency
+                this.ui_refresher++;
+
+                // Step 2: Update owning group size
+                setTimeout(() => {
+                    if (this.container_index !== -1) 
+                    {
+                        window.graph_elements[this.container_index].update_indices();
+                        window.graph_elements[this.container_index].update_size();
+                    }
+                });
             }
         },
         computed: {

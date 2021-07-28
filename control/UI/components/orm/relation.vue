@@ -172,10 +172,10 @@
                     window.graph_elements[this.group_index].update_group_size();
             },
             on_context_addition () {
-                graph_view.context_menu.actions = [
+                graph_view.contextmenu.actions = [
                     {
                         starter: () => {
-                            graph_view.context_menu.is_active = false;
+                            graph_view.contextmenu.is_active = false;
                             graph_view.dialog_open = true;
                             graph_view.in_edit = this.$props.index;
                             graph_view.dialog = 0;
@@ -186,7 +186,7 @@
                     {
                         starter: () => {
 
-                            graph_view.context_menu.is_active = false;
+                            graph_view.contextmenu.is_active = false;
                         },
                         name: 'Duplicate',
                         icon: 'mdi-content-duplicate',
@@ -194,20 +194,20 @@
                     {
                         starter: () => {
 
-                            graph_view.context_menu.is_active = false;
+                            graph_view.contextmenu.is_active = false;
                         },
                         actions: [
                             {
                                 starter: () => {
 
-                                    graph_view.context_menu.is_active = false;
+                                    graph_view.contextmenu.is_active = false;
                                 },
                                 name: 'One-to-One',
                                 icon: 'mdi-relation-one-to-one',
                             },
                             {
                                 starter: () => {
-                                    graph_view.context_menu.is_active = false;
+                                    graph_view.contextmenu.is_active = false;
 
                                 },
                                 name: 'One-to-Many',
@@ -216,7 +216,7 @@
                             {
                                 starter: () => {
                                     
-                                    graph_view.context_menu.is_active = false;
+                                    graph_view.contextmenu.is_active = false;
                                 },
                                 name: 'Many-to-Many',
                                 icon: 'mdi-relation-one-to-one'
@@ -228,7 +228,7 @@
                     {
                         starter: () => {
                             this.on_delete();
-                            graph_view.context_menu.is_active = false;
+                            graph_view.contextmenu.is_active = false;
                         },
                         name: 'Delete',
                         icon: 'mdi-delete-outline',

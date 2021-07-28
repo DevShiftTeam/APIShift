@@ -38,8 +38,8 @@
             // Load necessary components
             Promise.all([
                 APIShift.API.getMixin('graph/graph_element', true),
-                APIShift.API.getMixin('orm/editable_element', true),
-                APIShift.API.getMixin('graph/line_parent', true)
+                APIShift.API.getMixin('graph/line_parent', true),
+                APIShift.API.getMixin('graph/container_element', true)
             ]).then (() => {
                 this.mixins_loaded = true  
             });

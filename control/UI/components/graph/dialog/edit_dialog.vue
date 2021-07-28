@@ -52,6 +52,7 @@
             },
           save () {
             graph_view.elements[graph_view.in_edit].name = this.name;
+            window.graph_elements[graph_view.in_edit].refresh_dependencies();
             graph_view.dialog_open = false;
           }
         },

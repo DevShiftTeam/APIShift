@@ -77,11 +77,11 @@
                     window.graph_elements[this.group_index].update_group_size();
             },
             on_context_addition () {
-                graph_view.context_menu.actions = [
+                graph_view.contextmenu.actions = [
                     {
                         starter: () => {
 
-                            graph_view.context_menu.is_active = false;
+                            graph_view.contextmenu.is_active = false;
                             graph_view.dialog_open = true;
                             this.is_edit_mode = true;
                             graph_view.in_edit = this.$props.index;
@@ -100,13 +100,13 @@
                     {
                         starter: () => {
                             this.on_delete();
-                            graph_view.context_menu.is_active = false;
+                            graph_view.contextmenu.is_active = false;
                         },
                         name: 'Delete',
                         icon: 'mdi-delete-outline',
                     },
                 ]
-            }
+            },
         },
         computed: {
             from_position: function() {

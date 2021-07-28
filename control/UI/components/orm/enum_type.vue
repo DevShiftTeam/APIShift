@@ -107,18 +107,18 @@
                 graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);
             },
             on_context_addition () {
-                graph_view.context_menu.actions = [
+                graph_view.contextmenu.actions = [
                     {
                         starter: () => {
                             this.is_edit_mode = true;
-                            graph_view.context_menu.is_active = false;
+                            graph_view.contextmenu.is_active = false;
                         },
                         name: 'Edit',
                         icon: 'mdi-pencil',
                     },
                     {
                         starter: () => {
-                            graph_view.context_menu.is_active = false;
+                            graph_view.contextmenu.is_active = false;
                         },
                         name: 'Duplicate',
                         icon: 'mdi-content-duplicate',
@@ -126,7 +126,7 @@
                     {
                         starter: () => {
                             this.on_delete();
-                            graph_view.context_menu.is_active = false;
+                            graph_view.contextmenu.is_active = false;
                         },
                         name: 'Delete',
                         icon: 'mdi-delete-outline',

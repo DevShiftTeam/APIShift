@@ -58,7 +58,7 @@
         methods: {
             window_pointer_down(event) {
                 if (!event.target.closest('#context_menu_primary')) {
-                    graph_view.context_menu.is_active = false;
+                    graph_view.contextmenu.is_active = false;
                 }
             }
         }
@@ -79,7 +79,7 @@
                 <v-list-item-title>{{item.name}}</v-list-item-title>
             </v-list-item-content>
             <component v-if="hovered_index == index"
-                :is="graph_view.context_menu_comp"
+                :is="graph_view.components.context_menu"
                 :actions="item.actions"
                 :is_sub_menu="true">
             </component> 

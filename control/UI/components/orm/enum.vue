@@ -21,7 +21,7 @@
 
     // This shit is made for scripting
     module.exports = {
-        mixins: [APIShift.API.getMixin('graph/graph_element')],
+        mixins: [APIShift.API.getMixin('graph/line_parent'), APIShift.API.getMixin('graph/container_element')],
         data () {
             return {
                 drawer: null,
@@ -131,19 +131,7 @@
                     current_position_height += window.graph_elements[index].get_rect.height + 7;
                 }
             },
-            create_line (element_index) {
-                window.graph_view.lines.push({
-                    from_index: this.$props.index,
-                    to_index: element_index,
-                    data: {
-                        is_curvy: false,
-                        is_stroked: true,
-                        enum_parent: this.$props.index
-                    }
-                });
-                this.line_indices.push(window.graph_view.lines.length - 1);
-            },
-            on_delete () {
+            on_delete_addition () {
                 // Detach attached types
                 for(let type in this.$props.data.types) {
                     let type_id = this.$props.data.types[type];
@@ -176,18 +164,18 @@
                 this.$props.data.connected = this.$props.data.connected.filter(connected_id => connected_id != id);
             },
             on_context_addition () {
-                graph_view.context_menu.actions = [
+                graph_view.contextmenu.actions = [
                     {
                         starter: () => {
                             this.is_edit_mode = true;
-                            graph_view.context_menu.is_active = false;
+                            graph_view.contextmenu.is_active = false;
                         },
                         name: 'Edit',
                         icon: 'mdi-pencil',
                     },
                     {
                         starter: () => {
-                            graph_view.context_menu.is_active = false;
+                            graph_view.contextmenu.is_active = false;
                         },
                         name: 'Duplicate',
                         icon: 'mdi-content-duplicate',
@@ -195,7 +183,7 @@
                     {
                         starter: () => {
                             this.on_delete();
-                            graph_view.context_menu.is_active = false;
+                            graph_view.contextmenu.is_active = false;
                         },
                         name: 'Delete',
                         icon: 'mdi-delete-outline',

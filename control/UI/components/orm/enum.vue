@@ -142,8 +142,9 @@
                             if(intersection == null) intersection = segment_segment_intersection(src_point,dest_point,r2,r3);
                             if(intersection == null) intersection = segment_segment_intersection(src_point,dest_point,r3,r4);
                             if(intersection == null) intersection = segment_segment_intersection(src_point,dest_point,r4,r1);
-
-                            return intersection ? intersection : { x: target_ref.get_rect.x + target_ref.get_rect.width / 2 , y: target_ref.get_rect.y + target_ref.get_rect.height - target_ref.init_height} ;
+                            if(intersection == null) intersection = { x: target_ref.get_rect.x + target_ref.get_rect.width / 2 , y: target_ref.get_rect.y + target_ref.get_rect.height - target_ref.init_height };
+                            
+                            return intersection;
                         }
                     }, true);
                     
@@ -209,8 +210,8 @@
                 // Delete element from graph
                 graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);
             },
-            remove_connection (id) {
-                let element_index = graph_view.elements.findIndex(element => element.id == id && (element.component_id == 0 || element.component_id == 1 || element.component_id == 4));
+            remove_connection_addition (index) {
+                let id = graph_view.elements.findIndex(element => element.id == id && (element.component_id == 0 || element.component_id == 1 || element.component_id == 4));
 
                 // Delete line to connected element
                 let line_indices = [];

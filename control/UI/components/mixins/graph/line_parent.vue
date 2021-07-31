@@ -126,23 +126,26 @@
                     });
                 });
 
-                // Step 3: Execute additional procedures
+                // Step 3: Execute additional procedures & propogate change on data representing connection
                 this.expanded_functions.remove_connection(element_index);
             }, 
             on_delete () {
-                // Step 1: Remove line_parent connections
-                setTimeout(() => {
-                    let line_parents_indices = new Set();
-                    graph_view.elements.forEach((element, index) => {
+                    // Step 1: Iterate through connected line_parents and remove connections
+                    graph_view.elements.forEach((element, index) => {                        
+                        // Step 1.1: Skip deleted elements nor line-parent elements nor self
                         if (element.is_deleted || !window.graph_elements[index].im_a_line_parent || index == this.$props.index) return;
 
+                        // Step 1.2: Detemine connection status 
                         let line_element_map = window.graph_elements[index].get_line_element();
-                        let line_index = Object.keys(line_element_map).find(line_index => {
+                        let line_index = Object.keys(line_element_map).findIndex(line_index => {
                             return line_element_map[line_index] === this.$props.index;
                         });
-                        if (line_index) window.graph_elements[index].remove_connection(this.$props.index);
-                    });      
-                });          
+
+                        // Step 1.2: Remove connection from line_parent if set
+                        if (line_index != -1) 
+                            window.graph_elements[index].remove_connection(this.$props.index);
+                    });  
+
 
                 // Step 2: Delete points & lines
                 let line_element_map = this.get_line_element();
@@ -152,12 +155,12 @@
                         graph_view.$set(graph_view.elements[element_index], 'is_deleted', true);
                     graph_view.$set(graph_view.lines[line_index], 'is_deleted', true);
                 });  
-
-                // Step 3: Excecute additional procedures if set
-                this.expanded_functions.on_delete();
     
-                // Step 4: Mark element as deleted
+                // Step 3: Mark element as deleted
                 graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);  
+
+                // Step 4: Excecute additional procedures if set
+                this.expanded_functions.on_delete();
             },
             /**
              * Map each connected line to a {line_index: element_index} form and construct them to an object

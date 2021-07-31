@@ -159,28 +159,28 @@
                 // Change model value
                 graph_view.elements[this.$props.index].name = event.target.textContent;
             },
-            on_delete () {
-                    // Step 1: Iterate through connected line_parents and remove connections
-                    graph_view.elements.forEach((element, index) => {                        
-                        // Step 1.1: Skip deleted elements nor line-parent elements nor self
-                        if (element.is_deleted || !window.graph_elements[index].im_a_line_parent || index == this.$props.index) return;
+            on_delete () {     
+                // Step 1: Iterate through connected line_parents and remove connections
+                graph_view.elements.forEach((element, index) => {                        
+                    // Step 1.1: Skip deleted elements nor line-parent elements nor self
+                    if (element.is_deleted || !window.graph_elements[index].im_a_line_parent || index == this.$props.index) return;
 
-                        // Step 1.2: Detemine connection status 
-                        let line_element_map = window.graph_elements[index].get_line_element();
-                        let line_index = Object.keys(line_element_map).findIndex(line_index => {
-                            return line_element_map[line_index] === this.$props.index;
-                        });
+                    // Step 1.2: Detemine connection status 
+                    let line_element_map = window.graph_elements[index].get_line_element();
+                    let line_index = Object.keys(line_element_map).findIndex(line_index => {
+                        return line_element_map[line_index] === this.$props.index;
+                    });
 
-                        // Step 1.2: Remove connection from line_parent
-                        if (line_index != -1) 
-                            window.graph_elements[index].remove_connection(this.$props.index);
-                    });  
+                    // Step 1.2: Remove connection from line_parent if set
+                    if (line_index != -1) 
+                        window.graph_elements[index].remove_connection(this.$props.index);
+                });  
 
-                    // Step 2: Mark element as deleted
-                    graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);    
+                // Step 2: Mark element as deleted
+                graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);    
 
-                    // Step 3: Excecute additional procedures if set
-                    this.expanded_functions.on_delete();
+                // Step 3: Excecute additional procedures if set
+                this.expanded_functions.on_delete();
             },
             refresh_dependencies () {
                 // Step 1: Update cached get_rect dependency

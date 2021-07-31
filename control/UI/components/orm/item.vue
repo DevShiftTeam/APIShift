@@ -35,6 +35,7 @@
 
             // Construct expanded functions
             this.expanded_functions.on_context = this.on_context_addition;
+            this.expanded_functions.on_delete = this.on_delete_addition;
         }, 
         mounted () {
             let rect = this.$el.getBoundingClientRect();

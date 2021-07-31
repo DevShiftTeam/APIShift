@@ -94,7 +94,7 @@
                     this.create_line(target_element,
                     {
                         is_stroked: true,
-                        dest_point_generator: graph_view.elements[target_element].id == 5 ? () => {
+                        dest_point_generator: () => {
                             let target_ref = window.graph_elements[target_element];
                             let src_point = Object.assign({}, this.from_position);
                             let dest_point = { x: target_ref.$props.data.position.x + target_ref.get_rect.width / 2 , y: target_ref.$props.data.position.y + target_ref.get_rect.height / 2 };
@@ -144,7 +144,7 @@
                             if(intersection == null) intersection = segment_segment_intersection(src_point,dest_point,r4,r1);
 
                             return intersection ? intersection : { x: target_ref.get_rect.x + target_ref.get_rect.width / 2 , y: target_ref.get_rect.y + target_ref.get_rect.height - target_ref.init_height} ;
-                        } : null
+                        }
                     }, true);
                     
                     this.$props.data.connected.push(graph_view.elements[target_element].id);

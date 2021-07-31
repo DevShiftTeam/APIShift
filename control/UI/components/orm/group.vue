@@ -98,7 +98,7 @@
                     window.graph_elements[grp_index].container_index = window.graph_elements[grp_index].parent_group_index = this.$props.index;
                     this.group_indices.push(grp_index);
                 };
-                
+
                 // Delete group if empty 
                 if (this.element_indices.length + this.group_indices.length === 0) setTimeout(() => this.on_delete());    
             },

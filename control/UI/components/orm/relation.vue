@@ -164,7 +164,7 @@
                 {
                     window.graph_elements[this.group_index].data.elements = window.graph_elements[this.group_index].data.elements.filter(id => id != my_id);
                     window.graph_elements[this.group_index].update_indices();
-                    // window.graph_elements[this.group_index].update_group_size();
+                    window.graph_elements[this.group_index].update_group_size();
                 }
             },
             on_input_addition () {

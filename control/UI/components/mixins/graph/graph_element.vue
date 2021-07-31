@@ -161,7 +161,7 @@
             },
             on_delete () {     
                 // Step 1: Iterate through connected line_parents and remove connections
-                graph_view.elements.forEach((element, index) => {                        
+                Object.keys(graph_elements).forEach((element, index) => {                        
                     // Step 1.1: Skip deleted elements nor line-parent elements nor self
                     if (element.is_deleted || !window.graph_elements[index].im_a_line_parent || index == this.$props.index) return;
 
@@ -176,10 +176,26 @@
                         window.graph_elements[index].remove_connection(this.$props.index);
                 });  
 
-                // Step 2: Mark element as deleted
+                // Step 2: Iterate through containing container elements and remove self
+                Object.keys(graph_elements).forEach((element, index) => {                        
+                    // Step 2.1: Skip deleted elements nor line-parent elements nor self
+                    if (element.is_deleted || !window.graph_elements[index].im_a_container || index == this.$props.index) return;
+
+                    // Step 2.2: Detemine contaiment status 
+                    let is_contained = window.graph_elements[index].indices.find(inner_index => inner_index === this.$props.index);
+
+                    // Step 2.2: Remove self from container
+                    if (is_contained) {
+                        window.graph_elements[index].indices = window.graph_elements[index].indices.filter( index => index != this.$props.index);
+                        window.graph_elements[index].update_indices();
+                        window.graph_elements[index].indices.update_size();
+                    }
+                }); 
+
+                // Step 3: Mark element as deleted
                 graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);    
 
-                // Step 3: Excecute additional procedures if set
+                // Step 4: Excecute additional procedures if set
                 this.expanded_functions.on_delete();
             },
             refresh_dependencies () {

@@ -34,10 +34,13 @@
         },
         created () {
             window.graph_elements[this.$props.index] = this;
+            
             this.expanded_functions.drag_start = this.drag_start_addition;
             this.expanded_functions.drag = this.drag_addition;
             this.expanded_functions.drag_end = this.drag_end_addition;
-        }, 
+            this.expanded_functions.on_context = this.on_context_addition;
+            this.expanded_functions.on_delete = this.on_delete_addition;
+        },
         mounted () {
             graph_view.elements_loaded++;
 
@@ -77,7 +80,7 @@
                     
                     // Check collisions
                     if (window.graph_elements[index].data.z_index > z_index && graph_view.collision_check(this.get_rect, window.graph_elements[index].get_rect)) {
-                        target_element = index;
+                        target_element = parseInt(index);
                         z_index = graph_view.elements[index].data.z_index;
                     }
                 }
@@ -86,8 +89,64 @@
                 if (target_element !== -1 && !this.$props.data.connected.find(id => id === graph_view.elements[target_element]?.id)) {
                     let graph_rect = graph_view.$el.querySelector('#graph_center').getBoundingClientRect();
 
+
                     // Create line & update data 
-                    this.create_line(target_element);
+                    this.create_line(target_element,
+                    {
+                        is_stroked: true,
+                        dest_point_generator: graph_view.elements[target_element].id == 5 ? () => {
+                            let target_ref = window.graph_elements[target_element];
+                            let src_point = Object.assign({}, this.from_position);
+                            let dest_point = { x: target_ref.$props.data.position.x + target_ref.get_rect.width / 2 , y: target_ref.$props.data.position.y + target_ref.get_rect.height / 2 };
+
+                            let segment_segment_intersection = function(src_point, dest_point, p1, p2) {
+                                // if the lines intersect, the result contains the x and y of the intersection (treating the lines as infinite) and booleans for whether line segment 1 or line segment 2 contain the point
+                                var denominator, a, b, numerator1, numerator2, result = {
+                                    x: null,
+                                    y: null
+                                };
+
+                                let line1dy = dest_point.y - src_point.y, line1dx = dest_point.x - src_point.x;
+                                let line2dy = p2.y - p1.y, line2dx = p2.x - p1.x;
+                                
+                                denominator = ((line2dy) * (line1dx)) - ((line2dx) * (line1dy));
+                                
+                                // test whether two lines are parallel or coincident
+                                if (denominator == 0) {
+                                    return null;
+                                }
+                                
+                                a = src_point.y - p1.y;
+                                b = src_point.x - p1.x;
+                                numerator1 = (line2dx * a) - (line2dy * b);
+                                numerator2 = (line1dx * a) - (line1dy * b);
+
+                                a = numerator1 / denominator;
+                                b = numerator2 / denominator;
+
+                                // if we cast these lines infinitely in both directions, they intersect here:
+                                result.x = src_point.x + (a * (line1dx));
+                                result.y = src_point.y + (a * (line1dy));
+ 
+                                // lines intersects at segments
+                                return (a > 0 && a < 1) && (b > 0 && b < 1) ? result : null;
+                            }
+
+                            let r1 = target_ref.$props.data.position;
+                            let r2 = { x: target_ref.$props.data.position.x + target_ref.get_rect.width, y: target_ref.$props.data.position.y };
+                            let r3 = { x: target_ref.$props.data.position.x + target_ref.get_rect.width, y: target_ref.$props.data.position.y + target_ref.get_rect.height };
+                            let r4 = { x: target_ref.$props.data.position.x, y: target_ref.$props.data.position.y + target_ref.get_rect.height };
+
+                            // Determine interection point
+                            let intersection = segment_segment_intersection(src_point,dest_point,r1,r2);
+                            if(intersection == null) intersection = segment_segment_intersection(src_point,dest_point,r2,r3);
+                            if(intersection == null) intersection = segment_segment_intersection(src_point,dest_point,r3,r4);
+                            if(intersection == null) intersection = segment_segment_intersection(src_point,dest_point,r4,r1);
+
+                            return intersection ? intersection : { x: target_ref.get_rect.x + target_ref.get_rect.width / 2 , y: target_ref.get_rect.y + target_ref.get_rect.height - target_ref.init_height} ;
+                        } : null
+                    }, true);
+                    
                     this.$props.data.connected.push(graph_view.elements[target_element].id);
 
                     // Move enum back to origin position
@@ -112,6 +171,9 @@
                     this.occupied_height += rect.height + 7;
                     if(this.occupied_width - 14 < rect.width) this.occupied_width = rect.width + 14; // 14 for 7 pixel padding at each side
                 }
+
+                // Refresh cached rect computed property
+                this.ui_refresher++;
             },
             reset_type_position: function() {
                 // Move types with enum & update their z-index to heigher than enum

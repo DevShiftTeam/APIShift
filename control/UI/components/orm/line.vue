@@ -74,15 +74,15 @@ module.exports = {
     path_data() {
         if (graph_view.lines[this.$props.index].is_deleted) return;
         
-        let src_point = Object.assign({}, this.src_ref.from_position);
+        let src_point = this.$props.data.src_point_generator ? this.$props.data.src_point_generator() : Object.assign({}, this.src_ref.from_position);
         src_point.x += !!this.$props.data.marker_start*5;
 
-        let dest_point = Object.assign({}, this.dest_ref.to_position);
+        let dest_point = this.$props.data.dest_point_generator ? this.$props.data.dest_point_generator() : Object.assign({}, this.dest_ref.to_position);
         dest_point.x -= !!this.$props.data.marker_end*5;
 
         const bezierWeight = 0.675; // Amount to offset control points
 
-        const dx = Math.abs(src_point.x - dest_point.x ) * bezierWeight * this.$props.data.is_curvy;
+        const dx = Math.abs(src_point.x - dest_point.x ) * bezierWeight * !!this.$props.data.is_curvy;
         const c1 = { x: src_point.x + dx, y: src_point.y };
         const c2 = { x: dest_point.x - dx , y: dest_point.y };
 

@@ -185,12 +185,9 @@
                     let is_contained = window.graph_elements[index].indices.find(inner_index => inner_index === this.$props.index);
 
                     // Step 2.2: Remove self from container
-                    if (is_contained) {
-                        window.graph_elements[index].indices = window.graph_elements[index].indices.filter( index => index != this.$props.index);
-                        window.graph_elements[index].update_indices();
-                        window.graph_elements[index].indices.update_size();
-                    }
-                }); 
+                    if (is_contained) 
+                        window.graph_elements[index].remove_contained(this.$props.index);
+                });
 
                 // Step 3: Mark element as deleted
                 graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);    
@@ -210,6 +207,18 @@
                         window.graph_elements[this.container_index].update_size();
                     }
                 });
+            },
+            /**
+             * A binary function that accepts 'this.expanded_functions' property and compose it with an excecutable procedure 
+             */
+            compose_expanded (property, procedure = () => {}) {
+                if (this.expanded_functions[property]) {
+                    let r = this.expanded_functions[property].bind(this);
+                    this.expanded_functions[property] = () => {
+                        r();
+                        procedure();
+                    };
+                };
             }
         },
         computed: {
@@ -228,6 +237,23 @@
                     width: this.$el.offsetWidth,
                     height: this.$el.offsetHeight
                 };
+            },
+            container_indices: function () {
+                let containers = [];
+                // Step 1: Iterate through containing container elements and remove self
+                graph_view.elements.forEach((element, index) => {                        
+                    // Step 1.1: Skip deleted elements nor line-parent elements nor self
+                    if (element === undefined || element.is_deleted || !window.graph_elements[index].im_a_container || index == this.$props.index) return;
+
+                    // Step 1.2: Detemine contaiment status 
+                    let is_contained = window.graph_elements[index].indices.find(inner_index => inner_index === this.$props.index);
+
+                    // Step 1.3: Remove self from container
+                    if (is_contained) 
+                        containers.push(this.$props.index);
+                });
+
+                return containers;
             }
         },
         watch: {

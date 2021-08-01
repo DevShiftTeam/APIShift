@@ -36,6 +36,8 @@
                     console.warn(`Expanded function ${val} not implemented`);
                 }
             });
+
+            console.log('Im a container', this.expanded_functions);
         },
         methods: {
             update_indices () {

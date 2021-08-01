@@ -19,13 +19,12 @@
      * @author Ilan Dazanashvili
      */
 
-
     module.exports = {
         mixins: [APIShift.API.getMixin('graph/graph_element')],
         data() {
             return {
                 im_a_line_parent: true,
-                lines: [],
+                lines: []
             }
         },
         created () {
@@ -35,6 +34,11 @@
                     console.warn(`Expanded function ${val} not implemented`);
                 }
             });
+
+
+            // Composed functions 
+            this.compose_expanded('on_delete', APIShift.API.getMixin('graph/line_parent').methods.on_delete_addition.bind(this));
+            
         },
         methods: {
             create_line (to_index, data, is_from = false, is_deleted = false) {
@@ -129,53 +133,15 @@
                 // Step 3: Execute additional procedures & propogate change on data representing connection
                 this.expanded_functions.remove_connection(element_index);
             }, 
-            on_delete () {
-                // Step 1: Iterate through connected line_parents and remove connections
-                Object.keys(graph_elements).forEach((element, index) => {                        
-                    // Step 1.1: Skip deleted elements nor line-parent elements nor self
-                    if (element.is_deleted || !window.graph_elements[index].im_a_line_parent || index == this.$props.index) return;
-
-                    // Step 1.2: Detemine connection status 
-                    let line_element_map = window.graph_elements[index].get_line_element();
-                    let line_index = Object.keys(line_element_map).findIndex(line_index => {
-                        return line_element_map[line_index] === this.$props.index;
-                    });
-
-                    // Step 1.2: Remove connection from line_parent if set
-                    if (line_index != -1) 
-                        window.graph_elements[index].remove_connection(this.$props.index);
-                });  
-
-                // Step 2: Iterate through containing container elements and remove self
-                Object.keys(graph_elements).forEach((element, index) => {                        
-                    // Step 2.1: Skip deleted elements nor line-parent elements nor self
-                    if (element.is_deleted || !window.graph_elements[index].im_a_container || index == this.$props.index) return;
-
-                    // Step 2.2: Detemine contaiment status 
-                    let is_contained = window.graph_elements[index].indices.find(inner_index => inner_index === this.$props.index);
-
-                    // Step 2.2: Remove self from container
-                    if (is_contained) {
-                        window.graph_elements[index].indices = window.graph_elements[index].indices.filter( index => index != this.$props.index);
-                        window.graph_elements[index].update_indices();
-                        window.graph_elements[index].indices.update_size();
-                    }
-                }); 
-
-                // Step 3: Delete points & lines
+            on_delete_addition () {
+                // Step 1: Delete points & lines
                 let line_element_map = this.get_line_element();
                 Object.keys(line_element_map).forEach(line_index => {
                     let element_index = line_element_map[line_index];
                     if (window.graph_elements[element_index].im_a_point)
                         graph_view.$set(graph_view.elements[element_index], 'is_deleted', true);
                     graph_view.$set(graph_view.lines[line_index], 'is_deleted', true);
-                });  
-    
-                // Step 4: Mark element as deleted
-                graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);  
-
-                // Step 5: Excecute additional procedures if set
-                this.expanded_functions.on_delete();
+                });
             },
             /**
              * Map each connected line to a {line_index: element_index} form and construct them to an object
@@ -188,7 +154,7 @@
                     get_line_element[parseInt(line_index)] = graph_view.lines[line_index].data.is_parent_left ? graph_view.lines[line_index].to_index : graph_view.lines[line_index].from_index;
                 });
                 return get_line_element;
-            }
+            }, 
         },
     };
 </script>

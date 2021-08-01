@@ -39,8 +39,10 @@
             // Construct expanded functions
             this.expanded_functions['on_point_drag_end'] = this.on_point_drag_end_addition;
             this.expanded_functions['remove_connection'] = this.remove_connection_addition;
-            this.expanded_functions['on_context'] = this.on_context_addition;
-            this.expanded_functions['on_delete'] = this.on_delete_addition;
+
+            // Compose expanded functions
+            this.compose_expanded('on_delete', this.on_delete_addition);
+            this.compose_expanded('on_context', this.on_context_addition);
         }, 
         mounted () {
             this.expanded_functions.drag = this.drag_addition;

@@ -38,8 +38,10 @@
             this.expanded_functions.drag_start = this.drag_start_addition;
             this.expanded_functions.drag = this.drag_addition;
             this.expanded_functions.drag_end = this.drag_end_addition;
-            this.expanded_functions.on_context = this.on_context_addition;
-            this.expanded_functions.on_delete = this.on_delete_addition;
+
+            // Compose functions
+            this.compose_expanded('on_delete', this.on_delete_addition);
+            this.compose_expanded('on_context', this.on_context_addition);
         },
         mounted () {
             graph_view.elements_loaded++;
@@ -137,7 +139,7 @@
                             let r3 = { x: target_ref.$props.data.position.x + target_ref.get_rect.width, y: target_ref.$props.data.position.y + target_ref.get_rect.height };
                             let r4 = { x: target_ref.$props.data.position.x, y: target_ref.$props.data.position.y + target_ref.get_rect.height };
 
-                            // Determine interection point
+                            // Determine intersection point
                             let intersection = segment_segment_intersection(src_point,dest_point,r1,r2);
                             if(intersection == null) intersection = segment_segment_intersection(src_point,dest_point,r2,r3);
                             if(intersection == null) intersection = segment_segment_intersection(src_point,dest_point,r3,r4);
@@ -194,7 +196,7 @@
                     current_position_height += window.graph_elements[index].get_rect.height + 7;
                 }
             },
-            on_delete_addition () {
+            on_delete_addition () {             
                 // Detach attached types
                 for(let type in this.$props.data.types) {
                     let type_id = this.$props.data.types[type];

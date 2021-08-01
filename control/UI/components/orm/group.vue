@@ -45,8 +45,10 @@
             this.expanded_functions.drag = this.drag_addition;
             this.expanded_functions.update_indices = this.update_indices_additional;
             this.expanded_functions.update_size = this.update_group_size;
-            this.expanded_functions.on_delete = this.on_delete_addition;
-            this.expanded_functions.on_context = this.on_context_addition;
+
+            // Compose additional functions
+            this.compose_expanded('on_delete', this.on_delete_addition);
+            this.compose_expanded('on_context', this.on_context_addition);
         },
         mounted () {
             // Determine initial rect pre bounding setup

@@ -35,10 +35,9 @@
                 }
             });
 
-
             // Composed functions 
             this.compose_expanded('on_delete', APIShift.API.getMixin('graph/line_parent').methods.on_delete_addition.bind(this));
-            
+
         },
         methods: {
             create_line (to_index, data, is_from = false, is_deleted = false) {

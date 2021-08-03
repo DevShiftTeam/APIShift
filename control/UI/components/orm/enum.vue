@@ -135,16 +135,16 @@
                             }
 
                             let r1 = target_ref.$props.data.position;
-                            let r2 = { x: target_ref.$props.data.position.x + target_ref.get_rect.width, y: target_ref.$props.data.position.y };
-                            let r3 = { x: target_ref.$props.data.position.x + target_ref.get_rect.width, y: target_ref.$props.data.position.y + target_ref.get_rect.height };
-                            let r4 = { x: target_ref.$props.data.position.x, y: target_ref.$props.data.position.y + target_ref.get_rect.height };
+                            let r2 = { x: target_ref.get_rect.x + target_ref.get_rect.width, y: target_ref.get_rect.y };
+                            let r3 = { x: target_ref.get_rect.x + target_ref.get_rect.width, y: target_ref.get_rect.y + target_ref.get_rect.height };
+                            let r4 = { x: target_ref.get_rect.x, y: target_ref.get_rect.y + target_ref.get_rect.height };
 
                             // Determine intersection point
                             let intersection = segment_segment_intersection(src_point,dest_point,r1,r2);
                             if(intersection == null) intersection = segment_segment_intersection(src_point,dest_point,r2,r3);
                             if(intersection == null) intersection = segment_segment_intersection(src_point,dest_point,r3,r4);
                             if(intersection == null) intersection = segment_segment_intersection(src_point,dest_point,r4,r1);
-                            if(intersection == null) intersection = { x: target_ref.get_rect.x + target_ref.get_rect.width / 2 , y: target_ref.get_rect.y + target_ref.get_rect.height - target_ref.init_height };
+                            if(intersection == null) intersection = { x: target_ref.get_rect.x + target_ref.get_rect.width / 2 , y: target_ref.get_rect.y };
                             
                             return intersection;
                         }

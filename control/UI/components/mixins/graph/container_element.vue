@@ -30,21 +30,34 @@
             }
         },
         created () {
-            // Construct additional functions and generate runtime warnings on an improper use
-            ['update_indices', 'update_size'].forEach(val => {
+            // Construct additional functions and generate runtime warnings on missing implementation
+            ['update_indices', 'update_size', 'remove_contained', 'add_contained'].forEach(val => {
                 this.expanded_functions[val] = () => {
                     console.warn(`Expanded function ${val} not implemented`);
                 }
             });
-
-            console.log('Im a container', this.expanded_functions);
         },
         methods: {
+            remove_contained (index) {
+                this.expanded_functions.remove_contained(index);
+                this.update_indices();
+                this.update_size();
+            },
+            add_contained (index) {
+                this.expanded_functions.add_contained(index);
+                this.update_indices();
+                this.update_size();
+            },
             update_indices () {
                 // Step 1 - Execute additional procedures
                 this.expanded_functions.update_indices();
             },
             update_size () {
+                console.log('[op[');
+                this.container_indices.forEach(() => {
+                    console.log('asd');
+                }); 
+
                 // Step 1 - Execute additional procedures
                 this.expanded_functions.update_size();
             }

@@ -46,7 +46,7 @@
             this.expanded_functions.update_indices = this.update_indices_additional;
             this.expanded_functions.update_size = this.update_group_size;
 
-            // Compose additional functions
+            // Compose additional expanded functions
             this.compose_expanded('on_delete', this.on_delete_addition);
             this.compose_expanded('on_context', this.on_context_addition);
         },
@@ -81,6 +81,7 @@
                 this.bring_to_front();
             },
             update_indices_additional: function() {
+                this.indices = [];
                 this.element_indices = [];
                 this.group_indices = [];
 
@@ -101,8 +102,10 @@
                     this.group_indices.push(grp_index);
                 };
 
+                
                 // Delete group if empty 
-                if (this.element_indices.length + this.group_indices.length === 0) setTimeout(() => this.on_delete());    
+                if (this.element_indices.length + this.group_indices.length === 0) setTimeout(() => this.on_delete());   
+                else this.indices = [...this.element_indices, ...this.group_indices]; 
             },
             bring_to_front: function(ignore_parent = false) {
                 // If father present then call only the father's function

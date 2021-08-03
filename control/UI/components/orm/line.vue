@@ -86,7 +86,7 @@ module.exports = {
         const c1 = { x: src_point.x + dx, y: src_point.y };
         const c2 = { x: dest_point.x - dx , y: dest_point.y };
 
-        return `M ${src_point.x} ${src_point.y} C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${dest_point.x } ${dest_point.y}`;
+        return `M ${src_point.x} ${src_point.y} C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${dest_point.x} ${dest_point.y}`;
     },
   }
 };

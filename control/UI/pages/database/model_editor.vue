@@ -183,7 +183,8 @@
                             graph_view.cursor_state = "create";
                             graph_view.current_action = () => {
                                 graph_view.elements.push({
-                                    id: 0, component_id: 0, name: "Item", data: {
+                                    // TODO: Determine id on server-side
+                                    id: Math.max(...graph_view.elements.filter(el => el.component_id == 0).map(el => el.id)) + 1, component_id: 0, name: "Item", data: {
                                         position: window.mouse_on_graph,
                                         z_index: graph_view.elements.length
                                     }
@@ -198,7 +199,8 @@
                             graph_view.cursor_state = "create";
                             graph_view.current_action = () => {
                                 graph_view.elements.push({
-                                    id: 0, component_id: 1, name: "Relation", data: {
+                                    // TODO: Determine id on server-side
+                                    id: Math.max(...graph_view.elements.filter(el => el.component_id == 1).map(el => el.id)) + 1, component_id: 1, name: "Relation", data: {
                                         position: window.mouse_on_graph,
                                         type: 0,
                                         z_index: graph_view.elements.length
@@ -243,7 +245,8 @@
                             graph_view.cursor_state = "create";
                             graph_view.current_action = () => {
                                 graph_view.elements.push({
-                                    id: 0, component_id: 3, name: "Enum", data: {
+                                    // TODO: Determine id on server-side
+                                    id: Math.max(...graph_view.elements.filter(el => el.component_id == 3).map(el => el.id)) + 1, component_id: 3, name: "Enum", data: {
                                         position: window.mouse_on_graph,
                                         types: [],
                                         connected: [],
@@ -260,7 +263,8 @@
                             graph_view.cursor_state = "create";
                             graph_view.current_action = () => {
                                 graph_view.elements.push({
-                                    id: 0, component_id: 2, name: "Type", data: {
+                                    // TODO: Determine id on server-side
+                                    id: Math.max(...graph_view.elements.filter(el => el.component_id == 2).map(el => el.id)) + 1, component_id: 2, name: "Type", data: {
                                         position: window.mouse_on_graph,
                                         z_index: graph_view.elements.length
                                     }

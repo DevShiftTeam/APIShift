@@ -161,9 +161,9 @@
             },
             on_delete () {     
                 // Step 1: Iterate through connected line_parents and remove connections
-                Object.keys(graph_elements).forEach((element, index) => {                        
+                graph_view.elements.forEach((element, index) => {                        
                     // Step 1.1: Skip deleted elements nor line-parent elements nor self
-                    if (element.is_deleted || !window.graph_elements[index].im_a_line_parent || index == this.$props.index) return;
+                    if (!window.graph_elements[index] || element.is_deleted || !window.graph_elements[index].im_a_line_parent || index == this.$props.index) return;
 
                     // Step 1.2: Detemine connection status 
                     let line_element_map = window.graph_elements[index].get_line_element();
@@ -177,9 +177,9 @@
                 });  
 
                 // Step 2: Iterate through containing container elements and remove self
-                Object.keys(graph_elements).forEach((element, index) => {                        
+                graph_view.elements.forEach((element, index) => {                        
                     // Step 2.1: Skip deleted elements nor line-parent elements nor self
-                    if (element.is_deleted || !window.graph_elements[index].im_a_container || index == this.$props.index) return;
+                    if (!window.graph_elements[index] || element.is_deleted || !window.graph_elements[index].im_a_container || index == this.$props.index) return;
 
                     // Step 2.2: Detemine contaiment status 
                     let is_contained = window.graph_elements[index].indices.find(inner_index => inner_index === this.$props.index);

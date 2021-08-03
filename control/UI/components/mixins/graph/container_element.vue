@@ -53,11 +53,6 @@
                 this.expanded_functions.update_indices();
             },
             update_size () {
-                console.log('[op[');
-                this.container_indices.forEach(() => {
-                    console.log('asd');
-                }); 
-
                 // Step 1 - Execute additional procedures
                 this.expanded_functions.update_size();
             }

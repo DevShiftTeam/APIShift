@@ -122,7 +122,7 @@
                 });
 
                 // Step 2: Link lines to points post renderation
-                setTimeout(() => {
+                Vue.nextTick(() => {
                     Object.keys(points_line).forEach((point_index) => {
                         let line_index = points_line[point_index];
                         graph_view.lines[line_index][graph_view.elements[point_index].data.is_left ? 'from_index' : 'to_index'] = point_index;

@@ -199,7 +199,7 @@
                 // Step 1: Update cached get_rect dependency
                 this.ui_refresher++;
 
-                // Step 2: Update owning group size
+                // Step 2: Update owning group size (after data changes)
                 setTimeout(() => {
                     if (this.container_index !== -1) 
                     {
@@ -237,6 +237,9 @@
                     width: this.$el.offsetWidth,
                     height: this.$el.offsetHeight
                 };
+            },
+            get_hittable_rect: function() {
+                return this.get_rect;
             },
             container_indices: function () {
                 let containers = [];

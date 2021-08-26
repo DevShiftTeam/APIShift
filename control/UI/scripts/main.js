@@ -94,6 +94,15 @@ window.app = new Vue({
                     APIShift.installed
                 )
                     next("/login");
+                else if (
+                    ( to.path == "/database/model_editor" || to.path == "/database/model_editor/" ) && 
+                    APIShift.logged_in &&
+                    APIShift.installed
+                ) {
+                    let p = APIShift.API.getMixin('graph/graph_view', true);
+                    if (typeof(p.then) === 'function') p.then( () => next());
+                    else next();
+                }
                 else {
                     // Construct current page title
                     if (window.nav_holder !== undefined) {

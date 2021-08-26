@@ -104,7 +104,7 @@
 
                 
                 // Delete group if empty 
-                if (this.element_indices.length + this.group_indices.length === 0) setTimeout(() => this.on_delete());   
+                if (this.element_indices.length + this.group_indices.length === 0) Vue.nextTick(() => this.on_delete());   
                 else this.indices = [...this.element_indices, ...this.group_indices]; 
             },
             bring_to_front: function(ignore_parent = false) {
@@ -286,6 +286,14 @@
                     y: this.$props.data.position.y,
                     width: this.occupied_width,
                     height: this.occupied_height + 24,
+                };
+            },
+            get_hittable_rect: function () {
+                return {
+                    x: this.get_rect.x, 
+                    y: this.get_rect.y + this.occupied_height - this.init_height,
+                    width: this.get_rect.width,
+                    height: this.init_height
                 };
             },
             from_position: function() {

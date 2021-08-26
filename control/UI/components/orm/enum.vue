@@ -68,6 +68,22 @@
                     graph_view.bring_to_front(index);
                 }
             },
+            test () {
+                let data = ['car', 'customer']; // 
+                let all_data_recived = false;
+                this.get_order().then((res) => {
+                    var order_id = res.data.id;
+                    for (let index = 0; index < array.length; index++) {
+                        const element = array[index];
+                        setTimeout(() => {
+                                
+                        });
+                    }
+                    setTimeout(() => {
+                        
+                    });
+                });
+            },
             drag_addition: function(event) {
                 this.reset_type_position();
             },
@@ -77,7 +93,8 @@
                 for(let index in [...graph_view.elements.keys()]) {
                     let cmp_id = graph_view.elements[index].component_id;
                     // Skip non-item nor relations & self or undefined
-                    if(window.graph_elements[index] === undefined || (cmp_id != 0 && cmp_id != 1 && cmp_id != 4) || graph_view.elements[index].is_deleted)
+                    if(window.graph_elements[index] === undefined || (cmp_id != 0 && cmp_id != 1 && cmp_id != 4) || graph_view.elements[index].is_deleted
+                        || this.$props.data.connected.find(id => id === graph_view.elements[target_element]?.id))
                         continue;
                     
                     // Check collisions
@@ -96,19 +113,20 @@
                     this.create_line(target_element,
                     {
                         is_stroked: true,
+                        is_pointless: true,
                         dest_point_generator: () => {
                             let target_ref = window.graph_elements[target_element];
-                            let src_point = Object.assign({}, this.from_position);
-                            let dest_point = { x: target_ref.$props.data.position.x + target_ref.get_rect.width / 2 , y: target_ref.$props.data.position.y + target_ref.get_rect.height / 2 };
+                            let src_cord = Object.assign({}, this.from_position);
+                            let dest_cord = { x: target_ref.$props.data.position.x + target_ref.get_rect.width / 2 , y: target_ref.$props.data.position.y + target_ref.get_rect.height / 2 };
 
-                            let segment_segment_intersection = function(src_point, dest_point, p1, p2) {
+                            let segment_segment_intersection = function(src_cord, dest_cord, p1, p2) {
                                 // if the lines intersect, the result contains the x and y of the intersection (treating the lines as infinite) and booleans for whether line segment 1 or line segment 2 contain the point
                                 var denominator, a, b, numerator1, numerator2, result = {
                                     x: null,
                                     y: null
                                 };
 
-                                let line1dy = dest_point.y - src_point.y, line1dx = dest_point.x - src_point.x;
+                                let line1dy = dest_cord.y - src_cord.y, line1dx = dest_cord.x - src_cord.x;
                                 let line2dy = p2.y - p1.y, line2dx = p2.x - p1.x;
                                 
                                 denominator = ((line2dy) * (line1dx)) - ((line2dx) * (line1dy));
@@ -118,8 +136,8 @@
                                     return null;
                                 }
                                 
-                                a = src_point.y - p1.y;
-                                b = src_point.x - p1.x;
+                                a = src_cord.y - p1.y;
+                                b = src_cord.x - p1.x;
                                 numerator1 = (line2dx * a) - (line2dy * b);
                                 numerator2 = (line1dx * a) - (line1dy * b);
 
@@ -127,8 +145,8 @@
                                 b = numerator2 / denominator;
 
                                 // if we cast these lines infinitely in both directions, they intersect here:
-                                result.x = src_point.x + (a * (line1dx));
-                                result.y = src_point.y + (a * (line1dy));
+                                result.x = src_cord.x + (a * (line1dx));
+                                result.y = src_cord.y + (a * (line1dy));
  
                                 // lines intersects at segments
                                 return (a > 0 && a < 1) && (b > 0 && b < 1) ? result : null;
@@ -140,10 +158,10 @@
                             let r4 = { x: target_ref.get_rect.x, y: target_ref.get_rect.y + target_ref.get_rect.height };
 
                             // Determine intersection point
-                            let intersection = segment_segment_intersection(src_point,dest_point,r1,r2);
-                            if(intersection == null) intersection = segment_segment_intersection(src_point,dest_point,r2,r3);
-                            if(intersection == null) intersection = segment_segment_intersection(src_point,dest_point,r3,r4);
-                            if(intersection == null) intersection = segment_segment_intersection(src_point,dest_point,r4,r1);
+                            let intersection = segment_segment_intersection(src_cord,dest_cord,r1,r2);
+                            if(intersection == null) intersection = segment_segment_intersection(src_cord,dest_cord,r2,r3);
+                            if(intersection == null) intersection = segment_segment_intersection(src_cord,dest_cord,r3,r4);
+                            if(intersection == null) intersection = segment_segment_intersection(src_cord,dest_cord,r4,r1);
                             if(intersection == null) intersection = { x: target_ref.get_rect.x + target_ref.get_rect.width / 2 , y: target_ref.get_rect.y };
                             
                             return intersection;

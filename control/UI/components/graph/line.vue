@@ -51,22 +51,21 @@ module.exports = {
       let mouse_image = {
           x:  (event.clientX - graph_center_rect.x) / graph_view.scale - 5,
           y:  (event.clientY - graph_center_rect.y) / graph_view.scale - 5
-      }
+      };
 
       // Find / Create point
-      let element_index = parent_ref.get_line_element()[this.$props.index];
-      let point_index = window.graph_elements[element_index].im_a_point ? parseInt(element_index) : parent_ref.create_point(!this.$props.data.is_parent_left, mouse_image);
+        let element_index = parent_ref.get_line_element()[this.$props.index];
+        let point_index = window.graph_elements[element_index].im_a_point ? parseInt(element_index) : parent_ref.create_point(!this.$props.data.is_parent_left, mouse_image);
 
-      // Assign point position and line ref
-      setTimeout(() => {
+        // Assign point position and line ref
+        Vue.nextTick(() => {
           graph_view.elements[point_index].data.position = {
               x: mouse_image.x,
               y: mouse_image.y
           }
-          
           graph_view.lines[this.$props.index][this.$props.data.is_parent_left ? 'to_index' : 'from_index'] = point_index;
           graph_elements[point_index].drag_start(event);
-      });
+        });
     },
   },
   computed: {

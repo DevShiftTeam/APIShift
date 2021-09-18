@@ -101,7 +101,9 @@ window.app = new Vue({
                     APIShift.installed
                 ) {
                     let p = APIShift.API.getMixin('graph/graph_view', true);
-                    if (typeof(p.then) === 'function') p.then( () => next());
+                    if (typeof(p.then) === 'function') p.then( () => { 
+                        next()
+                    });
                     else next();
                 }
                 else {

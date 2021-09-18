@@ -43,7 +43,8 @@
                 APIShift.API.getMixin('graph/graph_view', true),
                 APIShift.API.getMixin('graph/graph_element', true),
                 APIShift.API.getMixin('graph/line_parent', true),
-                APIShift.API.getMixin('graph/container_element', true)
+                APIShift.API.getMixin('graph/container_element', true),
+                APIShift.API.getMixin('graph/logic/data_source', true)
             ]).then(() => {
                 this.mixins_loaded = true;
             });

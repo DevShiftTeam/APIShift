@@ -16,12 +16,12 @@
      * See the License for the specific language governing permissions and
      * limitations under the License.
      * 
-     * @author Sapir Shemer
+     * @author Ilan Dazanashvili
      */
 
     // This shit is made for scripting
     module.exports = {
-        mixins: [APIShift.API.getMixin('orm/graph_element')],
+        mixins: [APIShift.API.getMixin('graph/line_parent', true)],
         data () {
             return {
                 drawer: null,
@@ -30,11 +30,19 @@
                 element_sizes: {},
                 point_indices: [],
                 from_line_index: -1,
-                to_line_index: -1
+                to_line_index: -1,
             }
         },
         created () {
             window.graph_elements[this.$props.index] = this;
+
+            // Construct expanded functions
+            this.expanded_functions['on_point_drag_end'] = this.on_point_drag_end_addition;
+            this.expanded_functions['remove_connection'] = this.remove_connection_addition;
+
+            // Compose expanded functions
+            this.compose_expanded('on_delete', this.on_delete_addition);
+            this.compose_expanded('on_context', this.on_context_addition);
         }, 
         mounted () {
             this.expanded_functions.drag = this.drag_addition;
@@ -46,6 +54,9 @@
             };
 
             graph_view.elements_loaded++;
+
+            if(this.$props.data.is_deleted) return;
+
             if(graph_view.first_load) {
                 this.all_loaded();
                 graph_view.bring_to_front(this.$props.index);
@@ -67,74 +78,60 @@
                 
                 setTimeout(()=>{
                     // Step 2: Create lines
-                    window.graph_view.lines.push({
-                        from_index: from_index,
-                        to_index: this.$props.index,
-                        data: {
+                    this.from_line_index = this.create_line(from_index, {
                             is_curvy: true,
                             is_stroked: false,
-                            is_rel_source: false
-                        }
-                    });
-                    this.from_line_index = window.graph_view.lines.length - 1;
+                            is_persistent: true,
+                            marker_start: 'url(#many-arrow-head)',
+                        },
+                        false
+                    );
                     
-                    window.graph_view.lines.push({
-                        from_index: this.$props.index,
-                        to_index: to_index,
-                        data: {
+                    this.to_line_index = this.create_line(to_index, {
                             is_curvy: true,
                             is_stroked: false,
-                            is_rel_source: true
-                        }
-                    });
-                    this.to_line_index = window.graph_view.lines.length - 1;
+                            is_persistent: true,
+                            marker_end: 'url(#one-arrow-head)',
+                        },
+                        true
+                    );
                 });
             },
-            create_arrow_head: function() {
+            on_point_drag_end_addition (event, point_index) {
+                let line_index = graph_view.lines.findIndex(line => (line.to_index == this.$props.index && line.from_index == point_index) || (line.from_index == this.$props.index && line.to_index == point_index));
+                let target_element = -1, z_index = 0;
 
-            },
-            create_point: function(is_left = true, position = null, is_deleted = false) {
-                let my_rect = this.get_rect;
-
-                let point = 
-                { 
-                    id: 0, component_id: 5, name: '',
-                    data:
-                    {
-                        position: position ? position : {
-                            x: is_left ? my_rect.x - 20 : my_rect.x + my_rect.width + 20,
-                            y: my_rect.y + my_rect.height / 2
-                        },
-                        z_index: graph_view.elements.length+1,
-                        rel_index: this.$props.index,
-                        is_left
-                    },
-                    is_deleted
+                // TODO - decompose this shit
+                for(let index in [...graph_view.elements.keys()]) {
+                    let cmp_id = graph_view.elements[index].component_id;
+                    // Skip non-item nor relations & self or undefined
+                    if(window.graph_elements[index] === undefined || (cmp_id != 0 && cmp_id != 1 && cmp_id != 4) || index === this.$props.index || graph_view.elements[index].is_deleted)
+                        continue;
+                    
+                    // Check collisions 
+                    if (graph_view.elements[index].component_id === 4) {
+                        let group_rect = {
+                            x: graph_view.elements[index].data.position.x,
+                            y: graph_view.elements[index].data.position.y + graph_elements[index].get_rect.height - graph_elements[index].init_height,
+                            height: graph_elements[index].init_height,
+                            width: graph_elements[index].get_rect.width
+                        };
+                        if(window.graph_elements[index].data.z_index > z_index && graph_view.collision_check(window.graph_elements[point_index].get_rect, group_rect)) {
+                            target_element = parseInt(index);
+                            z_index = graph_view.elements[index].data.z_index;
+                        }
+                    } else if (window.graph_elements[index].data.z_index > z_index && graph_view.collision_check(window.graph_elements[point_index].get_rect, window.graph_elements[index].get_rect)) {
+                        target_element = parseInt(index);
+                        z_index = graph_view.elements[index].data.z_index;
+                    }
                 }
-
-                graph_view.elements.push(
-                    point
-                );
-                this.point_indices.push(graph_view.elements.length - 1);
-
-                return graph_view.elements.length - 1;
-            },
-            connect_to_line: function(is_from_or_to, element_index, to_delete = true) {
-                if(element_index == this.$props.index) return;
                 
-                // Change from
-                if (is_from_or_to === true) {
-                    this.$props.data.from = graph_view.elements[element_index].id;
+                // Drop on a connectable item 
+                if (target_element !== -1 && target_element !== this.$props.index) {
                     setTimeout(() => {
-                        if (to_delete) graph_view.$set(graph_view.elements[graph_view.lines[this.from_line_index].from_index], 'is_deleted', true);
-                        graph_view.lines[this.from_line_index].from_index = element_index;
-                    });
-                } // Change to 
-                else if (is_from_or_to === false) {
-                    this.$props.data.to = graph_view.elements[element_index].id;
-                    setTimeout(() => {
-                        if (to_delete) graph_view.$set(graph_view.elements[graph_view.lines[this.to_line_index].to_index], 'is_deleted', true);
-                        graph_view.lines[this.to_line_index].to_index = element_index;
+                        graph_view.$set(graph_view.elements[point_index], 'is_deleted', true);
+                        graph_view.lines[line_index][graph_view.elements[point_index].data.is_left ? 'from_index' : 'to_index'] = target_element;
+                        this.$props.data[graph_view.elements[point_index].data.is_left ? 'from' : 'to'] = graph_view.elements[target_element].id;          
                     });
                 }
             },
@@ -157,84 +154,17 @@
                 if (!this.enums) this.enums = graph_view.enums.filter(e => e.data.connected.find(connected => connected.type + connected.id === this.uid));
                 return this.enums;
             },
-            remove_connection (id) {
-                let self = this;
-                let element_index = graph_view.elements.findIndex(element => element.id == id && (element.component_id == 0 || element.component_id == 1 || element.component_id == 4));
-                if (id == this.$props.data.from) {
-                    let point_index = this.create_point(true, window.graph_elements[element_index].from_position);
-                    this.connect_to_line(true, point_index, false);
-                }
-                if (id == this.$props.data.to) { 
-                    let point_index = this.create_point(false, window.graph_elements[element_index].to_position);
-                    this.connect_to_line(false, point_index, false);
-                }
+            remove_connection_addition (element_index) {
+                // Step 1: Update element data
+                let keys = ['from', 'to'];
+                keys.forEach(key => {
+                    this.$props.data[key] = this.$props.data[key] == graph_view.elements[element_index].id ? -1 : this.$props.data[key];
+                })
             },
-            get_connected_enums () {
+            on_delete_addition() {
                 let my_id = graph_view.elements[this.$props.index].id;
 
-                // Iterate through enums
-                let enums = graph_view.elements.filter((el) => {
-                    return el.component_id == 3 && !el.is_deleted;;
-                });
-
-
-                // Infer connected enums indices
-                let enums_indices = [];
-                enums.forEach((e) => {
-                    if (e.data.connected.find(i => i == my_id)) {
-                        let enum_index = graph_view.elements.findIndex(el => el.id == e.id && el.component_id == 3); 
-                        return enums_indices.push(enum_index);
-                    }
-                });
-
-                return enums_indices;
-            },
-            get_connected_relations () {
-                let my_id = graph_view.elements[this.$props.index].id;
-
-                // Iterate through enums
-                let relations = graph_view.elements.filter((el) => {
-                    return el.component_id == 1 && !el.is_deleted;;
-                });
-
-
-                // Infer connected enums indices
-                let relations_indices = [];
-                relations.forEach((rel) => {
-                    if (rel.data.to == my_id || rel.data.from == my_id) {
-                        let rel_index = graph_view.elements.findIndex(el => el.id == rel.id && el.component_id == 1); 
-                        return relations_indices.push(rel_index);
-                    }
-                });
-
-                return relations_indices;
-            },
-            on_delete() {
-                let my_id = graph_view.elements[this.$props.index].id;
-
-                // Mark element as deleted
-                graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);    
-
-                 // Remove connection from connected enums
-                this.get_connected_enums().forEach(enum_index => {
-                    window.graph_elements[enum_index].remove_connection(my_id);
-                });
-
-                // Remove relation connection from item
-                this.get_connected_relations().forEach(rel_index => {
-                    window.graph_elements[rel_index].remove_connection(my_id);
-                });
-            
-                // Delete connected lines
-                graph_view.$set(graph_view.lines[this.from_line_index], 'is_deleted', true);
-                graph_view.$set(graph_view.lines[this.to_line_index], 'is_deleted', true);
-
-                // Delete connected points
-                this.point_indices.forEach(point_index => {
-                    graph_view.$set(graph_view.elements[point_index], 'is_deleted', true);
-                });
-
-                // Remove from owning group
+                // Step 1: Remove from owning group
                 if (this.group_index !== -1) 
                 {
                     window.graph_elements[this.group_index].data.elements = window.graph_elements[this.group_index].data.elements.filter(id => id != my_id);
@@ -242,12 +172,18 @@
                     window.graph_elements[this.group_index].update_group_size();
                 }
             },
+            on_input_addition () {
+                if (this.group_index !== -1) 
+                    window.graph_elements[this.group_index].update_group_size();
+            },
             on_context_addition () {
-                graph_view.context_menu.actions = [
+                graph_view.contextmenu.actions = [
                     {
                         starter: () => {
-                            this.is_edit_mode = true;
-                            graph_view.context_menu.is_active = false;
+                            graph_view.contextmenu.is_active = false;
+                            graph_view.dialog_open = true;
+                            graph_view.in_edit = this.$props.index;
+                            graph_view.dialog = 0;
                         },
                         name: 'Edit',
                         icon: 'mdi-pencil',
@@ -255,7 +191,7 @@
                     {
                         starter: () => {
 
-                            graph_view.context_menu.is_active = false;
+                            graph_view.contextmenu.is_active = false;
                         },
                         name: 'Duplicate',
                         icon: 'mdi-content-duplicate',
@@ -263,20 +199,20 @@
                     {
                         starter: () => {
 
-                            graph_view.context_menu.is_active = false;
+                            graph_view.contextmenu.is_active = false;
                         },
                         actions: [
                             {
                                 starter: () => {
 
-                                    graph_view.context_menu.is_active = false;
+                                    graph_view.contextmenu.is_active = false;
                                 },
                                 name: 'One-to-One',
                                 icon: 'mdi-relation-one-to-one',
                             },
                             {
                                 starter: () => {
-                                    graph_view.context_menu.is_active = false;
+                                    graph_view.contextmenu.is_active = false;
 
                                 },
                                 name: 'One-to-Many',
@@ -285,7 +221,7 @@
                             {
                                 starter: () => {
                                     
-                                    graph_view.context_menu.is_active = false;
+                                    graph_view.contextmenu.is_active = false;
                                 },
                                 name: 'Many-to-Many',
                                 icon: 'mdi-relation-one-to-one'
@@ -297,7 +233,7 @@
                     {
                         starter: () => {
                             this.on_delete();
-                            graph_view.context_menu.is_active = false;
+                            graph_view.contextmenu.is_active = false;
                         },
                         name: 'Delete',
                         icon: 'mdi-delete-outline',

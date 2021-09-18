@@ -25,7 +25,6 @@
         data () {
             return {
                 drawer: null,
-                params: {},
                 is_edit_mode: {
                     name: false,
                     entry: false
@@ -49,9 +48,9 @@
             this.expanded_functions.drag_end = this.drag_end_addition;
             graph_view.elements_loaded++;
 
-            let center = this.$el.getBoundingClientRect().y + this.$el.getBoundingClientRect().height / 2;
-            let rows = this.$el.querySelector("#inputs > div:nth-child(1)").getBoundingClientRect().y + this.$el.querySelector("#inputs > div:nth-child(1)").getBoundingClientRect().height / 2;
-            this.offsetTop = (rows - center) / graph_view.scale;
+            // let center = this.$el.getBoundingClientRect().y + this.$el.getBoundingClientRect().height / 2;
+            // let rows = this.$el.querySelector("#inputs > div:nth-child(1)").getBoundingClientRect().y + this.$el.querySelector("#inputs > div:nth-child(1)").getBoundingClientRect().height / 2;
+            // this.offsetTop = (rows - center) / graph_view.scale;
             
             if(graph_view.first_load) {
                 this.all_loaded();
@@ -59,7 +58,7 @@
             }
         },
         methods: {
-            all_loaded: function() {
+            all_loaded: function() { 
                 let to_index = this.$props.data.to !== undefined ?
                     graph_view.elements.findIndex((elem) => elem.id === this.$props.data.to.id && elem.component_id === this.$props.data.to.component_id)
                     :
@@ -71,11 +70,10 @@
                     this.to_line_index = this.create_line(to_index,{
                             is_curvy: true,
                             is_stroked: false,
+                            is_persistent: true
                     }, true);
                 });
             },
-
-
             drag_start_addition: function(event) {
                 
             },
@@ -237,14 +235,15 @@
                 </span>
                 <span id="name" style="position: absolute; top: -120%;">{{name}}</span>
         </div>
-        <div id="params">
-            <v-row v-for="(param, index) in $props.data.params" :key="index">
+        <!-- <div id="inputs">
+            <v-row v-for="param in $props.data.params" :key="param.name">
                 <div class="connector"></div>
                 <span class="input-text">{{param}}</span>
             </v-row>
             <v-row>
+
             </v-row>
-        </div>
+        </div> -->
     </div>
 </template>
 

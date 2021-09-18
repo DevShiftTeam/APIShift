@@ -17,7 +17,7 @@
      * limitations under the License.
      * 
      * @author Sapir Shemer
-     * @author Ilan Dazanashvili
+     * @contributor Ilan Dazanashvili
      */
 
 
@@ -28,14 +28,17 @@
                 expanded_functions: {
                     'drag_start': (event) => {},
                     'drag': (event) => {},
-                    'drag_end': (event) => {}
+                    'drag_end': (event) => {},
+                    'on_delete': () => {},
+                    'on_context': () => {}
                 },
                 is_dragging: false,
                 ghost_mode: false,
-                ui_refresher: 0,
                 init_position: { x: 0, y: 0},
                 is_edit_mode: false,
-                mouse_pos: {}
+                ui_refresher: 0,
+                mouse_pos: {},
+                container_index: -1
             }
         },
         props: {
@@ -91,14 +94,17 @@
                 this.expanded_functions.drag_end(event);
             },
             on_context (event) {
-                graph_view.context_menu.target = this;
-                graph_view.context_menu.position = {
+                // Step 1 - Set contextmenu position pre-renderation
+                graph_view.contextmenu.position = {
                     x: event.clientX - graph_position.x,
                     y: event.clientY - graph_position.y,
                 };
-                graph_view.context_menu.is_active = true;
 
-                this.on_context_addition ();
+                // Step 2 - Render context menu
+                graph_view.contextmenu.is_active = true;
+
+                // Step 3 - excecute additional procedures
+                this.expanded_functions.on_context ();
             },
             on_scroll () {
                 if (!this.is_dragging) return;
@@ -136,11 +142,7 @@
 
                 // Refresh view dependencies
                 this.ui_refresher++;
-                setTimeout(() => {
-                    if (this.group_index && this.group_index != -1) window.graph_elements[this.group_index].update_group_size();
-                    if (this.parent_group_index && this.parent_group_index != -1) window.graph_elements[this.parent_group_index].update_group_size();
-                });
-
+                
                 // Blur on enter key press
                 if (event.inputType === "insertParagraph") this.on_blur(event);
 
@@ -157,7 +159,67 @@
                 // Change model value
                 graph_view.elements[this.$props.index].name = event.target.textContent;
             },
+            on_delete () {     
+                // Step 1: Iterate through connected line_parents and remove connections
+                graph_view.elements.forEach((element, index) => {                        
+                    // Step 1.1: Skip deleted elements nor line-parent elements nor self
+                    if (!window.graph_elements[index] || element.is_deleted || !window.graph_elements[index].im_a_line_parent || index == this.$props.index) return;
 
+                    // Step 1.2: Detemine connection status 
+                    let line_element_map = window.graph_elements[index].get_line_element();
+                    let line_index = Object.keys(line_element_map).findIndex(line_index => {
+                        return line_element_map[line_index] === this.$props.index;
+                    });
+
+                    // Step 1.2: Remove connection from line_parent if set
+                    if (line_index != -1) 
+                        window.graph_elements[index].remove_connection(this.$props.index);
+                });  
+
+                // Step 2: Iterate through containing container elements and remove self
+                graph_view.elements.forEach((element, index) => {                        
+                    // Step 2.1: Skip deleted elements nor line-parent elements nor self
+                    if (!window.graph_elements[index] || element.is_deleted || !window.graph_elements[index].im_a_container || index == this.$props.index) return;
+
+                    // Step 2.2: Detemine contaiment status 
+                    let is_contained = window.graph_elements[index].indices.find(inner_index => inner_index === this.$props.index);
+
+                    // Step 2.2: Remove self from container
+                    if (is_contained) 
+                        window.graph_elements[index].remove_contained(this.$props.index);
+                });
+
+                // Step 3: Mark element as deleted
+                graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);    
+
+                // Step 4: Excecute additional procedures if set
+                this.expanded_functions.on_delete();
+            },
+            refresh_dependencies () {
+                // Step 1: Update cached get_rect dependency
+                this.ui_refresher++;
+
+                // Step 2: Update owning group size (after data changes)
+                setTimeout(() => {
+                    if (this.container_index !== -1) 
+                    {
+                        window.graph_elements[this.container_index].update_indices();
+                        window.graph_elements[this.container_index].update_size();
+                    }
+                });
+            },
+            /**
+             * A binary function that accepts 'this.expanded_functions' property and compose it with an excecutable procedure 
+             */
+            compose_expanded (property, procedure = () => {}) {
+                if (this.expanded_functions[property]) {
+                    let r = this.expanded_functions[property].bind(this);
+                    this.expanded_functions[property] = () => {
+                        r();
+                        procedure();
+                    };
+                };
+            }
         },
         computed: {
             // Rendered transformation (coordinates and scale) 
@@ -175,6 +237,26 @@
                     width: this.$el.offsetWidth,
                     height: this.$el.offsetHeight
                 };
+            },
+            get_hittable_rect: function() {
+                return this.get_rect;
+            },
+            container_indices: function () {
+                let containers = [];
+                // Step 1: Iterate through containing container elements and remove self
+                graph_view.elements.forEach((element, index) => {                        
+                    // Step 1.1: Skip deleted elements nor line-parent elements nor self
+                    if (element === undefined || element.is_deleted || !window.graph_elements[index].im_a_container || index == this.$props.index) return;
+
+                    // Step 1.2: Detemine contaiment status 
+                    let is_contained = window.graph_elements[index].indices.find(inner_index => inner_index === this.$props.index);
+
+                    // Step 1.3: Remove self from container
+                    if (is_contained) 
+                        containers.push(this.$props.index);
+                });
+
+                return containers;
             }
         },
         watch: {
@@ -188,7 +270,7 @@
                         }
                     );
                 }
-            }
+            },
         }
     };
 </script>

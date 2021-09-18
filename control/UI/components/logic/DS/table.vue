@@ -21,28 +21,16 @@
     
     // This shit is made for scripting
     module.exports = {
-        mixins: [APIShift.API.getMixin('graph/line_parent')],
+        mixins: [APIShift.API.getMixin('graph/logic/data_source')],
         data () {
             return {
-                drawer: null,
-                operations: [
-                    'SELECT',
-                    'SET',                    
-                ],
-                selected_operation: 'SELECT',      
-                columns: [
-                    'ID',
-                    'USERNAME',
-                    'PASSWORD',
-                    'CREATED_AT'
-                ],          
                 is_edit_mode: {
                     name: false,
                     entry: false
                 },
                 column: 'PASSWORD',
                 column_where: 'USERNAME',
-                entries: ['USERNAME'],
+                entries: [['PASSWORD']],
                 input: 'username',
                 edit_name_width: 0,
                 edit_entry_width: 0,
@@ -53,16 +41,26 @@
                 active_connector_index: null,
                 first_load: true,
                 entries_counter: 0,
-                offsetTop: 2
+                offsetTop: 2,
             }
         },
         created () {
             window.graph_elements[this.$props.index] = this;
-            window.t = this;
 
-            // setInterval(() => {
-            //     console.log(this.);
-            // }, 1000);
+
+            this.entries_set = [
+                'ID',
+                'USERNAME',
+                'PASSWORD',
+                'CREATED_AT'
+            ];
+
+            this.flows_set = [
+                'ID',
+                'USERNAME',
+                'PASSWORD',
+                'CREATED_AT'
+            ];
         }, 
         mounted () {
             this.expanded_functions.drag_start = this.drag_start_addition;
@@ -77,19 +75,12 @@
         },
         methods: {
             all_loaded: function() {   
-                for (const connection_index in this.$props.data.connections) {
-                    let connection = this.$props.data.connections[connection_index];
-                    let to_index = graph_view.elements.findIndex((elem) => elem.id === connection.id && elem.component_id === connection.component_id);          
+                let out_flows = [];
 
-                    // Draw lines to elements
-                    setTimeout(() => {
-                        this.to_line_index = this.create_line(to_index ,{
-                                is_curvy: true,
-                                is_stroked: false,
-                                is_interactive: true
-                        }, true);
-                    });
-                }
+                graph_view.elements.forEach(element => {
+                    if (element.component_id == 4 && (element.data.from.id == this.$props.index && element.from.component_id == graph_view.elements[this.$props.index].component_id))  
+                        out_flows.push(element.name);
+                });
             },
             drag_start_addition: function(event) {
 
@@ -140,81 +131,7 @@
                     },
                 ]
             },
-            on_connection_click (event, connector_index) {
-                let connection = this.$props.data.connections[connector_index];
-                let connectors = this.$el.querySelectorAll(`#content .connector`);
-                let offsetTop = connectors[connector_index].offsetTop - connectors[0].offsetTop;
-                let graph_pos = document.body.querySelector("#graph_center").getBoundingClientRect();
-                let point_index = this.create_point(false, { 
-                        x: ( connectors[connector_index].getBoundingClientRect().x -  graph_pos.x) / graph_view.scale,
-                        y: ( connectors[connector_index].getBoundingClientRect().y - graph_pos.y) / graph_view.scale
-                    }
-                );
-                this.drag_end(event); 
-
-
-                setTimeout(() => {
-                    let line_index = Object.keys(this.line_connector_map).find(line_index => 
-                                            this.line_connector_map[line_index] == connector_index);
-                    if (line_index) 
-                    {
-                        graph_view.lines[line_index].to_index = point_index;
-                        graph_view.lines[line_index].data.offsetTopDest = 0;
-                    }
-                    else this.create_line(point_index, {
-                            is_curvy: true,
-                            is_stroked: false,
-                            offsetTopSrc: offsetTop,
-                            is_interactive: true
-                    }, true);
-                    
-                    // Emulate a click on newly created point - fold currently active event handlers
-                    this.drag_end(event); 
-                    graph_elements[point_index].drag_start(event);
-                });
-
-            },
-            on_line_connected (line_index, is_left) {
-                if (this.first_load && graph_view.lines[line_index].from_index == this.index) {
-                    let con_index = this.line_connector_map[line_index] = this.entries_counter++;
-                    this.first_load = this.entries_counter != this.$props.data.connections.length;
-                }
-                else if (graph_view.lines[line_index].from_index == this.index) {
-                    // Calculate matching connector index by an inversion of offsetTopSrc property as a function of connector index
-                    let row_height = this.$el.querySelector('.row.demo-row').offsetHeight;
-                    let con_index = this.line_connector_map[line_index] = (graph_view.lines[line_index].data.offsetTopSrc | 0) / row_height;
-                }
-            },
-            on_line_disconnected (line_index, is_left) {
-                // Extract corresponding connector index
-                let con_index = this.line_connector_map[line_index];
-
-                // Delete corresponding connector by index 
-                // this.$props.data.connections[con_index].is_con = false;
-
-                // Delete line connector mapping
-                delete this.line_connector_map[line_index];
-
-
-                // console.log('disconnect: ', line_index, this.line_connector_map);
-            },
-            replace_connected_expanded(current_index, replace_index, line_index) {
-                // console.log(current_index, replace_index, line_index);
-                // Replace from point to non-point & delete point
-                if (graph_view.elements[current_index].component_id == 5 && graph_view.elements[replace_index].component_id != 5) {
-                    
-                    // this.line_connector_map[line_index] = this.$props.data.connections.findIndex(con => con.id == graph_view.elements[replace_index].id 
-                    //                                                 && con.component_id == graph_view.elements[replace_index].component_id);
-                                                            
-                }
-                // Replace from non-point to point
-                if (graph_view.elements[current_index].component_id != 5 && graph_view.elements[replace_index].component_id == 5) {
-                    // Remove data
-
-                }
-            },
-            on_point_drag_end () {
-                let point_index = this.point_indices[this.point_indices.length - 1];
+            on_point_drag_end (event, point_index) {                
                 let line_index = graph_view.elements[point_index].data.line_index;
                 let row_height = this.$el.querySelector('.row.demo-row').offsetHeight;
                 let con_index = (graph_view.lines[line_index].data.offsetTopSrc | 0) / row_height;
@@ -261,13 +178,13 @@
             from_position: function() {
                 return {
                     x: this.$props.data.position.x + this.get_rect.width,
-                    y: this.$props.data.position.y + this.get_rect.height / 2 + this.offsetTop
+                    y: this.$props.data.position.y
                 };
             },
             to_position: function() {
                 return {
                     x: this.$props.data.position.x,
-                    y: this.$props.data.position.y + this.get_rect.height / 2
+                    y: this.$props.data.position.y + 10
                 };
             }
         },
@@ -280,27 +197,6 @@
         @pointerdown.prevent="drag_start"
         @contextmenu.prevent="on_context"
         @pointerup.prevent="drag_end">
-
-                <!-- <v-tooltip top>
-                    <template #activator="{ on }">
-                        <div v-on="on" id="header" :style="{minWidth: header_min_width + 'px'}"
-                                @input="on_input"
-                                @dblclick.prevent="is_edit_mode.name = true">
-                                <v-avatar size="25" left class="avatar darken-4">T</v-avatar>
-                                <v-text-field
-                                    v-model="name"
-                                    v-show="is_edit_mode.name"
-                                    :style="{'width': edit_name_width + 'px', marginLeft: 'auto', marginRight: 'auto'}"
-                                    @input="requestAnimationFrame(() => edit_name_width = $el.querySelector('#name').offsetWidth + 30)"
-                                    >
-                                </v-text-field>
-                                <b :style="{  marginLeft: '5px', marginRight: 'auto', fontSize: '120%' }" v-show="!is_edit_mode.name">{{name}}</b>
-                                <span id="name" style="position: absolute; top: -120%; color: rgba(0,0,0,0);">{{name}}</span>
-                        </div>
-                    </template>
-                    <span>Query Database</span>
-                </v-tooltip> -->
-
         <!-- Header  -->
         <div id="header" :style="{minWidth: header_min_width + 'px'}"
                 @input="on_input"
@@ -321,77 +217,27 @@
         <div id="content"
             @dblclick.prevent="is_edit_mode.entry = true">
             <v-col style="padding-bottom: 0px; padding-top: 0px">
-                <v-row v-for="(connection,index) in $props.data.connections" :key="index" class="demo-row no-border" style="display: flex">
-                    <!-- <v-select
-                        class="bold"
-                        value="SELECT"
-                        :items="operations"
-                        @change="ui_refresher++"
-                    ></v-select> -->
-
+                <v-row  v-for="(entry, index) in entries" :key="index" class="demo-row no-border" style="display: flex">
                     <v-combobox
-                        v-model="connection.entries"
+                        :v-model="entries[index]"
+                        :value="entries[index]"
                         @input="setTimeout(() => ui_refresher++)"
-                        :items="columns"
+                        :items="entries_set"
                         multiple
                     ></v-combobox>
-                    <!-- <v-select
-                        class="center"
-                        style="width: 100%;"
-                        value="SELECT"
-                        v-model="entries[index]"
-                        :items="columns"
-                        clearable
-                        @change="ui_refresher++"
-                    ></v-select> -->
-                    <div class="connector" @pointerdown="on_connection_click(event,index)"></div>
+                    <div class="connector output" @pointerdown="output_press(event,index)"></div>
+                    <div class="connector input"></div>
                 </v-row>
                 <v-tooltip top>
                     <template #activator="{ on }">
                         <v-row class="demo-row no-border" block v-on="on" style="padding: 0px;">
-                            <v-btn @click="$props.data.connections.push({entries: []}); setTimeout(() => {ui_refresher++; offsetTop -= 21.5;});" block v-on="on" style="padding: 0px;">
+                            <v-btn @click="add_entry();" block v-on="on" style="padding: 0px;">
                                 <v-icon>mdi-plus-circle</v-icon>
                             </v-btn>
                         </v-row>
                     </template>
                     <span>Add Entry</span>
                 </v-tooltip>
-                <!-- <v-divider></v-divider> -->
-                <!-- <v-row class="demo-row">
-                    <b class="v-select__slot">WHERE</b>
-                    <div style="display: flex">
-                        <v-text-field
-                            v-model="column"
-                            class="outline"
-                            :style="{'max-width': column_width - 30 + 'px', marginRight: '10px',  marginTop: '2.5px'}"
-                            @input="requestAnimationFrame(() => { column_width = $el.querySelector('#column').offsetWidth + 30; ui_refresher++;})">
-                        </v-text-field>
-                        <span id="column" style="position: absolute; top: -120%;">{{column}}</span>
-                        <v-select
-                            class="center"
-                            style="width: 150px; margin-left: 10px"
-                            value="SELECT"
-                            v-model="column_where"
-                            :items="columns"
-                            @change="ui_refresher++"
-                        ></v-select>
-                        <b class="rule">==</b>
-                        <v-select
-                            class="center"
-                            style="width: 150px"
-                            v-model="input"
-                            :items="data.inputs"
-                            @change="ui_refresher++"
-                        ></v-select>
-                        <v-text-field
-                            v-model="input"
-                            class="outline"
-                            :style="{'max-width': input_width - 30 + 'px', marginLeft: '10px',  marginTop: '2.5px'}"
-                            @input="requestAnimationFrame(() => { input_width = $el.querySelector('#input').offsetWidth + 30; ui_refresher++;})">
-                        </v-text-field>
-                        <span id="input" style="position: absolute; top: -120%;">{{input}}</span>
-                    </div>
-                </v-row> -->
             </v-col>
         </div>
     </div>
@@ -450,26 +296,6 @@
     min-height: 0px;
 }
 
-/* .v-input {
-    flex: none;
-}
-
-.v-input__control {
-    flex-direction: column;
-}
-.v-input__slot {
-    margin: 0;
-}
-
-.v-text-field .v-input__append-inner {
-    margin: 0;
-}
-
-.v-application--is-ltr .v-text-field .v-input__append-inner {
-    padding-left: 0px;
-}
-
-*/
 .v-select__selections input {
     width: 5px;
 }
@@ -489,11 +315,6 @@
     margin-right: 0px;
 }
 
-
-/* .center .v-select__selection--comma {
-    margin-left: 4px;
-    margin-right: auto;
-} */
 
 .bold .v-select__selection--comma {
     font-weight: bold;
@@ -548,11 +369,19 @@
   margin-top: 6.5px;
   position: absolute;
   transition: all .2s ease-in-out;
-  right: 0px;
-  transform: translateX(50%);
 }
+
+.demo-row .connector.input {
+    left: -7px;
+}
+
+.demo-row .connector.output {
+    right: -7px;
+}
+
+
 .demo-row .connector:hover {
-    transform: translateX(50%) scale(1.11);
+    transform: scale(1.11);
 }
 
 
@@ -560,9 +389,7 @@
     margin-right: 10px;
     margin-left: 10px;
 }
-/* .v-select__slot {
-    width: 100px;
-} */
+
 
 .no-border .v-input__slot::before {
   border-style: none !important;
@@ -578,9 +405,6 @@
     display: none;
 
 }
-/* #content .demo-row div.v-input__append-inner {
-    display: none;
-} */
 
 .outline {
     /* outline: 2px solid rgba(	255, 255, 255, 0.7); */

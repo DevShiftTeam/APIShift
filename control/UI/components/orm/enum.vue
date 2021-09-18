@@ -21,7 +21,7 @@
 
     // This shit is made for scripting
     module.exports = {
-        mixins: [APIShift.API.getMixin('orm/graph_element')],
+        mixins: [APIShift.API.getMixin('graph/line_parent'), APIShift.API.getMixin('graph/container_element')],
         data () {
             return {
                 drawer: null,
@@ -34,10 +34,15 @@
         },
         created () {
             window.graph_elements[this.$props.index] = this;
+            
             this.expanded_functions.drag_start = this.drag_start_addition;
             this.expanded_functions.drag = this.drag_addition;
             this.expanded_functions.drag_end = this.drag_end_addition;
-        }, 
+
+            // Compose functions
+            this.compose_expanded('on_delete', this.on_delete_addition);
+            this.compose_expanded('on_context', this.on_context_addition);
+        },
         mounted () {
             graph_view.elements_loaded++;
 
@@ -63,6 +68,22 @@
                     graph_view.bring_to_front(index);
                 }
             },
+            test () {
+                let data = ['car', 'customer']; // 
+                let all_data_recived = false;
+                this.get_order().then((res) => {
+                    var order_id = res.data.id;
+                    for (let index = 0; index < array.length; index++) {
+                        const element = array[index];
+                        setTimeout(() => {
+                                
+                        });
+                    }
+                    setTimeout(() => {
+                        
+                    });
+                });
+            },
             drag_addition: function(event) {
                 this.reset_type_position();
             },
@@ -72,12 +93,13 @@
                 for(let index in [...graph_view.elements.keys()]) {
                     let cmp_id = graph_view.elements[index].component_id;
                     // Skip non-item nor relations & self or undefined
-                    if(window.graph_elements[index] === undefined || (cmp_id != 0 && cmp_id != 1 && cmp_id != 4) || graph_view.elements[index].is_deleted)
+                    if(window.graph_elements[index] === undefined || (cmp_id != 0 && cmp_id != 1 && cmp_id != 4) || graph_view.elements[index].is_deleted
+                        || this.$props.data.connected.find(id => id === graph_view.elements[target_element]?.id))
                         continue;
                     
                     // Check collisions
                     if (window.graph_elements[index].data.z_index > z_index && graph_view.collision_check(this.get_rect, window.graph_elements[index].get_rect)) {
-                        target_element = index;
+                        target_element = parseInt(index);
                         z_index = graph_view.elements[index].data.z_index;
                     }
                 }
@@ -86,8 +108,66 @@
                 if (target_element !== -1 && !this.$props.data.connected.find(id => id === graph_view.elements[target_element]?.id)) {
                     let graph_rect = graph_view.$el.querySelector('#graph_center').getBoundingClientRect();
 
+
                     // Create line & update data 
-                    this.create_line(target_element);
+                    this.create_line(target_element,
+                    {
+                        is_stroked: true,
+                        is_pointless: true,
+                        dest_point_generator: () => {
+                            let target_ref = window.graph_elements[target_element];
+                            let src_cord = Object.assign({}, this.from_position);
+                            let dest_cord = { x: target_ref.$props.data.position.x + target_ref.get_rect.width / 2 , y: target_ref.$props.data.position.y + target_ref.get_rect.height / 2 };
+
+                            let segment_segment_intersection = function(src_cord, dest_cord, p1, p2) {
+                                // if the lines intersect, the result contains the x and y of the intersection (treating the lines as infinite) and booleans for whether line segment 1 or line segment 2 contain the point
+                                var denominator, a, b, numerator1, numerator2, result = {
+                                    x: null,
+                                    y: null
+                                };
+
+                                let line1dy = dest_cord.y - src_cord.y, line1dx = dest_cord.x - src_cord.x;
+                                let line2dy = p2.y - p1.y, line2dx = p2.x - p1.x;
+                                
+                                denominator = ((line2dy) * (line1dx)) - ((line2dx) * (line1dy));
+                                
+                                // test whether two lines are parallel or coincident
+                                if (denominator == 0) {
+                                    return null;
+                                }
+                                
+                                a = src_cord.y - p1.y;
+                                b = src_cord.x - p1.x;
+                                numerator1 = (line2dx * a) - (line2dy * b);
+                                numerator2 = (line1dx * a) - (line1dy * b);
+
+                                a = numerator1 / denominator;
+                                b = numerator2 / denominator;
+
+                                // if we cast these lines infinitely in both directions, they intersect here:
+                                result.x = src_cord.x + (a * (line1dx));
+                                result.y = src_cord.y + (a * (line1dy));
+ 
+                                // lines intersects at segments
+                                return (a > 0 && a < 1) && (b > 0 && b < 1) ? result : null;
+                            }
+
+                            let r1 = target_ref.$props.data.position;
+                            let r2 = { x: target_ref.get_rect.x + target_ref.get_rect.width, y: target_ref.get_rect.y };
+                            let r3 = { x: target_ref.get_rect.x + target_ref.get_rect.width, y: target_ref.get_rect.y + target_ref.get_rect.height };
+                            let r4 = { x: target_ref.get_rect.x, y: target_ref.get_rect.y + target_ref.get_rect.height };
+
+                            // Determine intersection point
+                            let intersection = segment_segment_intersection(src_cord,dest_cord,r1,r2);
+                            if(intersection == null) intersection = segment_segment_intersection(src_cord,dest_cord,r2,r3);
+                            if(intersection == null) intersection = segment_segment_intersection(src_cord,dest_cord,r3,r4);
+                            if(intersection == null) intersection = segment_segment_intersection(src_cord,dest_cord,r4,r1);
+                            if(intersection == null) intersection = { x: target_ref.get_rect.x + target_ref.get_rect.width / 2 , y: target_ref.get_rect.y };
+                            
+                            return intersection;
+                        }
+                    }, true);
+                    
                     this.$props.data.connected.push(graph_view.elements[target_element].id);
 
                     // Move enum back to origin position
@@ -112,6 +192,9 @@
                     this.occupied_height += rect.height + 7;
                     if(this.occupied_width - 14 < rect.width) this.occupied_width = rect.width + 14; // 14 for 7 pixel padding at each side
                 }
+
+                // Refresh cached rect computed property
+                this.ui_refresher++;
             },
             reset_type_position: function() {
                 // Move types with enum & update their z-index to heigher than enum
@@ -131,19 +214,7 @@
                     current_position_height += window.graph_elements[index].get_rect.height + 7;
                 }
             },
-            create_line (element_index) {
-                window.graph_view.lines.push({
-                    from_index: this.$props.index,
-                    to_index: element_index,
-                    data: {
-                        is_curvy: false,
-                        is_stroked: true,
-                        enum_parent: this.$props.index
-                    }
-                });
-                this.line_indices.push(window.graph_view.lines.length - 1);
-            },
-            on_delete () {
+            on_delete_addition () {             
                 // Detach attached types
                 for(let type in this.$props.data.types) {
                     let type_id = this.$props.data.types[type];
@@ -159,8 +230,8 @@
                 // Delete element from graph
                 graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);
             },
-            remove_connection (id) {
-                let element_index = graph_view.elements.findIndex(element => element.id == id && (element.component_id == 0 || element.component_id == 1 || element.component_id == 4));
+            remove_connection_addition (index) {
+                let id = graph_view.elements.findIndex(element => element.id == id && (element.component_id == 0 || element.component_id == 1 || element.component_id == 4));
 
                 // Delete line to connected element
                 let line_indices = [];
@@ -176,18 +247,18 @@
                 this.$props.data.connected = this.$props.data.connected.filter(connected_id => connected_id != id);
             },
             on_context_addition () {
-                graph_view.context_menu.actions = [
+                graph_view.contextmenu.actions = [
                     {
                         starter: () => {
                             this.is_edit_mode = true;
-                            graph_view.context_menu.is_active = false;
+                            graph_view.contextmenu.is_active = false;
                         },
                         name: 'Edit',
                         icon: 'mdi-pencil',
                     },
                     {
                         starter: () => {
-                            graph_view.context_menu.is_active = false;
+                            graph_view.contextmenu.is_active = false;
                         },
                         name: 'Duplicate',
                         icon: 'mdi-content-duplicate',
@@ -195,7 +266,7 @@
                     {
                         starter: () => {
                             this.on_delete();
-                            graph_view.context_menu.is_active = false;
+                            graph_view.contextmenu.is_active = false;
                         },
                         name: 'Delete',
                         icon: 'mdi-delete-outline',

@@ -34,7 +34,7 @@ class Process {
      * free nodes will not produce a correct compilation process
      * 
      * @param array $connections_set The set of connection to compile
-     * @param array &$inputs Refernce to the inputs to pass to the compilation process
+     * @param array &$inputs Reference to the inputs to pass to the compilation process
      * 
      * @return mixed The result of the compilation
      */

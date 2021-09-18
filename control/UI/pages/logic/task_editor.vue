@@ -44,38 +44,45 @@
                 elements: [
                     // Data Sources - Tables
                     { id: 1, component_id: 0, name: "admin_users", data: {
-                            connections: [
-                                { id: 1, component_id: 2, entries: ['PASSWORD'] },
-                                // { id: 1, component_id: 2, entries: [] },
-                                // { id: 1, component_id: 2, entries: [] }
-
-                            ],
-                            position: { x: 450, y: 0 },
+                            position: { x: 450, y: -50 },
                         }
                     },
                     // Data Sources - Arrays
                     { id: 1, component_id: 1, name: "$REQUEST", data: {
                             entry: 'pass' ,
-                            position: { x: 50, y: 200 },
+                            position: { x: -50, y: 200 },
                             to: { id: 1, component_id: 2 }
                         }
                     },
                     { id: 2, component_id: 1, name: "$REQUEST", data: {
                             entry: 'user',
-                            position: { x: 50, y: 0 },
+                            position: { x: -50, y: 0 },
                         }
                     },
-                    // Connections
+                    // Functions
                     { id: 1, component_id: 2, name: "password_verify", data: {
                             params: ["hash", "password"],
                             position: { x: 400, y: 180 },
                             to: {id: 0, component_id: 3}
                         }
                     },
-                    { id: 2, component_id: 4, name: "username", data: {
+                    // Flows
+                    { id: 1, component_id: 4, name: "username", data: {
                             position: { x: 180, y: 180 },
                             from: { id: 2, component_id: 1 },
                             to: { id: 1, component_id: 0 },
+                        }
+                    },
+                    { id: 2, component_id: 4, name: "hash", data: {
+                            position: { x: 300, y: 300 },
+                            from: { id: 1, component_id: 0, entry: 0 },
+                            to: { id: 1, component_id: 2, entry: 0 },
+                        }
+                    },
+                    { id: 2, component_id: 4, name: "password", data: {
+                            position: { x: 350, y: 350 },
+                            from: { id: 1, component_id: 1, entry: 0 },
+                            to: { id: 1, component_id: 2, entry: 0 },
                         }
                     },
                     // Result
@@ -505,7 +512,6 @@
                         let connection_node_types = response.data.connection_node_types;
                         let connection_types = {...response.data.connection_types, 0: {name: "Flow"}};
                     
-                        console.log(response.data.connection_types);
                         for (const index in connections) {
                             let type = connection_types[connections[index].connection_type].name;
                             let counters = {functions: 0, rules: 0, processes: 0, tasks: 0, tables: 0, arrays: 0}
@@ -552,16 +558,7 @@
                 this.edit_dialog = false;
             }
         },
-        watch: {
-            elements_loaded: function(val) {
-                if(val == this.elements.length && !this.first_load)
-                {
-                    for(let index in window.graph_elements)
-                        if(window.graph_elements[index].all_loaded !== undefined) window.graph_elements[index].all_loaded();
-                    this.first_load = true;
-                }
-            }
-        }
+        watch: {}
     }
 </script>
 

@@ -21,7 +21,7 @@
     
     // This shit is made for scripting
     module.exports = {
-        mixins: [ APIShift.API.getMixin('graph/line_parent')],
+        mixins: [ APIShift.API.getMixin('graph/line_parent', true   )],
         data () {
             return {
                 drawer: null,
@@ -73,6 +73,7 @@
                     this.create_point(false); // Create & attach point near relation
 
 
+                // Step 2: Position self in-between
                 this.$props.data.position = {
                     x: (graph_view.elements[from_index].data.position.x + graph_view.elements[to_index].data.position.x) / 2,
                     y: (graph_view.elements[from_index].data.position.y + graph_view.elements[to_index].data.position.y) / 2 
@@ -81,14 +82,19 @@
 
                 // Draw lines to elements
                 setTimeout(() => {
+                    let from_offset, to_offset;
+
+                    from_offset = 
                     this.from_line_index = this.create_line(from_index,{
                             is_curvy: true,
                             is_stroked: false,
+                            is_persistent: true,
                     }, false);
                     
                     this.to_line_index = this.create_line(to_index,{
                             is_curvy: true,
                             is_stroked: false,
+                            is_persistent: true,
                             arrow_head: "many-arrow-head2"
                     }, true);
                 });
@@ -190,14 +196,21 @@
                 @input="on_input">
                 <v-avatar size="25" left class="avatar darken-4">F</v-avatar>
                 <!-- Function name -->
-                <v-select
+                <!-- <v-select
                     class="center"
                     style="width: 100%;"
                     value="SELECT"
                     v-model="column"
                     :items="columns"
                     @change="ui_refresher++"
-                ></v-select>
+                ></v-select> -->
+            <div 
+            @input="on_input"
+            @blur="on_blur" 
+            :contenteditable="is_edit_mode"
+            style="display: inline-block;">
+                {{name}}
+            <div>
         </div>
     </div>
 </template>

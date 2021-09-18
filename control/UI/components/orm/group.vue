@@ -21,7 +21,7 @@
 
     //TODO: Design better z-index system.
     module.exports = {
-        mixins: [APIShift.API.getMixin('orm/graph_element')],
+        mixins: [APIShift.API.getMixin('graph/graph_element'), APIShift.API.getMixin('graph/container_element') ],
         data () {
             return {
                 init_height: 0,
@@ -43,6 +43,12 @@
 
             this.expanded_functions.drag_start = this.drag_start_addition;
             this.expanded_functions.drag = this.drag_addition;
+            this.expanded_functions.update_indices = this.update_indices_additional;
+            this.expanded_functions.update_size = this.update_group_size;
+
+            // Compose additional expanded functions
+            this.compose_expanded('on_delete', this.on_delete_addition);
+            this.compose_expanded('on_context', this.on_context_addition);
         },
         mounted () {
             // Determine initial rect pre bounding setup
@@ -52,7 +58,7 @@
             graph_view.elements_loaded++;
 
             // Remove common elements of parent groups
-            this.parent_group_index = graph_view.elements.findIndex(el => el.id == this.$props.data.parent && el.component_id == 4);
+            this.container_index = this.parent_group_index = graph_view.elements.findIndex(el => el.id == this.$props.data.parent && el.component_id == 4);
             if (this.parent_group_index != -1)
                 graph_view.elements[this.parent_group_index].data.elements = graph_view.elements[this.parent_group_index].data.elements
                                                                             .filter (elem => this.$props.data.elements.indexOf(elem) < 0);
@@ -61,8 +67,6 @@
                 this.all_loaded();
                 this.bring_to_front();
             }
-
-
         },
         methods: {
             all_loaded: function() {
@@ -76,7 +80,8 @@
 
                 this.bring_to_front();
             },
-            update_indices: function() {
+            update_indices_additional: function() {
+                this.indices = [];
                 this.element_indices = [];
                 this.group_indices = [];
 
@@ -85,7 +90,7 @@
                     let item_id = this.$props.data.elements[elem];
                     let index = graph_view.elements.findIndex(el => el.id === item_id && (el.component_id == 1 || el.component_id == 0) && !el.is_deleted);
                     if(index == -1) continue;
-                    window.graph_elements[index].group_index = this.$props.index;
+                    window.graph_elements[index].container_index = window.graph_elements[index].group_index = this.$props.index;
                     this.element_indices.push(index);
                 }
 
@@ -93,12 +98,14 @@
                 for(let grp_index in graph_view.elements) {
                     if(graph_view.elements[grp_index].component_id != 4 || graph_view.elements[grp_index].data.parent != this.$props.id || graph_view.elements[grp_index].is_deleted)
                         continue;
-                    window.graph_elements[grp_index].parent_group_index = this.$props.index;
+                    window.graph_elements[grp_index].container_index = window.graph_elements[grp_index].parent_group_index = this.$props.index;
                     this.group_indices.push(grp_index);
                 };
 
+                
                 // Delete group if empty 
-                if (this.element_indices.length + this.group_indices.length === 0) this.on_delete();    
+                if (this.element_indices.length + this.group_indices.length === 0) Vue.nextTick(() => this.on_delete());   
+                else this.indices = [...this.element_indices, ...this.group_indices]; 
             },
             bring_to_front: function(ignore_parent = false) {
                 // If father present then call only the father's function
@@ -208,72 +215,8 @@
                 for(let sub_group in this.group_indices)
                     window.graph_elements[this.group_indices[sub_group]].drag(event);
             },
-            get_connected_enums () {
+            on_delete_addition () {
                 let my_id = graph_view.elements[this.$props.index].id;
-
-                // Iterate through enums
-                let enums = graph_view.elements.filter((el) => {
-                    return el.component_id == 3 && !el.is_deleted;;
-                });
-
-
-                // Infer connected enums indices
-                let enums_indices = [];
-                enums.forEach((e) => {
-                    if (e.data.connected.find(i => i == my_id)) {
-                        let enum_index = graph_view.elements.findIndex(el => el.id == e.id && el.component_id == 3); 
-                        return enums_indices.push(enum_index);
-                    }
-                });
-
-                return enums_indices;
-            },
-            get_connected_relations () {
-                let my_id = graph_view.elements[this.$props.index].id;
-
-                // Iterate through enums
-                let relations = graph_view.elements.filter((el) => {
-                    return el.component_id == 1 && !el.is_deleted;
-                });
-
-
-                // Infer connected enums indices
-                let relations_indices = [];
-                relations.forEach((rel) => {
-                    if (rel.data.to == my_id || rel.data.from == my_id) {
-                        let rel_index = graph_view.elements.findIndex(el => el.id == rel.id && el.component_id == 1); 
-                        return relations_indices.push(rel_index);
-                    }
-                });
-
-                return relations_indices;
-            },
-            on_delete () {
-                let my_id = graph_view.elements[this.$props.index].id;
-                
-                // Mark as deleted
-                graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);
-
-                // Remove connection from connected enums
-                this.get_connected_enums().forEach(enum_index => {
-                    window.graph_elements[enum_index].remove_connection(my_id);
-                });
-
-                // Remove relation connection form item
-                this.get_connected_relations().forEach(rel_index => {
-                    window.graph_elements[rel_index].remove_connection(my_id);
-                });
-
-                // Detach inner elements
-                for(let elem in this.element_indices) {
-                    window.graph_elements[this.element_indices[elem]].group_index = -1;
-                }
-
-                // Detach inner groups
-                for(let elem in this.group_indices) {
-                    graph_view.elements[this.group_indices[elem]].data.parent = this.$props.data.parent;
-                    window.graph_elements[this.group_indices[elem]].parent_group_index = -1;
-                }
 
                 // Add group elements to owning group's elements
                 if (this.parent_group_index !== -1) 
@@ -284,11 +227,13 @@
                 }
             },
             on_context_addition () {
-                graph_view.context_menu.actions = [
+                graph_view.contextmenu.actions = [
                     {
                         starter: () => {
-                            this.is_edit_mode = true;
                             graph_view.context_menu.is_active = false;
+                            graph_view.dialog_open = true;
+                            graph_view.in_edit = this.$props.index;
+                            graph_view.dialog = 0;
                         },
                         name: 'Edit',
                         icon: 'mdi-pencil',
@@ -316,10 +261,15 @@
                 this.init_height = info_el.offsetHeight;
                 this.init_width = info_el.querySelector('[contenteditable').offsetWidth + info_el.querySelector('.v-avatar').offsetWidth + 8;
 
+                // Update rect
                 this.update_group_size();
+
+                // Update parent rect if set
+                if (this.parent_group_index != -1) 
+                    window.graph_elements[this.parent_group_index].update_group_size();
+
             },
             move_by (dx,dy) {
-
                 // Move by all elements
                 for(let elem in this.element_indices)
                     window.graph_elements[this.element_indices[elem]].move_by(dx, dy);
@@ -336,6 +286,14 @@
                     y: this.$props.data.position.y,
                     width: this.occupied_width,
                     height: this.occupied_height + 24,
+                };
+            },
+            get_hittable_rect: function () {
+                return {
+                    x: this.get_rect.x, 
+                    y: this.get_rect.y + this.occupied_height - this.init_height,
+                    width: this.get_rect.width,
+                    height: this.init_height
                 };
             },
             from_position: function() {
@@ -357,6 +315,8 @@
                 }
             } 
         },
+        watch: {
+        }
     }
 </script>
 

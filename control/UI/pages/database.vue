@@ -17,6 +17,7 @@
      * limitations under the License.
      * 
      * @author Sapir Shemer
+     * @contributor Ilan Dazanashvili
      */
 
     module.exports = {
@@ -26,16 +27,23 @@
                 sub_pages: [
                     { title: "Database Connections", sub_title: "Manage database connections", url: "/database/database_list" },
                     { title: "Data Model Editor", sub_title: "Create database schemas using a smart ORM", url: "/database/model_editor" }
-                ]
+                ],
+                mixins_loaded: false
             }
         },
         created() {
             this.is_main_page = app.$router.currentRoute.path === '/database';
             window.holder = this;
 
-            // Load necessary comonents
-            APIShift.API.getMixin('orm/graph_element', true);
-            APIShift.API.getMixin('orm/editable_element', true);
+            // Load necessary components
+            Promise.all([
+                APIShift.API.getMixin('graph/graph_view', true),
+                APIShift.API.getMixin('graph/graph_element', true),
+                APIShift.API.getMixin('graph/line_parent', true),
+                APIShift.API.getMixin('graph/container_element', true)
+            ]).then(() => {
+                this.mixins_loaded = true;
+            });
         },
         beforeRouteUpdate (to, from, next) {
             if(to.path == '/database' || to.path == '/database/') this.is_main_page = true;
@@ -97,7 +105,7 @@
                     </div>
                 </div>
             </v-card>
-            <router-view v-else></router-view>
+            <router-view v-if="!is_main_page && mixins_loaded"></router-view>
         </v-container>
     </v-main>
 </template>

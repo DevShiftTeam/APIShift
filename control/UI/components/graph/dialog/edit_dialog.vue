@@ -22,29 +22,18 @@
 
     module.exports = {
         props: {
-            actions: Object,
-            position: Object,
-            is_sub_menu: Boolean
+            item_type: Number
         },
         data () {
             return {
+                name: '',
                 hovered_index: -1,
             }
         },
         created () {
-            if (!window.context_menu) window.context_menu = this;
         },
         mounted () {
-            // Detect outside clicks and close context menu
-            if (!this.$props.is_sub_menu) {
-                window.addEventListener('pointerdown', this.window_pointer_down);
-            }
-        },
-        beforeDestroy() {
-            if (!this.$props.is_sub_menu) {
-                window.removeEventListener('pointerdown', this.window_pointer_down);
-                window.context_menu = undefined;
-            }
+          this.name = graph_view.elements[graph_view.in_edit].name;
         },
         computed: {
             transformation: function() {
@@ -60,31 +49,48 @@
                 if (!event.target.closest('#context_menu_primary')) {
                     graph_view.context_menu.is_active = false;
                 }
-            }
-        }
+            },
+          save () {
+            graph_view.elements[graph_view.in_edit].name = this.name;
+            window.graph_elements[graph_view.in_edit].refresh_dependencies();
+            graph_view.dialog_open = false;
+          }
+        },
     }
 </script>
 
 <template>
-    <v-list dense :id="is_sub_menu ? 'context_menu' : 'context_menu_primary'" :style="is_sub_menu ? {} : transformation">
-        <v-list-item v-for="(item,index) in actions"
-            :key="index"
-            @pointerover.prevent="hovered_index = index" 
-            @pointerleave="hovered_index = -1" 
-            @click.prevent="item.starter()">
-            <v-list-item-action>
-                <v-icon>{{item.icon}}</v-icon>
-            </v-list-item-action>
-            <v-list-item-content>
-                <v-list-item-title>{{item.name}}</v-list-item-title>
-            </v-list-item-content>
-            <component v-if="hovered_index == index"
-                :is="graph_view.context_menu_comp"
-                :actions="item.actions"
-                :is_sub_menu="true">
-            </component> 
-        </v-list-item>
-    </v-list>
+    <v-dialog
+      v-model="graph_view.dialog_open"
+      width="500"
+    >
+
+      <v-card>
+        <v-card-title class="text-h5 grey lighten-2">
+          Add Item
+        </v-card-title>
+          <v-container>
+              <v-row>
+                  <v-col cols="12" sm="12" md="12">
+                      <v-text-field v-model="name" label="Name"></v-text-field>
+                  </v-col>          
+              </v-row>
+          </v-container>
+
+        <v-divider></v-divider>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="primary"
+            text
+            @pointerdown.prevent="save"
+          >
+            save
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 </template>
 
 <style scoped>

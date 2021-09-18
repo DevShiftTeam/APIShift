@@ -21,7 +21,7 @@
     
     // This shit is made for scripting
     module.exports = {
-        mixins: [APIShift.API.getMixin('graph/line_parent')],
+        mixins: [APIShift.API.getMixin('graph/graph_element', true)],
         data () {
             return {
                 drawer: null,
@@ -29,6 +29,7 @@
                     name: false,
                     entry: false
                 },
+                entries: [],
                 edit_name_width: 0,
                 edit_entry_width: 0,
                 header_min_width: 0
@@ -49,23 +50,6 @@
             }
         },
         methods: {
-            all_loaded: function() { 
-                let to_index = this.$props.data.to !== undefined ?
-                    graph_view.elements.findIndex((elem) => elem.id === this.$props.data.to.id && elem.component_id === this.$props.data.to.component_id) : -1;              
-
-                if (to_index != -1){
-                    // Draw lines to elements
-                    setTimeout(() => {
-                        this.to_line_index = this.create_line(to_index ,{
-                                is_curvy: true,
-                                is_stroked: false,
-                                is_interactive: true
-                        }, true);
-                    });
-                }
-
-
-            },
             drag_start_addition: function(event) {
 
             },
@@ -76,17 +60,7 @@
 
             },
             on_delete() {
-                let my_id = graph_view.elements[this.$props.index].id;
 
-                // Reset enum sizes
-                if (this.attached_enum != -1) {
-                    window.graph_elements[this.attached_enum].data.types = window.graph_elements[this.attached_enum].data.types.filter(id => id !== my_id);
-                    window.graph_elements[this.attached_enum].reset_enum_sizes();
-                    window.graph_elements[this.attached_enum].reset_type_position();
-                }
-
-                // Removing element from screen
-                graph_view.$set(graph_view.elements[this.$props.index], 'is_deleted', true);
             },
             on_context_addition () {
                 graph_view.context_menu.actions = [

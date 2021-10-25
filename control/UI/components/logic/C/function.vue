@@ -24,6 +24,7 @@
         mixins: [APIShift.API.getMixin('graph/line_parent')],
         data () {
             return {
+                name: '',
                 drawer: null,
                 is_edit_mode: {
                     name: false,
@@ -31,11 +32,13 @@
                 },
                 input_count: 0, // How many inputs are currently connected
                 edit_name_width: 0,
+                name_char_length: 0,
                 edit_entry_width: 0,
                 header_min_width: 0,
                 offsetTop: 0,
                 dropped_param: null,
-                first_load: true 
+                first_load: true,
+
             }
         },
         created () {
@@ -47,22 +50,19 @@
             this.expanded_functions.drag = this.drag_addition;
             this.expanded_functions.drag_end = this.drag_end_addition;
             graph_view.elements_loaded++;
-
-            // let center = this.$el.getBoundingClientRect().y + this.$el.getBoundingClientRect().height / 2;
-            // let rows = this.$el.querySelector("#inputs > div:nth-child(1)").getBoundingClientRect().y + this.$el.querySelector("#inputs > div:nth-child(1)").getBoundingClientRect().height / 2;
-            // this.offsetTop = (rows - center) / graph_view.scale;
-            
+                        
             if(graph_view.first_load) {
                 this.all_loaded();
                 graph_view.bring_to_front(this.$props.index);
             }
+
         },
         methods: {
             all_loaded: function() { 
                 let to_index = this.$props.data.to !== undefined ?
                     graph_view.elements.findIndex((elem) => elem.id === this.$props.data.to.id && elem.component_id === this.$props.data.to.component_id)
                     :
-                    this.create_point(false); // Create & attach point near relation                
+                    this.create_point(false); // Create & attach point near relation                
 
 
                 // Draw lines to elements
@@ -119,7 +119,6 @@
                 });
 
             },
-
             replace_connected_expanded(from_index, to_index) {
                 
             },
@@ -140,7 +139,6 @@
 
                             return true;
                         }
-
                     }
                 }
             },
@@ -175,22 +173,19 @@
         watch: {
             'is_edit_mode.name' (is_focused) {
                 if (is_focused) {
-                    requestAnimationFrame(() =>  {
+                    setTimeout(() =>  {
                         this.edit_name_width = this.$el.querySelector('#name').offsetWidth;
                         this.$el.querySelector('#name-input').focus();
                     });
                 }
-                
             },
-            'is_edit_mode.entry' (is_focused) {
-                if (is_focused) {
-                    requestAnimationFrame(() =>  {
-                        this.edit_entry_width = this.$el.querySelector('#entry').offsetWidth;
-                        this.$el.querySelector('#entry-input').focus();
-                    });
-                }
-            },
-        },
+            name() {                 
+                setTimeout(() => {
+                    this.edit_name_width = this.$el.querySelector('#name').offsetWidth;
+                    this.ui_refresher++;
+                });
+            }
+         },
         computed: {
             from_position: function() {
                 return {
@@ -214,28 +209,33 @@
         @pointerdown.prevent="drag_start"
         @contextmenu.prevent="on_context"
         @pointerup.prevent="drag_end">
+
+        <!-- Function header -->
         <div id="header" :style="{minWidth: header_min_width + 'px'}"
                 @input="on_input">
                 <v-avatar size="25" left class="avatar darken-4">F</v-avatar>
-
-                <!-- Function name -->
                 <v-text-field
                     id="name-input"
-                    v-model="name"
+                    v-model="graph_view.elements[index].name"
                     v-show="is_edit_mode.name"
                     @blur="is_edit_mode.name = false"
-                    :style="{'width': edit_name_width + 'px', marginLeft: '10px'}"
-                    @input="requestAnimationFrame(() => edit_name_width = $el.querySelector('#name').offsetWidth)">
+                    :style="{'width': edit_name_width + 'px', marginLeft: '10px'}">
                 </v-text-field>
                 <span 
                     @dblclick.prevent="is_edit_mode.name = true"
                     :style="{ marginLeft: '10px' }"
                     v-show="!is_edit_mode.name">
-                    {{name}}
+                    {{graph_view.elements[index].name}}
                 </span>
-                <span id="name" style="position: absolute; top: -120%;">{{name}}</span>
+                <span 
+                    id="name"
+                    style="position: absolute; opacity: 0; z-index: -10;">
+                    {{graph_view.elements[index].name}}
+                </span>
         </div>
-        <!-- <div id="inputs">
+        
+        <!-- Function inputs -->
+        <div id="inputs">
             <v-row v-for="param in $props.data.params" :key="param.name">
                 <div class="connector"></div>
                 <span class="input-text">{{param}}</span>
@@ -243,7 +243,7 @@
             <v-row>
 
             </v-row>
-        </div> -->
+        </div>
     </div>
 </template>
 

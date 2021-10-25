@@ -44,6 +44,12 @@
                 elements: [
                     // Data Sources - Tables
                     { id: 1, component_id: 0, name: "admin_users", data: {
+                            entries: [
+                                {
+                                    val: 'PASSWORD',
+                                    to: { id: 1, component_id: 2, con: 0 }
+                                }
+                            ],
                             position: { x: 450, y: -50 },
                         }
                     },
@@ -51,7 +57,18 @@
                     { id: 1, component_id: 1, name: "$REQUEST", data: {
                             entry: 'pass' ,
                             position: { x: -50, y: 200 },
-                            to: { id: 1, component_id: 2 }
+                            to: { id: 1, component_id: 2 },
+
+                            entries: [
+                                {
+                                    val: 'hash',
+                                    to: { id: 1, component_id: 2, con: 1 }
+                                },
+                                {
+                                    val: 'pass',
+                                    to: { id: 1, component_id: 2, con: 1 }
+                                }
+                            ]
                         }
                     },
                     { id: 2, component_id: 1, name: "$REQUEST", data: {
@@ -69,20 +86,20 @@
                     // Flows
                     { id: 1, component_id: 4, name: "username", data: {
                             position: { x: 180, y: 180 },
-                            from: { id: 2, component_id: 1 },
-                            to: { id: 1, component_id: 0 },
+                            from: { id: 2, component_id: 1, con: 0 },
+                            to: { id: 1, component_id: 0, con: 0 },
                         }
                     },
                     { id: 2, component_id: 4, name: "hash", data: {
                             position: { x: 300, y: 300 },
-                            from: { id: 1, component_id: 0, entry: 0 },
-                            to: { id: 1, component_id: 2, entry: 0 },
+                            from: { id: 1, component_id: 0, con: 0 },
+                            to: { id: 1, component_id: 2, con: 0 },
                         }
                     },
                     { id: 2, component_id: 4, name: "password", data: {
                             position: { x: 350, y: 350 },
-                            from: { id: 1, component_id: 1, entry: 0 },
-                            to: { id: 1, component_id: 2, entry: 0 },
+                            from: { id: 1, component_id: 1, con: 0 },
+                            to: { id: 1, component_id: 2, con: 0 },
                         }
                     },
                     // Result
@@ -545,7 +562,7 @@
                         }
                         
                         
-                        // this.process_list = response.data;
+                        // this.process_list = response.data;
                     }
                     else APIShift.API.notify(response.data, 'error');
                 });

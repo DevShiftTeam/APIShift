@@ -21,22 +21,24 @@
     
     // This shit is made for scripting
     module.exports = {
-        mixins: [APIShift.API.getMixin('graph/graph_element', true)],
+        mixins: [APIShift.API.getMixin('graph/logic/data_source', true)],
         data () {
             return {
                 drawer: null,
-                is_edit_mode: {
+                in_edit: {
                     name: false,
-                    entry: false
+                    entry_index: -1
                 },
-                entries: [],
                 edit_name_width: 0,
+                entry_max_width: 0,
                 edit_entry_width: 0,
                 header_min_width: 0
             }
         },
         created () {
             window.graph_elements[this.$props.index] = this;
+            
+            window.a = this;
         }, 
         mounted () {
             this.expanded_functions.drag_start = this.drag_start_addition;
@@ -50,6 +52,9 @@
             }
         },
         methods: {
+            all_loaded () {
+                this.create_lines();
+            },
             drag_start_addition: function(event) {
 
             },
@@ -89,35 +94,6 @@
                     },
                 ]
             },
-            replace_connected_expanded(current_index, replace_index) {
-                window.graph_elements[replace_index].expanded_functions.drag_end = this.on_point_drag_end;
-            },
-            on_point_drag_end () {
-                let point_index = this.point_indices[this.point_indices.length - 1];
-
-                let target_element = -1, z_index = 0;
-
-                for(let index in [...graph_view.elements.keys()]) {
-                    let cmp_id = graph_view.elements[index].component_id;
-                    // Skip non-connections
-                    if(window.graph_elements[index] === undefined ||  (cmp_id != 2 && cmp_id != 3 && cmp_id != 4) || graph_view.elements[index].is_deleted)
-                        continue;
-                    
-                    // Check collisions
-                    if (window.graph_elements[index].data.z_index > z_index && graph_view.collision_check(graph_elements[point_index].get_rect, window.graph_elements[index].get_rect)) {
-                        target_element = index;
-                        z_index = graph_view.elements[index].data.z_index;
-                    }
-                }
-                
-                // Drop on a connectable element
-                let res = window.graph_elements[target_element]?.on_point_drop(point_index);
-                if (res)
-                {
-                    graph_view.$set(graph_view.elements[point_index], 'is_deleted', true);
-                }
-                // graph_view.$set(graph_view.elements[point_index], 'is_deleted', true);
-            },
         },
         watch: {
             'is_edit_mode.name' (is_focused) {
@@ -142,13 +118,13 @@
             from_position: function() {
                 return {
                     x: this.$props.data.position.x + this.get_rect.width,
-                    y: this.$props.data.position.y + this.get_rect.height / 2
+                    y: this.$props.data.position.y
                 };
             },
             to_position: function() {
                 return {
                     x: this.$props.data.position.x,
-                    y: this.$props.data.position.y + this.get_rect.height / 2
+                    y: this.$props.data.position.y
                 };
             }
         },
@@ -156,52 +132,67 @@
 </script>
 
 <template>
-    <div class="array" style="overflow:hidden" color="#8789ff" :class="{  }"
+    <div class="array" color="#8789ff" :class="{  }"
         :style="transformation" 
         @pointerdown.prevent="drag_start"
         @contextmenu.prevent="on_context"
         @pointerup.prevent="drag_end">
-        <div id="header" :style="{minWidth: header_min_width + 'px'}"
-                @input="on_input">
-                <v-avatar size="25" left class="avatar darken-4">A</v-avatar>
 
-                <!-- Array name -->
+        <!-- Header  -->
+        <div id="header" :style="{minWidth: header_min_width + 'px'}"
+                @input="on_input"
+                @dblclick.prevent="is_edit_mode.name = true">
+                <v-icon size="25" left class="avatar darken-4">mdi-code-array</v-icon>
                 <v-text-field
-                    id="name-input"
                     v-model="name"
                     v-show="is_edit_mode.name"
-                    @blur="is_edit_mode.name = false"
-                    :style="{'width': edit_name_width + 'px', marginLeft: '10px'}"
-                    @input="requestAnimationFrame(() => edit_name_width = $el.querySelector('#name').offsetWidth)">
+                    :style="{'width': edit_name_width + 'px', marginLeft: 'auto', marginRight: 'auto'}"
+                    @input="requestAnimationFrame(() => edit_name_width = $el.querySelector('#name').offsetWidth + 30)"
+                    >
                 </v-text-field>
-                <b 
-                    @dblclick.prevent="is_edit_mode.name = true"
-                    :style="{ marginLeft: '10px' }"
-                    v-show="!is_edit_mode.name">
-                    {{name}}
-                </b>
-                <span id="name" style="position: absolute; top: -120%;">{{name}}</span>
+                <b :style="{  marginLeft: 'auto', marginRight: 'auto', fontSize: '120%' }" v-show="!is_edit_mode.name">{{name}}</b>
+                <span id="name" style="position: absolute; top: -120%; color: rgba(0,0,0,0);">{{name}}</span>
+        </div>
 
-                &nbsp;
-                <!-- Entry name -->
-                <b>['&nbsp;</b>
+        <!-- Entry list -->
+        <div id="content"
+            @dblclick.prevent="is_edit_mode.entry = true">
+            <v-col style="padding-bottom: 0px; padding-top: 0px">
+                <v-row  v-for="(entry, index) in $props.data.entries" 
+                        :key="index" 
+                        class="demo-row no-border" 
+                        style="display: flex">
                     <v-text-field
-                        id="entry-input"
-                        v-model="data.entry"
-                        v-show="is_edit_mode.entry"
-                        @blur="is_edit_mode.entry = false"
-                        class="nopadding"
-                        :style="{'width': edit_entry_width + 'px'}"
-                        @input="requestAnimationFrame(() => edit_entry_width = $el.querySelector('#entry').offsetWidth)">
+                        class="name-input"
+                        v-model="entry.val"
+                        v-show="in_edit.entry_index === index"
+                        @blur="in_edit.entry_index = -1"
+                        :style="{'width': edit_name_width + 'px'}">
                     </v-text-field>
-                    <span 
-                        v-show="!is_edit_mode.entry"
-                        @dblclick.prevent="is_edit_mode.entry = true;">
-                        {{data.entry}}
+                    <span
+                        @dblclick.prevent="in_edit.entry_index = index"
+                        v-show="in_edit.entry_index !== index">
+                        {{entry.val}}
                     </span>
-                <b>&nbsp;']</b>
-                <span id="entry" style="position: absolute; top: -120%;">{{data.entry}}</span>
-
+                    <span 
+                        id="name"
+                        style="position: absolute; opacity: 0; z-index: -10;">
+                        {{entry.val}}
+                    </span>
+                    <div class="connector output" @pointerdown="on_connector_click(event,index)"></div>
+                    <div class="connector input"></div>
+                </v-row>
+                <v-tooltip top>
+                    <template #activator="{ on }">
+                        <v-row class="demo-row no-border" block v-on="on" style="padding: 0px;">
+                            <v-btn @click="add_entry();" block v-on="on" style="padding: 0px;">
+                                <v-icon>mdi-plus-circle</v-icon>
+                            </v-btn>
+                        </v-row>
+                    </template>
+                    <span>Add Entry</span>
+                </v-tooltip>
+            </v-col>
         </div>
     </div>
 </template>
@@ -274,6 +265,233 @@
     padding: 0;
     line-height: inherit;
 }
+
+.row.demo-row {
+    display: flex;
+    flex-wrap: nowrap;
+    padding-top: 2.5px;
+    padding-bottom: 2.5px;
+    border-bottom: 2px solid rgba(	255, 255, 255, 0.2);
+    justify-content: center;
+}
+
+.row.demo-row:last-child {
+  border-style: none !important;
+}
+
+.row.demo-row .v-btn::before {
+  background-color: transparent;
+}
+#content > div > .demo-row > button {
+  background-color: transparent;
+  height: unset !important;
+}
+
+#content > div > .demo-row > button > span{
+    padding: 2.5px;
+}
+
+#content > div > .demo-row > button > span > i{
+    font-size: 18px;
+}
+
+.row.demo-row button {
+  background-color: transparent;
+}
+
+.demo-row .v-select__slot {
+    flex-direction: row-reverse;
+}
+
+.demo-row .connector {
+  height: 15px;
+  width: 15px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+  margin-top: 6.5px;
+  position: absolute;
+  transition: all .2s ease-in-out;
+}
+
+.demo-row .connector.input {
+    left: -7px;
+}
+
+.demo-row .connector.output {
+    right: -7px;
+}
+
+
+.demo-row .connector:hover {
+    transform: scale(1.11);
+}
+
+.avatar{
+    background-color: #083D77;
+}
+
+#header {
+    display: flex;
+    flex-direction: row;
+    border-bottom: 2px solid rgba(	100, 100, 220, 0.7);
+    padding-bottom: 1.5px;
+}
+
+#header i {
+    height: 70%;
+    border-radius: 10px;
+}
+
+#content {
+    display: flex;
+    flex-direction: row; 
+}
+
+.table {
+    position: absolute;
+    cursor: copy ;
+    background: #8789ff;
+    box-shadow: 50px 50px 50px rgba(255, 242, 94, 0); /* Removing weird trace on chrome */
+    border-radius: 2px;
+    padding: 5px;
+    padding-bottom: 0;
+}
+
+.type_over_enum {
+    opacity: 0.7;
+}
+
+
+.v-messages {
+    min-height: 0px
+}
+
+.v-text-field {
+    padding-top: 0px; 
+    margin-top: 0px;
+}
+.v-text-field input {
+    padding: 0;
+}
+.v-text-field__details {
+    min-height: 0px;
+}
+
+.v-select__selections input {
+    width: 5px;
+}
+
+
+.v-select__selections {
+    min-width: 65px;
+}
+.v-select__selection--comma {
+    font-size: 15px;
+    margin: 0;
+    padding: 0;
+    margin-right: 5px;
+}
+
+.v-select__selection--comma:last-of-type {
+    margin-right: 0px;
+}
+
+
+.bold .v-select__selection--comma {
+    font-weight: bold;
+}
+
+.v-input .v-select__slot {
+    width: none;
+}
+
+#input-111 {
+    text-align: center;
+}
+
+.row.demo-row {
+    display: flex;
+    flex-wrap: nowrap;
+    padding-top: 2.5px;
+    padding-bottom: 2.5px;
+    border-bottom: 2px solid rgba(	255, 255, 255, 0.2);
+}
+
+.row.demo-row:last-child {
+  border-style: none !important;
+}
+
+.row.demo-row .v-btn::before {
+  background-color: transparent;
+}
+#content > div > .demo-row > button {
+  background-color: transparent;
+  height: unset !important;
+}
+
+#content > div > .demo-row > button > span{
+    padding: 2.5px;
+}
+
+#content > div > .demo-row > button > span > i{
+    font-size: 18px;
+}
+
+.row.demo-row button {
+  background-color: transparent;
+}
+
+.demo-row .v-select__slot {
+    flex-direction: row-reverse;
+}
+
+.demo-row .connector {
+  height: 15px;
+  width: 15px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+  margin-top: 6.5px;
+  position: absolute;
+  transition: all .2s ease-in-out;
+}
+
+.demo-row .connector.input {
+    left: -7px;
+}
+
+.demo-row .connector.output {
+    right: -7px;
+}
+
+
+.demo-row .connector:hover {
+    transform: scale(1.11);
+}
+
+
+.rule {
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
+
+.no-border .v-input__slot::before {
+  border-style: none !important;
+}
+
+.no-border .v-text-field>.v-input__control>.v-input__slot:after {
+      border-style: none !important;
+}
+.v-input__append-inner .v-input__append-inner {
+    display: none;
+}
+#content div.v-input__slot > div.v-select__slot > div:nth-child(3) {
+    display: none;
+
+}
+
 /* .nopadding.v-text-field input {
     padding: 0;
 } */

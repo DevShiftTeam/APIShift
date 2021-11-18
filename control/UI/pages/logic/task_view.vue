@@ -29,7 +29,6 @@
                 edit_dialog: {
                     is_open: false,
                     name: '',
-                    process_list: [], 
                 },
                 delete_dialog: false,
                 discard_dialog: false,
@@ -81,7 +80,7 @@
             updateProcessList() {
                 APIShift.API.request("Admin\\Logic\\Processes", "getAllProcesses", {}, function(response) {
                     if(response.status == APIShift.API.status_codes.SUCCESS) {
-                        handler.process_list = response.data;
+                        handler.process_list = response.data.map(d => ({...d, is_checked: false}));
                     }
                     else APIShift.API.notify(response.data, 'error');
                 });
@@ -106,22 +105,17 @@
             }
         },
         watch: {
-            'edit_dialog.is_open' (open) {
-                if (open) {
-                    let my_processes = handler.is_creating ? [] : [...handler.tasks_collection[this.in_edit].processes];
-                    let other_processes = this.process_list.filter(p => !my_processes.find(mp => mp == p.id )).map(p => p.id);                
-            
-                    handler.edit_dialog.process_list = [...my_processes.map(p => ({id: p, is_checked: true})), ...other_processes.map(p => ({id: p, is_checked: false}))];
-                    handler.edit_dialog.name =  handler.is_creating ? '' : handler.tasks_collection[this.in_edit].name;
+            'edit_dialog.is_open' (is_open) {
+                if (is_open) {
+                    this.edit_dialog.name = this.tasks_collection[this.in_edit].name;
+                    this.process_list = this.process_list.map (p => ({...p, is_checked: this.tasks_collection[this.in_edit].processes.findIndex(o => o == p.id) !== -1}));
                 } else {
-                    handler.edit_dialog.process_list = [];
-                    handler.is_creating ? handler.tasks_collection.pop() : {};
-                    handler.is_creating = false;
+                    this.edit_dialog.name = '';
+                    this.process_list.forEach( p => p.is_checked = false);
                 }
             }
         }
-
-    };
+    }
     
 </script>
 
@@ -244,7 +238,7 @@
                                             ></v-text-field>
 
                                             <v-list style="height: 192px; overflow-y:auto">
-                                                <v-list-item v-for="(process, index) in edit_dialog.process_list" :key="index">
+                                                <v-list-item v-for="(process, index) in process_list" :key="index">
                                                         <v-row>
                                                             <v-list-item-action>
                                                                 <v-checkbox v-model="process.is_checked"></v-checkbox>
@@ -253,7 +247,7 @@
                                                             <v-list-item-content>
                                                                 <v-list-item-title>
                                                                     <v-icon>mdi-lightning-bolt</v-icon>
-                                                                    {{ process_list.find(p => p.id == process.id).name }}
+                                                                    {{ process_list.find(p => p.id == process.id)?.name }}
                                                                 </v-list-item-title>
                                                             </v-list-item-content>
                                                         </v-row>

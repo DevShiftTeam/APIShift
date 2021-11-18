@@ -64,7 +64,6 @@
                     :
                     this.create_point(false); // Create & attach point near relation                
 
-
                 // Draw lines to elements
                 setTimeout(() => {
                     this.to_line_index = this.create_line(to_index,{
@@ -196,7 +195,7 @@
             to_position: function() {
                 return {
                     x: this.$props.data.position.x,
-                    y: this.$props.data.position.y + this.get_rect.height / 2
+                    y: this.$props.data.position.y
                 };
             }
         },
@@ -237,7 +236,7 @@
         <!-- Function inputs -->
         <div id="inputs">
             <v-row v-for="param in $props.data.params" :key="param.name">
-                <div class="connector"></div>
+                <div class="connector input"></div>
                 <span class="input-text">{{param}}</span>
             </v-row>
             <v-row>

@@ -29,7 +29,7 @@
         },
         created () {
             // Construct additional functions and generate runtime warnings on an improper use
-            ['on_point_drag_end', 'remove_connection'].forEach(val => {
+            ['remove_connection'].forEach(val => {
                 this.expanded_functions[val] = () => {
                     console.warn(`Expanded function ${val} not implemented`);
                 }
@@ -79,17 +79,8 @@
 
                 return graph_view.elements.length - 1;
             },
-            on_point_drag_end (event, point_index) {
-                let line_index = graph_view.lines.findIndex(line => (line.to_index == this.$props.index && line.from_index == point_index) || (line.from_index == this.$props.index && line.to_index == point_index));
-
-                // Step 1 - Delete un-presistent (point,line) tuple
-                if (!graph_view.lines[line_index].data.is_persistent) {
-                    graph_view.$set(graph_view.lines[line_index], 'is_deleted', true);
-                    graph_view.$set(graph_view.elements[point_index], 'is_deleted', true);
-                }
-
-                // Step 2 - Execute additional procedures
-                this.expanded_functions.on_point_drag_end(event, point_index);
+            on_point_drag_end () {
+                
             },
             /**
              * Remove connection from a connected element

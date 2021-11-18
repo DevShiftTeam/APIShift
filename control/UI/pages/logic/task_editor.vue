@@ -54,26 +54,17 @@
                         }
                     },
                     // Data Sources - Arrays
-                    { id: 1, component_id: 1, name: "$REQUEST", data: {
-                            entry: 'pass' ,
-                            position: { x: -50, y: 200 },
-                            to: { id: 1, component_id: 2 },
-
+                    { id: 1, component_id: 1, name: "$_POST", data: {
+                            position: { x: -50, y: 50 },
                             entries: [
                                 {
-                                    val: 'hash',
-                                    to: { id: 1, component_id: 2, con: 1 }
+                                    val: 'user',
                                 },
                                 {
                                     val: 'pass',
                                     to: { id: 1, component_id: 2, con: 1 }
                                 }
                             ]
-                        }
-                    },
-                    { id: 2, component_id: 1, name: "$REQUEST", data: {
-                            entry: 'user',
-                            position: { x: -50, y: 0 },
                         }
                     },
                     // Functions
@@ -86,20 +77,8 @@
                     // Flows
                     { id: 1, component_id: 4, name: "username", data: {
                             position: { x: 180, y: 180 },
-                            from: { id: 2, component_id: 1, con: 0 },
-                            to: { id: 1, component_id: 0, con: 0 },
-                        }
-                    },
-                    { id: 2, component_id: 4, name: "hash", data: {
-                            position: { x: 300, y: 300 },
-                            from: { id: 1, component_id: 0, con: 0 },
-                            to: { id: 1, component_id: 2, con: 0 },
-                        }
-                    },
-                    { id: 2, component_id: 4, name: "password", data: {
-                            position: { x: 350, y: 350 },
                             from: { id: 1, component_id: 1, con: 0 },
-                            to: { id: 1, component_id: 2, con: 0 },
+                            to: { id: 1, component_id: 0, con: 0 },
                         }
                     },
                     // Result

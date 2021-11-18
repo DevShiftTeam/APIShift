@@ -55,7 +55,7 @@
                 'CREATED_AT'
             ];
 
-            this.flows_set = [
+            this.flows_set = [
                 'ID',
                 'USERNAME',
                 'PASSWORD',
@@ -75,12 +75,7 @@
         },
         methods: {
             all_loaded: function() {   
-                let out_flows = [];
-
-                graph_view.elements.forEach(element => {
-                    if (element.component_id == 4 && (element.data.from.id == this.$props.index && element.from.component_id == graph_view.elements[this.$props.index].component_id))  
-                        out_flows.push(element.name);
-                });
+                this.create_lines();
             },
             drag_start_addition: function(event) {
 
@@ -131,43 +126,6 @@
                     },
                 ]
             },
-            on_point_drag_end (event, point_index) {                
-                let line_index = graph_view.elements[point_index].data.line_index;
-                let row_height = this.$el.querySelector('.row.demo-row').offsetHeight;
-                let con_index = (graph_view.lines[line_index].data.offsetTopSrc | 0) / row_height;
-
-                let target_element = -1, z_index = 0;
-
-                for(let index in [...graph_view.elements.keys()]) {
-                    let cmp_id = graph_view.elements[index].component_id;
-                    // Skip non-connections
-                    if(window.graph_elements[index] === undefined ||  (cmp_id != 2 && cmp_id != 3 && cmp_id != 4) || graph_view.elements[index].is_deleted)
-                        continue;
-                    
-                    // Check collisions
-                    if (window.graph_elements[index].data.z_index > z_index && graph_view.collision_check(graph_elements[point_index].get_rect, window.graph_elements[index].get_rect)) {
-                        target_element = index;
-                        z_index = graph_view.elements[index].data.z_index;
-                    }
-                }
-                
-                // Drop on a connectable element
-                let res = window.graph_elements[target_element]?.on_point_drop(point_index);
-                if (res) {                
-                    this.$props.data.connections[con_index].id = graph_view.elements[target_element].id;
-                    this.$props.data.connections[con_index].component_id = graph_view.elements[target_element].component_id;
-
-                    graph_view.lines[line_index].to_index = target_element;
-                } else 
-                {
-                    this.$props.data.connections[con_index].id = -1;
-                    this.$props.data.connections[con_index].component_id = -1;
-                    graph_view.$set(graph_view.lines[graph_view.elements[point_index].data.line_index], 'is_deleted', true);
-                }
-
-                // Delete point & line
-                graph_view.elements[point_index].is_deleted = true;
-            },
             refresh_inputs () {
             }
         },
@@ -184,7 +142,7 @@
             to_position: function() {
                 return {
                     x: this.$props.data.position.x,
-                    y: this.$props.data.position.y + 10
+                    y: this.$props.data.position.y
                 };
             }
         },
@@ -213,7 +171,7 @@
                 <span id="name" style="position: absolute; top: -120%; color: rgba(0,0,0,0);">{{name}}</span>
         </div>
 
-        <!-- Content -->
+        <!-- Entry list -->
         <div id="content"
             @dblclick.prevent="is_edit_mode.entry = true">
             <v-col style="padding-bottom: 0px; padding-top: 0px">
@@ -225,7 +183,7 @@
                         :items="entries_set"
                         multiple
                     ></v-combobox>
-                    <div class="connector output" @pointerdown="output_press(event,index)"></div>
+                    <div class="connector output" @pointerdown="on_connector_click(event,index)"></div>
                     <div class="connector input"></div>
                 </v-row>
                 <v-tooltip top>

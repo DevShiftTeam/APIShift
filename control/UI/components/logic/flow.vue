@@ -65,13 +65,18 @@
                 let from_index = this.$props.data.from !== undefined ?
                     graph_view.elements.findIndex((elem) => elem.id == this.$props.data.from.id && elem.component_id == this.$props.data.from.component_id)
                     :
-                    this.create_point(); // Create & attach point near relation
+                    this.create_point(); // Create & attach point near relation
 
                 let to_index = this.$props.data.to !== undefined ?
                     graph_view.elements.findIndex((elem) => elem.id == this.$props.data.to.id && elem.component_id == this.$props.data.to.component_id)
                     :
-                    this.create_point(false); // Create & attach point near relation
+                    this.create_point(false); // Create & attach point near relation
 
+
+                let from_connectors = window.graph_elements[from_index].$el.querySelectorAll('.connector.output');
+                let to_connectors = window.graph_elements[to_index].$el.querySelectorAll('.connector.input');
+                let offsetTopSrc =  from_connectors.length !== 0 ? from_connectors[this.$props.data.from.con].offsetTop + from_connectors[this.$props.data.from.con].offsetHeight / 2 : 0;
+                let offsetTopDest =  to_connectors.length !== 0 ? to_connectors[this.$props.data.to.con].offsetTop + to_connectors[this.$props.data.to.con].offsetHeight / 2 : 0;
 
                 // Step 2: Position self in-between
                 this.$props.data.position = {
@@ -82,21 +87,24 @@
 
                 // Draw lines to elements
                 setTimeout(() => {
-                    let from_offset, to_offset;
-
-                    from_offset = 
                     this.from_line_index = this.create_line(from_index,{
                             is_curvy: true,
                             is_stroked: false,
                             is_persistent: true,
+                            offsetTopSrc
                     }, false);
                     
                     this.to_line_index = this.create_line(to_index,{
                             is_curvy: true,
                             is_stroked: false,
                             is_persistent: true,
-                            arrow_head: "many-arrow-head2"
+                            arrow_head: "many-arrow-head2",
+                            offsetTopDest,
                     }, true);
+
+
+
+
                 });
             },
             drag_start_addition: function(event) {

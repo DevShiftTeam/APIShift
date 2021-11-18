@@ -126,6 +126,8 @@ use DateTime;
         self::getTable('enums', $refresh, 0, 'id', false);
         self::getTable('enum_types', $refresh, 0, 'enum_id', false);
         self::getTable('item_enums', $refresh, 0, 'enum_id', false);
+        self::getTable('requests', $refresh);
+        self::getTable('request_task', $refresh);
 
         foreach(self::get('databases') as $key => $db_data) DatabaseManager::$connections_metadata[$key] = $db_data[0];
     }

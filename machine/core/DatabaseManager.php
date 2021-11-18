@@ -17,6 +17,7 @@
  * limitations under the License.
  * 
  * @author Sapir Shemer
+ * @contributor Ilan Dazanashvili
  */
 
 namespace APIShift\Core;

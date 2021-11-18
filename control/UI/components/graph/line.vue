@@ -64,6 +64,9 @@ module.exports = {
               y: mouse_image.y
           }
           graph_view.lines[this.$props.index][this.$props.data.is_parent_left ? 'to_index' : 'from_index'] = point_index;
+          graph_view.lines[this.$props.index].data.offsetTopSrc = this.$props.data.is_parent_left ? graph_view.lines[this.$props.index].data.offsetTopSrc : 0;
+          graph_view.lines[this.$props.index].data.offsetTopDest = !this.$props.data.is_parent_left ? graph_view.lines[this.$props.index].data.offsetTopDest : 0;
+
           graph_elements[point_index].drag_start(event);
         });
     },
@@ -74,10 +77,12 @@ module.exports = {
         if (graph_view.lines[this.$props.index].is_deleted) return;
         
         let src_point = this.$props.data.src_point_generator ? this.$props.data.src_point_generator() : Object.assign({}, this.src_ref.from_position);
-        src_point.x += !!this.$props.data.marker_start*5;
+        src_point.x += !!this.$props.data.marker_start*5 + (parseInt(this.$props.data.offsetLeftSrc) || 0);
+        src_point.y += parseInt(this.$props.data.offsetTopSrc) || 0;
 
         let dest_point = this.$props.data.dest_point_generator ? this.$props.data.dest_point_generator() : Object.assign({}, this.dest_ref.to_position);
-        dest_point.x -= !!this.$props.data.marker_end*5;
+        dest_point.x -= !!this.$props.data.marker_end*5 - (parseInt(this.$props.data.offsetLeftDest) || 0);
+        dest_point.y += parseInt(this.$props.data.offsetTopDest) || 0;
 
         const bezierWeight = 0.675; // Amount to offset control points
 

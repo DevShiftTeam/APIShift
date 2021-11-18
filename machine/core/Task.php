@@ -17,6 +17,7 @@
  * limitations under the License.
  * 
  * @author Sapir Shemer
+ * @contributor Ilan Dazanashvili
  */
 
 namespace APIShift\Core;
@@ -251,28 +252,31 @@ class Task {
         $result = DatabaseManager::query("main", "INSERT INTO tasks (name) VALUES (:name)", [ "name" => $name ]);
         if(!$result) Status::message(Status::ERROR, "Couldn't create task in database");
         CacheManager::getTable('tasks', true); // Refresh cache
-        $task_id = self::taskExists($name);
 
-        // Create task<->process list
-        $task_process_list = [];
-        $insert_values = []; // Used for insert query
-        foreach($process_ids as $id) {
-            $insert_values[] = "(:task_" . $id . ", :process_" . $id . ")";
-            $task_process_list['task_' . $id] = $task_id;
-            $task_process_list['process_' . $id] = $id;
+
+        if(!empty($process_ids)) {
+            // Create task<->process list
+            $task_process_list = [];
+            $insert_values = []; // Used for insert query
+            foreach($process_ids as $id) {
+                $insert_values[] = "(:task_" . $id . ", :process_" . $id . ")";
+                $task_process_list['task_' . $id] = $task_id;
+                $task_process_list['process_' . $id] = $id;
+            }
+            $query = "INSERT INTO task_processes (task, process) VALUES " . implode(",", $insert_values);
+
+            // Connect the connections
+            $result = DatabaseManager::query("main", $query, $task_process_list);
+            if(!$result) { // In case of error
+                // Remove process
+                DatabaseManager::query("main", "DELETE FROM tasks WHERE name = :name", [ "name" => $name ]);
+                CacheManager::getTable('tasks', true); // Refresh cache
+                Status::message(Status::ERROR, "Couldn't link task with given processes in DB");
+            }
+
+            CacheManager::getTable('task_processes', true, 0, 'task', false); // Refresh cache
         }
-        $query = "INSERT INTO task_processes (task, process) VALUES " . implode(",", $insert_values);
 
-        // Connect the connections
-        $result = DatabaseManager::query("main", $query, $task_process_list);
-        if(!$result) { // In case of error
-            // Remove process
-            DatabaseManager::query("main", "DELETE FROM tasks WHERE name = :name", [ "name" => $name ]);
-            CacheManager::getTable('tasks', true); // Refresh cache
-            Status::message(Status::ERROR, "Couldn't link task with given processes in DB");
-        }
-
-        CacheManager::getTable('task_processes', true, 0, 'task', false); // Refresh cache
         return $task_id;
     }
 }
